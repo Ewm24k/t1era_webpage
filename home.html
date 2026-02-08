@@ -90,6 +90,114 @@
       overflow-y: auto;
     }
 
+    /* ====== VIDEO INTRO STYLES ====== */
+    #videoIntro {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 10000;
+      background: #000;
+      display: none;
+      overflow: hidden;
+    }
+
+    #videoIntro.active {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #introVideo {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+    }
+
+    #startButton {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 20px 60px;
+      font-size: 24px;
+      font-weight: 900;
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+      border: none;
+      border-radius: 999px;
+      color: var(--text-primary);
+      cursor: pointer;
+      box-shadow: 0 0 50px var(--glow-cyan), 0 10px 40px rgba(0, 0, 0, 0.5);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.5s var(--transition);
+      z-index: 10;
+    }
+
+    #startButton.visible {
+      opacity: 1;
+      pointer-events: auto;
+      animation: buttonPulse 2s ease-in-out infinite;
+    }
+
+    #startButton:hover {
+      transform: translate(-50%, -50%) scale(1.05);
+      box-shadow: 0 0 80px var(--glow-cyan), 0 15px 50px rgba(0, 0, 0, 0.6);
+    }
+
+    #startButton:active {
+      transform: translate(-50%, -50%) scale(0.98);
+    }
+
+    @keyframes buttonPulse {
+      0%, 100% {
+        box-shadow: 0 0 50px var(--glow-cyan), 0 10px 40px rgba(0, 0, 0, 0.5);
+      }
+      50% {
+        box-shadow: 0 0 80px var(--glow-cyan), 0 15px 50px rgba(0, 0, 0, 0.6);
+      }
+    }
+
+    #videoIntro.fade-out {
+      animation: fadeOutIntro 1s ease-out forwards;
+    }
+
+    @keyframes fadeOutIntro {
+      from {
+        opacity: 1;
+      }
+      to {
+        opacity: 0;
+      }
+    }
+
+    #mainContent {
+      opacity: 0;
+      transition: opacity 1s ease-in;
+    }
+
+    #mainContent.visible {
+      opacity: 1;
+    }
+
+    /* Small screens - adjust button size */
+    @media (max-width: 480px) {
+      #startButton {
+        padding: 16px 48px;
+        font-size: 20px;
+      }
+    }
+
+    @media (max-width: 360px) {
+      #startButton {
+        padding: 14px 40px;
+        font-size: 18px;
+      }
+    }
+
     /* Neural network background */
     .neural-bg {
       position: fixed;
@@ -1714,448 +1822,459 @@
   </style>
 </head>
 <body>
-  <!-- Cursor Trail -->
-  <div class="cursor-trail" id="cursorTrail"></div>
-
-  <!-- Background Effects -->
-  <div class="neural-bg">
-    <div class="neural-grid"></div>
-    <div class="neural-orbs">
-      <div class="orb orb-1"></div>
-      <div class="orb orb-2"></div>
-      <div class="orb orb-3"></div>
-    </div>
+  <!-- Video Intro (Mobile Only) -->
+  <div id="videoIntro">
+    <video id="introVideo" playsinline muted loop>
+      <source src="./grok-video.mp4" type="video/mp4">
+    </video>
+    <button id="startButton">T1ERA START</button>
   </div>
-  <div class="scanlines"></div>
 
-  <!-- Content -->
-  <div class="content-wrapper">
-    <!-- Header -->
-    <header>
-      <div class="container">
-        <div class="header-content">
-          <a href="#top" class="logo-section">
-            <div class="logo-icon"></div>
-            <div class="logo-text">
-              <h1>T1ERA</h1>
-              <p>Telegram AI Suite</p>
-            </div>
-          </a>
+  <!-- Main Content -->
+  <div id="mainContent">
+    <!-- Cursor Trail -->
+    <div class="cursor-trail" id="cursorTrail"></div>
 
-          <nav>
-            <a href="#modes">Modes</a>
-            <a href="#capabilities">Capabilities</a>
-            <a href="#how">How it works</a>
-            <a href="#milestones">Milestones</a>
-            <a href="https://t1era-or-kode-blind.gitbook.io/t1era/" target="_blank" rel="noopener">Docs</a>
-          </nav>
-
-          <div class="header-actions">
-            <a class="btn" href="https://t1era-or-kode-blind.gitbook.io/t1era/" target="_blank" rel="noopener">
-              <span class="btn-docs-icon"></span>
-              Docs
-            </a>
-            <a class="btn btn-primary" href="https://t.me/T1ERA_SecBot" target="_blank" rel="noopener" data-bot-link>
-              <span class="btn-icon"></span>
-              Open T1ERA
-            </a>
-            <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">
-              <span></span>
-              <span></span>
-              <span></span>
-            </button>
-          </div>
-        </div>
+    <!-- Background Effects -->
+    <div class="neural-bg">
+      <div class="neural-grid"></div>
+      <div class="neural-orbs">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
       </div>
-    </header>
+    </div>
+    <div class="scanlines"></div>
 
-    <!-- Mobile Navigation -->
-    <nav class="mobile-nav" id="mobileNav">
-      <a href="#modes">Modes</a>
-      <a href="#capabilities">Capabilities</a>
-      <a href="#how">How it works</a>
-      <a href="#milestones">Milestones</a>
-      <a href="https://t1era-or-kode-blind.gitbook.io/t1era/" target="_blank" rel="noopener">Docs</a>
-    </nav>
+    <!-- Content -->
+    <div class="content-wrapper">
+      <!-- Header -->
+      <header>
+        <div class="container">
+          <div class="header-content">
+            <a href="#top" class="logo-section">
+              <div class="logo-icon"></div>
+              <div class="logo-text">
+                <h1>T1ERA</h1>
+                <p>Telegram AI Suite</p>
+              </div>
+            </a>
 
-    <!-- Hero -->
-    <section class="hero" id="top">
-      <div class="container">
-        <div class="hero-grid">
-          <div class="hero-content reveal">
-            <div class="badge">
-              <span class="badge-icon"></span>
-              Chat • Vision • VTT Scripts • Canva Mode • MinaThor
-            </div>
+            <nav>
+              <a href="#modes">Modes</a>
+              <a href="#capabilities">Capabilities</a>
+              <a href="#how">How it works</a>
+              <a href="#milestones">Milestones</a>
+              <a href="https://t1era-or-kode-blind.gitbook.io/t1era/" target="_blank" rel="noopener">Docs</a>
+            </nav>
 
-            <h2>
-              Meet <span class="gradient-text">T1ERA</span> — your all-in-one AI suite inside Telegram.
-            </h2>
-
-            <p class="hero-description">
-              T1ERA isn't "just a chat bot". It's a multi-mode AI system built for creators, marketers, and builders:
-              generate scripts, analyze images, plan campaigns with Canva Mode, and run focused workflows — all in Telegram.
-            </p>
-
-            <div class="cta-group">
-              <a class="btn btn-primary" href="https://t.me/T1ERA_SecBot" target="_blank" rel="noopener" data-bot-link>
-                <span class="btn-icon"></span>
-                Start on Telegram
-              </a>
-              <a class="btn btn-primary" href="#" target="_blank" rel="noopener" id="webappBtn" style="background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink)); box-shadow: 0 0 30px var(--glow-purple);">
-                <span class="btn-icon" style="background: var(--accent-pink);"></span>
-                Launch WebApp Platform
-              </a>
+            <div class="header-actions">
               <a class="btn" href="https://t1era-or-kode-blind.gitbook.io/t1era/" target="_blank" rel="noopener">
                 <span class="btn-docs-icon"></span>
-                Read Docs
+                Docs
               </a>
-              <a class="btn" href="#modes">Explore modes</a>
-            </div>
-
-            <div class="cta-note">
-              <span>Pay-as-you-go • no subscriptions • multilingual Canva Mode</span>
-            </div>
-
-            <div class="feature-chips">
-              <div class="chip" data-jump="chat">
-                <span class="chip-icon"></span>
-                Standard Chat
-              </div>
-              <div class="chip" data-jump="vision">
-                <span class="chip-icon"></span>
-                AI Vision
-              </div>
-              <div class="chip" data-jump="vtt">
-                <span class="chip-icon"></span>
-                VTT Scripts
-              </div>
-              <div class="chip" data-jump="canva">
-                <span class="chip-icon"></span>
-                Canva Mode
-              </div>
-              <div class="chip" data-jump="minathor">
-                <span class="chip-icon"></span>
-                MinaThor Video
-              </div>
-            </div>
-          </div>
-
-          <!-- Device Mockup -->
-          <div class="device-wrapper reveal">
-            <div class="device" id="device">
-              <div class="device-header">
-                <div class="status-pill">
-                  <span class="status-dot"></span>
-                  Live preview
-                </div>
-                <div class="status-pill" id="mockBadge">/chat</div>
-              </div>
-
-              <div class="device-screen">
-                <div class="chat-container">
-                  <div class="chat-header">
-                    <div class="chat-user">
-                      <div class="avatar"></div>
-                      <div class="chat-info">
-                        <h4>T1ERA</h4>
-                        <p id="mockSub">Standard AI Chat</p>
-                      </div>
-                    </div>
-                    <div class="status-pill">secure</div>
-                  </div>
-
-                  <div class="mode-tabs">
-                    <div class="mode-tab active" data-mode="chat">Chat</div>
-                    <div class="mode-tab" data-mode="vision">Vision</div>
-                    <div class="mode-tab" data-mode="vtt">VTT</div>
-                    <div class="mode-tab" data-mode="canva">Canva</div>
-                    <div class="mode-tab" data-mode="minathor">MinaThor</div>
-                  </div>
-
-                  <div class="chat-messages" id="chatBody">
-                    <!-- Messages will be inserted here -->
-                  </div>
-
-                  <div class="chat-input-wrapper">
-                    <input class="chat-input" value="Type your message..." readonly />
-                    <button class="send-btn">
-                      <span class="chip-icon"></span>
-                      Run
-                    </button>
-                  </div>
-                </div>
-              </div>
+              <a class="btn btn-primary" href="https://t.me/T1ERA_SecBot" target="_blank" rel="noopener" data-bot-link>
+                <span class="btn-icon"></span>
+                Open T1ERA
+              </a>
+              <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+              </button>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </header>
 
-    <!-- Modes Section -->
-    <section id="modes">
-      <div class="container">
-        <div class="section-header reveal">
-          <h3>Modes that match your real workflows</h3>
-          <p>These map directly to your bot commands and flows (Chat, Vision, VTT, Canva Mode, MinaThor).</p>
-        </div>
+      <!-- Mobile Navigation -->
+      <nav class="mobile-nav" id="mobileNav">
+        <a href="#modes">Modes</a>
+        <a href="#capabilities">Capabilities</a>
+        <a href="#how">How it works</a>
+        <a href="#milestones">Milestones</a>
+        <a href="https://t1era-or-kode-blind.gitbook.io/t1era/" target="_blank" rel="noopener">Docs</a>
+      </nav>
 
-        <div class="grid-3">
-          <div class="card reveal">
-            <div class="card-icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <path d="M4 6h16v10H7l-3 3V6z" stroke="currentColor" stroke-width="2" opacity="0.8"/>
-              </svg>
-            </div>
-            <h4>💬 Standard AI Chat</h4>
-            <p>Fast everyday assistant inside Telegram — ideas, answers, planning, rewriting, and more.</p>
-            <div class="card-footer">Command: /chat</div>
-          </div>
+      <!-- Hero -->
+      <section class="hero" id="top">
+        <div class="container">
+          <div class="hero-grid">
+            <div class="hero-content reveal">
+              <div class="badge">
+                <span class="badge-icon"></span>
+                Chat • Vision • VTT Scripts • Canva Mode • MinaThor
+              </div>
 
-          <div class="card reveal">
-            <div class="card-icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <path d="M3 7l9-4 9 4v10l-9 4-9-4V7z" stroke="currentColor" stroke-width="2" opacity="0.8"/>
-              </svg>
-            </div>
-            <h4>⚡ AI Vision (Photo Mode)</h4>
-            <p>Analyze images and get actionable outputs (insights, extraction, summaries, ideas).</p>
-            <div class="card-footer">Command: /power</div>
-          </div>
+              <h2>
+                Meet <span class="gradient-text">T1ERA</span> — your all-in-one AI suite inside Telegram.
+              </h2>
 
-          <div class="card reveal">
-            <div class="card-icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <path d="M7 4h10v16H7zM9 7h6M9 10h6M9 13h6" stroke="currentColor" stroke-width="2" opacity="0.8"/>
-              </svg>
-            </div>
-            <h4>📝 VTT Video Scripts</h4>
-            <p>Generate structured scripts for shorts, reels, YouTube, and marketing videos.</p>
-            <div class="card-footer">Command: /vtt</div>
-          </div>
-
-          <div class="card reveal">
-            <div class="card-icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <path d="M4 5h16v14H4zM8 9h8M8 12h6" stroke="currentColor" stroke-width="2" opacity="0.8"/>
-              </svg>
-            </div>
-            <h4>🎨 Canva Mode (Marketing Canvas)</h4>
-            <p>Language-first onboarding + step-by-step campaign planning — even if you have no idea yet.</p>
-            <div class="card-footer">Connect: Canva OAuth • Multilingual UI</div>
-          </div>
-
-          <div class="card reveal">
-            <div class="card-icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <path d="M4 8l8-4 8 4v8l-8 4-8-4V8z" stroke="currentColor" stroke-width="2" opacity="0.8"/>
-              </svg>
-            </div>
-            <h4>🎬 MinaThor (AI Video)</h4>
-            <p>Start a cinematic video flow and generate prompts for AI video creation.</p>
-            <div class="card-footer">Command: /minathor</div>
-          </div>
-
-          <div class="card reveal">
-            <div class="card-icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <path d="M12 2l7 4v6c0 5-3 9-7 10C8 21 5 17 5 12V6l7-4z" stroke="currentColor" stroke-width="2" opacity="0.8"/>
-              </svg>
-            </div>
-            <h4>👤 Account & Verification</h4>
-            <p>Track your status, affiliate info, and keep sessions clean with reset workflows.</p>
-            <div class="card-footer">Commands: /start • /account • /reset</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Capabilities Section -->
-    <section id="capabilities">
-      <div class="container">
-        <div class="section-header reveal">
-          <h3>What T1ERA helps you do</h3>
-          <p>A "suite feel" design: many tools, one chat entry point.</p>
-        </div>
-
-        <div class="feature-section reveal">
-          <div class="feature-grid">
-            <div>
-              <h3 style="font-size: 28px; margin-bottom: 16px;">From idea → output, without switching apps</h3>
-              <p style="color: var(--text-secondary); line-height: 1.7;">
-                Use T1ERA for planning, writing, scripting, image understanding, and marketing frameworks.
-                Canva Mode supports "No idea" and "Have an idea" flows, with multilingual onboarding
-                (MS/EN/ID/ZH/TH) to match your audience.
+              <p class="hero-description">
+                T1ERA isn't "just a chat bot". It's a multi-mode AI system built for creators, marketers, and builders:
+                generate scripts, analyze images, plan campaigns with Canva Mode, and run focused workflows — all in Telegram.
               </p>
 
-              <div class="feature-tags">
-                <div class="tag"><strong>Chat</strong> fast assistant</div>
-                <div class="tag"><strong>Vision</strong> photo analysis</div>
-                <div class="tag"><strong>VTT</strong> script generator</div>
-                <div class="tag"><strong>Canva</strong> marketing canvas</div>
-                <div class="tag"><strong>MinaThor</strong> video flow</div>
-              </div>
-            </div>
-
-            <div class="card" style="margin: 0;">
-              <p style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-tertiary); margin-bottom: 16px;">
-                Example commands
-              </p>
-              <div style="font-family: 'JetBrains Mono', monospace; line-height: 1.8; font-size: 14px;">
-                <div>• <strong>/chat</strong> — Standard AI chat</div>
-                <div>• <strong>/power</strong> — AI Vision (Photo Mode)</div>
-                <div>• <strong>/vtt</strong> — Video script generator</div>
-                <div>• <strong>/minathor</strong> — AI video flow</div>
-                <div>• <strong>/reset</strong> — Clear chat history</div>
-              </div>
-              <div style="margin-top: 24px; display: flex; gap: 12px; flex-wrap: wrap;">
-                <a class="btn" href="https://t1era-or-kode-blind.gitbook.io/t1era/" target="_blank" rel="noopener">
-                  <span class="btn-docs-icon"></span>
-                  Docs
-                </a>
+              <div class="cta-group">
                 <a class="btn btn-primary" href="https://t.me/T1ERA_SecBot" target="_blank" rel="noopener" data-bot-link>
                   <span class="btn-icon"></span>
-                  Open T1ERA
+                  Start on Telegram
                 </a>
+                <a class="btn btn-primary" href="#" target="_blank" rel="noopener" id="webappBtn" style="background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink)); box-shadow: 0 0 30px var(--glow-purple);">
+                  <span class="btn-icon" style="background: var(--accent-pink);"></span>
+                  Launch WebApp Platform
+                </a>
+                <a class="btn" href="https://t1era-or-kode-blind.gitbook.io/t1era/" target="_blank" rel="noopener">
+                  <span class="btn-docs-icon"></span>
+                  Read Docs
+                </a>
+                <a class="btn" href="#modes">Explore modes</a>
               </div>
-              <div style="margin-top: 16px; padding: 12px; border-radius: 12px; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); font-size: 13px; color: var(--text-secondary);">
-                Pay-as-you-go is available, but the product is the <strong>AI modes</strong> — not "payments first".
+
+              <div class="cta-note">
+                <span>Pay-as-you-go • no subscriptions • multilingual Canva Mode</span>
+              </div>
+
+              <div class="feature-chips">
+                <div class="chip" data-jump="chat">
+                  <span class="chip-icon"></span>
+                  Standard Chat
+                </div>
+                <div class="chip" data-jump="vision">
+                  <span class="chip-icon"></span>
+                  AI Vision
+                </div>
+                <div class="chip" data-jump="vtt">
+                  <span class="chip-icon"></span>
+                  VTT Scripts
+                </div>
+                <div class="chip" data-jump="canva">
+                  <span class="chip-icon"></span>
+                  Canva Mode
+                </div>
+                <div class="chip" data-jump="minathor">
+                  <span class="chip-icon"></span>
+                  MinaThor Video
+                </div>
+              </div>
+            </div>
+
+            <!-- Device Mockup -->
+            <div class="device-wrapper reveal">
+              <div class="device" id="device">
+                <div class="device-header">
+                  <div class="status-pill">
+                    <span class="status-dot"></span>
+                    Live preview
+                  </div>
+                  <div class="status-pill" id="mockBadge">/chat</div>
+                </div>
+
+                <div class="device-screen">
+                  <div class="chat-container">
+                    <div class="chat-header">
+                      <div class="chat-user">
+                        <div class="avatar"></div>
+                        <div class="chat-info">
+                          <h4>T1ERA</h4>
+                          <p id="mockSub">Standard AI Chat</p>
+                        </div>
+                      </div>
+                      <div class="status-pill">secure</div>
+                    </div>
+
+                    <div class="mode-tabs">
+                      <div class="mode-tab active" data-mode="chat">Chat</div>
+                      <div class="mode-tab" data-mode="vision">Vision</div>
+                      <div class="mode-tab" data-mode="vtt">VTT</div>
+                      <div class="mode-tab" data-mode="canva">Canva</div>
+                      <div class="mode-tab" data-mode="minathor">MinaThor</div>
+                    </div>
+
+                    <div class="chat-messages" id="chatBody">
+                      <!-- Messages will be inserted here -->
+                    </div>
+
+                    <div class="chat-input-wrapper">
+                      <input class="chat-input" value="Type your message..." readonly />
+                      <button class="send-btn">
+                        <span class="chip-icon"></span>
+                        Run
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- How it Works -->
-    <section id="how">
-      <div class="container">
-        <div class="section-header reveal">
-          <h3>How it works</h3>
-          <p>Simple onboarding + multiple modes, all inside Telegram.</p>
-        </div>
-
-        <div class="grid-3">
-          <div class="card reveal">
-            <h4>1) Start & verify</h4>
-            <p>Open Telegram, run <span style="font-family: 'JetBrains Mono', monospace; color: var(--accent-cyan);">/start</span>, choose your path, and get the menu.</p>
+      <!-- Modes Section -->
+      <section id="modes">
+        <div class="container">
+          <div class="section-header reveal">
+            <h3>Modes that match your real workflows</h3>
+            <p>These map directly to your bot commands and flows (Chat, Vision, VTT, Canva Mode, MinaThor).</p>
           </div>
 
-          <div class="card reveal">
-            <h4>2) Pick a mode</h4>
-            <p>Switch instantly: Chat, Vision, VTT scripts, Canva Mode, or MinaThor video.</p>
-          </div>
-
-          <div class="card reveal">
-            <h4>3) Produce outputs</h4>
-            <p>Get usable results: scripts, plans, ideas, analyses, and marketing structures.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Milestones -->
-    <section id="milestones">
-      <div class="container">
-        <div class="section-header reveal">
-          <h3>Milestones</h3>
-          <p>Animated Q1–Q2 roadmap</p>
-        </div>
-
-        <div class="timeline-container reveal" id="timeline">
-          <div class="timeline-header">
-            <div>
-              <p style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-tertiary); margin-bottom: 8px;">
-                Roadmap
-              </p>
-              <h4 style="font-size: 24px; font-weight: 900;">Q1 → Q2</h4>
-            </div>
-            <div class="progress-bar-wrapper">
-              <div class="progress-bar" id="roadBar" style="width: 0%"></div>
-            </div>
-          </div>
-
-          <div class="timeline-grid">
-            <div class="milestone done">
-              <div class="milestone-header">
-                <span class="milestone-label">Q1 • Suite launch</span>
-                <span class="milestone-status"></span>
+          <div class="grid-3">
+            <div class="card reveal">
+              <div class="card-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                  <path d="M4 6h16v10H7l-3 3V6z" stroke="currentColor" stroke-width="2" opacity="0.8"/>
+                </svg>
               </div>
-              <h5>Core multi-mode suite in Telegram</h5>
-              <p>Foundation features deployed</p>
-              <ul>
-                <li>/chat standard assistant</li>
-                <li>/vtt script generator</li>
-                <li>/power vision mode</li>
-              </ul>
+              <h4>💬 Standard AI Chat</h4>
+              <p>Fast everyday assistant inside Telegram — ideas, answers, planning, rewriting, and more.</p>
+              <div class="card-footer">Command: /chat</div>
             </div>
 
-            <div class="milestone">
-              <div class="milestone-header">
-                <span class="milestone-label">Q1 • Canva Mode</span>
-                <span class="milestone-status"></span>
+            <div class="card reveal">
+              <div class="card-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                  <path d="M3 7l9-4 9 4v10l-9 4-9-4V7z" stroke="currentColor" stroke-width="2" opacity="0.8"/>
+                </svg>
               </div>
-              <h5>Marketing Canvas flows</h5>
-              <p>Multilingual UX expansion</p>
-              <ul>
-                <li>No-idea → step-by-step</li>
-                <li>Have-idea → upload/describe</li>
-                <li>Canva OAuth connection</li>
-              </ul>
+              <h4>⚡ AI Vision (Photo Mode)</h4>
+              <p>Analyze images and get actionable outputs (insights, extraction, summaries, ideas).</p>
+              <div class="card-footer">Command: /power</div>
             </div>
 
-            <div class="milestone">
-              <div class="milestone-header">
-                <span class="milestone-label">Q2 • MinaThor upgrades</span>
-                <span class="milestone-status"></span>
+            <div class="card reveal">
+              <div class="card-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                  <path d="M7 4h10v16H7zM9 7h6M9 10h6M9 13h6" stroke="currentColor" stroke-width="2" opacity="0.8"/>
+                </svg>
               </div>
-              <h5>Improve video workflow</h5>
-              <p>Enhanced templates & presets</p>
-              <ul>
-                <li>Prompt presets</li>
-                <li>Creative style packs</li>
-                <li>Better onboarding</li>
-              </ul>
+              <h4>📝 VTT Video Scripts</h4>
+              <p>Generate structured scripts for shorts, reels, YouTube, and marketing videos.</p>
+              <div class="card-footer">Command: /vtt</div>
             </div>
 
-            <div class="milestone">
-              <div class="milestone-header">
-                <span class="milestone-label">Q2 • Web portal</span>
-                <span class="milestone-status"></span>
+            <div class="card reveal">
+              <div class="card-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                  <path d="M4 5h16v14H4zM8 9h8M8 12h6" stroke="currentColor" stroke-width="2" opacity="0.8"/>
+                </svg>
               </div>
-              <h5>Light web dashboard</h5>
-              <p>Marketing pages & docs</p>
-              <ul>
-                <li>Showcase modes</li>
-                <li>Docs & tutorials</li>
-                <li>Optional login later</li>
-              </ul>
+              <h4>🎨 Canva Mode (Marketing Canvas)</h4>
+              <p>Language-first onboarding + step-by-step campaign planning — even if you have no idea yet.</p>
+              <div class="card-footer">Connect: Canva OAuth • Multilingual UI</div>
+            </div>
+
+            <div class="card reveal">
+              <div class="card-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                  <path d="M4 8l8-4 8 4v8l-8 4-8-4V8z" stroke="currentColor" stroke-width="2" opacity="0.8"/>
+                </svg>
+              </div>
+              <h4>🎬 MinaThor (AI Video)</h4>
+              <p>Start a cinematic video flow and generate prompts for AI video creation.</p>
+              <div class="card-footer">Command: /minathor</div>
+            </div>
+
+            <div class="card reveal">
+              <div class="card-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                  <path d="M12 2l7 4v6c0 5-3 9-7 10C8 21 5 17 5 12V6l7-4z" stroke="currentColor" stroke-width="2" opacity="0.8"/>
+                </svg>
+              </div>
+              <h4>👤 Account & Verification</h4>
+              <p>Track your status, affiliate info, and keep sessions clean with reset workflows.</p>
+              <div class="card-footer">Commands: /start • /account • /reset</div>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- Footer -->
-    <footer>
-      <div class="container">
-        <div class="footer-content">
-          <p style="color: var(--text-tertiary); font-size: 14px;">
-            © <span id="year"></span> T1ERA • Telegram AI Suite
-          </p>
-          <div class="footer-links">
-            <a class="btn" href="https://t1era-or-kode-blind.gitbook.io/t1era/" target="_blank" rel="noopener">
-              <span class="btn-docs-icon"></span>
-              Docs
-            </a>
-            <a class="btn" href="https://t.me/T1ERA_SecBot" target="_blank" rel="noopener" data-bot-link>
-              Open bot
-            </a>
-            <a class="btn" href="#top">Back to top</a>
+      <!-- Capabilities Section -->
+      <section id="capabilities">
+        <div class="container">
+          <div class="section-header reveal">
+            <h3>What T1ERA helps you do</h3>
+            <p>A "suite feel" design: many tools, one chat entry point.</p>
+          </div>
+
+          <div class="feature-section reveal">
+            <div class="feature-grid">
+              <div>
+                <h3 style="font-size: 28px; margin-bottom: 16px;">From idea → output, without switching apps</h3>
+                <p style="color: var(--text-secondary); line-height: 1.7;">
+                  Use T1ERA for planning, writing, scripting, image understanding, and marketing frameworks.
+                  Canva Mode supports "No idea" and "Have an idea" flows, with multilingual onboarding
+                  (MS/EN/ID/ZH/TH) to match your audience.
+                </p>
+
+                <div class="feature-tags">
+                  <div class="tag"><strong>Chat</strong> fast assistant</div>
+                  <div class="tag"><strong>Vision</strong> photo analysis</div>
+                  <div class="tag"><strong>VTT</strong> script generator</div>
+                  <div class="tag"><strong>Canva</strong> marketing canvas</div>
+                  <div class="tag"><strong>MinaThor</strong> video flow</div>
+                </div>
+              </div>
+
+              <div class="card" style="margin: 0;">
+                <p style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-tertiary); margin-bottom: 16px;">
+                  Example commands
+                </p>
+                <div style="font-family: 'JetBrains Mono', monospace; line-height: 1.8; font-size: 14px;">
+                  <div>• <strong>/chat</strong> — Standard AI chat</div>
+                  <div>• <strong>/power</strong> — AI Vision (Photo Mode)</div>
+                  <div>• <strong>/vtt</strong> — Video script generator</div>
+                  <div>• <strong>/minathor</strong> — AI video flow</div>
+                  <div>• <strong>/reset</strong> — Clear chat history</div>
+                </div>
+                <div style="margin-top: 24px; display: flex; gap: 12px; flex-wrap: wrap;">
+                  <a class="btn" href="https://t1era-or-kode-blind.gitbook.io/t1era/" target="_blank" rel="noopener">
+                    <span class="btn-docs-icon"></span>
+                    Docs
+                  </a>
+                  <a class="btn btn-primary" href="https://t.me/T1ERA_SecBot" target="_blank" rel="noopener" data-bot-link>
+                    <span class="btn-icon"></span>
+                    Open T1ERA
+                  </a>
+                </div>
+                <div style="margin-top: 16px; padding: 12px; border-radius: 12px; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); font-size: 13px; color: var(--text-secondary);">
+                  Pay-as-you-go is available, but the product is the <strong>AI modes</strong> — not "payments first".
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    </footer>
+      </section>
+
+      <!-- How it Works -->
+      <section id="how">
+        <div class="container">
+          <div class="section-header reveal">
+            <h3>How it works</h3>
+            <p>Simple onboarding + multiple modes, all inside Telegram.</p>
+          </div>
+
+          <div class="grid-3">
+            <div class="card reveal">
+              <h4>1) Start & verify</h4>
+              <p>Open Telegram, run <span style="font-family: 'JetBrains Mono', monospace; color: var(--accent-cyan);">/start</span>, choose your path, and get the menu.</p>
+            </div>
+
+            <div class="card reveal">
+              <h4>2) Pick a mode</h4>
+              <p>Switch instantly: Chat, Vision, VTT scripts, Canva Mode, or MinaThor video.</p>
+            </div>
+
+            <div class="card reveal">
+              <h4>3) Produce outputs</h4>
+              <p>Get usable results: scripts, plans, ideas, analyses, and marketing structures.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Milestones -->
+      <section id="milestones">
+        <div class="container">
+          <div class="section-header reveal">
+            <h3>Milestones</h3>
+            <p>Animated Q1–Q2 roadmap</p>
+          </div>
+
+          <div class="timeline-container reveal" id="timeline">
+            <div class="timeline-header">
+              <div>
+                <p style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-tertiary); margin-bottom: 8px;">
+                  Roadmap
+                </p>
+                <h4 style="font-size: 24px; font-weight: 900;">Q1 → Q2</h4>
+              </div>
+              <div class="progress-bar-wrapper">
+                <div class="progress-bar" id="roadBar" style="width: 0%"></div>
+              </div>
+            </div>
+
+            <div class="timeline-grid">
+              <div class="milestone done">
+                <div class="milestone-header">
+                  <span class="milestone-label">Q1 • Suite launch</span>
+                  <span class="milestone-status"></span>
+                </div>
+                <h5>Core multi-mode suite in Telegram</h5>
+                <p>Foundation features deployed</p>
+                <ul>
+                  <li>/chat standard assistant</li>
+                  <li>/vtt script generator</li>
+                  <li>/power vision mode</li>
+                </ul>
+              </div>
+
+              <div class="milestone">
+                <div class="milestone-header">
+                  <span class="milestone-label">Q1 • Canva Mode</span>
+                  <span class="milestone-status"></span>
+                </div>
+                <h5>Marketing Canvas flows</h5>
+                <p>Multilingual UX expansion</p>
+                <ul>
+                  <li>No-idea → step-by-step</li>
+                  <li>Have-idea → upload/describe</li>
+                  <li>Canva OAuth connection</li>
+                </ul>
+              </div>
+
+              <div class="milestone">
+                <div class="milestone-header">
+                  <span class="milestone-label">Q2 • MinaThor upgrades</span>
+                  <span class="milestone-status"></span>
+                </div>
+                <h5>Improve video workflow</h5>
+                <p>Enhanced templates & presets</p>
+                <ul>
+                  <li>Prompt presets</li>
+                  <li>Creative style packs</li>
+                  <li>Better onboarding</li>
+                </ul>
+              </div>
+
+              <div class="milestone">
+                <div class="milestone-header">
+                  <span class="milestone-label">Q2 • Web portal</span>
+                  <span class="milestone-status"></span>
+                </div>
+                <h5>Light web dashboard</h5>
+                <p>Marketing pages & docs</p>
+                <ul>
+                  <li>Showcase modes</li>
+                  <li>Docs & tutorials</li>
+                  <li>Optional login later</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer>
+        <div class="container">
+          <div class="footer-content">
+            <p style="color: var(--text-tertiary); font-size: 14px;">
+              © <span id="year"></span> T1ERA • Telegram AI Suite
+            </p>
+            <div class="footer-links">
+              <a class="btn" href="https://t1era-or-kode-blind.gitbook.io/t1era/" target="_blank" rel="noopener">
+                <span class="btn-docs-icon"></span>
+                Docs
+              </a>
+              <a class="btn" href="https://t.me/T1ERA_SecBot" target="_blank" rel="noopener" data-bot-link>
+                Open bot
+              </a>
+              <a class="btn" href="#top">Back to top</a>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
   </div>
 
   <script>
@@ -2163,6 +2282,50 @@
     const BOT_URL = "https://t.me/T1ERA_SecBot";
     const DOCS_URL = "https://t1era-or-kode-blind.gitbook.io/t1era/";
     const WEBAPP_URL = "#"; // Replace with your actual WebApp URL
+
+    // ====== VIDEO INTRO LOGIC ======
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const videoIntro = document.getElementById('videoIntro');
+    const introVideo = document.getElementById('introVideo');
+    const startButton = document.getElementById('startButton');
+    const mainContent = document.getElementById('mainContent');
+
+    // Check if user has already seen the intro
+    const hasSeenIntro = sessionStorage.getItem('hasSeenIntro');
+
+    if (isMobile && !hasSeenIntro) {
+      // Show video intro on mobile
+      videoIntro.classList.add('active');
+      
+      // Play video
+      introVideo.play().catch(err => {
+        console.log('Autoplay prevented:', err);
+      });
+
+      // Show button after 3 seconds
+      setTimeout(() => {
+        startButton.classList.add('visible');
+      }, 3000);
+
+      // Handle button click
+      startButton.addEventListener('click', () => {
+        // Mark intro as seen
+        sessionStorage.setItem('hasSeenIntro', 'true');
+        
+        // Fade out video intro
+        videoIntro.classList.add('fade-out');
+        
+        // After fade out, hide video and show main content
+        setTimeout(() => {
+          videoIntro.style.display = 'none';
+          mainContent.classList.add('visible');
+        }, 1000);
+      });
+    } else {
+      // Desktop or already seen intro - show main content immediately
+      videoIntro.style.display = 'none';
+      mainContent.classList.add('visible');
+    }
 
     // Apply URLs
     document.querySelectorAll('[data-bot-link]').forEach(a => a.href = BOT_URL);
