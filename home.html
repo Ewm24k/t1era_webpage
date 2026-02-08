@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="theme-color" content="#0a0e27" />
-  <meta name="description" content="T1ERA — Telegram AI Suite (Chat, Vision, VTT scripts, Canva Mode, MinaThor video). Next-gen AI interface." />
-  <title>T1ERA — Telegram AI Suite</title>
+  <meta name="theme-color" content="#000000" />
+  <meta name="description" content="T1ERA — Professional Telegram AI Suite. Next-generation AI interface for creators and businesses." />
+  <title>T1ERA — Professional AI Suite</title>
 
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website" />
@@ -35,37 +35,35 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
-    :root{
-      --bg-primary: #0a0e27;
-      --bg-secondary: #0f1435;
-      --bg-tertiary: #151b42;
+    :root {
+      --bg-primary: #000000;
+      --bg-secondary: #0a0a0a;
+      --bg-tertiary: #111111;
+      --bg-card: #151515;
       
-      --glass-bg: rgba(255, 255, 255, 0.03);
-      --glass-border: rgba(255, 255, 255, 0.08);
-      --glass-hover: rgba(255, 255, 255, 0.06);
+      --border-primary: rgba(255, 255, 255, 0.1);
+      --border-hover: rgba(255, 255, 255, 0.2);
       
-      --text-primary: rgba(255, 255, 255, 0.95);
-      --text-secondary: rgba(255, 255, 255, 0.70);
-      --text-tertiary: rgba(255, 255, 255, 0.50);
+      --text-primary: #ffffff;
+      --text-secondary: rgba(255, 255, 255, 0.7);
+      --text-tertiary: rgba(255, 255, 255, 0.5);
       
-      --accent-cyan: #00f0ff;
-      --accent-purple: #8b5cf6;
-      --accent-pink: #ec4899;
-      --accent-green: #10b981;
+      --accent-primary: #3b82f6;
+      --accent-secondary: #8b5cf6;
+      --accent-tertiary: #06b6d4;
+      --accent-success: #10b981;
       
-      --glow-cyan: rgba(0, 240, 255, 0.4);
-      --glow-purple: rgba(139, 92, 246, 0.4);
-      --glow-pink: rgba(236, 72, 153, 0.4);
+      --glow-primary: rgba(59, 130, 246, 0.3);
+      --glow-secondary: rgba(139, 92, 246, 0.3);
       
-      --radius-sm: 12px;
-      --radius-md: 16px;
-      --radius-lg: 24px;
-      --radius-xl: 32px;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+      --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
       
-      --max-width: 1280px;
       --transition: cubic-bezier(0.4, 0, 0.2, 1);
     }
 
@@ -75,22 +73,21 @@
       box-sizing: border-box;
     }
 
-    html, body {
-      height: 100%;
-      overflow-x: hidden;
-      -webkit-overflow-scrolling: touch;
+    html {
+      scroll-behavior: smooth;
     }
 
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       background: var(--bg-primary);
       color: var(--text-primary);
       line-height: 1.6;
-      position: relative;
-      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
-    /* ====== GIF INTRO STYLES ====== */
+    /* ====== GIF INTRO ====== */
     #gifIntro {
       position: fixed;
       top: 0;
@@ -121,262 +118,125 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      padding: 20px 60px;
-      font-size: 24px;
-      font-weight: 900;
-      font-family: 'Inter', sans-serif;
-      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
-      border: none;
-      border-radius: 999px;
+      padding: 18px 48px;
+      font-size: 18px;
+      font-weight: 700;
+      font-family: 'Space Grotesk', sans-serif;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      border: 1px solid var(--border-primary);
+      border-radius: 12px;
       color: var(--text-primary);
       cursor: pointer;
-      box-shadow: 0 0 50px var(--glow-cyan), 0 10px 40px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 0 40px var(--glow-primary), var(--shadow-xl);
       opacity: 0;
       pointer-events: none;
-      transition: all 0.5s var(--transition);
+      transition: all 0.4s var(--transition);
       z-index: 10;
+      letter-spacing: 0.02em;
     }
 
     #startButton.visible {
       opacity: 1;
       pointer-events: auto;
-      animation: buttonPulse 2s ease-in-out infinite;
     }
 
     #startButton:hover {
-      transform: translate(-50%, -50%) scale(1.05);
-      box-shadow: 0 0 80px var(--glow-cyan), 0 15px 50px rgba(0, 0, 0, 0.6);
-    }
-
-    #startButton:active {
-      transform: translate(-50%, -50%) scale(0.98);
-    }
-
-    @keyframes buttonPulse {
-      0%, 100% {
-        box-shadow: 0 0 50px var(--glow-cyan), 0 10px 40px rgba(0, 0, 0, 0.5);
-      }
-      50% {
-        box-shadow: 0 0 80px var(--glow-cyan), 0 15px 50px rgba(0, 0, 0, 0.6);
-      }
+      transform: translate(-50%, -50%) translateY(-2px);
+      box-shadow: 0 0 60px var(--glow-primary), var(--shadow-xl);
     }
 
     #gifIntro.fade-out {
-      animation: fadeOutIntro 1s ease-out forwards;
+      animation: fadeOut 0.8s ease-out forwards;
     }
 
-    @keyframes fadeOutIntro {
-      from {
-        opacity: 1;
-      }
-      to {
-        opacity: 0;
-      }
+    @keyframes fadeOut {
+      to { opacity: 0; }
     }
 
     #mainContent {
       opacity: 0;
-      transition: opacity 1s ease-in;
+      transition: opacity 0.8s ease-in;
     }
 
     #mainContent.visible {
       opacity: 1;
     }
 
-    /* Small screens - adjust button size */
-    @media (max-width: 480px) {
-      #startButton {
-        padding: 16px 48px;
-        font-size: 20px;
-      }
-    }
-
-    @media (max-width: 360px) {
-      #startButton {
-        padding: 14px 40px;
-        font-size: 18px;
-      }
-    }
-
-    /* Neural network background */
-    .neural-bg {
+    /* ====== BACKGROUND GRID ====== */
+    .bg-grid {
       position: fixed;
       inset: 0;
       z-index: 0;
-      overflow: hidden;
-      pointer-events: none;
-    }
-
-    .neural-grid {
-      position: absolute;
-      inset: 0;
       background-image: 
-        linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
-      background-size: 50px 50px;
-      animation: gridPulse 8s ease-in-out infinite;
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 60px 60px;
+      mask-image: radial-gradient(ellipse at center, black 0%, transparent 80%);
+      -webkit-mask-image: radial-gradient(ellipse at center, black 0%, transparent 80%);
     }
 
-    @keyframes gridPulse {
-      0%, 100% { opacity: 0.3; }
-      50% { opacity: 0.6; }
-    }
-
-    .neural-orbs {
-      position: absolute;
-      inset: 0;
-    }
-
-    .orb {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(80px);
-      opacity: 0.4;
-      animation: float 20s ease-in-out infinite;
-    }
-
-    .orb-1 {
-      width: 600px;
-      height: 600px;
-      background: radial-gradient(circle, var(--glow-cyan), transparent);
-      top: -200px;
-      left: -200px;
-      animation-delay: 0s;
-    }
-
-    .orb-2 {
-      width: 500px;
-      height: 500px;
-      background: radial-gradient(circle, var(--glow-purple), transparent);
-      top: 20%;
-      right: -150px;
-      animation-delay: 3s;
-    }
-
-    .orb-3 {
-      width: 550px;
-      height: 550px;
-      background: radial-gradient(circle, var(--glow-pink), transparent);
-      bottom: -200px;
-      left: 30%;
-      animation-delay: 6s;
-    }
-
-    @keyframes float {
-      0%, 100% { transform: translate(0, 0) scale(1); }
-      33% { transform: translate(50px, -50px) scale(1.1); }
-      66% { transform: translate(-30px, 30px) scale(0.9); }
-    }
-
-    /* Scanline effect */
-    .scanlines {
+    .bg-gradient {
       position: fixed;
       inset: 0;
-      background: linear-gradient(
-        to bottom,
-        transparent 50%,
-        rgba(0, 240, 255, 0.02) 50%
-      );
-      background-size: 100% 4px;
+      z-index: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(59, 130, 246, 0.15), transparent 50%),
+                  radial-gradient(ellipse at 0% 50%, rgba(139, 92, 246, 0.1), transparent 50%);
       pointer-events: none;
-      z-index: 1;
-      opacity: 0.4;
-      animation: scan 8s linear infinite;
     }
 
-    @keyframes scan {
-      0% { transform: translateY(0); }
-      100% { transform: translateY(4px); }
-    }
-
-    .content-wrapper {
+    .content-container {
       position: relative;
-      z-index: 2;
+      z-index: 1;
     }
 
     .container {
-      max-width: var(--max-width);
+      max-width: 1400px;
       margin: 0 auto;
       padding: 0 24px;
     }
 
-    /* Header */
+    /* ====== HEADER ====== */
     header {
-      position: sticky;
+      position: fixed;
       top: 0;
-      z-index: 100;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background: rgba(0, 0, 0, 0.8);
       backdrop-filter: blur(20px) saturate(180%);
-      background: rgba(10, 14, 39, 0.7);
-      border-bottom: 1px solid var(--glass-border);
+      border-bottom: 1px solid var(--border-primary);
     }
 
-    .header-content {
+    .header-inner {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      height: 80px;
-      gap: 12px;
+      height: 72px;
+      gap: 24px;
     }
 
-    .logo-section {
+    .logo {
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 12px;
       text-decoration: none;
-      color: inherit;
-      flex-shrink: 0;
+      color: var(--text-primary);
+      font-weight: 700;
+      font-size: 20px;
+      font-family: 'Space Grotesk', sans-serif;
     }
 
-    .logo-icon {
-      position: relative;
-      width: 48px;
-      height: 48px;
-      border-radius: var(--radius-md);
-      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
-      display: grid;
-      place-items: center;
-      overflow: hidden;
-      box-shadow: 0 0 30px var(--glow-cyan);
-    }
-
-    .logo-icon::before {
-      content: '';
-      position: absolute;
-      inset: -50%;
-      background: conic-gradient(from 0deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-      animation: logoSpin 4s linear infinite;
-    }
-
-    @keyframes logoSpin {
-      to { transform: rotate(360deg); }
-    }
-
-    .logo-icon::after {
-      content: 'T1';
-      position: relative;
-      z-index: 1;
-      font-family: 'JetBrains Mono', monospace;
-      font-weight: 900;
-      font-size: 18px;
-      color: var(--bg-primary);
-    }
-
-    .logo-text h1 {
-      font-size: 24px;
-      font-weight: 900;
-      letter-spacing: -0.02em;
-      background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .logo-text p {
-      font-size: 12px;
-      color: var(--text-tertiary);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
+    .logo-mark {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 16px;
+      box-shadow: 0 0 20px var(--glow-primary);
     }
 
     nav {
@@ -388,21 +248,20 @@
     nav a {
       color: var(--text-secondary);
       text-decoration: none;
-      font-weight: 600;
-      font-size: 14px;
-      transition: all 0.3s var(--transition);
+      font-size: 15px;
+      font-weight: 500;
+      transition: color 0.3s var(--transition);
       position: relative;
-      padding: 8px 0;
     }
 
     nav a::after {
       content: '';
       position: absolute;
-      bottom: 0;
+      bottom: -4px;
       left: 0;
       right: 0;
       height: 2px;
-      background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
+      background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
       transform: scaleX(0);
       transition: transform 0.3s var(--transition);
     }
@@ -419,174 +278,108 @@
       display: flex;
       gap: 12px;
       align-items: center;
-      flex-shrink: 0;
     }
 
-    .header-actions .btn:not(.btn-primary):not(.mobile-menu-btn) {
-      display: inline-flex;
-    }
-
-    @media (max-width: 768px) {
-      .header-actions {
-        gap: 8px;
-      }
-      
-      .header-actions .btn-primary {
-        padding: 8px 12px;
-        font-size: 12px;
-        white-space: nowrap;
-      }
-
-      .header-actions .btn-primary .btn-icon {
-        width: 6px;
-        height: 6px;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .header-actions .btn:not(.btn-primary):not(.mobile-menu-btn) {
-        display: none;
-      }
-
-      .header-actions .btn-primary {
-        padding: 7px 10px;
-        font-size: 11px;
-        gap: 6px;
-      }
-    }
-
-    /* Buttons */
+    /* ====== BUTTONS ====== */
     .btn {
       display: inline-flex;
       align-items: center;
-      gap: 10px;
-      padding: 12px 24px;
-      border-radius: var(--radius-md);
-      font-weight: 700;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-weight: 600;
       font-size: 14px;
       text-decoration: none;
       cursor: pointer;
       transition: all 0.3s var(--transition);
-      border: 1px solid var(--glass-border);
-      background: var(--glass-bg);
+      border: 1px solid var(--border-primary);
+      background: var(--bg-secondary);
       color: var(--text-primary);
       white-space: nowrap;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .btn::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, var(--glass-hover), transparent);
-      opacity: 0;
-      transition: opacity 0.3s var(--transition);
-    }
-
-    .btn:hover::before {
-      opacity: 1;
     }
 
     .btn:hover {
       transform: translateY(-2px);
-      border-color: rgba(255, 255, 255, 0.15);
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+      border-color: var(--border-hover);
+      box-shadow: var(--shadow-md);
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
       border: none;
-      box-shadow: 0 0 30px var(--glow-cyan);
+      box-shadow: 0 0 20px var(--glow-primary);
     }
 
     .btn-primary:hover {
-      box-shadow: 0 0 50px var(--glow-cyan), 0 10px 40px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 0 30px var(--glow-primary), var(--shadow-md);
     }
 
     .btn-icon {
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      background: var(--accent-green);
-      box-shadow: 0 0 10px var(--accent-green);
+      background: var(--accent-success);
       animation: pulse 2s ease-in-out infinite;
     }
 
     @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.6; transform: scale(1.2); }
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
     }
 
-    .btn-docs-icon {
-      width: 12px;
-      height: 12px;
-      border-radius: 4px;
-      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
-    }
-
-    /* Hero Section */
+    /* ====== HERO SECTION ====== */
     .hero {
-      padding: 120px 0 80px;
-      overflow: hidden;
-    }
-
-    .hero-grid {
-      display: grid;
-      grid-template-columns: 1.1fr 0.9fr;
-      gap: 60px;
+      padding: 160px 0 120px;
+      min-height: 100vh;
+      display: flex;
       align-items: center;
     }
 
     .hero-content {
-      position: relative;
-      max-width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+      text-align: center;
     }
 
-    .badge {
+    .hero-badge {
       display: inline-flex;
       align-items: center;
-      gap: 12px;
-      padding: 10px 20px;
-      border-radius: 999px;
-      background: var(--glass-bg);
-      border: 1px solid var(--glass-border);
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 100px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-primary);
       font-size: 13px;
-      font-weight: 700;
+      font-weight: 600;
       color: var(--text-secondary);
-      margin-bottom: 24px;
-      backdrop-filter: blur(10px);
+      margin-bottom: 32px;
     }
 
-    .badge-icon {
-      width: 12px;
-      height: 12px;
-      border-radius: 4px;
-      background: linear-gradient(135deg, var(--accent-green), var(--accent-cyan));
-      box-shadow: 0 0 20px var(--accent-cyan);
-      animation: rotate 3s linear infinite;
+    .hero-badge-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-success);
+      animation: pulse 2s ease-in-out infinite;
     }
 
-    @keyframes rotate {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-
-    .hero h2 {
-      font-size: clamp(40px, 5vw, 72px);
-      font-weight: 900;
+    .hero h1 {
+      font-size: clamp(48px, 7vw, 84px);
+      font-weight: 800;
       line-height: 1.1;
       letter-spacing: -0.03em;
       margin-bottom: 24px;
+      font-family: 'Space Grotesk', sans-serif;
     }
 
     .gradient-text {
-      background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple), var(--accent-pink));
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary), var(--accent-tertiary));
       -webkit-background-clip: text;
       background-clip: text;
       -webkit-text-fill-color: transparent;
-      animation: gradientShift 3s ease-in-out infinite;
       background-size: 200% 200%;
+      animation: gradientShift 4s ease infinite;
     }
 
     @keyframes gradientShift {
@@ -595,668 +388,491 @@
     }
 
     .hero-description {
-      font-size: 18px;
+      font-size: 20px;
       color: var(--text-secondary);
       line-height: 1.7;
-      margin-bottom: 32px;
-      max-width: 540px;
+      margin-bottom: 48px;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
     }
 
-    /* AI Gallery Styles */
-    .ai-gallery {
+    .hero-cta {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 64px;
+    }
+
+    /* ====== AI GALLERY ====== */
+    .ai-showcase {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
-      margin: 32px 0;
-      max-width: 540px;
+      gap: 16px;
+      max-width: 800px;
+      margin: 0 auto 64px;
     }
 
-    .gallery-item {
+    .showcase-item {
       position: relative;
-      aspect-ratio: 1 / 1;
-      border-radius: var(--radius-md);
+      aspect-ratio: 1;
+      border-radius: 16px;
       overflow: hidden;
+      border: 1px solid var(--border-primary);
+      background: var(--bg-card);
       cursor: pointer;
-      border: 2px solid var(--glass-border);
-      background: var(--glass-bg);
       transition: all 0.4s var(--transition);
     }
 
-    .gallery-item img {
+    .showcase-item img {
       width: 100%;
       height: 100%;
       object-fit: cover;
       transition: transform 0.4s var(--transition);
     }
 
-    .gallery-overlay {
+    .showcase-overlay {
       position: absolute;
       inset: 0;
-      background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent 50%);
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
       display: flex;
       align-items: flex-end;
       justify-content: center;
-      padding: 12px;
+      padding: 16px;
       opacity: 0;
       transition: opacity 0.4s var(--transition);
     }
 
-    .gallery-label {
-      font-size: 11px;
-      font-weight: 900;
+    .showcase-label {
+      font-size: 12px;
+      font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.05em;
       color: var(--text-primary);
-      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+      background: rgba(59, 130, 246, 0.2);
       padding: 6px 12px;
-      border-radius: 999px;
-      font-family: 'JetBrains Mono', monospace;
-      box-shadow: 0 0 20px var(--glow-cyan);
+      border-radius: 6px;
+      border: 1px solid var(--accent-primary);
     }
 
-    .gallery-item:hover {
-      transform: translateY(-8px) scale(1.05);
-      border-color: var(--accent-cyan);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 40px var(--glow-cyan);
-      z-index: 10;
+    .showcase-item:hover {
+      transform: translateY(-8px);
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 30px var(--glow-primary), var(--shadow-lg);
     }
 
-    .gallery-item:hover img {
+    .showcase-item:hover img {
       transform: scale(1.1);
     }
 
-    .gallery-item:hover .gallery-overlay {
+    .showcase-item:hover .showcase-overlay {
       opacity: 1;
     }
 
-    /* Staggered animation on page load */
-    .gallery-item {
-      opacity: 0;
-      animation: galleryFadeIn 0.6s var(--transition) forwards;
-    }
-
-    .gallery-item:nth-child(1) {
-      animation-delay: 0.1s;
-    }
-
-    .gallery-item:nth-child(2) {
-      animation-delay: 0.2s;
-    }
-
-    .gallery-item:nth-child(3) {
-      animation-delay: 0.3s;
-    }
-
-    .gallery-item:nth-child(4) {
-      animation-delay: 0.4s;
-    }
-
-    @keyframes galleryFadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .cta-group {
+    /* ====== FEATURE TAGS ====== */
+    .feature-tags {
       display: flex;
-      gap: 16px;
+      gap: 12px;
+      justify-content: center;
       flex-wrap: wrap;
-      align-items: center;
-      margin-bottom: 32px;
+      margin-bottom: 48px;
     }
 
-    .cta-note {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 20px;
-      border-radius: var(--radius-md);
-      background: var(--glass-bg);
-      border: 1px dashed var(--glass-border);
-      font-size: 13px;
-      color: var(--text-tertiary);
-      font-family: 'JetBrains Mono', monospace;
-    }
-
-    .feature-chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-
-    .chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 18px;
-      border-radius: 999px;
-      background: rgba(0, 0, 0, 0.3);
-      border: 1px solid var(--glass-border);
-      font-size: 13px;
-      font-weight: 800;
-      color: var(--text-secondary);
-      cursor: pointer;
-      transition: all 0.3s var(--transition);
-    }
-
-    .chip:hover {
-      background: var(--glass-hover);
-      color: var(--text-primary);
-      transform: translateY(-2px);
-      border-color: var(--accent-cyan);
-    }
-
-    .chip-icon {
-      width: 10px;
-      height: 10px;
-      border-radius: 3px;
-      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
-    }
-
-    /* Device Mockup */
-    .device-wrapper {
-      position: relative;
-      perspective: 1200px;
-      width: 100%;
-      max-width: 100%;
-    }
-
-    .device {
-      position: relative;
-      border-radius: var(--radius-xl);
-      background: rgba(15, 20, 53, 0.6);
-      border: 1px solid var(--glass-border);
-      backdrop-filter: blur(20px);
-      overflow: hidden;
-      width: 100%;
-      max-width: 100%;
-      box-shadow: 
-        0 0 0 1px rgba(255, 255, 255, 0.05),
-        0 50px 100px rgba(0, 0, 0, 0.5),
-        0 0 80px var(--glow-cyan);
-      transition: transform 0.3s var(--transition);
-    }
-
-    .device-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 16px 20px;
-      background: rgba(0, 0, 0, 0.3);
-      border-bottom: 1px solid var(--glass-border);
-    }
-
-    .status-pill {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 14px;
-      border-radius: 999px;
-      background: var(--glass-bg);
-      border: 1px solid var(--glass-border);
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--text-secondary);
-      font-family: 'JetBrains Mono', monospace;
-    }
-
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--accent-green);
-      box-shadow: 0 0 15px var(--accent-green);
-      animation: pulse 2s ease-in-out infinite;
-    }
-
-    .device-screen {
-      padding: 20px;
-      min-height: 600px;
-    }
-
-    .chat-container {
-      border-radius: var(--radius-lg);
-      background: rgba(0, 0, 0, 0.4);
-      border: 1px solid var(--glass-border);
-      overflow: hidden;
-    }
-
-    .chat-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 16px 20px;
-      background: var(--glass-bg);
-      border-bottom: 1px solid var(--glass-border);
-    }
-
-    .chat-user {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: var(--radius-sm);
-      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
-      border: 2px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 0 20px var(--glow-cyan);
-    }
-
-    .chat-info h4 {
-      font-size: 14px;
-      font-weight: 700;
-      margin-bottom: 2px;
-    }
-
-    .chat-info p {
-      font-size: 12px;
-      color: var(--text-tertiary);
-    }
-
-    .mode-tabs {
-      display: flex;
-      gap: 8px;
-      padding: 12px 16px;
-      background: rgba(0, 0, 0, 0.2);
-      border-bottom: 1px solid var(--glass-border);
-      overflow-x: auto;
-    }
-
-    .mode-tab {
+    .tag {
       padding: 8px 16px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid var(--glass-border);
-      font-size: 12px;
-      font-weight: 900;
+      border-radius: 8px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-primary);
+      font-size: 13px;
+      font-weight: 600;
       color: var(--text-secondary);
       cursor: pointer;
       transition: all 0.3s var(--transition);
-      white-space: nowrap;
     }
 
-    .mode-tab:hover {
-      background: var(--glass-hover);
+    .tag:hover {
+      background: var(--bg-tertiary);
+      border-color: var(--accent-primary);
       color: var(--text-primary);
-    }
-
-    .mode-tab.active {
-      background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(139, 92, 246, 0.2));
-      border-color: var(--accent-cyan);
-      color: var(--text-primary);
-      box-shadow: 0 0 20px var(--glow-cyan);
-    }
-
-    .chat-messages {
-      padding: 20px;
-      height: 380px;
-      overflow-y: auto;
-    }
-
-    .chat-messages::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    .chat-messages::-webkit-scrollbar-thumb {
-      background: var(--glass-border);
-      border-radius: 999px;
-    }
-
-    .message {
-      max-width: 85%;
-      padding: 12px 16px;
-      border-radius: var(--radius-md);
-      margin-bottom: 12px;
-      font-size: 14px;
-      line-height: 1.5;
-      opacity: 0;
-      transform: translateY(10px);
-      animation: messageIn 0.4s var(--transition) forwards;
-    }
-
-    @keyframes messageIn {
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .message.bot {
-      background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(0, 240, 255, 0.1));
-      border: 1px solid rgba(139, 92, 246, 0.3);
-    }
-
-    .message.user {
-      background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(236, 72, 153, 0.1));
-      border: 1px solid rgba(0, 240, 255, 0.3);
-      margin-left: auto;
-    }
-
-    .message-tag {
-      display: inline-block;
-      padding: 4px 10px;
-      border-radius: 999px;
-      background: rgba(0, 0, 0, 0.3);
-      border: 1px solid var(--glass-border);
-      font-size: 11px;
-      font-weight: 900;
-      color: var(--text-tertiary);
-      margin-bottom: 8px;
-      font-family: 'JetBrains Mono', monospace;
-    }
-
-    .chat-input-wrapper {
-      display: flex;
-      gap: 12px;
-      padding: 16px 20px;
-      background: rgba(0, 0, 0, 0.2);
-      border-top: 1px solid var(--glass-border);
-    }
-
-    .chat-input {
-      flex: 1;
-      padding: 12px 16px;
-      border-radius: var(--radius-md);
-      background: rgba(0, 0, 0, 0.4);
-      border: 1px solid var(--glass-border);
-      color: var(--text-primary);
-      font-size: 14px;
-      outline: none;
-      transition: all 0.3s var(--transition);
-    }
-
-    .chat-input:focus {
-      border-color: var(--accent-cyan);
-      box-shadow: 0 0 20px var(--glow-cyan);
-    }
-
-    .send-btn {
-      padding: 12px 20px;
-      border-radius: var(--radius-md);
-      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
-      border: none;
-      color: var(--text-primary);
-      font-weight: 900;
-      font-size: 13px;
-      cursor: pointer;
-      transition: all 0.3s var(--transition);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .send-btn:hover {
       transform: translateY(-2px);
-      box-shadow: 0 0 30px var(--glow-cyan);
     }
 
-    /* Sections */
+    .tag-icon {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent-primary);
+      margin-right: 6px;
+    }
+
+    /* ====== STATS BAR ====== */
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1px;
+      background: var(--border-primary);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-top: 48px;
+    }
+
+    .stat-item {
+      background: var(--bg-card);
+      padding: 32px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 36px;
+      font-weight: 800;
+      color: var(--accent-primary);
+      margin-bottom: 8px;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+
+    .stat-label {
+      font-size: 14px;
+      color: var(--text-tertiary);
+      font-weight: 500;
+    }
+
+    /* ====== MODES SECTION ====== */
     section {
       padding: 100px 0;
     }
 
     .section-header {
       text-align: center;
-      margin-bottom: 60px;
+      margin-bottom: 64px;
     }
 
-    .section-header h3 {
-      font-size: clamp(32px, 4vw, 48px);
-      font-weight: 900;
-      letter-spacing: -0.02em;
+    .section-label {
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: 6px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-primary);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--accent-primary);
       margin-bottom: 16px;
     }
 
-    .section-header p {
+    .section-title {
+      font-size: clamp(36px, 5vw, 56px);
+      font-weight: 800;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+
+    .section-description {
       font-size: 18px;
       color: var(--text-secondary);
       max-width: 600px;
       margin: 0 auto;
     }
 
-    /* Grid Cards */
-    .grid-3 {
+    /* ====== MODE CARDS ====== */
+    .modes-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
       gap: 24px;
     }
 
-    .card {
-      position: relative;
+    .mode-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-primary);
+      border-radius: 20px;
       padding: 32px;
-      border-radius: var(--radius-lg);
-      background: var(--glass-bg);
-      border: 1px solid var(--glass-border);
-      backdrop-filter: blur(20px);
       transition: all 0.4s var(--transition);
+      position: relative;
       overflow: hidden;
     }
 
-    .card::before {
+    .mode-card::before {
       content: '';
       position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, var(--glow-cyan), var(--glow-purple));
-      opacity: 0;
-      transition: opacity 0.4s var(--transition);
-      z-index: 0;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.4s var(--transition);
     }
 
-    .card:hover::before {
-      opacity: 0.1;
+    .mode-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 40px var(--glow-primary), var(--shadow-lg);
     }
 
-    .card:hover {
-      transform: translateY(-8px);
-      border-color: var(--accent-cyan);
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), 0 0 40px var(--glow-cyan);
+    .mode-card:hover::before {
+      transform: scaleX(1);
     }
 
-    .card > * {
-      position: relative;
-      z-index: 1;
-    }
-
-    .card-icon {
+    .mode-icon {
       width: 56px;
       height: 56px;
-      border-radius: var(--radius-md);
-      background: rgba(0, 0, 0, 0.4);
-      border: 1px solid var(--glass-border);
-      display: grid;
-      place-items: center;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+      border: 1px solid var(--border-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
       margin-bottom: 20px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     }
 
-    .card h4 {
-      font-size: 20px;
-      font-weight: 800;
+    .mode-card h3 {
+      font-size: 22px;
+      font-weight: 700;
       margin-bottom: 12px;
+      font-family: 'Space Grotesk', sans-serif;
     }
 
-    .card p {
+    .mode-card p {
       color: var(--text-secondary);
       line-height: 1.6;
-      margin-bottom: 16px;
+      margin-bottom: 20px;
+      font-size: 15px;
     }
 
-    .card-footer {
+    .mode-meta {
       padding: 12px 16px;
-      border-radius: var(--radius-sm);
-      background: rgba(0, 0, 0, 0.3);
-      border: 1px solid var(--glass-border);
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
+      border-radius: 10px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-primary);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 13px;
       color: var(--text-tertiary);
+      font-weight: 600;
     }
 
-    /* Feature Section */
-    .feature-section {
+    /* ====== FEATURE SHOWCASE ====== */
+    .feature-showcase {
+      background: var(--bg-card);
+      border: 1px solid var(--border-primary);
+      border-radius: 24px;
+      padding: 64px;
       position: relative;
-      border-radius: var(--radius-xl);
-      background: var(--glass-bg);
-      border: 1px solid var(--glass-border);
-      backdrop-filter: blur(20px);
       overflow: hidden;
-      padding: 48px;
     }
 
-    .feature-section::before {
+    .feature-showcase::before {
       content: '';
       position: absolute;
-      inset: -100%;
-      background: radial-gradient(circle at 30% 30%, var(--glow-cyan), transparent 50%),
-                  radial-gradient(circle at 70% 70%, var(--glow-purple), transparent 50%);
-      opacity: 0.2;
-      animation: float 15s ease-in-out infinite;
+      top: -50%;
+      right: -50%;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.1), transparent);
+      pointer-events: none;
     }
 
     .feature-grid {
       display: grid;
-      grid-template-columns: 1.2fr 0.8fr;
-      gap: 48px;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
       align-items: center;
       position: relative;
       z-index: 1;
     }
 
-    .feature-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-top: 24px;
+    .feature-content h3 {
+      font-size: 36px;
+      font-weight: 800;
+      margin-bottom: 20px;
+      font-family: 'Space Grotesk', sans-serif;
     }
 
-    .tag {
-      padding: 10px 16px;
-      border-radius: 999px;
-      background: rgba(0, 0, 0, 0.4);
-      border: 1px solid var(--glass-border);
-      font-size: 13px;
-      font-weight: 800;
+    .feature-content p {
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin-bottom: 32px;
+      font-size: 16px;
+    }
+
+    .feature-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      border-radius: 12px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-primary);
+      transition: all 0.3s var(--transition);
+    }
+
+    .feature-item:hover {
+      border-color: var(--accent-primary);
+      transform: translateX(4px);
+    }
+
+    .feature-item-icon {
+      width: 12px;
+      height: 12px;
+      border-radius: 4px;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      flex-shrink: 0;
+    }
+
+    .feature-item-text {
+      font-size: 14px;
+      font-weight: 600;
       color: var(--text-secondary);
     }
 
-    .tag strong {
-      color: var(--accent-cyan);
-    }
-
-    /* Timeline */
-    .timeline-container {
-      position: relative;
+    /* ====== ROADMAP ====== */
+    .roadmap-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border-primary);
+      border-radius: 24px;
       padding: 48px;
-      border-radius: var(--radius-xl);
-      background: var(--glass-bg);
-      border: 1px solid var(--glass-border);
-      backdrop-filter: blur(20px);
     }
 
-    .timeline-header {
+    .roadmap-header {
       display: flex;
       justify-content: space-between;
-      align-items: flex-end;
-      margin-bottom: 40px;
+      align-items: center;
+      margin-bottom: 48px;
+      flex-wrap: wrap;
+      gap: 24px;
     }
 
-    .progress-bar-wrapper {
-      width: 300px;
-      height: 12px;
-      border-radius: 999px;
-      background: rgba(0, 0, 0, 0.4);
-      border: 1px solid var(--glass-border);
+    .roadmap-title {
+      font-size: 32px;
+      font-weight: 800;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+
+    .progress-container {
+      flex: 1;
+      max-width: 400px;
+    }
+
+    .progress-label {
+      font-size: 13px;
+      color: var(--text-tertiary);
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .progress-bar-bg {
+      width: 100%;
+      height: 8px;
+      border-radius: 100px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-primary);
       overflow: hidden;
     }
 
-    .progress-bar {
+    .progress-bar-fill {
       height: 100%;
-      background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple), var(--accent-pink));
-      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+      border-radius: 100px;
       transition: width 1s var(--transition);
-      box-shadow: 0 0 20px var(--glow-cyan);
+      box-shadow: 0 0 20px var(--glow-primary);
     }
 
-    .timeline-grid {
+    .roadmap-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
     }
 
     .milestone {
       padding: 24px;
-      border-radius: var(--radius-md);
-      background: rgba(0, 0, 0, 0.3);
-      border: 1px solid var(--glass-border);
-      transition: all 0.4s var(--transition);
+      border-radius: 16px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-primary);
+      transition: all 0.3s var(--transition);
     }
 
     .milestone:hover {
-      transform: translateY(-4px);
-      border-color: var(--accent-cyan);
+      border-color: var(--accent-primary);
+      transform: translateY(-2px);
     }
 
     .milestone-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
+      margin-bottom: 16px;
     }
 
     .milestone-label {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 13px;
-      font-weight: 900;
-      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-tertiary);
     }
 
     .milestone-status {
       width: 12px;
       height: 12px;
       border-radius: 4px;
-      background: var(--glass-border);
-      border: 1px solid var(--glass-border);
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-primary);
       transition: all 0.3s var(--transition);
     }
 
     .milestone.done .milestone-status {
-      background: var(--accent-green);
-      box-shadow: 0 0 20px var(--accent-green);
+      background: var(--accent-success);
+      box-shadow: 0 0 12px var(--accent-success);
     }
 
-    .milestone h5 {
-      font-size: 16px;
-      font-weight: 800;
+    .milestone h4 {
+      font-size: 18px;
+      font-weight: 700;
       margin-bottom: 8px;
+      font-family: 'Space Grotesk', sans-serif;
     }
 
     .milestone p {
       font-size: 14px;
       color: var(--text-secondary);
-      margin-bottom: 12px;
+      margin-bottom: 16px;
     }
 
     .milestone ul {
-      padding-left: 20px;
-      color: var(--text-tertiary);
-      font-size: 13px;
+      list-style: none;
+      padding: 0;
     }
 
     .milestone li {
-      margin: 6px 0;
+      font-size: 13px;
+      color: var(--text-tertiary);
+      padding-left: 20px;
+      position: relative;
+      margin-bottom: 8px;
     }
 
-    /* Footer */
+    .milestone li::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: var(--accent-primary);
+    }
+
+    /* ====== FOOTER ====== */
     footer {
-      padding: 60px 0 40px;
-      border-top: 1px solid var(--glass-border);
+      padding: 60px 0;
+      border-top: 1px solid var(--border-primary);
     }
 
     .footer-content {
@@ -1267,573 +883,33 @@
       gap: 24px;
     }
 
+    .footer-text {
+      font-size: 14px;
+      color: var(--text-tertiary);
+    }
+
     .footer-links {
       display: flex;
       gap: 16px;
     }
 
-    /* Responsive */
-    @media (max-width: 1024px) {
-      nav {
-        display: none;
-      }
-
-      .hero-grid,
-      .feature-grid {
-        grid-template-columns: 1fr;
-        gap: 40px;
-      }
-
-      .grid-3 {
-        grid-template-columns: 1fr;
-      }
-
-      .timeline-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .device-wrapper {
-        order: -1;
-      }
-    }
-
-    @media (max-width: 768px) {
-      .container {
-        padding: 0 20px;
-      }
-
-      .header-content {
-        height: 64px;
-        gap: 8px;
-      }
-
-      .logo-icon {
-        width: 36px;
-        height: 36px;
-      }
-
-      .logo-icon::after {
-        font-size: 14px;
-      }
-
-      .logo-text h1 {
-        font-size: 18px;
-      }
-
-      .logo-text p {
-        display: none;
-      }
-
-      .header-actions {
-        gap: 6px;
-      }
-
-      .btn {
-        padding: 8px 12px;
-        font-size: 12px;
-        gap: 6px;
-      }
-
-      .btn-primary {
-        padding: 10px 16px;
-        font-size: 13px;
-      }
-
-      section {
-        padding: 60px 0;
-      }
-
-      .hero {
-        padding: 40px 0 40px;
-      }
-
-      .hero h2 {
-        font-size: clamp(28px, 7vw, 40px);
-        line-height: 1.15;
-      }
-
-      .hero-description {
-        font-size: 15px;
-        line-height: 1.6;
-      }
-
-      /* Gallery responsive - 2x2 grid on tablet */
-      .ai-gallery {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
-        margin: 24px 0;
-      }
-
-      .badge {
-        font-size: 10px;
-        padding: 6px 12px;
-        flex-wrap: wrap;
-        text-align: center;
-        justify-content: center;
-        margin-bottom: 20px;
-      }
-
-      .badge-icon {
-        width: 10px;
-        height: 10px;
-      }
-
-      .feature-chips {
-        gap: 8px;
-      }
-
-      .chip {
-        font-size: 11px;
-        padding: 6px 12px;
-      }
-
-      .chip-icon {
-        width: 8px;
-        height: 8px;
-      }
-
-      .device {
-        border-radius: 20px;
-      }
-
-      .device-header {
-        padding: 10px 14px;
-      }
-
-      .device-screen {
-        padding: 14px;
-        min-height: 400px;
-      }
-
-      .chat-messages {
-        height: 280px;
-        padding: 14px;
-      }
-
-      .message {
-        font-size: 13px;
-        padding: 10px 14px;
-      }
-
-      .mode-tabs {
-        padding: 8px 10px;
-        gap: 6px;
-        overflow-x: auto;
-        scrollbar-width: none;
-      }
-
-      .mode-tabs::-webkit-scrollbar {
-        display: none;
-      }
-
-      .mode-tab {
-        font-size: 11px;
-        padding: 6px 12px;
-      }
-
-      .section-header h3 {
-        font-size: clamp(24px, 5vw, 36px);
-      }
-
-      .section-header p {
-        font-size: 15px;
-      }
-
-      .card {
-        padding: 24px;
-      }
-
-      .card-icon {
-        width: 48px;
-        height: 48px;
-      }
-
-      .card h4 {
-        font-size: 18px;
-      }
-
-      .feature-section {
-        padding: 32px 24px;
-      }
-
-      .feature-grid {
-        gap: 32px;
-      }
-
-      .timeline-container {
-        padding: 32px 24px;
-      }
-
-      .timeline-grid {
-        grid-template-columns: 1fr;
-        gap: 16px;
-      }
-
-      .milestone {
-        padding: 20px;
-      }
-    }
-
-    @media (max-width: 640px) {
-      .container {
-        padding: 0 16px;
-      }
-
-      .header-content {
-        height: 60px;
-      }
-
-      /* Hide entire device mockup on mobile */
-      .device-wrapper {
-        display: none !important;
-      }
-
-      .logo-section {
-        gap: 10px;
-      }
-
-      .logo-icon {
-        width: 32px;
-        height: 32px;
-      }
-
-      .logo-text h1 {
-        font-size: 16px;
-      }
-
-      .hero {
-        padding: 30px 0 30px;
-      }
-
-      .hero h2 {
-        margin-bottom: 16px;
-        font-size: 26px;
-      }
-
-      .hero-description {
-        margin-bottom: 20px;
-        font-size: 14px;
-      }
-
-      /* Gallery mobile - 2x2 grid */
-      .ai-gallery {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 8px;
-        margin: 20px 0;
-      }
-
-      .gallery-item:hover {
-        transform: scale(1.02);
-      }
-
-      .gallery-label {
-        font-size: 9px;
-        padding: 4px 8px;
-      }
-
-      .cta-group {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 10px;
-        margin-bottom: 20px;
-      }
-
-      .btn {
-        justify-content: center;
-        width: 100%;
-        padding: 12px 20px;
-        font-size: 14px;
-      }
-
-      .btn-primary {
-        padding: 14px 20px;
-        font-size: 14px;
-      }
-
-      .cta-note {
-        font-size: 11px;
-        padding: 10px 14px;
-        text-align: center;
-      }
-
-      .feature-chips {
-        justify-content: center;
-      }
-
-      .chip {
-        font-size: 10px;
-        padding: 6px 10px;
-      }
-
-      .device-screen {
-        min-height: 380px;
-        padding: 12px;
-      }
-
-      .chat-messages {
-        height: 260px;
-        padding: 12px;
-      }
-
-      .chat-input-wrapper {
-        padding: 12px 14px;
-        gap: 8px;
-      }
-
-      .chat-input {
-        font-size: 13px;
-        padding: 10px 12px;
-      }
-
-      .send-btn {
-        padding: 10px 14px;
-        font-size: 12px;
-      }
-
-      .timeline-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 16px;
-      }
-
-      .progress-bar-wrapper {
-        width: 100%;
-      }
-
-      .footer-content {
-        flex-direction: column;
-        text-align: center;
-        gap: 20px;
-      }
-
-      .footer-links {
-        flex-direction: column;
-        width: 100%;
-      }
-
-      .footer-links .btn {
-        width: 100%;
-      }
-
-      /* Disable 3D tilt on mobile */
-      .device {
-        transform: none !important;
-      }
-
-      /* Reduce orb sizes on mobile for performance */
-      .orb-1 {
-        width: 400px;
-        height: 400px;
-      }
-
-      .orb-2 {
-        width: 350px;
-        height: 350px;
-      }
-
-      .orb-3 {
-        width: 380px;
-        height: 380px;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .header-content {
-        height: 56px;
-      }
-
-      .logo-icon {
-        width: 28px;
-        height: 28px;
-        border-radius: 8px;
-      }
-
-      .logo-icon::after {
-        font-size: 12px;
-      }
-
-      .logo-text h1 {
-        font-size: 15px;
-      }
-
-      .header-actions {
-        gap: 6px;
-      }
-
-      .header-actions .btn-primary {
-        padding: 6px 8px;
-        font-size: 10px;
-        gap: 4px;
-      }
-
-      .header-actions .btn-primary .btn-icon {
-        width: 5px;
-        height: 5px;
-      }
-
-      .mobile-menu-btn {
-        width: 36px;
-        height: 36px;
-        gap: 4px;
-      }
-
-      .mobile-menu-btn span {
-        width: 18px;
-      }
-
-      .hero {
-        padding: 24px 0 24px;
-      }
-
-      .hero h2 {
-        font-size: 24px;
-        margin-bottom: 12px;
-      }
-
-      .hero-description {
-        font-size: 13px;
-        margin-bottom: 16px;
-      }
-
-      /* Gallery extra small mobile */
-      .ai-gallery {
-        gap: 6px;
-        margin: 16px 0;
-      }
-
-      .gallery-item {
-        border-radius: var(--radius-sm);
-      }
-
-      .gallery-label {
-        font-size: 8px;
-        padding: 3px 6px;
-      }
-
-      .badge {
-        font-size: 9px;
-        padding: 5px 10px;
-        margin-bottom: 16px;
-      }
-
-      .cta-group {
-        margin-bottom: 16px;
-      }
-
-      .section-header h3 {
-        font-size: 22px;
-      }
-
-      .section-header p {
-        font-size: 14px;
-      }
-
-      .device-header {
-        padding: 8px 12px;
-      }
-
-      .status-pill {
-        font-size: 10px;
-        padding: 5px 8px;
-      }
-
-      .device-screen {
-        min-height: 360px;
-      }
-
-      .chat-header {
-        padding: 10px 14px;
-      }
-
-      .chat-messages {
-        height: 240px;
-      }
-
-      .message {
-        font-size: 12px;
-        padding: 8px 12px;
-      }
-
-      .message-tag {
-        font-size: 10px;
-        padding: 3px 8px;
-      }
-
-      .mode-tab {
-        font-size: 10px;
-        padding: 5px 10px;
-      }
-
-      .chat-input-wrapper {
-        padding: 10px 12px;
-      }
-
-      .send-btn {
-        padding: 8px 12px;
-        font-size: 11px;
-      }
-    }
-
-    /* Extra small screens - compact header button */
-    @media (max-width: 360px) {
-      .header-actions .btn-primary {
-        padding: 5px 7px;
-        font-size: 9px;
-      }
-
-      .mobile-menu-btn {
-        width: 32px;
-        height: 32px;
-      }
-
-      .mobile-menu-btn span {
-        width: 16px;
-      }
-    }
-
-    /* Touch device optimization */
-    @media (hover: none) and (pointer: coarse) {
-      .btn:hover,
-      .card:hover,
-      .chip:hover,
-      .mode-tab:hover {
-        transform: none;
-      }
-
-      .btn:active {
-        transform: scale(0.97);
-      }
-
-      /* Disable cursor trail on touch devices */
-      .cursor-trail {
-        display: none;
-      }
-
-      /* Disable device tilt on touch devices */
-      .device {
-        transform: none !important;
-      }
-    }
-
-    /* Mobile Menu */
+    /* ====== MOBILE MENU ====== */
     .mobile-menu-btn {
       display: none;
       width: 40px;
       height: 40px;
-      border: none;
-      background: var(--glass-bg);
-      border: 1px solid var(--glass-border);
-      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-primary);
+      background: var(--bg-secondary);
+      border-radius: 10px;
       cursor: pointer;
       flex-direction: column;
       justify-content: center;
       align-items: center;
       gap: 5px;
-      transition: all 0.3s var(--transition);
     }
 
     .mobile-menu-btn span {
-      width: 20px;
+      width: 18px;
       height: 2px;
       background: var(--text-primary);
       border-radius: 2px;
@@ -1841,7 +917,7 @@
     }
 
     .mobile-menu-btn.active span:nth-child(1) {
-      transform: rotate(45deg) translate(6px, 6px);
+      transform: rotate(45deg) translate(5px, 5px);
     }
 
     .mobile-menu-btn.active span:nth-child(2) {
@@ -1855,20 +931,17 @@
     .mobile-nav {
       display: none;
       position: fixed;
-      top: 80px;
+      top: 72px;
       left: 0;
       right: 0;
-      background: rgba(10, 14, 39, 0.98);
+      background: rgba(0, 0, 0, 0.95);
       backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--glass-border);
-      padding: 20px 24px;
-      z-index: 99;
+      border-bottom: 1px solid var(--border-primary);
+      padding: 24px;
+      z-index: 999;
       opacity: 0;
       transform: translateY(-20px);
       transition: all 0.3s var(--transition);
-      max-height: calc(100vh - 80px);
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
     }
 
     .mobile-nav.active {
@@ -1881,9 +954,8 @@
       padding: 12px 0;
       color: var(--text-secondary);
       text-decoration: none;
-      font-weight: 600;
-      font-size: 16px;
-      border-bottom: 1px solid var(--glass-border);
+      font-weight: 500;
+      border-bottom: 1px solid var(--border-primary);
       transition: color 0.3s var(--transition);
     }
 
@@ -1891,134 +963,143 @@
       border-bottom: none;
     }
 
-    .mobile-nav a:active {
-      color: var(--accent-cyan);
+    .mobile-nav a:hover {
+      color: var(--text-primary);
     }
 
+    /* ====== RESPONSIVE ====== */
     @media (max-width: 1024px) {
-      .mobile-menu-btn {
+      nav {
+        display: none;
+      }
+
+      .mobile-menu-btn,
+      .mobile-nav {
         display: flex;
       }
 
-      .mobile-nav {
-        display: block;
+      .feature-grid {
+        grid-template-columns: 1fr;
       }
     }
 
     @media (max-width: 768px) {
-      .mobile-nav {
-        top: 64px;
-        max-height: calc(100vh - 64px);
+      .container {
+        padding: 0 20px;
       }
-    }
 
-    @media (max-width: 640px) {
-      .mobile-nav {
-        top: 60px;
-        max-height: calc(100vh - 60px);
-        padding: 16px 16px;
+      .header-inner {
+        height: 64px;
+      }
+
+      .hero {
+        padding: 120px 0 80px;
+      }
+
+      .hero h1 {
+        font-size: 40px;
+      }
+
+      .hero-description {
+        font-size: 16px;
+      }
+
+      .ai-showcase {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+      }
+
+      .modes-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .feature-showcase {
+        padding: 32px 24px;
+      }
+
+      .roadmap-container {
+        padding: 32px 24px;
+      }
+
+      .roadmap-grid {
+        grid-template-columns: 1fr;
+      }
+
+      section {
+        padding: 60px 0;
       }
     }
 
     @media (max-width: 480px) {
-      .mobile-nav {
-        top: 56px;
-        max-height: calc(100vh - 56px);
+      .hero h1 {
+        font-size: 32px;
+      }
+
+      .hero-cta {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .stats-bar {
+        grid-template-columns: 1fr;
       }
     }
 
-    /* Scroll Reveal */
-    .reveal {
+    /* ====== SCROLL ANIMATIONS ====== */
+    .fade-in {
       opacity: 0;
       transform: translateY(30px);
       transition: all 0.8s var(--transition);
     }
 
-    .reveal.active {
+    .fade-in.visible {
       opacity: 1;
       transform: translateY(0);
-    }
-
-    /* Cursor Trail */
-    .cursor-trail {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 9999;
-      mix-blend-mode: screen;
-    }
-
-    .cursor-trail span {
-      position: absolute;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 30% 30%, var(--accent-cyan), var(--accent-purple), transparent);
-      opacity: 0;
-      transform: translate(-50%, -50%);
-      transition: opacity 0.4s var(--transition);
-      box-shadow: 
-        0 0 20px var(--glow-cyan),
-        0 0 40px var(--glow-purple);
-      will-change: transform;
     }
   </style>
 </head>
 <body>
-  <!-- GIF Intro (Mobile Only) -->
+  <!-- GIF Intro (Mobile) -->
   <div id="gifIntro">
     <img id="introGif" src="./assets/grok-video.gif" alt="T1ERA Intro" />
-    <button id="startButton">T1ERA START</button>
+    <button id="startButton">ENTER T1ERA</button>
   </div>
 
   <!-- Main Content -->
   <div id="mainContent">
-    <!-- Cursor Trail -->
-    <div class="cursor-trail" id="cursorTrail"></div>
+    <!-- Background -->
+    <div class="bg-grid"></div>
+    <div class="bg-gradient"></div>
 
-    <!-- Background Effects -->
-    <div class="neural-bg">
-      <div class="neural-grid"></div>
-      <div class="neural-orbs">
-        <div class="orb orb-1"></div>
-        <div class="orb orb-2"></div>
-        <div class="orb orb-3"></div>
-      </div>
-    </div>
-    <div class="scanlines"></div>
-
-    <!-- Content -->
-    <div class="content-wrapper">
+    <div class="content-container">
       <!-- Header -->
       <header>
         <div class="container">
-          <div class="header-content">
-            <a href="#top" class="logo-section">
-              <div class="logo-icon"></div>
-              <div class="logo-text">
-                <h1>T1ERA</h1>
-                <p>Telegram AI Suite</p>
-              </div>
+          <div class="header-inner">
+            <a href="#" class="logo">
+              <div class="logo-mark">T1</div>
+              <span>T1ERA</span>
             </a>
 
             <nav>
               <a href="#modes">Modes</a>
-              <a href="#capabilities">Capabilities</a>
-              <a href="#how">How it works</a>
-              <a href="#milestones">Milestones</a>
-              <a href="https://t1era-or-kode-blind.gitbook.io/t1era/" target="_blank" rel="noopener">Docs</a>
+              <a href="#features">Features</a>
+              <a href="#roadmap">Roadmap</a>
+              <a href="https://t1era-or-kode-blind.gitbook.io/t1era/" target="_blank" rel="noopener">Documentation</a>
             </nav>
 
             <div class="header-actions">
-              <a class="btn" href="https://t1era-or-kode-blind.gitbook.io/t1era/" target="_blank" rel="noopener">
-                <span class="btn-docs-icon"></span>
-                Docs
-              </a>
-              <a class="btn btn-primary" href="https://t.me/T1ERA_SecBot" target="_blank" rel="noopener" data-bot-link>
+              <a class="btn" href="https://t1era-or-kode-blind.gitbook.io/t1era/" target="_blank" rel="noopener">Docs</a>
+              <a class="btn btn-primary" href="https://t.me/T1ERA_SecBot" target="_blank" rel="noopener">
                 <span class="btn-icon"></span>
-                Open T1ERA
+                Launch T1ERA
               </a>
-              <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">
+              <button class="mobile-menu-btn" id="mobileMenuBtn">
                 <span></span>
                 <span></span>
                 <span></span>
@@ -2028,151 +1109,92 @@
         </div>
       </header>
 
-      <!-- Mobile Navigation -->
+      <!-- Mobile Nav -->
       <nav class="mobile-nav" id="mobileNav">
         <a href="#modes">Modes</a>
-        <a href="#capabilities">Capabilities</a>
-        <a href="#how">How it works</a>
-        <a href="#milestones">Milestones</a>
-        <a href="https://t1era-or-kode-blind.gitbook.io/t1era/" target="_blank" rel="noopener">Docs</a>
+        <a href="#features">Features</a>
+        <a href="#roadmap">Roadmap</a>
+        <a href="https://t1era-or-kode-blind.gitbook.io/t1era/" target="_blank" rel="noopener">Documentation</a>
       </nav>
 
       <!-- Hero -->
-      <section class="hero" id="top">
+      <section class="hero">
         <div class="container">
-          <div class="hero-grid">
-            <div class="hero-content reveal">
-              <div class="badge">
-                <span class="badge-icon"></span>
-                Chat • Vision • VTT Scripts • Canva Mode • MinaThor
-              </div>
+          <div class="hero-content">
+            <div class="hero-badge">
+              <span class="hero-badge-dot"></span>
+              Professional AI Suite for Telegram
+            </div>
 
-              <h2>
-                Meet <span class="gradient-text">T1ERA</span> — your all-in-one AI suite inside Telegram.
-              </h2>
+            <h1>
+              Next-Gen AI Platform<br/>
+              <span class="gradient-text">Built for Results</span>
+            </h1>
 
-              <!-- AI Generation Examples Gallery -->
-              <div class="ai-gallery">
-                <div class="gallery-item" data-style="Illustration">
-                  <img src="./assets/new11.jpg" alt="AI Illustration Example" />
-                  <div class="gallery-overlay">
-                    <span class="gallery-label">Illustration</span>
-                  </div>
-                </div>
-                <div class="gallery-item" data-style="Realistic">
-                  <img src="./assets/new14.jpg" alt="AI Realistic Photo Example" />
-                  <div class="gallery-overlay">
-                    <span class="gallery-label">Realistic</span>
-                  </div>
-                </div>
-                <div class="gallery-item" data-style="3D Render">
-                  <img src="./assets/new13.jpg" alt="AI 3D Render Example" />
-                  <div class="gallery-overlay">
-                    <span class="gallery-label">3D Render</span>
-                  </div>
-                </div>
-                <div class="gallery-item" data-style="Cartoon">
-                  <img src="./assets/new12.png" alt="AI Cartoon Example" />
-                  <div class="gallery-overlay">
-                    <span class="gallery-label">Cartoon</span>
-                  </div>
+            <p class="hero-description">
+              T1ERA is a professional multi-mode AI system designed for creators, marketers, and businesses. 
+              Chat, analyze, create, and automate — all from one powerful Telegram interface.
+            </p>
+
+            <div class="hero-cta">
+              <a class="btn btn-primary" href="https://t.me/T1ERA_SecBot" target="_blank" rel="noopener">
+                <span class="btn-icon"></span>
+                Start on Telegram
+              </a>
+              <a class="btn btn-primary" href="#" target="_blank" rel="noopener" id="webappBtn" style="background: linear-gradient(135deg, var(--accent-secondary), var(--accent-tertiary));">
+                Launch WebApp
+              </a>
+              <a class="btn" href="https://t1era-or-kode-blind.gitbook.io/t1era/" target="_blank" rel="noopener">View Documentation</a>
+            </div>
+
+            <!-- AI Showcase Gallery -->
+            <div class="ai-showcase fade-in">
+              <div class="showcase-item">
+                <img src="./assets/new11.jpg" alt="AI Illustration" />
+                <div class="showcase-overlay">
+                  <span class="showcase-label">Illustration</span>
                 </div>
               </div>
-
-              <p class="hero-description">
-                T1ERA isn't "just a chat bot". It's a multi-mode AI system built for creators, marketers, and builders:
-                generate scripts, analyze images, plan campaigns with Canva Mode, and run focused workflows — all in Telegram.
-              </p>
-
-              <div class="cta-group">
-                <a class="btn btn-primary" href="https://t.me/T1ERA_SecBot" target="_blank" rel="noopener" data-bot-link>
-                  <span class="btn-icon"></span>
-                  Start on Telegram
-                </a>
-                <a class="btn btn-primary" href="#" target="_blank" rel="noopener" id="webappBtn" style="background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink)); box-shadow: 0 0 30px var(--glow-purple);">
-                  <span class="btn-icon" style="background: var(--accent-pink);"></span>
-                  Launch WebApp Platform
-                </a>
-                <a class="btn" href="https://t1era-or-kode-blind.gitbook.io/t1era/" target="_blank" rel="noopener">
-                  <span class="btn-docs-icon"></span>
-                  Read Docs
-                </a>
-                <a class="btn" href="#modes">Explore modes</a>
+              <div class="showcase-item">
+                <img src="./assets/new14.jpg" alt="AI Realistic" />
+                <div class="showcase-overlay">
+                  <span class="showcase-label">Realistic</span>
+                </div>
               </div>
-
-              <div class="cta-note">
-                <span>Pay-as-you-go • no subscriptions • multilingual Canva Mode</span>
+              <div class="showcase-item">
+                <img src="./assets/new13.jpg" alt="AI 3D Render" />
+                <div class="showcase-overlay">
+                  <span class="showcase-label">3D Render</span>
+                </div>
               </div>
-
-              <div class="feature-chips">
-                <div class="chip" data-jump="chat">
-                  <span class="chip-icon"></span>
-                  Standard Chat
-                </div>
-                <div class="chip" data-jump="vision">
-                  <span class="chip-icon"></span>
-                  AI Vision
-                </div>
-                <div class="chip" data-jump="vtt">
-                  <span class="chip-icon"></span>
-                  VTT Scripts
-                </div>
-                <div class="chip" data-jump="canva">
-                  <span class="chip-icon"></span>
-                  Canva Mode
-                </div>
-                <div class="chip" data-jump="minathor">
-                  <span class="chip-icon"></span>
-                  MinaThor Video
+              <div class="showcase-item">
+                <img src="./assets/new12.png" alt="AI Cartoon" />
+                <div class="showcase-overlay">
+                  <span class="showcase-label">Cartoon</span>
                 </div>
               </div>
             </div>
 
-            <!-- Device Mockup -->
-            <div class="device-wrapper reveal">
-              <div class="device" id="device">
-                <div class="device-header">
-                  <div class="status-pill">
-                    <span class="status-dot"></span>
-                    Live preview
-                  </div>
-                  <div class="status-pill" id="mockBadge">/chat</div>
-                </div>
+            <div class="feature-tags fade-in">
+              <span class="tag"><span class="tag-icon"></span>AI Chat Assistant</span>
+              <span class="tag"><span class="tag-icon"></span>Vision Analysis</span>
+              <span class="tag"><span class="tag-icon"></span>Script Generator</span>
+              <span class="tag"><span class="tag-icon"></span>Marketing Canvas</span>
+              <span class="tag"><span class="tag-icon"></span>Video AI</span>
+            </div>
 
-                <div class="device-screen">
-                  <div class="chat-container">
-                    <div class="chat-header">
-                      <div class="chat-user">
-                        <div class="avatar"></div>
-                        <div class="chat-info">
-                          <h4>T1ERA</h4>
-                          <p id="mockSub">Standard AI Chat</p>
-                        </div>
-                      </div>
-                      <div class="status-pill">secure</div>
-                    </div>
-
-                    <div class="mode-tabs">
-                      <div class="mode-tab active" data-mode="chat">Chat</div>
-                      <div class="mode-tab" data-mode="vision">Vision</div>
-                      <div class="mode-tab" data-mode="vtt">VTT</div>
-                      <div class="mode-tab" data-mode="canva">Canva</div>
-                      <div class="mode-tab" data-mode="minathor">MinaThor</div>
-                    </div>
-
-                    <div class="chat-messages" id="chatBody">
-                      <!-- Messages will be inserted here -->
-                    </div>
-
-                    <div class="chat-input-wrapper">
-                      <input class="chat-input" value="Type your message..." readonly />
-                      <button class="send-btn">
-                        <span class="chip-icon"></span>
-                        Run
-                      </button>
-                    </div>
-                  </div>
-                </div>
+            <div class="stats-bar fade-in">
+              <div class="stat-item">
+                <div class="stat-value">5</div>
+                <div class="stat-label">AI Modes</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value">24/7</div>
+                <div class="stat-label">Availability</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value">Multi</div>
+                <div class="stat-label">Language Support</div>
               </div>
             </div>
           </div>
@@ -2182,131 +1204,137 @@
       <!-- Modes Section -->
       <section id="modes">
         <div class="container">
-          <div class="section-header reveal">
-            <h3>Modes that match your real workflows</h3>
-            <p>These map directly to your bot commands and flows (Chat, Vision, VTT, Canva Mode, MinaThor).</p>
+          <div class="section-header fade-in">
+            <span class="section-label">AI Capabilities</span>
+            <h2 class="section-title">Powerful Modes for Every Workflow</h2>
+            <p class="section-description">
+              Choose the right tool for your task. Switch seamlessly between modes to maximize productivity.
+            </p>
           </div>
 
-          <div class="grid-3">
-            <div class="card reveal">
-              <div class="card-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <path d="M4 6h16v10H7l-3 3V6z" stroke="currentColor" stroke-width="2" opacity="0.8"/>
-                </svg>
-              </div>
-              <h4>💬 Standard AI Chat</h4>
-              <p>Fast everyday assistant inside Telegram — ideas, answers, planning, rewriting, and more.</p>
-              <div class="card-footer">Command: /chat</div>
+          <div class="modes-grid">
+            <div class="mode-card fade-in">
+              <div class="mode-icon">💬</div>
+              <h3>Standard AI Chat</h3>
+              <p>
+                Fast, intelligent conversations for everyday tasks. Get answers, brainstorm ideas, 
+                and solve problems with advanced AI assistance.
+              </p>
+              <div class="mode-meta">Command: /chat</div>
             </div>
 
-            <div class="card reveal">
-              <div class="card-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <path d="M3 7l9-4 9 4v10l-9 4-9-4V7z" stroke="currentColor" stroke-width="2" opacity="0.8"/>
-                </svg>
-              </div>
-              <h4>⚡ AI Vision (Photo Mode)</h4>
-              <p>Analyze images and get actionable outputs (insights, extraction, summaries, ideas).</p>
-              <div class="card-footer">Command: /power</div>
+            <div class="mode-card fade-in">
+              <div class="mode-icon">⚡</div>
+              <h3>AI Vision (Photo Mode)</h3>
+              <p>
+                Analyze images with precision. Extract insights, identify objects, 
+                read text, and get actionable recommendations from visual content.
+              </p>
+              <div class="mode-meta">Command: /power</div>
             </div>
 
-            <div class="card reveal">
-              <div class="card-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <path d="M7 4h10v16H7zM9 7h6M9 10h6M9 13h6" stroke="currentColor" stroke-width="2" opacity="0.8"/>
-                </svg>
-              </div>
-              <h4>📝 VTT Video Scripts</h4>
-              <p>Generate structured scripts for shorts, reels, YouTube, and marketing videos.</p>
-              <div class="card-footer">Command: /vtt</div>
+            <div class="mode-card fade-in">
+              <div class="mode-icon">📝</div>
+              <h3>VTT Script Generator</h3>
+              <p>
+                Create professional video scripts for YouTube, TikTok, and social media. 
+                Structured formats optimized for engagement and conversion.
+              </p>
+              <div class="mode-meta">Command: /vtt</div>
             </div>
 
-            <div class="card reveal">
-              <div class="card-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <path d="M4 5h16v14H4zM8 9h8M8 12h6" stroke="currentColor" stroke-width="2" opacity="0.8"/>
-                </svg>
-              </div>
-              <h4>🎨 Canva Mode (Marketing Canvas)</h4>
-              <p>Language-first onboarding + step-by-step campaign planning — even if you have no idea yet.</p>
-              <div class="card-footer">Connect: Canva OAuth • Multilingual UI</div>
+            <div class="mode-card fade-in">
+              <div class="mode-icon">🎨</div>
+              <h3>Canva Marketing Mode</h3>
+              <p>
+                Plan marketing campaigns with AI guidance. Multilingual support with 
+                step-by-step workflows for content creation and strategy.
+              </p>
+              <div class="mode-meta">OAuth Integration • Multi-language</div>
             </div>
 
-            <div class="card reveal">
-              <div class="card-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <path d="M4 8l8-4 8 4v8l-8 4-8-4V8z" stroke="currentColor" stroke-width="2" opacity="0.8"/>
-                </svg>
-              </div>
-              <h4>🎬 MinaThor (AI Video)</h4>
-              <p>Start a cinematic video flow and generate prompts for AI video creation.</p>
-              <div class="card-footer">Command: /minathor</div>
+            <div class="mode-card fade-in">
+              <div class="mode-icon">🎬</div>
+              <h3>MinaThor Video AI</h3>
+              <p>
+                Generate cinematic video concepts and prompts. Create compelling 
+                narratives for AI video generation platforms.
+              </p>
+              <div class="mode-meta">Command: /minathor</div>
             </div>
 
-            <div class="card reveal">
-              <div class="card-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <path d="M12 2l7 4v6c0 5-3 9-7 10C8 21 5 17 5 12V6l7-4z" stroke="currentColor" stroke-width="2" opacity="0.8"/>
-                </svg>
-              </div>
-              <h4>👤 Account & Verification</h4>
-              <p>Track your status, affiliate info, and keep sessions clean with reset workflows.</p>
-              <div class="card-footer">Commands: /start • /account • /reset</div>
+            <div class="mode-card fade-in">
+              <div class="mode-icon">👤</div>
+              <h3>Account Management</h3>
+              <p>
+                Track usage, manage sessions, and access affiliate tools. 
+                Complete control over your T1ERA experience.
+              </p>
+              <div class="mode-meta">Commands: /account • /reset</div>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- Capabilities Section -->
-      <section id="capabilities">
+      <!-- Features Section -->
+      <section id="features">
         <div class="container">
-          <div class="section-header reveal">
-            <h3>What T1ERA helps you do</h3>
-            <p>A "suite feel" design: many tools, one chat entry point.</p>
-          </div>
-
-          <div class="feature-section reveal">
+          <div class="feature-showcase fade-in">
             <div class="feature-grid">
-              <div>
-                <h3 style="font-size: 28px; margin-bottom: 16px;">From idea → output, without switching apps</h3>
-                <p style="color: var(--text-secondary); line-height: 1.7;">
-                  Use T1ERA for planning, writing, scripting, image understanding, and marketing frameworks.
-                  Canva Mode supports "No idea" and "Have an idea" flows, with multilingual onboarding
-                  (MS/EN/ID/ZH/TH) to match your audience.
+              <div class="feature-content">
+                <h3>Enterprise-Grade AI in Your Pocket</h3>
+                <p>
+                  T1ERA brings professional AI capabilities to Telegram, making advanced 
+                  tools accessible without complexity. Pay-as-you-go pricing with no subscriptions.
                 </p>
 
-                <div class="feature-tags">
-                  <div class="tag"><strong>Chat</strong> fast assistant</div>
-                  <div class="tag"><strong>Vision</strong> photo analysis</div>
-                  <div class="tag"><strong>VTT</strong> script generator</div>
-                  <div class="tag"><strong>Canva</strong> marketing canvas</div>
-                  <div class="tag"><strong>MinaThor</strong> video flow</div>
+                <div class="feature-list">
+                  <div class="feature-item">
+                    <div class="feature-item-icon"></div>
+                    <div class="feature-item-text">Multi-mode AI system with specialized tools</div>
+                  </div>
+                  <div class="feature-item">
+                    <div class="feature-item-icon"></div>
+                    <div class="feature-item-text">Instant mode switching for workflow optimization</div>
+                  </div>
+                  <div class="feature-item">
+                    <div class="feature-item-icon"></div>
+                    <div class="feature-item-text">Multilingual support (EN, MS, ID, ZH, TH)</div>
+                  </div>
+                  <div class="feature-item">
+                    <div class="feature-item-icon"></div>
+                    <div class="feature-item-text">Pay-per-use model with transparent pricing</div>
+                  </div>
+                  <div class="feature-item">
+                    <div class="feature-item-icon"></div>
+                    <div class="feature-item-text">Secure OAuth integrations (Canva & more)</div>
+                  </div>
                 </div>
-              </div>
 
-              <div class="card" style="margin: 0;">
-                <p style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-tertiary); margin-bottom: 16px;">
-                  Example commands
-                </p>
-                <div style="font-family: 'JetBrains Mono', monospace; line-height: 1.8; font-size: 14px;">
-                  <div>• <strong>/chat</strong> — Standard AI chat</div>
-                  <div>• <strong>/power</strong> — AI Vision (Photo Mode)</div>
-                  <div>• <strong>/vtt</strong> — Video script generator</div>
-                  <div>• <strong>/minathor</strong> — AI video flow</div>
-                  <div>• <strong>/reset</strong> — Clear chat history</div>
-                </div>
-                <div style="margin-top: 24px; display: flex; gap: 12px; flex-wrap: wrap;">
-                  <a class="btn" href="https://t1era-or-kode-blind.gitbook.io/t1era/" target="_blank" rel="noopener">
-                    <span class="btn-docs-icon"></span>
-                    Docs
-                  </a>
-                  <a class="btn btn-primary" href="https://t.me/T1ERA_SecBot" target="_blank" rel="noopener" data-bot-link>
+                <div style="margin-top: 32px; display: flex; gap: 12px; flex-wrap: wrap;">
+                  <a class="btn btn-primary" href="https://t.me/T1ERA_SecBot" target="_blank" rel="noopener">
                     <span class="btn-icon"></span>
-                    Open T1ERA
+                    Get Started
+                  </a>
+                  <a class="btn" href="https://t1era-or-kode-blind.gitbook.io/t1era/" target="_blank" rel="noopener">
+                    Read Documentation
                   </a>
                 </div>
-                <div style="margin-top: 16px; padding: 12px; border-radius: 12px; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); font-size: 13px; color: var(--text-secondary);">
-                  Pay-as-you-go is available, but the product is the <strong>AI modes</strong> — not "payments first".
+              </div>
+
+              <div>
+                <div style="background: var(--bg-secondary); border: 1px solid var(--border-primary); border-radius: 16px; padding: 32px;">
+                  <h4 style="font-size: 18px; font-weight: 700; margin-bottom: 24px; font-family: 'Space Grotesk', sans-serif;">
+                    Quick Start Commands
+                  </h4>
+                  <div style="font-family: 'Space Grotesk', monospace; font-size: 14px; line-height: 2; color: var(--text-secondary);">
+                    <div><span style="color: var(--accent-primary);">/chat</span> — Start AI conversation</div>
+                    <div><span style="color: var(--accent-primary);">/power</span> — Analyze images</div>
+                    <div><span style="color: var(--accent-primary);">/vtt</span> — Generate video scripts</div>
+                    <div><span style="color: var(--accent-primary);">/minathor</span> — Create video concepts</div>
+                    <div><span style="color: var(--accent-primary);">/account</span> — View dashboard</div>
+                    <div><span style="color: var(--accent-primary);">/reset</span> — Clear session</div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -2314,108 +1342,82 @@
         </div>
       </section>
 
-      <!-- How it Works -->
-      <section id="how">
+      <!-- Roadmap -->
+      <section id="roadmap">
         <div class="container">
-          <div class="section-header reveal">
-            <h3>How it works</h3>
-            <p>Simple onboarding + multiple modes, all inside Telegram.</p>
+          <div class="section-header fade-in">
+            <span class="section-label">Development Timeline</span>
+            <h2 class="section-title">Q1 — Q2 Roadmap</h2>
+            <p class="section-description">
+              Track our progress as we build the future of AI-powered productivity.
+            </p>
           </div>
 
-          <div class="grid-3">
-            <div class="card reveal">
-              <h4>1) Start & verify</h4>
-              <p>Open Telegram, run <span style="font-family: 'JetBrains Mono', monospace; color: var(--accent-cyan);">/start</span>, choose your path, and get the menu.</p>
-            </div>
-
-            <div class="card reveal">
-              <h4>2) Pick a mode</h4>
-              <p>Switch instantly: Chat, Vision, VTT scripts, Canva Mode, or MinaThor video.</p>
-            </div>
-
-            <div class="card reveal">
-              <h4>3) Produce outputs</h4>
-              <p>Get usable results: scripts, plans, ideas, analyses, and marketing structures.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Milestones -->
-      <section id="milestones">
-        <div class="container">
-          <div class="section-header reveal">
-            <h3>Milestones</h3>
-            <p>Animated Q1–Q2 roadmap</p>
-          </div>
-
-          <div class="timeline-container reveal" id="timeline">
-            <div class="timeline-header">
-              <div>
-                <p style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-tertiary); margin-bottom: 8px;">
-                  Roadmap
-                </p>
-                <h4 style="font-size: 24px; font-weight: 900;">Q1 → Q2</h4>
-              </div>
-              <div class="progress-bar-wrapper">
-                <div class="progress-bar" id="roadBar" style="width: 0%"></div>
+          <div class="roadmap-container fade-in">
+            <div class="roadmap-header">
+              <h3 class="roadmap-title">Milestones</h3>
+              <div class="progress-container">
+                <div class="progress-label">Overall Progress</div>
+                <div class="progress-bar-bg">
+                  <div class="progress-bar-fill" id="progressBar" style="width: 0%"></div>
+                </div>
               </div>
             </div>
 
-            <div class="timeline-grid">
+            <div class="roadmap-grid">
               <div class="milestone done">
                 <div class="milestone-header">
-                  <span class="milestone-label">Q1 • Suite launch</span>
+                  <span class="milestone-label">Q1 • Launch</span>
                   <span class="milestone-status"></span>
                 </div>
-                <h5>Core multi-mode suite in Telegram</h5>
-                <p>Foundation features deployed</p>
+                <h4>Core Platform Release</h4>
+                <p>Foundation features and multi-mode system</p>
                 <ul>
                   <li>/chat standard assistant</li>
                   <li>/vtt script generator</li>
-                  <li>/power vision mode</li>
+                  <li>/power vision analysis</li>
                 </ul>
               </div>
 
               <div class="milestone">
                 <div class="milestone-header">
-                  <span class="milestone-label">Q1 • Canva Mode</span>
+                  <span class="milestone-label">Q1 • Canva</span>
                   <span class="milestone-status"></span>
                 </div>
-                <h5>Marketing Canvas flows</h5>
-                <p>Multilingual UX expansion</p>
+                <h4>Marketing Canvas</h4>
+                <p>Multilingual campaign planning</p>
                 <ul>
-                  <li>No-idea → step-by-step</li>
-                  <li>Have-idea → upload/describe</li>
-                  <li>Canva OAuth connection</li>
+                  <li>Step-by-step workflows</li>
+                  <li>OAuth integration</li>
+                  <li>5 language support</li>
                 </ul>
               </div>
 
               <div class="milestone">
                 <div class="milestone-header">
-                  <span class="milestone-label">Q2 • MinaThor upgrades</span>
+                  <span class="milestone-label">Q2 • Video</span>
                   <span class="milestone-status"></span>
                 </div>
-                <h5>Improve video workflow</h5>
-                <p>Enhanced templates & presets</p>
+                <h4>MinaThor Enhancement</h4>
+                <p>Advanced video AI features</p>
                 <ul>
-                  <li>Prompt presets</li>
-                  <li>Creative style packs</li>
-                  <li>Better onboarding</li>
+                  <li>Preset library expansion</li>
+                  <li>Style packs</li>
+                  <li>Improved prompts</li>
                 </ul>
               </div>
 
               <div class="milestone">
                 <div class="milestone-header">
-                  <span class="milestone-label">Q2 • Web portal</span>
+                  <span class="milestone-label">Q2 • Web</span>
                   <span class="milestone-status"></span>
                 </div>
-                <h5>Light web dashboard</h5>
-                <p>Marketing pages & docs</p>
+                <h4>Web Platform</h4>
+                <p>Dashboard and documentation</p>
                 <ul>
-                  <li>Showcase modes</li>
-                  <li>Docs & tutorials</li>
-                  <li>Optional login later</li>
+                  <li>Mode showcase</li>
+                  <li>Tutorial system</li>
+                  <li>Analytics dashboard</li>
                 </ul>
               </div>
             </div>
@@ -2427,18 +1429,12 @@
       <footer>
         <div class="container">
           <div class="footer-content">
-            <p style="color: var(--text-tertiary); font-size: 14px;">
-              © <span id="year"></span> T1ERA • Telegram AI Suite
-            </p>
+            <div class="footer-text">
+              © <span id="year"></span> T1ERA. Professional AI Suite for Telegram.
+            </div>
             <div class="footer-links">
-              <a class="btn" href="https://t1era-or-kode-blind.gitbook.io/t1era/" target="_blank" rel="noopener">
-                <span class="btn-docs-icon"></span>
-                Docs
-              </a>
-              <a class="btn" href="https://t.me/T1ERA_SecBot" target="_blank" rel="noopener" data-bot-link>
-                Open bot
-              </a>
-              <a class="btn" href="#top">Back to top</a>
+              <a class="btn" href="https://t1era-or-kode-blind.gitbook.io/t1era/" target="_blank" rel="noopener">Documentation</a>
+              <a class="btn" href="https://t.me/T1ERA_SecBot" target="_blank" rel="noopener">Launch Bot</a>
             </div>
           </div>
         </div>
@@ -2447,70 +1443,45 @@
   </div>
 
   <script>
-    // ====== CONFIG ======
+    // ====== CONFIGURATION ======
     const BOT_URL = "https://t.me/T1ERA_SecBot";
     const DOCS_URL = "https://t1era-or-kode-blind.gitbook.io/t1era/";
-    const WEBAPP_URL = "#"; // Replace with your actual WebApp URL
+    const WEBAPP_URL = "#"; // Replace with actual WebApp URL
 
-    // ====== GIF INTRO LOGIC ======
+    // Set year
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // ====== GIF INTRO ======
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     const gifIntro = document.getElementById('gifIntro');
-    const introGif = document.getElementById('introGif');
     const startButton = document.getElementById('startButton');
     const mainContent = document.getElementById('mainContent');
-
-    // Check if user has already seen the intro
     const hasSeenIntro = sessionStorage.getItem('hasSeenIntro');
 
     if (isMobile && !hasSeenIntro) {
-      // Show GIF intro on mobile
       gifIntro.classList.add('active');
-      
-      // Prevent body scroll during intro
       document.body.style.overflow = 'hidden';
 
-      // Show button after 3 seconds
       setTimeout(() => {
         startButton.classList.add('visible');
       }, 3000);
 
-      // Handle button click
       startButton.addEventListener('click', () => {
-        // Mark intro as seen
         sessionStorage.setItem('hasSeenIntro', 'true');
-        
-        // Restore body scroll
         document.body.style.overflow = '';
-        
-        // Fade out GIF intro
         gifIntro.classList.add('fade-out');
         
-        // After fade out, hide GIF and show main content
         setTimeout(() => {
           gifIntro.style.display = 'none';
           mainContent.classList.add('visible');
-        }, 1000);
+        }, 800);
       });
     } else {
-      // Desktop or already seen intro - show main content immediately
       gifIntro.style.display = 'none';
       mainContent.classList.add('visible');
-      document.body.style.overflow = '';
     }
 
-    // Apply URLs
-    document.querySelectorAll('[data-bot-link]').forEach(a => a.href = BOT_URL);
-    document.querySelectorAll('a[href="https://t1era-or-kode-blind.gitbook.io/t1era/"]').forEach(a => a.href = DOCS_URL);
-    
-    // Apply WebApp URL
-    const webappBtn = document.getElementById('webappBtn');
-    if (webappBtn && WEBAPP_URL !== '#') {
-      webappBtn.href = WEBAPP_URL;
-    }
-    
-    document.getElementById("year").textContent = new Date().getFullYear();
-
-    // ====== Mobile Menu Toggle ======
+    // ====== MOBILE MENU ======
     const mobileMenuBtn = document.getElementById('mobileMenuBtn');
     const mobileNav = document.getElementById('mobileNav');
 
@@ -2520,7 +1491,6 @@
       mobileNav.classList.toggle('active');
     });
 
-    // Close mobile menu when clicking on a link
     document.querySelectorAll('.mobile-nav a').forEach(link => {
       link.addEventListener('click', () => {
         mobileMenuBtn.classList.remove('active');
@@ -2528,7 +1498,6 @@
       });
     });
 
-    // Close mobile menu when clicking outside
     document.addEventListener('click', (e) => {
       if (mobileNav.classList.contains('active')) {
         if (!mobileMenuBtn.contains(e.target) && !mobileNav.contains(e.target)) {
@@ -2538,15 +1507,7 @@
       }
     });
 
-    // Prevent scroll issues on touch devices
-    let scrollPosition = 0;
-    mobileNav.addEventListener('touchmove', (e) => {
-      if (!mobileNav.classList.contains('active')) {
-        e.preventDefault();
-      }
-    }, { passive: false });
-
-    // ====== Scroll Reveal ======
+    // ====== SCROLL ANIMATIONS ======
     const observerOptions = {
       threshold: 0.1,
       rootMargin: '0px 0px -100px 0px'
@@ -2555,155 +1516,37 @@
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
-          entry.target.classList.add('active');
+          entry.target.classList.add('visible');
         }
       });
     }, observerOptions);
 
-    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
 
-    // ====== Device 3D Tilt (Desktop Only) ======
-    const device = document.getElementById('device');
-    let tiltFrame = null;
-    const isTouchDevice = window.matchMedia("(hover: none) and (pointer: coarse)").matches;
-
-    if (!isTouchDevice && window.innerWidth > 768) {
-      device.addEventListener('mousemove', (e) => {
-        if (tiltFrame) cancelAnimationFrame(tiltFrame);
-        tiltFrame = requestAnimationFrame(() => {
-          const rect = device.getBoundingClientRect();
-          const x = (e.clientX - rect.left) / rect.width;
-          const y = (e.clientY - rect.top) / rect.height;
-          const tiltX = (y - 0.5) * -10;
-          const tiltY = (x - 0.5) * 10;
-          device.style.transform = `perspective(1200px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) translateZ(10px)`;
-        });
-      });
-
-      device.addEventListener('mouseleave', () => {
-        device.style.transform = 'perspective(1200px) rotateX(0deg) rotateY(0deg) translateZ(0px)';
-      });
-    }
-
-    // ====== Mode Switching ======
-    const mockBadge = document.getElementById('mockBadge');
-    const mockSub = document.getElementById('mockSub');
-    const chatBody = document.getElementById('chatBody');
-    const tabs = document.querySelectorAll('.mode-tab');
-
-    const MODES = {
-      chat: {
-        badge: '/chat',
-        sub: 'Standard AI Chat',
-        messages: [
-          { type: 'bot', tag: 'T1ERA', text: 'Welcome 👋 I\'m T1ERA. Switch modes anytime: /chat /vtt /power /minathor' },
-          { type: 'user', tag: 'You', text: 'Draft a bio for my Telegram AI suite.' },
-          { type: 'bot', tag: 'T1ERA', text: 'Here are 3 versions: professional, casual, and bold. Which tone do you want?' }
-        ]
-      },
-      vision: {
-        badge: '/power',
-        sub: 'AI Vision (Photo Mode)',
-        messages: [
-          { type: 'bot', tag: 'T1ERA', text: 'Upload an image and tell me what you want: explain, extract text, analyze, or improve.' },
-          { type: 'user', tag: 'You', text: 'Analyze this product photo and suggest better captions.' },
-          { type: 'bot', tag: 'T1ERA', text: 'I\'ll generate 10 captions + hashtags, plus a short product description for your store.' }
-        ]
-      },
-      vtt: {
-        badge: '/vtt',
-        sub: 'VTT Video Script Generator',
-        messages: [
-          { type: 'bot', tag: 'T1ERA', text: 'VTT Mode ✅ Choose language and platform. I\'ll write hooks, scenes, VO, and CTA.' },
-          { type: 'user', tag: 'You', text: 'Make a 30s reel script about AI for students.' },
-          { type: 'bot', tag: 'T1ERA', text: 'Hook → Problem → Solution → CTA. Want Malay or English version?' }
-        ]
-      },
-      canva: {
-        badge: 'Canva Mode',
-        sub: 'AI Marketing Canvas',
-        messages: [
-          { type: 'bot', tag: 'T1ERA', text: 'Canva Mode 🎨 Choose language: 🇲🇾 🇬🇧 🇮🇩 🇨🇳 🇹🇭' },
-          { type: 'user', tag: 'You', text: 'I have no idea. Help me plan content.' },
-          { type: 'bot', tag: 'T1ERA', text: 'Step 1: What is this content for? Step 2: Main platform? I\'ll build your marketing canvas.' }
-        ]
-      },
-      minathor: {
-        badge: '/minathor',
-        sub: 'MinaThor (AI Video Flow)',
-        messages: [
-          { type: 'bot', tag: 'T1ERA', text: '🎬 MinaThor ready. Choose how you want to start: Start / Cancel.' },
-          { type: 'user', tag: 'You', text: 'Start MinaThor' },
-          { type: 'bot', tag: 'T1ERA', text: 'Give me your video goal + style. I\'ll generate cinematic prompts you can use for AI video.' }
-        ]
-      }
-    };
-
-    function renderMode(mode) {
-      const data = MODES[mode];
-      mockBadge.textContent = data.badge;
-      mockSub.textContent = data.sub;
-      
-      chatBody.innerHTML = data.messages.map(msg => `
-        <div class="message ${msg.type}">
-          <div class="message-tag">${msg.tag}</div>
-          ${msg.text}
-        </div>
-      `).join('');
-
-      setTimeout(() => {
-        chatBody.scrollTop = chatBody.scrollHeight;
-      }, 100);
-    }
-
-    tabs.forEach(tab => {
-      tab.addEventListener('click', () => {
-        tabs.forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        renderMode(tab.dataset.mode);
-      });
-    });
-
-    document.querySelectorAll('.chip[data-jump]').forEach(chip => {
-      chip.addEventListener('click', () => {
-        const mode = chip.dataset.jump;
-        const tab = document.querySelector(`.mode-tab[data-mode="${mode}"]`);
-        if (tab) {
-          tab.click();
-          document.getElementById('modes').scrollIntoView({ behavior: 'smooth' });
-        }
-      });
-    });
-
-    renderMode('chat');
-
-    // ====== Progress Bar Animation ======
-    const timeline = document.getElementById('timeline');
-    const roadBar = document.getElementById('roadBar');
+    // ====== PROGRESS BAR ======
+    const progressBar = document.getElementById('progressBar');
     const milestones = document.querySelectorAll('.milestone');
 
     function updateProgress() {
-      const rect = timeline.getBoundingClientRect();
+      const roadmapSection = document.getElementById('roadmap');
+      const rect = roadmapSection.getBoundingClientRect();
       const windowHeight = window.innerHeight;
-      const progress = Math.max(0, Math.min(1, (windowHeight - rect.top) / (windowHeight + rect.height)));
+      const progress = Math.max(0, Math.min(1, (windowHeight - rect.top) / windowHeight));
       
-      roadBar.style.width = `${progress * 100}%`;
+      progressBar.style.width = `${progress * 100}%`;
       
       const activeCount = Math.floor(progress * milestones.length);
       milestones.forEach((milestone, i) => {
         if (i < activeCount) {
           milestone.classList.add('done');
-        } else {
-          milestone.classList.remove('done');
         }
       });
     }
 
     window.addEventListener('scroll', updateProgress);
     window.addEventListener('resize', updateProgress);
-    updateProgress();
 
-    // ====== Smooth Scroll ======
+    // ====== SMOOTH SCROLL ======
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
       anchor.addEventListener('click', (e) => {
         const href = anchor.getAttribute('href');
@@ -2721,64 +1564,11 @@
       });
     });
 
-    // ====== Cursor Trail ======
-    const trail = document.getElementById('cursorTrail');
-    const trailDots = [];
-    const TRAIL_LENGTH = 12;
-
-    // Create trail dots
-    for (let i = 0; i < TRAIL_LENGTH; i++) {
-      const dot = document.createElement('span');
-      trail.appendChild(dot);
-      trailDots.push({
-        element: dot,
-        x: 0,
-        y: 0
-      });
+    // Apply WebApp URL
+    const webappBtn = document.getElementById('webappBtn');
+    if (webappBtn && WEBAPP_URL !== '#') {
+      webappBtn.href = WEBAPP_URL;
     }
-
-    let mouseX = window.innerWidth / 2;
-    let mouseY = window.innerHeight / 2;
-
-    // Track mouse position
-    window.addEventListener('mousemove', (e) => {
-      mouseX = e.clientX;
-      mouseY = e.clientY;
-      
-      // Show first dot immediately
-      trailDots[0].element.style.opacity = '0.8';
-      
-      // Fade in other dots
-      for (let i = 1; i < TRAIL_LENGTH; i++) {
-        trailDots[i].element.style.opacity = '0.5';
-      }
-    });
-
-    // Animate trail
-    function animateTrail() {
-      let targetX = mouseX;
-      let targetY = mouseY;
-
-      for (let i = 0; i < TRAIL_LENGTH; i++) {
-        const dot = trailDots[i];
-        
-        // Smoothly follow
-        const speed = 0.15 - (i * 0.008);
-        dot.x += (targetX - dot.x) * speed;
-        dot.y += (targetY - dot.y) * speed;
-
-        // Update position
-        dot.element.style.transform = `translate(${dot.x}px, ${dot.y}px) translate(-50%, -50%) scale(${1 - i * 0.05})`;
-
-        // Next dot follows current dot
-        targetX = dot.x;
-        targetY = dot.y;
-      }
-
-      requestAnimationFrame(animateTrail);
-    }
-
-    animateTrail();
   </script>
 </body>
 </html>
