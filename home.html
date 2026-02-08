@@ -1376,6 +1376,15 @@
         height: 60px;
       }
 
+      /* Hide live preview pill on mobile */
+      .device-header .status-pill:first-child {
+        display: none;
+      }
+
+      .device-header {
+        justify-content: flex-end;
+      }
+
       .logo-section {
         gap: 10px;
       }
@@ -1961,6 +1970,10 @@
             <div class="device-wrapper reveal">
               <div class="device" id="device">
                 <div class="device-header">
+                  <div class="status-pill">
+                    <span class="status-dot"></span>
+                    Live preview
+                  </div>
                   <div class="status-pill" id="mockBadge">/chat</div>
                 </div>
 
