@@ -1014,34 +1014,390 @@
       .timeline-grid {
         grid-template-columns: repeat(2, 1fr);
       }
+
+      .device-wrapper {
+        order: -1;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 0 16px;
+      }
+
+      .header-content {
+        height: 70px;
+      }
+
+      .logo-icon {
+        width: 40px;
+        height: 40px;
+      }
+
+      .logo-icon::after {
+        font-size: 16px;
+      }
+
+      .logo-text h1 {
+        font-size: 20px;
+      }
+
+      .logo-text p {
+        font-size: 10px;
+      }
+
+      .header-actions {
+        gap: 8px;
+      }
+
+      .btn {
+        padding: 10px 16px;
+        font-size: 13px;
+      }
+
+      section {
+        padding: 60px 0;
+      }
+
+      .hero {
+        padding: 60px 0 40px;
+      }
+
+      .hero h2 {
+        font-size: clamp(32px, 8vw, 48px);
+      }
+
+      .hero-description {
+        font-size: 16px;
+      }
+
+      .badge {
+        font-size: 11px;
+        padding: 8px 14px;
+        flex-wrap: wrap;
+      }
+
+      .feature-chips {
+        gap: 8px;
+      }
+
+      .chip {
+        font-size: 12px;
+        padding: 8px 14px;
+      }
+
+      .device {
+        border-radius: var(--radius-lg);
+      }
+
+      .device-screen {
+        padding: 12px;
+        min-height: 500px;
+      }
+
+      .chat-messages {
+        height: 320px;
+      }
+
+      .mode-tabs {
+        padding: 10px 12px;
+        gap: 6px;
+      }
+
+      .mode-tab {
+        font-size: 11px;
+        padding: 6px 12px;
+      }
+
+      .section-header h3 {
+        font-size: clamp(28px, 6vw, 40px);
+      }
+
+      .section-header p {
+        font-size: 16px;
+      }
+
+      .card {
+        padding: 24px;
+      }
+
+      .card-icon {
+        width: 48px;
+        height: 48px;
+      }
+
+      .card h4 {
+        font-size: 18px;
+      }
+
+      .feature-section {
+        padding: 32px 24px;
+      }
+
+      .feature-grid {
+        gap: 32px;
+      }
+
+      .timeline-container {
+        padding: 32px 24px;
+      }
+
+      .timeline-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+
+      .milestone {
+        padding: 20px;
+      }
     }
 
     @media (max-width: 640px) {
+      .container {
+        padding: 0 16px;
+      }
+
       .hero {
-        padding: 80px 0 60px;
+        padding: 40px 0 30px;
+      }
+
+      .hero h2 {
+        margin-bottom: 16px;
+      }
+
+      .hero-description {
+        margin-bottom: 24px;
       }
 
       .cta-group {
         flex-direction: column;
         align-items: stretch;
+        gap: 12px;
       }
 
       .btn {
         justify-content: center;
+        width: 100%;
       }
 
-      .timeline-grid {
-        grid-template-columns: 1fr;
+      .cta-note {
+        font-size: 12px;
+        padding: 10px 14px;
+      }
+
+      .feature-chips {
+        justify-content: center;
+      }
+
+      .device-screen {
+        min-height: 450px;
+      }
+
+      .chat-messages {
+        height: 280px;
       }
 
       .timeline-header {
         flex-direction: column;
         align-items: flex-start;
-        gap: 20px;
+        gap: 16px;
       }
 
       .progress-bar-wrapper {
         width: 100%;
+      }
+
+      .footer-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 20px;
+      }
+
+      .footer-links {
+        flex-direction: column;
+        width: 100%;
+      }
+
+      .footer-links .btn {
+        width: 100%;
+      }
+
+      /* Disable 3D tilt on mobile */
+      .device {
+        transform: none !important;
+      }
+
+      /* Reduce orb sizes on mobile for performance */
+      .orb-1 {
+        width: 400px;
+        height: 400px;
+      }
+
+      .orb-2 {
+        width: 350px;
+        height: 350px;
+      }
+
+      .orb-3 {
+        width: 380px;
+        height: 380px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .logo-text h1 {
+        font-size: 18px;
+      }
+
+      .hero h2 {
+        font-size: 28px;
+      }
+
+      .hero-description {
+        font-size: 15px;
+      }
+
+      .section-header h3 {
+        font-size: 24px;
+      }
+
+      .device-header {
+        padding: 12px 16px;
+      }
+
+      .status-pill {
+        font-size: 11px;
+        padding: 6px 10px;
+      }
+
+      .chat-header {
+        padding: 12px 16px;
+      }
+
+      .chat-input-wrapper {
+        padding: 12px 16px;
+      }
+
+      .send-btn {
+        padding: 10px 16px;
+        font-size: 12px;
+      }
+    }
+
+    /* Touch device optimization */
+    @media (hover: none) and (pointer: coarse) {
+      .btn:hover,
+      .card:hover,
+      .chip:hover,
+      .mode-tab:hover {
+        transform: none;
+      }
+
+      .btn:active {
+        transform: scale(0.97);
+      }
+
+      /* Disable cursor trail on touch devices */
+      .cursor-trail {
+        display: none;
+      }
+
+      /* Disable device tilt on touch devices */
+      .device {
+        transform: none !important;
+      }
+    }
+
+    /* Mobile Menu */
+    .mobile-menu-btn {
+      display: none;
+      width: 40px;
+      height: 40px;
+      border: none;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.3s var(--transition);
+    }
+
+    .mobile-menu-btn span {
+      width: 20px;
+      height: 2px;
+      background: var(--text-primary);
+      border-radius: 2px;
+      transition: all 0.3s var(--transition);
+    }
+
+    .mobile-menu-btn.active span:nth-child(1) {
+      transform: rotate(45deg) translate(6px, 6px);
+    }
+
+    .mobile-menu-btn.active span:nth-child(2) {
+      opacity: 0;
+    }
+
+    .mobile-menu-btn.active span:nth-child(3) {
+      transform: rotate(-45deg) translate(6px, -6px);
+    }
+
+    .mobile-nav {
+      display: none;
+      position: fixed;
+      top: 80px;
+      left: 0;
+      right: 0;
+      background: rgba(10, 14, 39, 0.98);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--glass-border);
+      padding: 20px 24px;
+      z-index: 99;
+      opacity: 0;
+      transform: translateY(-20px);
+      transition: all 0.3s var(--transition);
+    }
+
+    .mobile-nav.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .mobile-nav a {
+      display: block;
+      padding: 12px 0;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 16px;
+      border-bottom: 1px solid var(--glass-border);
+      transition: color 0.3s var(--transition);
+    }
+
+    .mobile-nav a:last-child {
+      border-bottom: none;
+    }
+
+    .mobile-nav a:active {
+      color: var(--accent-cyan);
+    }
+
+    @media (max-width: 1024px) {
+      .mobile-menu-btn {
+        display: flex;
+      }
+
+      .mobile-nav {
+        display: block;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .mobile-nav {
+        top: 70px;
       }
     }
 
@@ -1056,9 +1412,36 @@
       opacity: 1;
       transform: translateY(0);
     }
+
+    /* Cursor Trail */
+    .cursor-trail {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9999;
+      mix-blend-mode: screen;
+    }
+
+    .cursor-trail span {
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, var(--accent-cyan), var(--accent-purple), transparent);
+      opacity: 0;
+      transform: translate(-50%, -50%);
+      transition: opacity 0.4s var(--transition);
+      box-shadow: 
+        0 0 20px var(--glow-cyan),
+        0 0 40px var(--glow-purple);
+      will-change: transform;
+    }
   </style>
 </head>
 <body>
+  <!-- Cursor Trail -->
+  <div class="cursor-trail" id="cursorTrail"></div>
+
   <!-- Background Effects -->
   <div class="neural-bg">
     <div class="neural-grid"></div>
@@ -1093,6 +1476,11 @@
           </nav>
 
           <div class="header-actions">
+            <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">
+              <span></span>
+              <span></span>
+              <span></span>
+            </button>
             <a class="btn" href="https://t1era-or-kode-blind.gitbook.io/t1era/" target="_blank" rel="noopener">
               <span class="btn-docs-icon"></span>
               Docs
@@ -1105,6 +1493,15 @@
         </div>
       </div>
     </header>
+
+    <!-- Mobile Navigation -->
+    <nav class="mobile-nav" id="mobileNav">
+      <a href="#modes">Modes</a>
+      <a href="#capabilities">Capabilities</a>
+      <a href="#how">How it works</a>
+      <a href="#milestones">Milestones</a>
+      <a href="https://t1era-or-kode-blind.gitbook.io/t1era/" target="_blank" rel="noopener">Docs</a>
+    </nav>
 
     <!-- Hero -->
     <section class="hero" id="top">
@@ -1492,6 +1889,31 @@
     document.querySelectorAll('a[href="https://t1era-or-kode-blind.gitbook.io/t1era/"]').forEach(a => a.href = DOCS_URL);
     document.getElementById("year").textContent = new Date().getFullYear();
 
+    // ====== Mobile Menu Toggle ======
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileNav = document.getElementById('mobileNav');
+
+    mobileMenuBtn.addEventListener('click', () => {
+      mobileMenuBtn.classList.toggle('active');
+      mobileNav.classList.toggle('active');
+    });
+
+    // Close mobile menu when clicking on a link
+    document.querySelectorAll('.mobile-nav a').forEach(link => {
+      link.addEventListener('click', () => {
+        mobileMenuBtn.classList.remove('active');
+        mobileNav.classList.remove('active');
+      });
+    });
+
+    // Close mobile menu when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!mobileMenuBtn.contains(e.target) && !mobileNav.contains(e.target)) {
+        mobileMenuBtn.classList.remove('active');
+        mobileNav.classList.remove('active');
+      }
+    });
+
     // ====== Scroll Reveal ======
     const observerOptions = {
       threshold: 0.1,
@@ -1508,25 +1930,28 @@
 
     document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-    // ====== Device 3D Tilt ======
+    // ====== Device 3D Tilt (Desktop Only) ======
     const device = document.getElementById('device');
     let tiltFrame = null;
+    const isTouchDevice = window.matchMedia("(hover: none) and (pointer: coarse)").matches;
 
-    device.addEventListener('mousemove', (e) => {
-      if (tiltFrame) cancelAnimationFrame(tiltFrame);
-      tiltFrame = requestAnimationFrame(() => {
-        const rect = device.getBoundingClientRect();
-        const x = (e.clientX - rect.left) / rect.width;
-        const y = (e.clientY - rect.top) / rect.height;
-        const tiltX = (y - 0.5) * -10;
-        const tiltY = (x - 0.5) * 10;
-        device.style.transform = `perspective(1200px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) translateZ(10px)`;
+    if (!isTouchDevice && window.innerWidth > 768) {
+      device.addEventListener('mousemove', (e) => {
+        if (tiltFrame) cancelAnimationFrame(tiltFrame);
+        tiltFrame = requestAnimationFrame(() => {
+          const rect = device.getBoundingClientRect();
+          const x = (e.clientX - rect.left) / rect.width;
+          const y = (e.clientY - rect.top) / rect.height;
+          const tiltX = (y - 0.5) * -10;
+          const tiltY = (x - 0.5) * 10;
+          device.style.transform = `perspective(1200px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) translateZ(10px)`;
+        });
       });
-    });
 
-    device.addEventListener('mouseleave', () => {
-      device.style.transform = 'perspective(1200px) rotateX(0deg) rotateY(0deg) translateZ(0px)';
-    });
+      device.addEventListener('mouseleave', () => {
+        device.style.transform = 'perspective(1200px) rotateX(0deg) rotateY(0deg) translateZ(0px)';
+      });
+    }
 
     // ====== Mode Switching ======
     const mockBadge = document.getElementById('mockBadge');
@@ -1663,6 +2088,65 @@
         }
       });
     });
+
+    // ====== Cursor Trail ======
+    const trail = document.getElementById('cursorTrail');
+    const trailDots = [];
+    const TRAIL_LENGTH = 12;
+
+    // Create trail dots
+    for (let i = 0; i < TRAIL_LENGTH; i++) {
+      const dot = document.createElement('span');
+      trail.appendChild(dot);
+      trailDots.push({
+        element: dot,
+        x: 0,
+        y: 0
+      });
+    }
+
+    let mouseX = window.innerWidth / 2;
+    let mouseY = window.innerHeight / 2;
+
+    // Track mouse position
+    window.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      
+      // Show first dot immediately
+      trailDots[0].element.style.opacity = '0.8';
+      
+      // Fade in other dots
+      for (let i = 1; i < TRAIL_LENGTH; i++) {
+        trailDots[i].element.style.opacity = '0.5';
+      }
+    });
+
+    // Animate trail
+    function animateTrail() {
+      let targetX = mouseX;
+      let targetY = mouseY;
+
+      for (let i = 0; i < TRAIL_LENGTH; i++) {
+        const dot = trailDots[i];
+        
+        // Smoothly follow
+        const speed = 0.15 - (i * 0.008);
+        dot.x += (targetX - dot.x) * speed;
+        dot.y += (targetY - dot.y) * speed;
+
+        // Update position
+        dot.element.style.transform = `translate(${dot.x}px, ${dot.y}px) translate(-50%, -50%) scale(${1 - i * 0.05})`;
+
+        // Next dot follows current dot
+        targetX = dot.x;
+        targetY = dot.y;
+      }
+
+      requestAnimationFrame(animateTrail);
+    }
+
+    animateTrail();
   </script>
 </body>
 </html>
