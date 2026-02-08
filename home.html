@@ -602,6 +602,106 @@
       max-width: 540px;
     }
 
+    /* AI Gallery Styles */
+    .ai-gallery {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin: 32px 0;
+      max-width: 540px;
+    }
+
+    .gallery-item {
+      position: relative;
+      aspect-ratio: 1 / 1;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      cursor: pointer;
+      border: 2px solid var(--glass-border);
+      background: var(--glass-bg);
+      transition: all 0.4s var(--transition);
+    }
+
+    .gallery-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s var(--transition);
+    }
+
+    .gallery-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent 50%);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 12px;
+      opacity: 0;
+      transition: opacity 0.4s var(--transition);
+    }
+
+    .gallery-label {
+      font-size: 11px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-primary);
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-family: 'JetBrains Mono', monospace;
+      box-shadow: 0 0 20px var(--glow-cyan);
+    }
+
+    .gallery-item:hover {
+      transform: translateY(-8px) scale(1.05);
+      border-color: var(--accent-cyan);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 40px var(--glow-cyan);
+      z-index: 10;
+    }
+
+    .gallery-item:hover img {
+      transform: scale(1.1);
+    }
+
+    .gallery-item:hover .gallery-overlay {
+      opacity: 1;
+    }
+
+    /* Staggered animation on page load */
+    .gallery-item {
+      opacity: 0;
+      animation: galleryFadeIn 0.6s var(--transition) forwards;
+    }
+
+    .gallery-item:nth-child(1) {
+      animation-delay: 0.1s;
+    }
+
+    .gallery-item:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .gallery-item:nth-child(3) {
+      animation-delay: 0.3s;
+    }
+
+    .gallery-item:nth-child(4) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes galleryFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
     .cta-group {
       display: flex;
       gap: 16px;
@@ -1257,6 +1357,13 @@
         line-height: 1.6;
       }
 
+      /* Gallery responsive - 2x2 grid on tablet */
+      .ai-gallery {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        margin: 24px 0;
+      }
+
       .badge {
         font-size: 10px;
         padding: 6px 12px;
@@ -1406,6 +1513,22 @@
       .hero-description {
         margin-bottom: 20px;
         font-size: 14px;
+      }
+
+      /* Gallery mobile - 2x2 grid */
+      .ai-gallery {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        margin: 20px 0;
+      }
+
+      .gallery-item:hover {
+        transform: scale(1.02);
+      }
+
+      .gallery-label {
+        font-size: 9px;
+        padding: 4px 8px;
       }
 
       .cta-group {
@@ -1570,6 +1693,21 @@
       .hero-description {
         font-size: 13px;
         margin-bottom: 16px;
+      }
+
+      /* Gallery extra small mobile */
+      .ai-gallery {
+        gap: 6px;
+        margin: 16px 0;
+      }
+
+      .gallery-item {
+        border-radius: var(--radius-sm);
+      }
+
+      .gallery-label {
+        font-size: 8px;
+        padding: 3px 6px;
       }
 
       .badge {
@@ -1912,6 +2050,34 @@
               <h2>
                 Meet <span class="gradient-text">T1ERA</span> — your all-in-one AI suite inside Telegram.
               </h2>
+
+              <!-- AI Generation Examples Gallery -->
+              <div class="ai-gallery">
+                <div class="gallery-item" data-style="Illustration">
+                  <img src="./assets/new11.jpg" alt="AI Illustration Example" />
+                  <div class="gallery-overlay">
+                    <span class="gallery-label">Illustration</span>
+                  </div>
+                </div>
+                <div class="gallery-item" data-style="Realistic">
+                  <img src="./assets/new14.jpg" alt="AI Realistic Photo Example" />
+                  <div class="gallery-overlay">
+                    <span class="gallery-label">Realistic</span>
+                  </div>
+                </div>
+                <div class="gallery-item" data-style="3D Render">
+                  <img src="./assets/new13.jpg" alt="AI 3D Render Example" />
+                  <div class="gallery-overlay">
+                    <span class="gallery-label">3D Render</span>
+                  </div>
+                </div>
+                <div class="gallery-item" data-style="Cartoon">
+                  <img src="./assets/new12.png" alt="AI Cartoon Example" />
+                  <div class="gallery-overlay">
+                    <span class="gallery-label">Cartoon</span>
+                  </div>
+                </div>
+              </div>
 
               <p class="hero-description">
                 T1ERA isn't "just a chat bot". It's a multi-mode AI system built for creators, marketers, and builders:
