@@ -136,6 +136,15 @@
       transform: translateY(-1px);
     }
 
+    /* Header actions cluster */
+    .actions{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
     .btn{
       display:inline-flex; align-items:center; justify-content:center;
       gap:10px;
@@ -151,6 +160,7 @@
       box-shadow: 0 10px 30px rgba(0,0,0,.25);
       user-select:none;
       will-change:transform;
+      white-space:nowrap;
     }
     .btn:hover{
       transform: translateY(-2px) scale(1.01);
@@ -174,6 +184,11 @@
       width:8px; height:8px; border-radius:999px;
       background: rgba(0,255,168,.95);
       box-shadow: 0 0 18px rgba(0,255,168,.6);
+    }
+    .btn .book{
+      width:10px; height:10px; border-radius:3px;
+      background: linear-gradient(135deg, var(--b), var(--a));
+      box-shadow: 0 0 18px rgba(124,92,255,.35);
     }
 
     main{position:relative; z-index:2}
@@ -719,12 +734,19 @@
         <a href="#capabilities">Capabilities</a>
         <a href="#how">How it works</a>
         <a href="#milestones">Milestones</a>
+        <a href="https://t1era-or-kode-blind.gitbook.io/t1era/" target="_blank" rel="noopener">Docs</a>
       </nav>
 
-      <a class="btn primary" href="https://t.me/T1ERA_SecBot" target="_blank" rel="noopener">
-        <span class="dot"></span>
-        Open T1ERA on Telegram
-      </a>
+      <div class="actions" aria-label="Actions">
+        <a class="btn" href="https://t1era-or-kode-blind.gitbook.io/t1era/" target="_blank" rel="noopener">
+          <span class="book" aria-hidden="true"></span>
+          Docs
+        </a>
+        <a class="btn primary" href="https://t.me/T1ERA_SecBot" target="_blank" rel="noopener" data-bot-link>
+          <span class="dot"></span>
+          Open T1ERA on Telegram
+        </a>
+      </div>
     </div>
   </header>
 
@@ -748,9 +770,13 @@
           </p>
 
           <div class="cta-row reveal-up">
-            <a class="btn primary" href="https://t.me/YOUR_BOT_USERNAME" target="_blank" rel="noopener">
+            <a class="btn primary" href="https://t.me/YOUR_BOT_USERNAME" target="_blank" rel="noopener" data-bot-link>
               <span class="dot"></span>
               Start on Telegram
+            </a>
+            <a class="btn" href="https://t1era-or-kode-blind.gitbook.io/t1era/" target="_blank" rel="noopener">
+              <span class="book" aria-hidden="true"></span>
+              Read Docs
             </a>
             <a class="btn" href="#modes">Explore modes</a>
             <div class="cta-note">
@@ -796,8 +822,7 @@
               </div>
 
               <div class="chat-body" id="chatBody">
-                <!-- Content replaced by JS per mode.
-                     You can paste real Telegram content examples into the JS templates below. -->
+                <!-- Content replaced by JS per mode. -->
               </div>
             </div>
 
@@ -821,7 +846,12 @@
             <h2 class="reveal-up">Modes that match your real workflows</h2>
             <p class="reveal-up">These map directly to your bot commands and flows (Chat, Vision, VTT, Canva Mode, MinaThor).</p>
           </div>
-          <a class="btn" href="https://t.me/YOUR_BOT_USERNAME" target="_blank" rel="noopener">Open bot</a>
+          <div class="actions">
+            <a class="btn" href="https://t1era-or-kode-blind.gitbook.io/t1era/" target="_blank" rel="noopener">
+              <span class="book" aria-hidden="true"></span> Docs
+            </a>
+            <a class="btn" href="https://t.me/YOUR_BOT_USERNAME" target="_blank" rel="noopener" data-bot-link>Open bot</a>
+          </div>
         </div>
 
         <div class="grid3">
@@ -924,9 +954,14 @@
                   <div>• <b>/reset</b> — Clear chat history</div>
                 </div>
                 <div style="height:12px"></div>
-                <a class="btn primary" href="https://t.me/YOUR_BOT_USERNAME" target="_blank" rel="noopener">
-                  <span class="dot"></span> Open T1ERA on Telegram
-                </a>
+                <div class="actions" style="gap:10px;">
+                  <a class="btn" href="https://t1era-or-kode-blind.gitbook.io/t1era/" target="_blank" rel="noopener">
+                    <span class="book" aria-hidden="true"></span> Docs
+                  </a>
+                  <a class="btn primary" href="https://t.me/YOUR_BOT_USERNAME" target="_blank" rel="noopener" data-bot-link>
+                    <span class="dot"></span> Open T1ERA on Telegram
+                  </a>
+                </div>
                 <div class="mini" style="margin-top:12px;">
                   Pay-as-you-go is available, but the product is the <b>AI modes</b> — not “payments first”.
                 </div>
@@ -946,7 +981,12 @@
             <h2 class="reveal-up">How it works</h2>
             <p class="reveal-up">Simple onboarding + multiple modes, all inside Telegram.</p>
           </div>
-          <a class="btn" href="https://t.me/YOUR_BOT_USERNAME" target="_blank" rel="noopener">Try now</a>
+          <div class="actions">
+            <a class="btn" href="https://t1era-or-kode-blind.gitbook.io/t1era/" target="_blank" rel="noopener">
+              <span class="book" aria-hidden="true"></span> Docs
+            </a>
+            <a class="btn" href="https://t.me/YOUR_BOT_USERNAME" target="_blank" rel="noopener" data-bot-link>Try now</a>
+          </div>
         </div>
 
         <div class="grid3">
@@ -1037,7 +1077,10 @@
       <div class="wrap foot">
         <div class="muted2">© <span id="year"></span> T1ERA • Telegram AI Suite</div>
         <div style="display:flex; gap:10px; flex-wrap:wrap;">
-          <a class="btn" href="https://t.me/YOUR_BOT_USERNAME" target="_blank" rel="noopener">Open bot</a>
+          <a class="btn" href="https://t1era-or-kode-blind.gitbook.io/t1era/" target="_blank" rel="noopener">
+            <span class="book" aria-hidden="true"></span> Docs
+          </a>
+          <a class="btn" href="https://t.me/YOUR_BOT_USERNAME" target="_blank" rel="noopener" data-bot-link>Open bot</a>
           <a class="btn" href="#top">Back to top</a>
         </div>
       </div>
@@ -1046,13 +1089,18 @@
 
   <script>
     // ====== CONFIG ======
-    // Replace with your real bot:
-    const BOT_URL = "https://t.me/YOUR_BOT_USERNAME";
+    // Replace BOT_URL with your real bot link.
+    const BOT_URL = "https://t.me/T1ERA_SecBot";
 
-    // Apply to all CTA links:
-    for (const a of document.querySelectorAll('a[href="https://t.me/YOUR_BOT_USERNAME"]')) {
-      a.href = BOT_URL;
-    }
+    // GitBook Docs URL (your live docs)
+    const DOCS_URL = "https://t1era-or-kode-blind.gitbook.io/t1era/";
+
+    // Apply BOT_URL to all bot CTA links marked with data-bot-link
+    document.querySelectorAll('[data-bot-link]').forEach(a => a.href = BOT_URL);
+
+    // Apply DOCS_URL to all docs links (safe if you change later)
+    document.querySelectorAll('a[href="https://t1era-or-kode-blind.gitbook.io/t1era/"]').forEach(a => a.href = DOCS_URL);
+
     document.getElementById("year").textContent = new Date().getFullYear();
 
     // ====== Scroll reveal ======
@@ -1180,7 +1228,6 @@
     const chatBody = document.getElementById("chatBody");
     const tabs = Array.from(document.querySelectorAll(".tab"));
 
-    // Paste your real Telegram samples here (each mode).
     const MODE = {
       chat: {
         badge: "/chat",
@@ -1240,13 +1287,11 @@
         </div>`
       )).join("");
 
-      // stagger reveal
       const bubbles = Array.from(chatBody.querySelectorAll(".bubble"));
       bubbles.forEach((b, i) => {
         setTimeout(() => b.classList.add("show"), 120 + i * 220);
       });
 
-      // scroll down for “chat feel”
       setTimeout(() => { chatBody.scrollTop = chatBody.scrollHeight; }, 450);
     }
 
@@ -1259,7 +1304,6 @@
         .replaceAll("'","&#039;");
     }
 
-    // Tabs click
     tabs.forEach(t => {
       t.addEventListener("click", () => {
         tabs.forEach(x => x.classList.remove("active"));
@@ -1268,7 +1312,6 @@
       });
     });
 
-    // hero chips jump to tab
     document.querySelectorAll(".chip[data-jump]").forEach(c => {
       c.addEventListener("click", () => {
         const key = c.dataset.jump;
@@ -1278,7 +1321,6 @@
       });
     });
 
-    // initial render
     renderMode("chat");
   </script>
 </body>
