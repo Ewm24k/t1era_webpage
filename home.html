@@ -292,9 +292,32 @@
       display: inline-flex;
     }
 
+    @media (max-width: 768px) {
+      .header-actions {
+        gap: 8px;
+      }
+      
+      .header-actions .btn-primary {
+        padding: 8px 12px;
+        font-size: 12px;
+        white-space: nowrap;
+      }
+
+      .header-actions .btn-primary .btn-icon {
+        width: 6px;
+        height: 6px;
+      }
+    }
+
     @media (max-width: 480px) {
       .header-actions .btn:not(.btn-primary):not(.mobile-menu-btn) {
         display: none;
+      }
+
+      .header-actions .btn-primary {
+        padding: 7px 10px;
+        font-size: 11px;
+        gap: 6px;
       }
     }
 
@@ -1371,6 +1394,31 @@
         font-size: 15px;
       }
 
+      .header-actions {
+        gap: 6px;
+      }
+
+      .header-actions .btn-primary {
+        padding: 6px 8px;
+        font-size: 10px;
+        gap: 4px;
+      }
+
+      .header-actions .btn-primary .btn-icon {
+        width: 5px;
+        height: 5px;
+      }
+
+      .mobile-menu-btn {
+        width: 36px;
+        height: 36px;
+        gap: 4px;
+      }
+
+      .mobile-menu-btn span {
+        width: 18px;
+      }
+
       .hero {
         padding: 24px 0 24px;
       }
@@ -1446,6 +1494,23 @@
       .send-btn {
         padding: 8px 12px;
         font-size: 11px;
+      }
+    }
+
+    /* Extra small screens - compact header button */
+    @media (max-width: 360px) {
+      .header-actions .btn-primary {
+        padding: 5px 7px;
+        font-size: 9px;
+      }
+
+      .mobile-menu-btn {
+        width: 32px;
+        height: 32px;
+      }
+
+      .mobile-menu-btn span {
+        width: 16px;
       }
     }
 
@@ -1660,11 +1725,6 @@
           </nav>
 
           <div class="header-actions">
-            <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">
-              <span></span>
-              <span></span>
-              <span></span>
-            </button>
             <a class="btn" href="https://t1era-or-kode-blind.gitbook.io/t1era/" target="_blank" rel="noopener">
               <span class="btn-docs-icon"></span>
               Docs
@@ -1673,6 +1733,11 @@
               <span class="btn-icon"></span>
               Open T1ERA
             </a>
+            <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">
+              <span></span>
+              <span></span>
+              <span></span>
+            </button>
           </div>
         </div>
       </div>
