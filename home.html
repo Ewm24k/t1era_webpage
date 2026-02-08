@@ -90,8 +90,8 @@
       overflow-y: auto;
     }
 
-    /* ====== VIDEO INTRO STYLES ====== */
-    #videoIntro {
+    /* ====== GIF INTRO STYLES ====== */
+    #gifIntro {
       position: fixed;
       top: 0;
       left: 0;
@@ -103,13 +103,13 @@
       overflow: hidden;
     }
 
-    #videoIntro.active {
+    #gifIntro.active {
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
-    #introVideo {
+    #introGif {
       width: 100%;
       height: 100%;
       object-fit: cover;
@@ -161,7 +161,7 @@
       }
     }
 
-    #videoIntro.fade-out {
+    #gifIntro.fade-out {
       animation: fadeOutIntro 1s ease-out forwards;
     }
 
@@ -1822,11 +1822,9 @@
   </style>
 </head>
 <body>
-  <!-- Video Intro (Mobile Only) -->
-  <div id="videoIntro">
-    <video id="introVideo" playsinline muted loop>
-      <source src="./assets/grok-video.mp4" type="video/mp4">
-    </video>
+  <!-- GIF Intro (Mobile Only) -->
+  <div id="gifIntro">
+    <img id="introGif" src="./assets/grok-video.gif" alt="T1ERA Intro" />
     <button id="startButton">T1ERA START</button>
   </div>
 
@@ -2283,10 +2281,10 @@
     const DOCS_URL = "https://t1era-or-kode-blind.gitbook.io/t1era/";
     const WEBAPP_URL = "#"; // Replace with your actual WebApp URL
 
-    // ====== VIDEO INTRO LOGIC ======
+    // ====== GIF INTRO LOGIC ======
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    const videoIntro = document.getElementById('videoIntro');
-    const introVideo = document.getElementById('introVideo');
+    const gifIntro = document.getElementById('gifIntro');
+    const introGif = document.getElementById('introGif');
     const startButton = document.getElementById('startButton');
     const mainContent = document.getElementById('mainContent');
 
@@ -2294,13 +2292,8 @@
     const hasSeenIntro = sessionStorage.getItem('hasSeenIntro');
 
     if (isMobile && !hasSeenIntro) {
-      // Show video intro on mobile
-      videoIntro.classList.add('active');
-      
-      // Play video
-      introVideo.play().catch(err => {
-        console.log('Autoplay prevented:', err);
-      });
+      // Show GIF intro on mobile
+      gifIntro.classList.add('active');
 
       // Show button after 3 seconds
       setTimeout(() => {
@@ -2312,18 +2305,18 @@
         // Mark intro as seen
         sessionStorage.setItem('hasSeenIntro', 'true');
         
-        // Fade out video intro
-        videoIntro.classList.add('fade-out');
+        // Fade out GIF intro
+        gifIntro.classList.add('fade-out');
         
-        // After fade out, hide video and show main content
+        // After fade out, hide GIF and show main content
         setTimeout(() => {
-          videoIntro.style.display = 'none';
+          gifIntro.style.display = 'none';
           mainContent.classList.add('visible');
         }, 1000);
       });
     } else {
       // Desktop or already seen intro - show main content immediately
-      videoIntro.style.display = 'none';
+      gifIntro.style.display = 'none';
       mainContent.classList.add('visible');
     }
 
