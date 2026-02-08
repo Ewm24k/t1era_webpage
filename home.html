@@ -52,6 +52,7 @@
     html, body {
       height: 100%;
       overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
     }
 
     body {
@@ -60,6 +61,7 @@
       color: var(--text-primary);
       line-height: 1.6;
       position: relative;
+      overflow-y: auto;
     }
 
     /* Neural network background */
@@ -179,7 +181,7 @@
       align-items: center;
       justify-content: space-between;
       height: 80px;
-      gap: 24px;
+      gap: 12px;
     }
 
     .logo-section {
@@ -188,6 +190,7 @@
       gap: 16px;
       text-decoration: none;
       color: inherit;
+      flex-shrink: 0;
     }
 
     .logo-icon {
@@ -282,6 +285,17 @@
       display: flex;
       gap: 12px;
       align-items: center;
+      flex-shrink: 0;
+    }
+
+    .header-actions .btn:not(.btn-primary):not(.mobile-menu-btn) {
+      display: inline-flex;
+    }
+
+    @media (max-width: 480px) {
+      .header-actions .btn:not(.btn-primary):not(.mobile-menu-btn) {
+        display: none;
+      }
     }
 
     /* Buttons */
@@ -357,6 +371,7 @@
     /* Hero Section */
     .hero {
       padding: 120px 0 80px;
+      overflow: hidden;
     }
 
     .hero-grid {
@@ -368,6 +383,7 @@
 
     .hero-content {
       position: relative;
+      max-width: 100%;
     }
 
     .badge {
@@ -489,6 +505,8 @@
     .device-wrapper {
       position: relative;
       perspective: 1200px;
+      width: 100%;
+      max-width: 100%;
     }
 
     .device {
@@ -498,6 +516,8 @@
       border: 1px solid var(--glass-border);
       backdrop-filter: blur(20px);
       overflow: hidden;
+      width: 100%;
+      max-width: 100%;
       box-shadow: 
         0 0 0 1px rgba(255, 255, 255, 0.05),
         0 50px 100px rgba(0, 0, 0, 0.5),
@@ -1022,35 +1042,42 @@
 
     @media (max-width: 768px) {
       .container {
-        padding: 0 16px;
+        padding: 0 20px;
       }
 
       .header-content {
-        height: 70px;
-      }
-
-      .logo-icon {
-        width: 40px;
-        height: 40px;
-      }
-
-      .logo-icon::after {
-        font-size: 16px;
-      }
-
-      .logo-text h1 {
-        font-size: 20px;
-      }
-
-      .logo-text p {
-        font-size: 10px;
-      }
-
-      .header-actions {
+        height: 64px;
         gap: 8px;
       }
 
+      .logo-icon {
+        width: 36px;
+        height: 36px;
+      }
+
+      .logo-icon::after {
+        font-size: 14px;
+      }
+
+      .logo-text h1 {
+        font-size: 18px;
+      }
+
+      .logo-text p {
+        display: none;
+      }
+
+      .header-actions {
+        gap: 6px;
+      }
+
       .btn {
+        padding: 8px 12px;
+        font-size: 12px;
+        gap: 6px;
+      }
+
+      .btn-primary {
         padding: 10px 16px;
         font-size: 13px;
       }
@@ -1060,21 +1087,31 @@
       }
 
       .hero {
-        padding: 60px 0 40px;
+        padding: 40px 0 40px;
       }
 
       .hero h2 {
-        font-size: clamp(32px, 8vw, 48px);
+        font-size: clamp(28px, 7vw, 40px);
+        line-height: 1.15;
       }
 
       .hero-description {
-        font-size: 16px;
+        font-size: 15px;
+        line-height: 1.6;
       }
 
       .badge {
-        font-size: 11px;
-        padding: 8px 14px;
+        font-size: 10px;
+        padding: 6px 12px;
         flex-wrap: wrap;
+        text-align: center;
+        justify-content: center;
+        margin-bottom: 20px;
+      }
+
+      .badge-icon {
+        width: 10px;
+        height: 10px;
       }
 
       .feature-chips {
@@ -1082,26 +1119,47 @@
       }
 
       .chip {
-        font-size: 12px;
-        padding: 8px 14px;
+        font-size: 11px;
+        padding: 6px 12px;
+      }
+
+      .chip-icon {
+        width: 8px;
+        height: 8px;
       }
 
       .device {
-        border-radius: var(--radius-lg);
+        border-radius: 20px;
+      }
+
+      .device-header {
+        padding: 10px 14px;
       }
 
       .device-screen {
-        padding: 12px;
-        min-height: 500px;
+        padding: 14px;
+        min-height: 400px;
       }
 
       .chat-messages {
-        height: 320px;
+        height: 280px;
+        padding: 14px;
+      }
+
+      .message {
+        font-size: 13px;
+        padding: 10px 14px;
       }
 
       .mode-tabs {
-        padding: 10px 12px;
+        padding: 8px 10px;
         gap: 6px;
+        overflow-x: auto;
+        scrollbar-width: none;
+      }
+
+      .mode-tabs::-webkit-scrollbar {
+        display: none;
       }
 
       .mode-tab {
@@ -1110,11 +1168,11 @@
       }
 
       .section-header h3 {
-        font-size: clamp(28px, 6vw, 40px);
+        font-size: clamp(24px, 5vw, 36px);
       }
 
       .section-header p {
-        font-size: 16px;
+        font-size: 15px;
       }
 
       .card {
@@ -1157,44 +1215,94 @@
         padding: 0 16px;
       }
 
+      .header-content {
+        height: 60px;
+      }
+
+      .logo-section {
+        gap: 10px;
+      }
+
+      .logo-icon {
+        width: 32px;
+        height: 32px;
+      }
+
+      .logo-text h1 {
+        font-size: 16px;
+      }
+
       .hero {
-        padding: 40px 0 30px;
+        padding: 30px 0 30px;
       }
 
       .hero h2 {
         margin-bottom: 16px;
+        font-size: 26px;
       }
 
       .hero-description {
-        margin-bottom: 24px;
+        margin-bottom: 20px;
+        font-size: 14px;
       }
 
       .cta-group {
         flex-direction: column;
         align-items: stretch;
-        gap: 12px;
+        gap: 10px;
+        margin-bottom: 20px;
       }
 
       .btn {
         justify-content: center;
         width: 100%;
+        padding: 12px 20px;
+        font-size: 14px;
+      }
+
+      .btn-primary {
+        padding: 14px 20px;
+        font-size: 14px;
       }
 
       .cta-note {
-        font-size: 12px;
+        font-size: 11px;
         padding: 10px 14px;
+        text-align: center;
       }
 
       .feature-chips {
         justify-content: center;
       }
 
+      .chip {
+        font-size: 10px;
+        padding: 6px 10px;
+      }
+
       .device-screen {
-        min-height: 450px;
+        min-height: 380px;
+        padding: 12px;
       }
 
       .chat-messages {
-        height: 280px;
+        height: 260px;
+        padding: 12px;
+      }
+
+      .chat-input-wrapper {
+        padding: 12px 14px;
+        gap: 8px;
+      }
+
+      .chat-input {
+        font-size: 13px;
+        padding: 10px 12px;
+      }
+
+      .send-btn {
+        padding: 10px 14px;
+        font-size: 12px;
       }
 
       .timeline-header {
@@ -1245,42 +1353,99 @@
     }
 
     @media (max-width: 480px) {
+      .header-content {
+        height: 56px;
+      }
+
+      .logo-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+      }
+
+      .logo-icon::after {
+        font-size: 12px;
+      }
+
       .logo-text h1 {
-        font-size: 18px;
-      }
-
-      .hero h2 {
-        font-size: 28px;
-      }
-
-      .hero-description {
         font-size: 15px;
       }
 
-      .section-header h3 {
+      .hero {
+        padding: 24px 0 24px;
+      }
+
+      .hero h2 {
         font-size: 24px;
+        margin-bottom: 12px;
+      }
+
+      .hero-description {
+        font-size: 13px;
+        margin-bottom: 16px;
+      }
+
+      .badge {
+        font-size: 9px;
+        padding: 5px 10px;
+        margin-bottom: 16px;
+      }
+
+      .cta-group {
+        margin-bottom: 16px;
+      }
+
+      .section-header h3 {
+        font-size: 22px;
+      }
+
+      .section-header p {
+        font-size: 14px;
       }
 
       .device-header {
-        padding: 12px 16px;
+        padding: 8px 12px;
       }
 
       .status-pill {
-        font-size: 11px;
-        padding: 6px 10px;
+        font-size: 10px;
+        padding: 5px 8px;
+      }
+
+      .device-screen {
+        min-height: 360px;
       }
 
       .chat-header {
-        padding: 12px 16px;
+        padding: 10px 14px;
+      }
+
+      .chat-messages {
+        height: 240px;
+      }
+
+      .message {
+        font-size: 12px;
+        padding: 8px 12px;
+      }
+
+      .message-tag {
+        font-size: 10px;
+        padding: 3px 8px;
+      }
+
+      .mode-tab {
+        font-size: 10px;
+        padding: 5px 10px;
       }
 
       .chat-input-wrapper {
-        padding: 12px 16px;
+        padding: 10px 12px;
       }
 
       .send-btn {
-        padding: 10px 16px;
-        font-size: 12px;
+        padding: 8px 12px;
+        font-size: 11px;
       }
     }
 
@@ -1359,6 +1524,9 @@
       opacity: 0;
       transform: translateY(-20px);
       transition: all 0.3s var(--transition);
+      max-height: calc(100vh - 80px);
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     }
 
     .mobile-nav.active {
@@ -1397,7 +1565,23 @@
 
     @media (max-width: 768px) {
       .mobile-nav {
-        top: 70px;
+        top: 64px;
+        max-height: calc(100vh - 64px);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .mobile-nav {
+        top: 60px;
+        max-height: calc(100vh - 60px);
+        padding: 16px 16px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .mobile-nav {
+        top: 56px;
+        max-height: calc(100vh - 56px);
       }
     }
 
@@ -1526,6 +1710,10 @@
               <a class="btn btn-primary" href="https://t.me/T1ERA_SecBot" target="_blank" rel="noopener" data-bot-link>
                 <span class="btn-icon"></span>
                 Start on Telegram
+              </a>
+              <a class="btn btn-primary" href="#" target="_blank" rel="noopener" id="webappBtn" style="background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink)); box-shadow: 0 0 30px var(--glow-purple);">
+                <span class="btn-icon" style="background: var(--accent-pink);"></span>
+                Launch WebApp Platform
               </a>
               <a class="btn" href="https://t1era-or-kode-blind.gitbook.io/t1era/" target="_blank" rel="noopener">
                 <span class="btn-docs-icon"></span>
@@ -1883,17 +2071,26 @@
     // ====== CONFIG ======
     const BOT_URL = "https://t.me/T1ERA_SecBot";
     const DOCS_URL = "https://t1era-or-kode-blind.gitbook.io/t1era/";
+    const WEBAPP_URL = "#"; // Replace with your actual WebApp URL
 
     // Apply URLs
     document.querySelectorAll('[data-bot-link]').forEach(a => a.href = BOT_URL);
     document.querySelectorAll('a[href="https://t1era-or-kode-blind.gitbook.io/t1era/"]').forEach(a => a.href = DOCS_URL);
+    
+    // Apply WebApp URL
+    const webappBtn = document.getElementById('webappBtn');
+    if (webappBtn && WEBAPP_URL !== '#') {
+      webappBtn.href = WEBAPP_URL;
+    }
+    
     document.getElementById("year").textContent = new Date().getFullYear();
 
     // ====== Mobile Menu Toggle ======
     const mobileMenuBtn = document.getElementById('mobileMenuBtn');
     const mobileNav = document.getElementById('mobileNav');
 
-    mobileMenuBtn.addEventListener('click', () => {
+    mobileMenuBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
       mobileMenuBtn.classList.toggle('active');
       mobileNav.classList.toggle('active');
     });
@@ -1908,11 +2105,21 @@
 
     // Close mobile menu when clicking outside
     document.addEventListener('click', (e) => {
-      if (!mobileMenuBtn.contains(e.target) && !mobileNav.contains(e.target)) {
-        mobileMenuBtn.classList.remove('active');
-        mobileNav.classList.remove('active');
+      if (mobileNav.classList.contains('active')) {
+        if (!mobileMenuBtn.contains(e.target) && !mobileNav.contains(e.target)) {
+          mobileMenuBtn.classList.remove('active');
+          mobileNav.classList.remove('active');
+        }
       }
     });
+
+    // Prevent scroll issues on touch devices
+    let scrollPosition = 0;
+    mobileNav.addEventListener('touchmove', (e) => {
+      if (!mobileNav.classList.contains('active')) {
+        e.preventDefault();
+      }
+    }, { passive: false });
 
     // ====== Scroll Reveal ======
     const observerOptions = {
