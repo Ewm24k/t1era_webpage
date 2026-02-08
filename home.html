@@ -1376,13 +1376,9 @@
         height: 60px;
       }
 
-      /* Hide live preview pill on mobile */
-      .device-header .status-pill:first-child {
-        display: none;
-      }
-
-      .device-header {
-        justify-content: flex-end;
+      /* Hide entire device mockup on mobile */
+      .device-wrapper {
+        display: none !important;
       }
 
       .logo-section {
@@ -2303,6 +2299,9 @@
     if (isMobile && !hasSeenIntro) {
       // Show GIF intro on mobile
       gifIntro.classList.add('active');
+      
+      // Prevent body scroll during intro
+      document.body.style.overflow = 'hidden';
 
       // Show button after 3 seconds
       setTimeout(() => {
@@ -2313,6 +2312,9 @@
       startButton.addEventListener('click', () => {
         // Mark intro as seen
         sessionStorage.setItem('hasSeenIntro', 'true');
+        
+        // Restore body scroll
+        document.body.style.overflow = '';
         
         // Fade out GIF intro
         gifIntro.classList.add('fade-out');
@@ -2327,6 +2329,7 @@
       // Desktop or already seen intro - show main content immediately
       gifIntro.style.display = 'none';
       mainContent.classList.add('visible');
+      document.body.style.overflow = '';
     }
 
     // Apply URLs
