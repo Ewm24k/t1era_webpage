@@ -1150,6 +1150,232 @@
       opacity: 1;
       transform: translateY(0);
     }
+
+    /* ====== MODAL/POPUP ====== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.3s var(--transition);
+    }
+
+    .modal-overlay.active {
+      display: flex;
+      opacity: 1;
+    }
+
+    .modal {
+      background: var(--bg-card);
+      border: 1px solid var(--border-primary);
+      border-radius: 24px;
+      padding: 48px;
+      max-width: 500px;
+      width: 90%;
+      position: relative;
+      transform: scale(0.9) translateY(20px);
+      transition: all 0.3s var(--transition);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 80px var(--glow-primary);
+    }
+
+    .modal-overlay.active .modal {
+      transform: scale(1) translateY(0);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 32px;
+      height: 32px;
+      border: 1px solid var(--border-primary);
+      background: var(--bg-secondary);
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s var(--transition);
+      color: var(--text-secondary);
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    .modal-close:hover {
+      background: var(--bg-tertiary);
+      border-color: var(--accent-primary);
+      color: var(--text-primary);
+      transform: rotate(90deg);
+    }
+
+    .modal-icon {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 24px;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+      border: 2px solid var(--border-primary);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      animation: modalIconPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes modalIconPulse {
+      0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 20px var(--glow-primary);
+      }
+      50% {
+        transform: scale(1.05);
+        box-shadow: 0 0 40px var(--glow-primary), 0 0 60px var(--glow-secondary);
+      }
+    }
+
+    .modal-title {
+      font-size: 28px;
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 12px;
+      font-family: 'Space Grotesk', sans-serif;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .modal-subtitle {
+      font-size: 16px;
+      color: var(--text-secondary);
+      text-align: center;
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+
+    .modal-date {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid var(--accent-primary);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--accent-primary);
+      margin: 0 auto 32px;
+      display: block;
+      width: fit-content;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+
+    .modal-content {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-primary);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 32px;
+    }
+
+    .modal-content h4 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      font-family: 'Space Grotesk', sans-serif;
+      color: var(--text-primary);
+    }
+
+    .modal-features {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .modal-feature {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .modal-feature-icon {
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      flex-shrink: 0;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .modal-btn {
+      flex: 1;
+      padding: 14px 24px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 15px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.3s var(--transition);
+      border: none;
+      font-family: 'Space Grotesk', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .modal-btn-primary {
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      color: var(--text-primary);
+      box-shadow: 0 4px 20px var(--glow-primary);
+    }
+
+    .modal-btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 30px var(--glow-primary);
+    }
+
+    .modal-btn-secondary {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-primary);
+      color: var(--text-secondary);
+    }
+
+    .modal-btn-secondary:hover {
+      background: var(--bg-tertiary);
+      border-color: var(--accent-primary);
+      color: var(--text-primary);
+      transform: translateY(-2px);
+    }
+
+    @media (max-width: 480px) {
+      .modal {
+        padding: 32px 24px;
+      }
+
+      .modal-title {
+        font-size: 24px;
+      }
+
+      .modal-actions {
+        flex-direction: column;
+      }
+
+      .modal-btn {
+        width: 100%;
+      }
+    }
   </style>
 </head>
 <body>
@@ -1232,7 +1458,7 @@
                 <span class="btn-icon"></span>
                 Start on Telegram
               </a>
-              <a class="btn btn-primary" href="#" target="_blank" rel="noopener" id="webappBtn" style="background: linear-gradient(135deg, var(--accent-secondary), var(--accent-tertiary));">
+              <a class="btn btn-primary" href="#" id="webappBtn" style="background: linear-gradient(135deg, var(--accent-secondary), var(--accent-tertiary));">
                 Launch WebApp
               </a>
               <a class="btn" href="https://t1era-or-kode-blind.gitbook.io/t1era/documentation" target="_blank" rel="noopener">View Documentation</a>
@@ -1533,6 +1759,55 @@
     </div>
   </div>
 
+  <!-- WebApp Coming Soon Modal -->
+  <div class="modal-overlay" id="webappModal">
+    <div class="modal">
+      <button class="modal-close" id="modalClose">×</button>
+      
+      <div class="modal-icon">🚀</div>
+      
+      <h3 class="modal-title">WebApp Coming Soon!</h3>
+      <p class="modal-subtitle">
+        Our powerful web application is currently under development and will be launching soon.
+      </p>
+      
+      <div class="modal-date">📅 Expected Launch: April 2026</div>
+      
+      <div class="modal-content">
+        <h4>What to expect:</h4>
+        <div class="modal-features">
+          <div class="modal-feature">
+            <span class="modal-feature-icon"></span>
+            <span>Full-featured web dashboard</span>
+          </div>
+          <div class="modal-feature">
+            <span class="modal-feature-icon"></span>
+            <span>Advanced analytics & insights</span>
+          </div>
+          <div class="modal-feature">
+            <span class="modal-feature-icon"></span>
+            <span>Enhanced AI tools & features</span>
+          </div>
+          <div class="modal-feature">
+            <span class="modal-feature-icon"></span>
+            <span>Seamless Telegram integration</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="modal-actions">
+        <a href="https://t.me/T1ERA_SecBot" target="_blank" rel="noopener" class="modal-btn modal-btn-primary">
+          <span>🤖</span>
+          Use Telegram Bot Now
+        </a>
+        <button class="modal-btn modal-btn-secondary" id="modalNotifyMe">
+          <span>🔔</span>
+          Notify Me
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script>
     // ====== CONFIGURATION ======
     const BOT_URL = "https://t.me/T1ERA_SecBot";
@@ -1698,6 +1973,48 @@
     if (webappBtn && WEBAPP_URL !== '#') {
       webappBtn.href = WEBAPP_URL;
     }
+
+    // ====== WEBAPP MODAL ======
+    const webappModal = document.getElementById('webappModal');
+    const modalClose = document.getElementById('modalClose');
+    const modalNotifyMe = document.getElementById('modalNotifyMe');
+
+    // Open modal when clicking Launch WebApp button
+    if (webappBtn) {
+      webappBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        webappModal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      });
+    }
+
+    // Close modal
+    function closeModal() {
+      webappModal.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    modalClose.addEventListener('click', closeModal);
+
+    // Close modal when clicking outside
+    webappModal.addEventListener('click', (e) => {
+      if (e.target === webappModal) {
+        closeModal();
+      }
+    });
+
+    // Close modal with Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && webappModal.classList.contains('active')) {
+        closeModal();
+      }
+    });
+
+    // Notify Me button (you can customize this)
+    modalNotifyMe.addEventListener('click', () => {
+      alert('🔔 Great! We\'ll notify you when the WebApp launches in April 2026!\n\nFor now, please use our Telegram bot for the full T1ERA experience.');
+      closeModal();
+    });
   </script>
 </body>
 </html>
