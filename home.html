@@ -118,31 +118,64 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      padding: 18px 48px;
-      font-size: 18px;
-      font-weight: 700;
+      padding: 14px 32px;
+      font-size: 15px;
+      font-weight: 600;
       font-family: 'Space Grotesk', sans-serif;
       background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-      border: 1px solid var(--border-primary);
+      border: none;
       border-radius: 12px;
       color: var(--text-primary);
       cursor: pointer;
-      box-shadow: 0 0 40px var(--glow-primary), var(--shadow-xl);
+      box-shadow: 0 4px 20px var(--glow-primary);
       opacity: 0;
       pointer-events: none;
-      transition: all 0.4s var(--transition);
+      transition: all 0.3s var(--transition);
       z-index: 10;
-      letter-spacing: 0.02em;
+      letter-spacing: 0.5px;
+      backdrop-filter: blur(10px);
     }
 
     #startButton.visible {
       opacity: 1;
       pointer-events: auto;
+      animation: buttonPulse 2s ease-in-out infinite;
     }
 
     #startButton:hover {
-      transform: translate(-50%, -50%) translateY(-2px);
-      box-shadow: 0 0 60px var(--glow-primary), var(--shadow-xl);
+      transform: translate(-50%, -50%) scale(1.05);
+      box-shadow: 0 6px 30px var(--glow-primary);
+    }
+
+    #startButton:active {
+      transform: translate(-50%, -50%) scale(0.98);
+    }
+
+    @keyframes buttonPulse {
+      0%, 100% {
+        box-shadow: 0 4px 20px var(--glow-primary);
+      }
+      50% {
+        box-shadow: 0 4px 30px var(--glow-primary), 0 0 40px var(--glow-secondary);
+      }
+    }
+
+    /* Mobile optimization for start button */
+    @media (max-width: 768px) {
+      #startButton {
+        padding: 12px 28px;
+        font-size: 14px;
+        border-radius: 10px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      #startButton {
+        padding: 10px 24px;
+        font-size: 13px;
+        border-radius: 8px;
+        letter-spacing: 0.3px;
+      }
     }
 
     #gifIntro.fade-out {
@@ -380,11 +413,35 @@
       -webkit-text-fill-color: transparent;
       background-size: 200% 200%;
       animation: gradientShift 4s ease infinite;
+      display: inline-block;
+      position: relative;
     }
 
     @keyframes gradientShift {
       0%, 100% { background-position: 0% 50%; }
       50% { background-position: 100% 50%; }
+    }
+
+    /* ====== TYPING ANIMATION ====== */
+    .typing-text {
+      display: inline-block;
+      min-height: 1.2em;
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 3px;
+      height: 1em;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      margin-left: 4px;
+      animation: blink 1s infinite;
+      vertical-align: middle;
+      border-radius: 2px;
+    }
+
+    @keyframes blink {
+      0%, 49% { opacity: 1; }
+      50%, 100% { opacity: 0; }
     }
 
     .hero-description {
@@ -992,6 +1049,32 @@
         height: 64px;
       }
 
+      /* Mobile header buttons */
+      .header-actions {
+        gap: 8px;
+      }
+
+      .header-actions .btn {
+        padding: 8px 12px;
+        font-size: 12px;
+        gap: 6px;
+      }
+
+      .header-actions .btn-icon {
+        width: 6px;
+        height: 6px;
+      }
+
+      .logo {
+        font-size: 18px;
+      }
+
+      .logo-mark {
+        width: 36px;
+        height: 36px;
+        font-size: 14px;
+      }
+
       .hero {
         padding: 120px 0 80px;
       }
@@ -1043,6 +1126,12 @@
       .btn {
         width: 100%;
         justify-content: center;
+      }
+
+      /* Even smaller buttons on very small phones */
+      .header-actions .btn {
+        padding: 6px 10px;
+        font-size: 11px;
       }
 
       .stats-bar {
@@ -1128,7 +1217,9 @@
 
             <h1>
               Next-Gen AI Platform<br/>
-              <span class="gradient-text">Built for Results</span>
+              <span class="gradient-text">
+                <span class="typing-text" id="typingText"></span><span class="cursor"></span>
+              </span>
             </h1>
 
             <p class="hero-description">
@@ -1450,6 +1541,44 @@
 
     // Set year
     document.getElementById('year').textContent = new Date().getFullYear();
+
+    // ====== TYPING ANIMATION ======
+    const typingText = document.getElementById('typingText');
+    const textsToType = [
+      'Built for Results',
+      'Enhancement Human Making Decision'
+    ];
+    let textIndex = 0;
+    let charIndex = 0;
+    let isDeleting = false;
+    let typingSpeed = 100;
+    let pauseEnd = 2000;
+
+    function typeWriter() {
+      const currentText = textsToType[textIndex];
+      
+      if (!isDeleting && charIndex <= currentText.length) {
+        typingText.textContent = currentText.substring(0, charIndex);
+        charIndex++;
+        setTimeout(typeWriter, typingSpeed);
+      } else if (isDeleting && charIndex >= 0) {
+        typingText.textContent = currentText.substring(0, charIndex);
+        charIndex--;
+        setTimeout(typeWriter, typingSpeed / 2);
+      } else if (!isDeleting && charIndex > currentText.length) {
+        setTimeout(() => {
+          isDeleting = true;
+          typeWriter();
+        }, pauseEnd);
+      } else if (isDeleting && charIndex < 0) {
+        isDeleting = false;
+        textIndex = (textIndex + 1) % textsToType.length; // Switch to next text
+        setTimeout(typeWriter, 500);
+      }
+    }
+
+    // Start typing animation after page loads
+    setTimeout(typeWriter, 1000);
 
     // ====== GIF INTRO ======
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
