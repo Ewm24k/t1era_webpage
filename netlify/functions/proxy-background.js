@@ -77,10 +77,9 @@ exports.handler = async function (event, context) {
   }
 
   // 3. Payload Normalization (Ensuring correct types for Wan2GP)
-  /** * FIX: Wrapped in arrays [] to satisfy Pydantic ValidationError for GalleryData 
-   */
-  const prompt = [String(payload.prompt).trim()]; 
-  const negPrompt = ["(low quality, worst quality, text, watermark, speech, talking, subtitles:1.4)"];
+  // ✅ FIX: Plain strings, NOT arrays - Gradio expects raw text for prompt fields
+  const prompt = String(payload.prompt).trim(); 
+  const negPrompt = "(low quality, worst quality, text, watermark, speech, talking, subtitles:1.4)";
   
   const width = parseInt(payload.width) || DEFAULTS.WIDTH;
   const height = parseInt(payload.height) || DEFAULTS.HEIGHT;
@@ -90,9 +89,9 @@ exports.handler = async function (event, context) {
   // 4. Data Array Alignment for Wan2GP fn_index: 2
   // Alignment: [Prompt, NegPrompt, Image(null), Model, W, H, Frames, FPS, Batch, Guidance, Seed, Offload, Attn, LoRA, Reserved]
   const dataArray = [
-    prompt,
-    negPrompt,
-    null, // Image slot (must be null for Text-to-Video)
+    prompt,        // ✅ Plain string
+    negPrompt,     // ✅ Plain string
+    null,          // Image slot (must be null for Text-to-Video)
     FORCED_MODEL,
     width,
     height,
@@ -148,12 +147,22 @@ exports.handler = async function (event, context) {
     // Success Path
     if (result.event_id) {
       console.log(`[Success] Job Queued. Event ID: ${result.event_id}`);
+      
+      const statusUrl = `${AZURE_BASE}/gradio_api/queue/data?session_hash=${session_hash}`;
+      
       return sendResponse(200, {
         success: true,
         job_id: session_hash,
         event_id: result.event_id,
-        // Using /gradio_api/ prefix for the status polling too
-        status_url: `${AZURE_BASE}/gradio_api/queue/data?session_hash=${session_hash}`
+        status_url: statusUrl,
+        check_status_url: statusUrl,  // ✅ Frontend expects this field
+        specs: {
+          width: width,
+          height: height,
+          num_frames: frames,
+          fps: fps,
+          model: FORCED_MODEL
+        }
       }, cors);
     } else {
       console.warn("[Unexpected] No Event ID in response:", result);
