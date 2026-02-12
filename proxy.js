@@ -3,6 +3,8 @@
  * File: netlify/functions/proxy.js
  */
 
+const multipart = require('lambda-multipart-parser');
+
 // ═══════════════════════════════════════════════════════
 //  CONSTANTS
 // ═══════════════════════════════════════════════════════
@@ -61,12 +63,27 @@ function err(statusCode, message, extraHeaders = {}) {
 
 async function parsePayload(event) {
   const contentType = (event.headers["content-type"] || "").toLowerCase();
+  
+  // FIXED: Handle Multipart (FormData) which contains the 'data' string and 'image' file
+  if (contentType.includes("multipart/form-data")) {
+    const result = await multipart.parse(event);
+    const fields = result.data ? JSON.parse(result.data) : {};
+    const imageFile = result.files && result.files[0];
+    
+    return { 
+      fields, 
+      imageBase64: imageFile ? imageFile.content.toString('base64') : null, 
+      imageType: imageFile ? imageFile.contentType : null 
+    };
+  }
+
+  // Fallback for direct JSON
   if (contentType.includes("application/json")) {
     const parsed = JSON.parse(event.body || "{}");
     return { fields: parsed, imageBase64: null, imageType: null };
   }
-  // Multipart parsing logic omitted for brevity as JSON is standard for this UI
-  throw new Error("Please send payload as application/json");
+
+  throw new Error("Unsupported content type. Use multipart/form-data or application/json");
 }
 
 // ═══════════════════════════════════════════════════════
@@ -83,18 +100,18 @@ function buildGradioPayload(fields, imageBase64, imageType) {
     fields.prompt || "",          // [0] Positive prompt
     "(low quality, worst quality, text, watermark, speech, talking, subtitles:1.4)", // [1] Negative prompt
     imageBase64 ? { data: `data:${imageType};base64,${imageBase64}`, name: "input.jpg" } : null, // [2] Image
-    FORCED_MODEL,                 // [3] Hardcoded Model
-    width,                        // [4] Width
-    height,                       // [5] Height
-    numFrames,                    // [6] Frames
-    fields.fps || FPS,            // [7] FPS
-    1,                            // [8] Steps (Distilled)
-    7.0,                          // [9] Guidance Scale (High = Action)
-    -1,                           // [10] Seed
-    true,                         // [11] VAE Tiling
-    "sdpa",                       // [12] Attention
-    "None",                       // [13] Upscaler
-    127,                          // [14] Motion Bucket (Higher = More movement/dancing)
+    FORCED_MODEL,                  // [3] Hardcoded Model
+    width,                         // [4] Width
+    height,                        // [5] Height
+    numFrames,                     // [6] Frames
+    fields.fps || FPS,             // [7] FPS
+    1,                             // [8] Steps (Distilled)
+    7.0,                           // [9] Guidance Scale (High = Action)
+    -1,                            // [10] Seed
+    true,                          // [11] VAE Tiling
+    "sdpa",                        // [12] Attention
+    "None",                        // [13] Upscaler
+    127,                           // [14] Motion Bucket (Higher = More movement/dancing)
   ];
 
   return {
@@ -134,7 +151,8 @@ exports.handler = async function handler(event, _context) {
   try {
     ({ fields, imageBase64, imageType } = await parsePayload(event));
   } catch (parseErr) {
-    return err(400, "Invalid payload", cors);
+    console.error("[proxy] Parse Error:", parseErr.message);
+    return err(400, "Invalid payload structure", cors);
   }
 
   const gradioPayload = buildGradioPayload(fields, imageBase64, imageType);
