@@ -1,5 +1,5 @@
 /**
- * T1ERA — Netlify Serverless Proxy (Fixed for LTX-2 / Wan2GP)
+ * T1ERA — Netlify Serverless Proxy (Queue-Compatible for LTX-2)
  * File: netlify/functions/proxy.js
  */
 
@@ -12,15 +12,12 @@ const multipart = require('lambda-multipart-parser');
 const FORCED_MODEL = "ltx-2-19b-distilled_Q4_K_M.gguf";
 
 /** * Use the Gradio Live URL from your Netlify Env Vars 
- * Example: https://bad7ec597ed5f9bde6.gradio.live
  */
 const AZURE_BASE = process.env.AZURE_VM_URL ? process.env.AZURE_VM_URL.replace(/\/$/, "") : "";
-
 const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || "";
 
+const RATE_WINDOW_MS = 15_000; 
 const rateLimits = new Map();
-const RATE_WINDOW_MS = 15_000; // 15 seconds cooldown
-const MAX_BODY_BYTES = 12 * 1024 * 1024; 
 
 const RESOLUTION_MAP = {
   "480p:16:9":  [854,  480],
@@ -61,17 +58,11 @@ function err(statusCode, message, extraHeaders = {}) {
   return json(statusCode, { error: true, message }, extraHeaders);
 }
 
-/**
- * FIXED: This now correctly handles both JSON and Multipart (Images)
- */
 async function parsePayload(event) {
   const contentType = (event.headers["content-type"] || event.headers["Content-Type"] || "").toLowerCase();
   
-  // Handle Multipart (FormData from UI)
   if (contentType.includes("multipart/form-data")) {
     const result = await multipart.parse(event);
-    
-    // result.data contains the JSON string 'payload' from generate.html
     const fields = result.data ? JSON.parse(result.data) : {};
     const imageFile = result.files && result.files[0];
     
@@ -82,47 +73,12 @@ async function parsePayload(event) {
     };
   }
 
-  // Handle Standard JSON
   if (contentType.includes("application/json")) {
     const parsed = JSON.parse(event.body || "{}");
     return { fields: parsed, imageBase64: null, imageType: null };
   }
   
-  throw new Error("Unsupported Content-Type. Expected multipart/form-data or application/json");
-}
-
-// ═══════════════════════════════════════════════════════
-//  AZURE VM — Payload Construction
-// ═══════════════════════════════════════════════════════
-
-function buildGradioPayload(fields, imageBase64, imageType) {
-  const resKey = `${fields.resolution || "480p"}:${fields.aspect_ratio || "16:9"}`;
-  const [width, height] = RESOLUTION_MAP[resKey] || [854, 480];
-  const numFrames = (fields.fps || FPS) * (fields.duration || 6) + FRAME_BONUS;
-
-  const data = [
-    fields.prompt || "",          // [0] Positive prompt
-    "(low quality, worst quality, text, watermark, speech, talking, subtitles:1.4)", // [1] Negative prompt
-    imageBase64 ? { data: `data:${imageType};base64,${imageBase64}`, name: "input.jpg" } : null, // [2] Image
-    FORCED_MODEL,                  // [3] Hardcoded Model
-    width,                         // [4] Width
-    height,                        // [5] Height
-    numFrames,                     // [6] Frames
-    fields.fps || FPS,             // [7] FPS
-    1,                             // [8] Steps (Distilled)
-    7.0,                           // [9] Guidance Scale
-    -1,                            // [10] Seed
-    true,                          // [11] VAE Tiling
-    "sdpa",                        // [12] Attention
-    "None",                        // [13] Upscaler
-    127,                           // [14] Motion Bucket
-  ];
-
-  return {
-    fn_index: 1, 
-    data,
-    session_hash: `t1era_${Date.now()}`,
-  };
+  throw new Error("Unsupported Content-Type");
 }
 
 function checkRateLimit(ip) {
@@ -144,8 +100,7 @@ exports.handler = async function handler(event, _context) {
 
   if (event.httpMethod === "OPTIONS") return { statusCode: 204, headers: cors, body: "" };
   if (event.httpMethod !== "POST") return err(405, "Method not allowed", cors);
-
-  if (!AZURE_BASE) return err(500, "AZURE_VM_URL environment variable is not set.", cors);
+  if (!AZURE_BASE) return err(500, "AZURE_VM_URL not set", cors);
 
   const clientIp = (event.headers["x-forwarded-for"] || "unknown").split(",")[0].trim();
   const rl = checkRateLimit(clientIp);
@@ -155,54 +110,67 @@ exports.handler = async function handler(event, _context) {
   try {
     ({ fields, imageBase64, imageType } = await parsePayload(event));
   } catch (parseErr) {
-    console.error("[proxy] Parse Error Details:", parseErr);
-    return err(400, "Invalid payload structure. Check proxy logs.", cors);
+    return err(400, "Invalid payload", cors);
   }
 
-  const gradioPayload = buildGradioPayload(fields, imageBase64, imageType);
-  const t0 = Date.now();
-  
+  // Build Data Array
+  const resKey = `${fields.resolution || "480p"}:${fields.aspect_ratio || "16:9"}`;
+  const [width, height] = RESOLUTION_MAP[resKey] || [854, 480];
+  const numFrames = (fields.fps || FPS) * (fields.duration || 6) + FRAME_BONUS;
+
+  const dataArray = [
+    fields.prompt || "",
+    "(low quality, worst quality, text, watermark, speech, talking, subtitles:1.4)",
+    imageBase64 ? { data: `data:${imageType};base64,${imageBase64}`, name: "input.jpg" } : null,
+    FORCED_MODEL,
+    width,
+    height,
+    numFrames,
+    fields.fps || FPS,
+    1, 7.0, -1, true, "sdpa", "None", 127
+  ];
+
+  const session_hash = `t1era_${Math.random().toString(36).substring(2, 10)}`;
+
   try {
     /**
-     * UPDATED ENDPOINT: Switching from /gradio_api/predict to /api/predict
-     * to resolve the 404 error returned by your Azure VM.
+     * QUEUE JOIN LOGIC
+     * Because your VM uses WebSockets ("join"), we use /queue/join 
+     * which handles the queueing process for complex Gradio spaces.
      */
-    const endpoint = `${AZURE_BASE}/api/predict`;
-    console.log(`[proxy] Requesting GPU at: ${endpoint}`);
+    const endpoint = `${AZURE_BASE}/queue/join`;
+    console.log(`[proxy] Joining Queue: ${endpoint}`);
 
     const azureResponse = await fetch(endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(gradioPayload),
-      signal: AbortSignal.timeout(180_000), 
+      body: JSON.stringify({
+        data: dataArray,
+        fn_index: 2, // Common index for video gen in large spaces
+        session_hash: session_hash
+      }),
+      signal: AbortSignal.timeout(240_000), 
     });
 
     if (!azureResponse.ok) {
       const errorText = await azureResponse.text();
-      console.error(`[proxy] GPU Error ${azureResponse.status}:`, errorText);
-      return err(502, `GPU returned ${azureResponse.status}`, cors);
+      console.error(`[proxy] GPU Error:`, errorText);
+      return err(502, `Queue Rejected: ${azureResponse.status}`, cors);
     }
 
     const gradioData = await azureResponse.json();
-    
-    // Support for both new and old Gradio data formats
-    const rawPathData = gradioData.data || [];
-    const rawPath = (typeof rawPathData[0] === 'object') ? rawPathData[0].name : rawPathData[0] || "";
 
-    if (!rawPath) return err(502, "GPU failed to return a video path", cors);
-
-    // Build the final public video URL
-    const videoUrl = rawPath.startsWith("http") ? rawPath : `${AZURE_BASE}/file=${rawPath.replace(/^\//, "")}`;
-
+    // Since Queue is asynchronous, we return the session details
+    // so the frontend can wait for the result.
     return json(200, {
-      video_url: videoUrl,
-      job_id: gradioData.session_hash || `job_${Date.now()}`,
-      duration_ms: (Date.now() - t0),
-      specs: { width: gradioPayload.data[4], height: gradioPayload.data[5] }
+      message: "Processing started",
+      job_id: session_hash,
+      event_id: gradioData.event_id,
+      check_status_url: `${AZURE_BASE}/queue/data?session_hash=${session_hash}`
     }, cors);
 
   } catch (fetchErr) {
     console.error("[proxy] Connection Error:", fetchErr.message);
-    return err(503, "GPU Server connection failed. Check your Azure VM terminal.", cors);
+    return err(503, "GPU Server connection failed", cors);
   }
 };
