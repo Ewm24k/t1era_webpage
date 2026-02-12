@@ -1436,385 +1436,147 @@
 <div class="toast" id="toast"></div>
 
 <script>
-/* ══════════════════════════════════════════════
-   CONFIG — update AZURE_ENDPOINT before deploy
-══════════════════════════════════════════════ */
-const CONFIG = {
-  AZURE_ENDPOINT:  "/.netlify/functions/proxy",   // Netlify Function bridge
-  RATE_LIMIT_MS:   45000,                          // 45s cooldown per user
-  FPS:             24,
-  FRAME_OFFSET:    1,                              // LTX-2 uses n*s + 1 frames
-  MODEL:           "ltx-2-19b-distilled_Q4_K_M",  // hidden from UI — attached in proxy
-};
+  /* ══════════════════════════════════════════
+     T1ERA — MINATHOR LOGIC (Background Polling)
+  ══════════════════════════════════════════ */
 
-/* Resolution map — [width, height] keyed by "res:ratio" */
-const RES_MAP = {
-  "480p:16:9":[854,480],  "480p:9:16":[480,854],  "480p:1:1":[480,480],
-  "720p:16:9":[1280,720], "720p:9:16":[720,1280], "720p:1:1":[720,720],
-  "1080p:16:9":[1920,1080],"1080p:9:16":[1080,1920],"1080p:1:1":[1080,1080],
-};
+  // 1. SELECTORS
+  const promptInput = document.getElementById('promptInput');
+  const charCount = document.getElementById('charCount');
+  const generateBtn = document.getElementById('generateBtn');
+  const statusBar = document.getElementById('statusBar');
+  const progressBar = document.getElementById('progressFill');
+  const outputPlaceholder = document.getElementById('outputPlaceholder');
+  const videoWrap = document.getElementById('videoWrap');
+  const outputVideo = document.getElementById('outputVideo');
+  const downloadBtn = document.getElementById('downloadBtn');
 
-/* ── State ── */
-let state = {
-  ratio:    "16:9",
-  duration: 6,
-  res:      "480p",
-  imageFile: null,
-  isGenerating: false,
-  lastRequest: 0,
-  abortCtrl: null,
-  stepTimers: [],
-  progressInterval: null,
-};
+  // 2. STATE
+  let currentFile = null;
+  let isGenerating = false;
+  let pollInterval = null;
 
-let history = JSON.parse(localStorage.getItem("t1era_history") || "[]");
-
-/* ══════════════════════════════════════════════
-   INIT
-══════════════════════════════════════════════ */
-updateSpecs();
-renderHistory();
-
-/* ══ PROMPT CHAR COUNT ══ */
-const promptEl = document.getElementById("promptInput");
-promptEl.addEventListener("input", () => {
-  document.getElementById("charCount").textContent = promptEl.value.length;
-});
-
-/* ══ RATIO PILLS ══ */
-document.querySelectorAll("#ratioGroup .pill").forEach(btn => {
-  btn.addEventListener("click", () => {
-    document.querySelectorAll("#ratioGroup .pill").forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-    state.ratio = btn.dataset.ratio;
-    updateSpecs();
+  // 3. EVENT LISTENERS
+  promptInput.addEventListener('input', () => {
+    charCount.textContent = promptInput.value.length;
   });
-});
 
-/* ══ DURATION PILLS ══ */
-document.querySelectorAll("#durGroup .pill").forEach(btn => {
-  btn.addEventListener("click", () => {
-    document.querySelectorAll("#durGroup .pill").forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-    state.duration = parseInt(btn.dataset.dur);
-    updateSpecs();
-  });
-});
+  generateBtn.addEventListener('click', startGeneration);
 
-/* ══ RESOLUTION SELECT ══ */
-document.getElementById("resSelect").addEventListener("change", (e) => {
-  state.res = e.target.value;
-  updateSpecs();
-});
+  // 4. MAIN ACTION: START
+  async function startGeneration() {
+    const prompt = promptInput.value.trim();
+    if (!prompt) return showToast("Please enter a prompt.", "error");
 
-/* ══ LIVE SPEC UPDATE ══ */
-function frames(secs) { return secs * CONFIG.FPS + CONFIG.FRAME_OFFSET; }
+    setLoading(true);
+    updateStep(1); // Step: Requesting
 
-function updateSpecs() {
-  const key = `${state.res}:${state.ratio}`;
-  const [w, h] = RES_MAP[key] || [854, 480];
-  const f = frames(state.duration);
-  document.getElementById("sRes").textContent    = `${w}×${h}`;
-  document.getElementById("sRatio").textContent  = state.ratio;
-  document.getElementById("sFrames").textContent = `${f}f`;
-  document.getElementById("sDur").textContent    = `${state.duration}s @ 24fps`;
-  document.getElementById("statFrames").textContent = `${f}f`;
-}
+    try {
+      const formData = new FormData();
+      formData.append('payload', JSON.stringify({
+        prompt: prompt,
+        resolution: "480p", // You can link these to your UI pills
+        aspect_ratio: "16:9"
+      }));
 
-/* ══ IMAGE UPLOAD ══ */
-const uploadDrop = document.getElementById("uploadDrop");
-const imageFileInput = document.getElementById("imageFile");
+      // NOTE: Calling the -background function
+      const response = await fetch('/.netlify/functions/proxy-background', {
+        method: 'POST',
+        body: formData
+      });
 
-imageFileInput.addEventListener("change", handleFile);
+      const data = await response.json();
 
-uploadDrop.addEventListener("dragover", e => { e.preventDefault(); uploadDrop.classList.add("over"); });
-uploadDrop.addEventListener("dragleave", () => uploadDrop.classList.remove("over"));
-uploadDrop.addEventListener("drop", e => {
-  e.preventDefault();
-  uploadDrop.classList.remove("over");
-  const f = e.dataTransfer.files[0];
-  if (f && f.type.startsWith("image/")) {
-    const dt = new DataTransfer();
-    dt.items.add(f);
-    imageFileInput.files = dt.files;
-    handleFile({ target: imageFileInput });
-  }
-});
+      if (!response.ok) throw new Error(data.error || "Queue failed");
 
-function handleFile(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  if (file.size > 10 * 1024 * 1024) { toast("Image too large — max 10MB", "error"); return; }
-  state.imageFile = file;
-  const url = URL.createObjectURL(file);
-  document.getElementById("previewImg").src = url;
-  document.getElementById("previewStrip").style.display = "block";
-  uploadDrop.style.display = "none";
-}
+      // The proxy-background returns a job_id (hash) and a check_status_url
+      showToast("Request queued on Azure GPU...", "info");
+      updateStep(2); // Step: Rendering
+      
+      // Start checking for the video every 5 seconds
+      startPolling(data.check_status_url);
 
-document.getElementById("clearImg").addEventListener("click", () => {
-  state.imageFile = null;
-  document.getElementById("previewImg").src = "";
-  document.getElementById("previewStrip").style.display = "none";
-  uploadDrop.style.display = "block";
-  imageFileInput.value = "";
-});
-
-/* ══════════════════════════════════════════════
-   GENERATE
-══════════════════════════════════════════════ */
-document.getElementById("generateBtn").addEventListener("click", generate);
-document.getElementById("regenBtn").addEventListener("click", generate);
-
-async function generate() {
-  if (state.isGenerating) return;
-
-  const prompt = promptEl.value.trim();
-  if (!prompt) { toast("Please enter a video description", "error"); return; }
-  if (prompt.length < 20) { toast("Describe your scene in more detail (min 20 chars)", "error"); return; }
-
-  const cooldown = CONFIG.RATE_LIMIT_MS - (Date.now() - state.lastRequest);
-  if (cooldown > 0) {
-    toast(`Please wait ${Math.ceil(cooldown/1000)}s before generating again`, "error");
-    return;
-  }
-
-  const key = `${state.res}:${state.ratio}`;
-  const [width, height] = RES_MAP[key] || [854, 480];
-  const numFrames = frames(state.duration);
-
-  const payload = {
-    prompt,
-    width,
-    height,
-    num_frames: numFrames,
-    fps: CONFIG.FPS,
-    aspect_ratio: state.ratio,
-    resolution: state.res,
-    has_image: !!state.imageFile,
-  };
-
-  startGeneration(prompt, payload, { width, height });
-}
-
-async function startGeneration(prompt, payload, meta) {
-  state.isGenerating = true;
-  state.lastRequest = Date.now();
-  state.abortCtrl = new AbortController();
-
-  setBusy(true);
-  setStatusBar(true, 1);
-  animateSteps();
-  animateProgress();
-  hideOutput();
-
-  try {
-    const formData = new FormData();
-    formData.append("data", JSON.stringify(payload));
-    if (state.imageFile) formData.append("image", state.imageFile);
-
-    const res = await fetch(CONFIG.AZURE_ENDPOINT, {
-      method: "POST",
-      body: formData,
-      signal: state.abortCtrl.signal,
-    });
-
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.message || `Server error ${res.status}`);
+    } catch (err) {
+      console.error(err);
+      showToast(err.message, "error");
+      setLoading(false);
     }
-
-    const data = await res.json();
-    
-    // Success flow
-    showOutput(data.video_url, prompt, meta);
-    addHistory(prompt, data.video_url, meta);
-    toast("✓ Generation complete!", "success");
-
-  } catch (err) {
-    if (err.name === "AbortError") {
-      toast("Generation cancelled", "info");
-    } else {
-      toast(`Error: ${err.message}`, "error");
-    }
-    clearPipeline();
-    resetOutput();
-  } finally {
-    state.isGenerating = false;
-    setBusy(false);
-    setStatusBar(false);
   }
-}
 
-function simulateDelay(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
+  // 5. POLLING LOGIC
+  function startPolling(checkUrl) {
+    let attempts = 0;
+    const maxAttempts = 60; // 5 minutes total
 
-/* ── UI helpers ── */
-function setBusy(on) {
-  const btn = document.getElementById("generateBtn");
-  const spinner = document.getElementById("btnSpinner");
-  const label = document.getElementById("btnLabel");
-  btn.disabled = on;
-  spinner.style.display = on ? "block" : "none";
-  label.textContent = on ? "GENERATING…" : "GENERATE VIDEO";
-}
+    pollInterval = setInterval(async () => {
+      attempts++;
+      
+      // Simulate progress bar movement
+      const progress = Math.min(attempts * 2, 95); 
+      progressBar.style.width = `${progress}%`;
 
-function setStatusBar(on, pos) {
-  const bar = document.getElementById("statusBar");
-  bar.classList.toggle("visible", on);
-  if (on) {
-    document.getElementById("statQueue").textContent = `#${pos}`;
-    document.getElementById("statEta").textContent = `~${state.duration * 10}s`;
-    updateSpecs();
+      try {
+        const res = await fetch(checkUrl);
+        const statusData = await res.json();
+
+        // Gradio typically returns a 'data' array when the job is done
+        if (statusData.data && statusData.data[0]) {
+          const videoUrl = statusData.data[0].name || statusData.data[0];
+          finishGeneration(videoUrl);
+        }
+
+        if (attempts >= maxAttempts) {
+          throw new Error("Generation timed out.");
+        }
+      } catch (err) {
+        clearInterval(pollInterval);
+        showToast("Check failed: GPU might be busy.", "error");
+        setLoading(false);
+      }
+    }, 5000); // Check every 5 seconds
   }
-}
 
-/* ── Step animation ── */
-const STEP_DELAYS = [0, 900, 2500, 4500, 7000];
+  // 6. FINISH
+  function finishGeneration(videoUrl) {
+    clearInterval(pollInterval);
+    progressBar.style.width = "100%";
+    updateStep(3); // Step: Finalizing
 
-function animateSteps() {
-  for (let i = 0; i < 5; i++) {
-    const el = document.getElementById(`step-${i}`);
-    el.className = "step-row pending";
+    // If URL is relative, prepend Azure base (handled by proxy but safe to check)
+    outputVideo.src = videoUrl;
+    downloadBtn.href = videoUrl;
+
+    setTimeout(() => {
+      setLoading(false);
+      outputPlaceholder.style.display = 'none';
+      videoWrap.style.display = 'block';
+      showToast("Video Generated Successfully!", "success");
+    }, 1000);
   }
-  document.getElementById("step-0").className = "step-row active";
 
-  state.stepTimers.forEach(clearTimeout);
-  state.stepTimers = [];
-
-  for (let i = 1; i < 5; i++) {
-    const t = setTimeout(() => {
-      document.getElementById(`step-${i-1}`).className = "step-row done";
-      document.getElementById(`step-${i}`).className   = "step-row active";
-    }, STEP_DELAYS[i]);
-    state.stepTimers.push(t);
+  // 7. UI HELPERS
+  function setLoading(active) {
+    isGenerating = active;
+    generateBtn.disabled = active;
+    document.querySelector('.spinner').style.display = active ? 'block' : 'none';
+    statusBar.classList.toggle('visible', active);
+    if (!active) progressBar.style.width = "0%";
   }
-}
 
-function clearPipeline() {
-  state.stepTimers.forEach(clearTimeout);
-  state.stepTimers = [];
-  clearInterval(state.progressInterval);
-  for (let i = 0; i < 5; i++) {
-    document.getElementById(`step-${i}`).className = "step-row pending";
-  }
-  document.getElementById("progressFill").style.width = "0%";
-}
-
-/* ── Progress bar ── */
-function animateProgress() {
-  const fill = document.getElementById("progressFill");
-  let pct = 0;
-  clearInterval(state.progressInterval);
-  state.progressInterval = setInterval(() => {
-    if (!state.isGenerating) { fill.style.width = "100%"; clearInterval(state.progressInterval); return; }
-    pct = Math.min(pct + (100 / (state.duration * 12)), 94);
-    fill.style.width = pct + "%";
-  }, 100);
-}
-
-/* ── Output display ── */
-function showOutput(videoUrl, prompt, meta) {
-  document.getElementById("outputPlaceholder").style.display = "none";
-  const wrap = document.getElementById("outputVideoWrap");
-  wrap.style.display = "block";
-  document.getElementById("outputVideo").src = videoUrl;
-
-  document.getElementById("videoBadgeRes").textContent  = state.res;
-  document.getElementById("videoBadgeRatio").textContent = state.ratio;
-  document.getElementById("videoBadgeDur").textContent  = `${state.duration}s`;
-  document.getElementById("outputBadge").textContent    = "✓ Ready";
-  document.getElementById("outputBadge").className      = "card-badge badge-green";
-
-  document.getElementById("downloadBtn").onclick = () => {
-    const a = document.createElement("a");
-    a.href = videoUrl;
-    a.download = `t1era_${Date.now()}.mp4`;
-    a.click();
-  };
-
-  document.getElementById("shareBtn").onclick = () => {
-    if (navigator.share) navigator.share({ title: "T1ERA Video", url: videoUrl });
-    else { navigator.clipboard.writeText(videoUrl); toast("URL copied to clipboard", "info"); }
-  };
-}
-
-function hideOutput() {
-  document.getElementById("outputPlaceholder").style.display = "block";
-  document.getElementById("outputVideoWrap").style.display = "none";
-  document.getElementById("outputBadge").textContent = "Processing…";
-  document.getElementById("outputBadge").className   = "card-badge badge-orange";
-}
-
-function resetOutput() {
-  document.getElementById("outputPlaceholder").style.display = "block";
-  document.getElementById("outputVideoWrap").style.display = "none";
-  document.getElementById("outputBadge").textContent = "Waiting";
-  document.getElementById("outputBadge").className   = "card-badge";
-  document.getElementById("outputBadge").style = "background:rgba(255,255,255,0.04);border:1px solid var(--border-primary);color:var(--text-tertiary);";
-}
-
-/* ══════════════════════════════════════════════
-   HISTORY
-══════════════════════════════════════════════ */
-function addHistory(prompt, videoUrl, meta) {
-  history.unshift({ prompt, videoUrl, meta, ts: Date.now(), res: state.res, ratio: state.ratio, dur: state.duration });
-  if (history.length > 30) history.pop();
-  localStorage.setItem("t1era_history", JSON.stringify(history));
-  renderHistory();
-}
-
-function renderHistory() {
-  const list = document.getElementById("historyList");
-  const empty = document.getElementById("historyEmpty");
-  if (!history.length) { empty.style.display = "block"; list.querySelectorAll(".history-item").forEach(el => el.remove()); return; }
-  empty.style.display = "none";
-
-  list.querySelectorAll(".history-item").forEach(el => el.remove());
-  history.forEach(item => {
-    const div = document.createElement("div");
-    div.className = "history-item";
-    const dt = new Date(item.ts);
-    const time = dt.toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" });
-    div.innerHTML = `
-      <div class="hist-thumb">🎬</div>
-      <div class="hist-info">
-        <div class="hist-prompt">${item.prompt}</div>
-        <div class="hist-meta">${item.res} · ${item.ratio} · ${item.dur}s · ${time}</div>
-      </div>`;
-    div.addEventListener("click", () => {
-      promptEl.value = item.prompt;
-      document.getElementById("charCount").textContent = item.prompt.length;
-      if (item.videoUrl) showOutput(item.videoUrl, item.prompt, item.meta);
+  function updateStep(stepIndex) {
+    const steps = document.querySelectorAll('.step-row');
+    steps.forEach((step, i) => {
+      step.className = 'step-row ' + (i + 1 === stepIndex ? 'active' : i + 1 < stepIndex ? 'done' : 'pending');
     });
-    list.appendChild(div);
-  });
-}
+  }
 
-document.getElementById("clearHistory").addEventListener("click", () => {
-  history = [];
-  localStorage.removeItem("t1era_history");
-  renderHistory();
-  toast("History cleared", "info");
-});
-
-/* ══ SCROLL TO TIPS ══ */
-function scrollToTips() {
-  document.getElementById("tipCard").scrollIntoView({ behavior: "smooth", block: "center" });
-}
-
-/* ══════════════════════════════════════════════
-   TOAST
-══════════════════════════════════════════════ */
-let toastTimer;
-function toast(msg, type = "info") {
-  const el = document.getElementById("toast");
-  el.textContent = msg;
-  el.className = `toast show ${type}`;
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove("show"), 3800);
-}
+  function showToast(msg, type) {
+    const t = document.createElement('div');
+    t.className = `toast show ${type}`;
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 4000);
+  }
 </script>
 </body>
 </html>
