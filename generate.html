@@ -1583,7 +1583,6 @@ async function generate() {
   const [width, height] = RES_MAP[key] || [854, 480];
   const numFrames = frames(state.duration);
 
-  /* Payload — model is NOT included here; proxy attaches it */
   const payload = {
     prompt,
     width,
@@ -1610,7 +1609,6 @@ async function startGeneration(prompt, payload, meta) {
   hideOutput();
 
   try {
-    /* ─── REAL FETCH (uncomment once Netlify proxy is deployed) ───
     const formData = new FormData();
     formData.append("data", JSON.stringify(payload));
     if (state.imageFile) formData.append("image", state.imageFile);
@@ -1627,22 +1625,18 @@ async function startGeneration(prompt, payload, meta) {
     }
 
     const data = await res.json();
-    // data = { video_url: "https://...", job_id: "...", duration_ms: 12400 }
+    
+    // Success flow
     showOutput(data.video_url, prompt, meta);
-    ─── */
-
-    /* ── DEMO MODE — simulates 8s generation ── */
-    await simulateDelay(8000);
-    toast("Backend not yet connected — wire up proxy.js to go live", "info");
-    clearPipeline();
-    resetOutput();
-
-    addHistory(prompt, "", meta);
+    addHistory(prompt, data.video_url, meta);
     toast("✓ Generation complete!", "success");
 
   } catch (err) {
-    if (err.name === "AbortError") toast("Generation cancelled", "info");
-    else toast(`Error: ${err.message}`, "error");
+    if (err.name === "AbortError") {
+      toast("Generation cancelled", "info");
+    } else {
+      toast(`Error: ${err.message}`, "error");
+    }
     clearPipeline();
     resetOutput();
   } finally {
