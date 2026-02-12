@@ -163,7 +163,11 @@ exports.handler = async function handler(event, _context) {
   const t0 = Date.now();
   
   try {
-    const endpoint = `${AZURE_BASE}/gradio_api/predict`;
+    /**
+     * UPDATED ENDPOINT: Switching from /gradio_api/predict to /api/predict
+     * to resolve the 404 error returned by your Azure VM.
+     */
+    const endpoint = `${AZURE_BASE}/api/predict`;
     console.log(`[proxy] Requesting GPU at: ${endpoint}`);
 
     const azureResponse = await fetch(endpoint, {
@@ -180,10 +184,14 @@ exports.handler = async function handler(event, _context) {
     }
 
     const gradioData = await azureResponse.json();
-    const rawPath = (gradioData.data || [])[0] || "";
+    
+    // Support for both new and old Gradio data formats
+    const rawPathData = gradioData.data || [];
+    const rawPath = (typeof rawPathData[0] === 'object') ? rawPathData[0].name : rawPathData[0] || "";
 
     if (!rawPath) return err(502, "GPU failed to return a video path", cors);
 
+    // Build the final public video URL
     const videoUrl = rawPath.startsWith("http") ? rawPath : `${AZURE_BASE}/file=${rawPath.replace(/^\//, "")}`;
 
     return json(200, {
