@@ -29,7 +29,7 @@
   <meta property="og:locale" content="en_US" />
 
   <!-- Additional SEO -->
-  <meta name="keywords" content="T1ERA, Telegram AI, AI Suite, Chat AI, Vision AI, VTT Scripts, Canva Mode, MinaThor, AI Assistant" />
+  <meta name="keywords" content="T1ERA, Telegram AI, AI Suite, Chat AI, Vision AI, VTT Scripts, Canva Mode, MinaThor, AI Assistant, AI Video Generator" />
   <meta name="author" content="T1ERA" />
   <link rel="canonical" href="https://t1era.netlify.app/" />
 
@@ -55,9 +55,11 @@
       --accent-secondary: #8b5cf6;
       --accent-tertiary: #06b6d4;
       --accent-success: #10b981;
+      --accent-video: #f97316;
       
       --glow-primary: rgba(59, 130, 246, 0.3);
       --glow-secondary: rgba(139, 92, 246, 0.3);
+      --glow-video: rgba(249, 115, 22, 0.3);
       
       --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
       --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
@@ -152,48 +154,27 @@
     }
 
     @keyframes buttonPulse {
-      0%, 100% {
-        box-shadow: 0 4px 20px var(--glow-primary);
-      }
-      50% {
-        box-shadow: 0 4px 30px var(--glow-primary), 0 0 40px var(--glow-secondary);
-      }
+      0%, 100% { box-shadow: 0 4px 20px var(--glow-primary); }
+      50% { box-shadow: 0 4px 30px var(--glow-primary), 0 0 40px var(--glow-secondary); }
     }
 
-    /* Mobile optimization for start button */
     @media (max-width: 768px) {
-      #startButton {
-        padding: 12px 28px;
-        font-size: 14px;
-        border-radius: 10px;
-      }
+      #startButton { padding: 12px 28px; font-size: 14px; border-radius: 10px; }
     }
-
     @media (max-width: 480px) {
-      #startButton {
-        padding: 10px 24px;
-        font-size: 13px;
-        border-radius: 8px;
-        letter-spacing: 0.3px;
-      }
+      #startButton { padding: 10px 24px; font-size: 13px; border-radius: 8px; letter-spacing: 0.3px; }
     }
 
-    #gifIntro.fade-out {
-      animation: fadeOut 0.8s ease-out forwards;
-    }
+    #gifIntro.fade-out { animation: fadeOut 0.8s ease-out forwards; }
 
-    @keyframes fadeOut {
-      to { opacity: 0; }
-    }
+    @keyframes fadeOut { to { opacity: 0; } }
 
     #mainContent {
       opacity: 0;
       transition: opacity 0.8s ease-in;
     }
 
-    #mainContent.visible {
-      opacity: 1;
-    }
+    #mainContent.visible { opacity: 1; }
 
     /* ====== BACKGROUND GRID ====== */
     .bg-grid {
@@ -217,16 +198,9 @@
       pointer-events: none;
     }
 
-    .content-container {
-      position: relative;
-      z-index: 1;
-    }
+    .content-container { position: relative; z-index: 1; }
 
-    .container {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 0 24px;
-    }
+    .container { max-width: 1400px; margin: 0 auto; padding: 0 24px; }
 
     /* ====== HEADER ====== */
     header {
@@ -299,13 +273,8 @@
       transition: transform 0.3s var(--transition);
     }
 
-    nav a:hover {
-      color: var(--text-primary);
-    }
-
-    nav a:hover::after {
-      transform: scaleX(1);
-    }
+    nav a:hover { color: var(--text-primary); }
+    nav a:hover::after { transform: scaleX(1); }
 
     .header-actions {
       display: flex;
@@ -348,6 +317,38 @@
       box-shadow: 0 0 30px var(--glow-primary), var(--shadow-md);
     }
 
+    /* ── NEW: Video Generate Button ── */
+    .btn-video {
+      background: linear-gradient(135deg, #f97316, #ec4899);
+      border: none;
+      box-shadow: 0 0 20px var(--glow-video);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-video::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .btn-video:hover {
+      box-shadow: 0 0 36px var(--glow-video), var(--shadow-md);
+    }
+
+    .btn-video:hover::before { opacity: 1; }
+
+    /* Video button sparkle animation */
+    @keyframes videoSpark {
+      0%, 100% { box-shadow: 0 0 20px var(--glow-video); }
+      50% { box-shadow: 0 0 32px rgba(249,115,22,0.5), 0 0 48px rgba(236,72,153,0.3); }
+    }
+
+    .btn-video { animation: videoSpark 3s ease-in-out infinite; }
+
     .btn-icon {
       width: 8px;
       height: 8px;
@@ -359,6 +360,94 @@
     @keyframes pulse {
       0%, 100% { opacity: 1; }
       50% { opacity: 0.5; }
+    }
+
+    /* ── NEW: Hero Video Banner ── */
+    .video-banner {
+      background: linear-gradient(135deg, rgba(249,115,22,0.08), rgba(236,72,153,0.06));
+      border: 1px solid rgba(249,115,22,0.25);
+      border-radius: 20px;
+      padding: 28px 32px;
+      margin-bottom: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      flex-wrap: wrap;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .video-banner::before {
+      content: '';
+      position: absolute;
+      top: -40%;
+      right: -10%;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(249,115,22,0.12), transparent 70%);
+      pointer-events: none;
+    }
+
+    .video-banner-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .video-banner-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(249,115,22,0.2), rgba(236,72,153,0.2));
+      border: 1px solid rgba(249,115,22,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      flex-shrink: 0;
+      animation: iconFloat 3s ease-in-out infinite;
+    }
+
+    @keyframes iconFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+
+    .video-banner-text h3 {
+      font-size: 17px;
+      font-weight: 700;
+      font-family: 'Space Grotesk', sans-serif;
+      margin-bottom: 4px;
+    }
+
+    .video-banner-text p {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .video-banner-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(249,115,22,0.15);
+      border: 1px solid rgba(249,115,22,0.3);
+      color: #fb923c;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-left: 8px;
+    }
+
+    .video-banner-new-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #fb923c;
+      animation: pulse 1.5s ease-in-out infinite;
     }
 
     /* ====== HERO SECTION ====== */
@@ -422,11 +511,7 @@
       50% { background-position: 100% 50%; }
     }
 
-    /* ====== TYPING ANIMATION ====== */
-    .typing-text {
-      display: inline-block;
-      min-height: 1.2em;
-    }
+    .typing-text { display: inline-block; min-height: 1.2em; }
 
     .cursor {
       display: inline-block;
@@ -519,13 +604,8 @@
       box-shadow: 0 0 30px var(--glow-primary), var(--shadow-lg);
     }
 
-    .showcase-item:hover img {
-      transform: scale(1.1);
-    }
-
-    .showcase-item:hover .showcase-overlay {
-      opacity: 1;
-    }
+    .showcase-item:hover img { transform: scale(1.1); }
+    .showcase-item:hover .showcase-overlay { opacity: 1; }
 
     /* ====== FEATURE TAGS ====== */
     .feature-tags {
@@ -564,6 +644,21 @@
       margin-right: 6px;
     }
 
+    /* Video tag special style */
+    .tag-video {
+      border-color: rgba(249,115,22,0.3);
+      background: rgba(249,115,22,0.06);
+      color: #fb923c;
+    }
+
+    .tag-video:hover {
+      border-color: rgba(249,115,22,0.6);
+      background: rgba(249,115,22,0.12);
+      color: #fb923c;
+    }
+
+    .tag-video .tag-icon { background: #fb923c; }
+
     /* ====== STATS BAR ====== */
     .stats-bar {
       display: grid;
@@ -589,21 +684,12 @@
       font-family: 'Space Grotesk', sans-serif;
     }
 
-    .stat-label {
-      font-size: 14px;
-      color: var(--text-tertiary);
-      font-weight: 500;
-    }
+    .stat-label { font-size: 14px; color: var(--text-tertiary); font-weight: 500; }
 
     /* ====== MODES SECTION ====== */
-    section {
-      padding: 100px 0;
-    }
+    section { padding: 100px 0; }
 
-    .section-header {
-      text-align: center;
-      margin-bottom: 64px;
-    }
+    .section-header { text-align: center; margin-bottom: 64px; }
 
     .section-label {
       display: inline-block;
@@ -671,8 +757,35 @@
       box-shadow: 0 0 40px var(--glow-primary), var(--shadow-lg);
     }
 
-    .mode-card:hover::before {
-      transform: scaleX(1);
+    .mode-card:hover::before { transform: scaleX(1); }
+
+    /* ── Video card special style ── */
+    .mode-card.video-card {
+      border-color: rgba(249,115,22,0.2);
+      background: linear-gradient(135deg, rgba(249,115,22,0.04), var(--bg-card));
+    }
+
+    .mode-card.video-card::before {
+      background: linear-gradient(90deg, #f97316, #ec4899);
+    }
+
+    .mode-card.video-card:hover {
+      border-color: rgba(249,115,22,0.5);
+      box-shadow: 0 0 40px var(--glow-video), var(--shadow-lg);
+    }
+
+    .mode-card-new-badge {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: linear-gradient(135deg, #f97316, #ec4899);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
     }
 
     .mode-icon {
@@ -686,6 +799,11 @@
       justify-content: center;
       font-size: 28px;
       margin-bottom: 20px;
+    }
+
+    .mode-icon.video-icon {
+      background: linear-gradient(135deg, rgba(249,115,22,0.15), rgba(236,72,153,0.1));
+      border-color: rgba(249,115,22,0.25);
     }
 
     .mode-card h3 {
@@ -707,10 +825,42 @@
       border-radius: 10px;
       background: var(--bg-secondary);
       border: 1px solid var(--border-primary);
-      font-family: 'Space Grotesk', sans-serif;
+      font-family: 'Space Grotesk', monospace;
       font-size: 13px;
       color: var(--text-tertiary);
       font-weight: 600;
+    }
+
+    .mode-meta.video-meta {
+      background: rgba(249,115,22,0.06);
+      border-color: rgba(249,115,22,0.2);
+      color: #fb923c;
+    }
+
+    /* ── Video card CTA link ── */
+    .video-card-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 14px;
+      padding: 10px 18px;
+      background: linear-gradient(135deg, #f97316, #ec4899);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.3s var(--transition);
+      font-family: 'Space Grotesk', sans-serif;
+      letter-spacing: 0.03em;
+      box-shadow: 0 4px 16px var(--glow-video);
+    }
+
+    .video-card-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px var(--glow-video);
     }
 
     /* ====== FEATURE SHOWCASE ====== */
@@ -757,11 +907,7 @@
       font-size: 16px;
     }
 
-    .feature-list {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
+    .feature-list { display: flex; flex-direction: column; gap: 16px; }
 
     .feature-item {
       display: flex;
@@ -774,10 +920,7 @@
       transition: all 0.3s var(--transition);
     }
 
-    .feature-item:hover {
-      border-color: var(--accent-primary);
-      transform: translateX(4px);
-    }
+    .feature-item:hover { border-color: var(--accent-primary); transform: translateX(4px); }
 
     .feature-item-icon {
       width: 12px;
@@ -787,11 +930,7 @@
       flex-shrink: 0;
     }
 
-    .feature-item-text {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text-secondary);
-    }
+    .feature-item-text { font-size: 14px; font-weight: 600; color: var(--text-secondary); }
 
     /* ====== ROADMAP ====== */
     .roadmap-container {
@@ -810,23 +949,11 @@
       gap: 24px;
     }
 
-    .roadmap-title {
-      font-size: 32px;
-      font-weight: 800;
-      font-family: 'Space Grotesk', sans-serif;
-    }
+    .roadmap-title { font-size: 32px; font-weight: 800; font-family: 'Space Grotesk', sans-serif; }
 
-    .progress-container {
-      flex: 1;
-      max-width: 400px;
-    }
+    .progress-container { flex: 1; max-width: 400px; }
 
-    .progress-label {
-      font-size: 13px;
-      color: var(--text-tertiary);
-      margin-bottom: 8px;
-      font-weight: 600;
-    }
+    .progress-label { font-size: 13px; color: var(--text-tertiary); margin-bottom: 8px; font-weight: 600; }
 
     .progress-bar-bg {
       width: 100%;
@@ -859,10 +986,7 @@
       transition: all 0.3s var(--transition);
     }
 
-    .milestone:hover {
-      border-color: var(--accent-primary);
-      transform: translateY(-2px);
-    }
+    .milestone:hover { border-color: var(--accent-primary); transform: translateY(-2px); }
 
     .milestone-header {
       display: flex;
@@ -893,23 +1017,11 @@
       box-shadow: 0 0 12px var(--accent-success);
     }
 
-    .milestone h4 {
-      font-size: 18px;
-      font-weight: 700;
-      margin-bottom: 8px;
-      font-family: 'Space Grotesk', sans-serif;
-    }
+    .milestone h4 { font-size: 18px; font-weight: 700; margin-bottom: 8px; font-family: 'Space Grotesk', sans-serif; }
 
-    .milestone p {
-      font-size: 14px;
-      color: var(--text-secondary);
-      margin-bottom: 16px;
-    }
+    .milestone p { font-size: 14px; color: var(--text-secondary); margin-bottom: 16px; }
 
-    .milestone ul {
-      list-style: none;
-      padding: 0;
-    }
+    .milestone ul { list-style: none; padding: 0; }
 
     .milestone li {
       font-size: 13px;
@@ -919,12 +1031,7 @@
       margin-bottom: 8px;
     }
 
-    .milestone li::before {
-      content: '→';
-      position: absolute;
-      left: 0;
-      color: var(--accent-primary);
-    }
+    .milestone li::before { content: '→'; position: absolute; left: 0; color: var(--accent-primary); }
 
     /* ====== FOOTER ====== */
     footer {
@@ -940,15 +1047,8 @@
       gap: 24px;
     }
 
-    .footer-text {
-      font-size: 14px;
-      color: var(--text-tertiary);
-    }
-
-    .footer-links {
-      display: flex;
-      gap: 16px;
-    }
+    .footer-text { font-size: 14px; color: var(--text-tertiary); }
+    .footer-links { display: flex; gap: 16px; }
 
     /* ====== MOBILE MENU ====== */
     .mobile-menu-btn {
@@ -973,17 +1073,9 @@
       transition: all 0.3s var(--transition);
     }
 
-    .mobile-menu-btn.active span:nth-child(1) {
-      transform: rotate(45deg) translate(5px, 5px);
-    }
-
-    .mobile-menu-btn.active span:nth-child(2) {
-      opacity: 0;
-    }
-
-    .mobile-menu-btn.active span:nth-child(3) {
-      transform: rotate(-45deg) translate(6px, -6px);
-    }
+    .mobile-menu-btn.active span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+    .mobile-menu-btn.active span:nth-child(2) { opacity: 0; }
+    .mobile-menu-btn.active span:nth-child(3) { transform: rotate(-45deg) translate(6px, -6px); }
 
     .mobile-nav {
       display: none;
@@ -1001,10 +1093,7 @@
       transition: all 0.3s var(--transition);
     }
 
-    .mobile-nav.active {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    .mobile-nav.active { opacity: 1; transform: translateY(0); }
 
     .mobile-nav a {
       display: block;
@@ -1016,127 +1105,44 @@
       transition: color 0.3s var(--transition);
     }
 
-    .mobile-nav a:last-child {
-      border-bottom: none;
-    }
-
-    .mobile-nav a:hover {
-      color: var(--text-primary);
-    }
+    .mobile-nav a:last-child { border-bottom: none; }
+    .mobile-nav a:hover { color: var(--text-primary); }
 
     /* ====== RESPONSIVE ====== */
     @media (max-width: 1024px) {
-      nav {
-        display: none;
-      }
-
-      .mobile-menu-btn,
-      .mobile-nav {
-        display: flex;
-      }
-
-      .feature-grid {
-        grid-template-columns: 1fr;
-      }
+      nav { display: none; }
+      .mobile-menu-btn, .mobile-nav { display: flex; }
+      .feature-grid { grid-template-columns: 1fr; }
     }
 
     @media (max-width: 768px) {
-      .container {
-        padding: 0 20px;
-      }
-
-      .header-inner {
-        height: 64px;
-      }
-
-      /* Mobile header buttons */
-      .header-actions {
-        gap: 8px;
-      }
-
-      .header-actions .btn {
-        padding: 8px 12px;
-        font-size: 12px;
-        gap: 6px;
-      }
-
-      .header-actions .btn-icon {
-        width: 6px;
-        height: 6px;
-      }
-
-      .logo {
-        font-size: 18px;
-      }
-
-      .logo-mark {
-        width: 36px;
-        height: 36px;
-        font-size: 14px;
-      }
-
-      .hero {
-        padding: 120px 0 80px;
-      }
-
-      .hero h1 {
-        font-size: 40px;
-      }
-
-      .hero-description {
-        font-size: 16px;
-      }
-
-      .ai-showcase {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
-      }
-
-      .modes-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .feature-showcase {
-        padding: 32px 24px;
-      }
-
-      .roadmap-container {
-        padding: 32px 24px;
-      }
-
-      .roadmap-grid {
-        grid-template-columns: 1fr;
-      }
-
-      section {
-        padding: 60px 0;
-      }
+      .container { padding: 0 20px; }
+      .header-inner { height: 64px; }
+      .header-actions { gap: 8px; }
+      .header-actions .btn { padding: 8px 12px; font-size: 12px; gap: 6px; }
+      .header-actions .btn-icon { width: 6px; height: 6px; }
+      .logo { font-size: 18px; }
+      .logo-mark { width: 36px; height: 36px; font-size: 14px; }
+      .hero { padding: 120px 0 80px; }
+      .hero h1 { font-size: 40px; }
+      .hero-description { font-size: 16px; }
+      .ai-showcase { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+      .modes-grid { grid-template-columns: 1fr; }
+      .feature-showcase { padding: 32px 24px; }
+      .roadmap-container { padding: 32px 24px; }
+      .roadmap-grid { grid-template-columns: 1fr; }
+      section { padding: 60px 0; }
+      .video-banner { padding: 20px; }
+      .video-banner-text h3 { font-size: 15px; }
     }
 
     @media (max-width: 480px) {
-      .hero h1 {
-        font-size: 32px;
-      }
-
-      .hero-cta {
-        flex-direction: column;
-        align-items: stretch;
-      }
-
-      .btn {
-        width: 100%;
-        justify-content: center;
-      }
-
-      /* Even smaller buttons on very small phones */
-      .header-actions .btn {
-        padding: 6px 10px;
-        font-size: 11px;
-      }
-
-      .stats-bar {
-        grid-template-columns: 1fr;
-      }
+      .hero h1 { font-size: 32px; }
+      .hero-cta { flex-direction: column; align-items: stretch; }
+      .btn { width: 100%; justify-content: center; }
+      .header-actions .btn { padding: 6px 10px; font-size: 11px; }
+      .stats-bar { grid-template-columns: 1fr; }
+      .video-banner { flex-direction: column; }
     }
 
     /* ====== SCROLL ANIMATIONS ====== */
@@ -1146,10 +1152,7 @@
       transition: all 0.8s var(--transition);
     }
 
-    .fade-in.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
 
     /* ====== MODAL/POPUP ====== */
     .modal-overlay {
@@ -1165,10 +1168,7 @@
       transition: opacity 0.3s var(--transition);
     }
 
-    .modal-overlay.active {
-      display: flex;
-      opacity: 1;
-    }
+    .modal-overlay.active { display: flex; opacity: 1; }
 
     .modal {
       background: var(--bg-card);
@@ -1183,9 +1183,7 @@
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 80px var(--glow-primary);
     }
 
-    .modal-overlay.active .modal {
-      transform: scale(1) translateY(0);
-    }
+    .modal-overlay.active .modal { transform: scale(1) translateY(0); }
 
     .modal-close {
       position: absolute;
@@ -1228,14 +1226,8 @@
     }
 
     @keyframes modalIconPulse {
-      0%, 100% {
-        transform: scale(1);
-        box-shadow: 0 0 20px var(--glow-primary);
-      }
-      50% {
-        transform: scale(1.05);
-        box-shadow: 0 0 40px var(--glow-primary), 0 0 60px var(--glow-secondary);
-      }
+      0%, 100% { transform: scale(1); box-shadow: 0 0 20px var(--glow-primary); }
+      50% { transform: scale(1.05); box-shadow: 0 0 40px var(--glow-primary), 0 0 60px var(--glow-secondary); }
     }
 
     .modal-title {
@@ -1291,11 +1283,7 @@
       color: var(--text-primary);
     }
 
-    .modal-features {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
+    .modal-features { display: flex; flex-direction: column; gap: 12px; }
 
     .modal-feature {
       display: flex;
@@ -1313,10 +1301,7 @@
       flex-shrink: 0;
     }
 
-    .modal-actions {
-      display: flex;
-      gap: 12px;
-    }
+    .modal-actions { display: flex; gap: 12px; }
 
     .modal-btn {
       flex: 1;
@@ -1360,21 +1345,10 @@
     }
 
     @media (max-width: 480px) {
-      .modal {
-        padding: 32px 24px;
-      }
-
-      .modal-title {
-        font-size: 24px;
-      }
-
-      .modal-actions {
-        flex-direction: column;
-      }
-
-      .modal-btn {
-        width: 100%;
-      }
+      .modal { padding: 32px 24px; }
+      .modal-title { font-size: 24px; }
+      .modal-actions { flex-direction: column; }
+      .modal-btn { width: 100%; }
     }
   </style>
 </head>
@@ -1387,7 +1361,6 @@
 
   <!-- Main Content -->
   <div id="mainContent">
-    <!-- Background -->
     <div class="bg-grid"></div>
     <div class="bg-gradient"></div>
 
@@ -1409,6 +1382,10 @@
             </nav>
 
             <div class="header-actions">
+              <!-- ★ NEW: Generate Video button in header -->
+              <a class="btn btn-video" href="generate.html">
+                🎬 Generate Video
+              </a>
               <a class="btn" href="https://t1era-or-kode-blind.gitbook.io/t1era/documentation" target="_blank" rel="noopener">Docs</a>
               <a class="btn btn-primary" href="https://t.me/T1ERA_SecBot" target="_blank" rel="noopener">
                 <span class="btn-icon"></span>
@@ -1426,6 +1403,7 @@
 
       <!-- Mobile Nav -->
       <nav class="mobile-nav" id="mobileNav">
+        <a href="generate.html">🎬 AI Video Generator</a>
         <a href="#modes">Modes</a>
         <a href="#features">Features</a>
         <a href="#roadmap">Roadmap</a>
@@ -1453,10 +1431,33 @@
               Chat, analyze, create, and automate — all from one powerful Telegram interface.
             </p>
 
+            <!-- ★ NEW: Video Generation Banner -->
+            <div class="video-banner fade-in">
+              <div class="video-banner-left">
+                <div class="video-banner-icon">🎬</div>
+                <div class="video-banner-text">
+                  <h3>
+                    AI Video Generator
+                    <span class="video-banner-badge">
+                      <span class="video-banner-new-dot"></span> NEW
+                    </span>
+                  </h3>
+                  <p>Text-to-video powered by LTX-2 on Azure A10 GPU · Up to 1080p · 24fps</p>
+                </div>
+              </div>
+              <a class="btn btn-video" href="generate.html" style="flex-shrink:0;">
+                ⚡ Try Now — Free
+              </a>
+            </div>
+
             <div class="hero-cta">
               <a class="btn btn-primary" href="https://t.me/T1ERA_SecBot" target="_blank" rel="noopener">
                 <span class="btn-icon"></span>
                 Start on Telegram
+              </a>
+              <!-- ★ NEW: Generate Video in main CTA row -->
+              <a class="btn btn-video" href="generate.html">
+                🎬 Generate Video
               </a>
               <a class="btn btn-primary" href="#" id="webappBtn" style="background: linear-gradient(135deg, var(--accent-secondary), var(--accent-tertiary));">
                 Launch WebApp
@@ -1468,27 +1469,19 @@
             <div class="ai-showcase fade-in">
               <div class="showcase-item">
                 <img src="./assets/new11.jpg" alt="AI Illustration" />
-                <div class="showcase-overlay">
-                  <span class="showcase-label">Illustration</span>
-                </div>
+                <div class="showcase-overlay"><span class="showcase-label">Illustration</span></div>
               </div>
               <div class="showcase-item">
                 <img src="./assets/new14.jpg" alt="AI Realistic" />
-                <div class="showcase-overlay">
-                  <span class="showcase-label">Realistic</span>
-                </div>
+                <div class="showcase-overlay"><span class="showcase-label">Realistic</span></div>
               </div>
               <div class="showcase-item">
                 <img src="./assets/new13.jpg" alt="AI 3D Render" />
-                <div class="showcase-overlay">
-                  <span class="showcase-label">3D Render</span>
-                </div>
+                <div class="showcase-overlay"><span class="showcase-label">3D Render</span></div>
               </div>
               <div class="showcase-item">
                 <img src="./assets/new12.png" alt="AI Cartoon" />
-                <div class="showcase-overlay">
-                  <span class="showcase-label">Cartoon</span>
-                </div>
+                <div class="showcase-overlay"><span class="showcase-label">Cartoon</span></div>
               </div>
             </div>
 
@@ -1497,17 +1490,24 @@
               <span class="tag"><span class="tag-icon"></span>Vision Analysis</span>
               <span class="tag"><span class="tag-icon"></span>Script Generator</span>
               <span class="tag"><span class="tag-icon"></span>Marketing Canvas</span>
-              <span class="tag"><span class="tag-icon"></span>Video AI</span>
+              <!-- ★ NEW: Video tag -->
+              <a href="generate.html" class="tag tag-video" style="text-decoration:none;">
+                <span class="tag-icon"></span>🎬 Video Generator
+              </a>
             </div>
 
             <div class="stats-bar fade-in">
               <div class="stat-item">
-                <div class="stat-value">5</div>
+                <div class="stat-value">6</div>
                 <div class="stat-label">AI Modes</div>
               </div>
               <div class="stat-item">
                 <div class="stat-value">24/7</div>
                 <div class="stat-label">Availability</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value">A10</div>
+                <div class="stat-label">Azure GPU · 24GB</div>
               </div>
               <div class="stat-item">
                 <div class="stat-value">Multi</div>
@@ -1530,6 +1530,20 @@
           </div>
 
           <div class="modes-grid">
+            <!-- ★ NEW: Video Generator card — first, most prominent -->
+            <div class="mode-card video-card fade-in">
+              <span class="mode-card-new-badge">✨ New</span>
+              <div class="mode-icon video-icon">🎬</div>
+              <h3>AI Video Generator</h3>
+              <p>
+                Generate cinematic 480p–1080p videos from a text prompt or reference image.
+                Powered by LTX-2 Distilled Q4_K_M on Azure A10 GPU — up to 10 seconds, 24fps.
+                Support for TikTok (9:16), YouTube (16:9) and Instagram (1:1) ratios.
+              </p>
+              <div class="mode-meta video-meta">LTX-2 Q4_K_M · Azure A10 · 24fps</div>
+              <a class="video-card-cta" href="generate.html">⚡ Open Generator →</a>
+            </div>
+
             <div class="mode-card fade-in">
               <div class="mode-icon">💬</div>
               <h3>Standard AI Chat</h3>
@@ -1571,7 +1585,7 @@
             </div>
 
             <div class="mode-card fade-in">
-              <div class="mode-icon">🎬</div>
+              <div class="mode-icon">🎭</div>
               <h3>MinaThor Video AI</h3>
               <p>
                 Generate cinematic video concepts and prompts. Create compelling 
@@ -1626,6 +1640,11 @@
                     <div class="feature-item-icon"></div>
                     <div class="feature-item-text">Secure OAuth integrations (Canva & more)</div>
                   </div>
+                  <!-- ★ NEW feature item -->
+                  <div class="feature-item" style="border-color:rgba(249,115,22,0.3);">
+                    <div class="feature-item-icon" style="background:linear-gradient(135deg,#f97316,#ec4899);"></div>
+                    <div class="feature-item-text" style="color:#fb923c;">AI Video Generation — LTX-2 on Azure A10 GPU</div>
+                  </div>
                 </div>
 
                 <div style="margin-top: 32px; display: flex; gap: 12px; flex-wrap: wrap;">
@@ -1633,6 +1652,8 @@
                     <span class="btn-icon"></span>
                     Get Started
                   </a>
+                  <!-- ★ NEW: Video button in features -->
+                  <a class="btn btn-video" href="generate.html">🎬 Generate Video</a>
                   <a class="btn" href="https://t1era-or-kode-blind.gitbook.io/t1era/documentation" target="_blank" rel="noopener">
                     Read Documentation
                   </a>
@@ -1651,6 +1672,12 @@
                     <div><span style="color: var(--accent-primary);">/minathor</span> — Create video concepts</div>
                     <div><span style="color: var(--accent-primary);">/account</span> — View dashboard</div>
                     <div><span style="color: var(--accent-primary);">/reset</span> — Clear session</div>
+                  </div>
+                  <!-- ★ NEW: Web generator shortcut in command panel -->
+                  <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border-primary);">
+                    <a href="generate.html" style="display:flex;align-items:center;gap:10px;padding:12px;background:rgba(249,115,22,0.06);border:1px solid rgba(249,115,22,0.25);border-radius:10px;text-decoration:none;color:#fb923c;font-size:13px;font-weight:600;transition:all 0.2s;">
+                      🎬 Open AI Video Generator →
+                    </a>
                   </div>
                 </div>
               </div>
@@ -1715,12 +1742,12 @@
                   <span class="milestone-label">Q2 • Video</span>
                   <span class="milestone-status"></span>
                 </div>
-                <h4>MinaThor Enhancement</h4>
-                <p>Advanced video AI features</p>
+                <h4>AI Video Generator</h4>
+                <p>LTX-2 on Azure A10 · Web interface</p>
                 <ul>
-                  <li>Preset library expansion</li>
-                  <li>Style packs</li>
-                  <li>Improved prompts</li>
+                  <li>Text-to-video (480p–1080p)</li>
+                  <li>Image-to-video support</li>
+                  <li>9:16 / 16:9 / 1:1 ratios</li>
                 </ul>
               </div>
 
@@ -1750,6 +1777,7 @@
               © <span id="year"></span> T1ERA. Professional AI Suite for Telegram.
             </div>
             <div class="footer-links">
+              <a class="btn btn-video" href="generate.html">🎬 Video Generator</a>
               <a class="btn" href="https://t1era-or-kode-blind.gitbook.io/t1era/documentation" target="_blank" rel="noopener">Documentation</a>
               <a class="btn" href="https://t.me/T1ERA_SecBot" target="_blank" rel="noopener">Launch Bot</a>
             </div>
@@ -1763,16 +1791,12 @@
   <div class="modal-overlay" id="webappModal">
     <div class="modal">
       <button class="modal-close" id="modalClose">×</button>
-      
       <div class="modal-icon">🚀</div>
-      
       <h3 class="modal-title">WebApp Coming Soon!</h3>
       <p class="modal-subtitle">
         Our powerful web application is currently under development and will be launching soon.
       </p>
-      
       <div class="modal-date">📅 Expected Launch: April 2026</div>
-      
       <div class="modal-content">
         <h4>What to expect:</h4>
         <div class="modal-features">
@@ -1794,7 +1818,6 @@
           </div>
         </div>
       </div>
-      
       <div class="modal-actions">
         <a href="https://t.me/T1ERA_SecBot" target="_blank" rel="noopener" class="modal-btn modal-btn-primary">
           <span>🤖</span>
@@ -1809,53 +1832,37 @@
   </div>
 
   <script>
-    // ====== CONFIGURATION ======
     const BOT_URL = "https://t.me/T1ERA_SecBot";
     const DOCS_URL = "https://t1era-or-kode-blind.gitbook.io/t1era/documentation";
-    const WEBAPP_URL = "#"; // Replace with actual WebApp URL
+    const WEBAPP_URL = "#";
 
-    // Set year
     document.getElementById('year').textContent = new Date().getFullYear();
 
-    // ====== TYPING ANIMATION ======
+    // ── TYPING ANIMATION ──
     const typingText = document.getElementById('typingText');
-    const textsToType = [
-      'Built for Results',
-      'Enhancement Human Making Decision'
-    ];
-    let textIndex = 0;
-    let charIndex = 0;
-    let isDeleting = false;
-    let typingSpeed = 100;
-    let pauseEnd = 2000;
+    const textsToType = ['Built for Results', 'Enhancement Human Making Decision'];
+    let textIndex = 0, charIndex = 0, isDeleting = false;
+    const typingSpeed = 100, pauseEnd = 2000;
 
     function typeWriter() {
       const currentText = textsToType[textIndex];
-      
       if (!isDeleting && charIndex <= currentText.length) {
-        typingText.textContent = currentText.substring(0, charIndex);
-        charIndex++;
+        typingText.textContent = currentText.substring(0, charIndex++);
         setTimeout(typeWriter, typingSpeed);
       } else if (isDeleting && charIndex >= 0) {
-        typingText.textContent = currentText.substring(0, charIndex);
-        charIndex--;
+        typingText.textContent = currentText.substring(0, charIndex--);
         setTimeout(typeWriter, typingSpeed / 2);
       } else if (!isDeleting && charIndex > currentText.length) {
-        setTimeout(() => {
-          isDeleting = true;
-          typeWriter();
-        }, pauseEnd);
+        setTimeout(() => { isDeleting = true; typeWriter(); }, pauseEnd);
       } else if (isDeleting && charIndex < 0) {
         isDeleting = false;
-        textIndex = (textIndex + 1) % textsToType.length; // Switch to next text
+        textIndex = (textIndex + 1) % textsToType.length;
         setTimeout(typeWriter, 500);
       }
     }
-
-    // Start typing animation after page loads
     setTimeout(typeWriter, 1000);
 
-    // ====== GIF INTRO ======
+    // ── GIF INTRO ──
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     const gifIntro = document.getElementById('gifIntro');
     const startButton = document.getElementById('startButton');
@@ -1865,27 +1872,19 @@
     if (isMobile && !hasSeenIntro) {
       gifIntro.classList.add('active');
       document.body.style.overflow = 'hidden';
-
-      setTimeout(() => {
-        startButton.classList.add('visible');
-      }, 3000);
-
+      setTimeout(() => startButton.classList.add('visible'), 3000);
       startButton.addEventListener('click', () => {
         sessionStorage.setItem('hasSeenIntro', 'true');
         document.body.style.overflow = '';
         gifIntro.classList.add('fade-out');
-        
-        setTimeout(() => {
-          gifIntro.style.display = 'none';
-          mainContent.classList.add('visible');
-        }, 800);
+        setTimeout(() => { gifIntro.style.display = 'none'; mainContent.classList.add('visible'); }, 800);
       });
     } else {
       gifIntro.style.display = 'none';
       mainContent.classList.add('visible');
     }
 
-    // ====== MOBILE MENU ======
+    // ── MOBILE MENU ──
     const mobileMenuBtn = document.getElementById('mobileMenuBtn');
     const mobileNav = document.getElementById('mobileNav');
 
@@ -1911,76 +1910,46 @@
       }
     });
 
-    // ====== SCROLL ANIMATIONS ======
-    const observerOptions = {
-      threshold: 0.1,
-      rootMargin: '0px 0px -100px 0px'
-    };
-
+    // ── SCROLL ANIMATIONS ──
     const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-        }
-      });
-    }, observerOptions);
-
+      entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
+    }, { threshold: 0.1, rootMargin: '0px 0px -100px 0px' });
     document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
 
-    // ====== PROGRESS BAR ======
+    // ── PROGRESS BAR ──
     const progressBar = document.getElementById('progressBar');
     const milestones = document.querySelectorAll('.milestone');
-
     function updateProgress() {
       const roadmapSection = document.getElementById('roadmap');
       const rect = roadmapSection.getBoundingClientRect();
-      const windowHeight = window.innerHeight;
-      const progress = Math.max(0, Math.min(1, (windowHeight - rect.top) / windowHeight));
-      
+      const progress = Math.max(0, Math.min(1, (window.innerHeight - rect.top) / window.innerHeight));
       progressBar.style.width = `${progress * 100}%`;
-      
       const activeCount = Math.floor(progress * milestones.length);
-      milestones.forEach((milestone, i) => {
-        if (i < activeCount) {
-          milestone.classList.add('done');
-        }
-      });
+      milestones.forEach((m, i) => { if (i < activeCount) m.classList.add('done'); });
     }
-
     window.addEventListener('scroll', updateProgress);
     window.addEventListener('resize', updateProgress);
 
-    // ====== SMOOTH SCROLL ======
+    // ── SMOOTH SCROLL ──
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
       anchor.addEventListener('click', (e) => {
         const href = anchor.getAttribute('href');
         if (href === '#') return;
-        
         const target = document.querySelector(href);
         if (target) {
           e.preventDefault();
-          const offsetTop = target.getBoundingClientRect().top + window.pageYOffset - 80;
-          window.scrollTo({
-            top: offsetTop,
-            behavior: 'smooth'
-          });
+          window.scrollTo({ top: target.getBoundingClientRect().top + window.pageYOffset - 80, behavior: 'smooth' });
         }
       });
     });
 
-    // Apply WebApp URL
+    // ── WEBAPP MODAL ──
     const webappBtn = document.getElementById('webappBtn');
-    if (webappBtn && WEBAPP_URL !== '#') {
-      webappBtn.href = WEBAPP_URL;
-    }
-
-    // ====== WEBAPP MODAL ======
     const webappModal = document.getElementById('webappModal');
     const modalClose = document.getElementById('modalClose');
     const modalNotifyMe = document.getElementById('modalNotifyMe');
 
-    // Open modal when clicking Launch WebApp button
-    if (webappBtn) {
+    if (webappBtn && WEBAPP_URL === '#') {
       webappBtn.addEventListener('click', (e) => {
         e.preventDefault();
         webappModal.classList.add('active');
@@ -1988,29 +1957,10 @@
       });
     }
 
-    // Close modal
-    function closeModal() {
-      webappModal.classList.remove('active');
-      document.body.style.overflow = '';
-    }
-
+    function closeModal() { webappModal.classList.remove('active'); document.body.style.overflow = ''; }
     modalClose.addEventListener('click', closeModal);
-
-    // Close modal when clicking outside
-    webappModal.addEventListener('click', (e) => {
-      if (e.target === webappModal) {
-        closeModal();
-      }
-    });
-
-    // Close modal with Escape key
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && webappModal.classList.contains('active')) {
-        closeModal();
-      }
-    });
-
-    // Notify Me button (you can customize this)
+    webappModal.addEventListener('click', (e) => { if (e.target === webappModal) closeModal(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && webappModal.classList.contains('active')) closeModal(); });
     modalNotifyMe.addEventListener('click', () => {
       alert('🔔 Great! We\'ll notify you when the WebApp launches in April 2026!\n\nFor now, please use our Telegram bot for the full T1ERA experience.');
       closeModal();
