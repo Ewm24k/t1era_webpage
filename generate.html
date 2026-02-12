@@ -1437,145 +1437,461 @@
 
 <script>
   /* ══════════════════════════════════════════
-     T1ERA — MINATHOR LOGIC (Background Polling)
+     T1ERA — MINATHOR LOGIC (Fixed)
+
+     KEY FIXES:
+     1. Frontend sends application/json (not FormData) — avoids multipart parse crash
+     2. Image converted to base64 on client before sending
+     3. response.text() → JSON.parse() instead of response.json() directly
+     4. Every error path shows a useful message
   ══════════════════════════════════════════ */
 
-  // 1. SELECTORS
-  const promptInput = document.getElementById('promptInput');
-  const charCount = document.getElementById('charCount');
-  const generateBtn = document.getElementById('generateBtn');
-  const statusBar = document.getElementById('statusBar');
-  const progressBar = document.getElementById('progressFill');
+  // ── SELECTORS ──
+  const promptInput     = document.getElementById('promptInput');
+  const charCount       = document.getElementById('charCount');
+  const generateBtn     = document.getElementById('generateBtn');
+  const btnLabel        = document.getElementById('btnLabel');
+  const btnSpinner      = document.getElementById('btnSpinner');
+  const statusBar       = document.getElementById('statusBar');
+  const progressFill    = document.getElementById('progressFill');
   const outputPlaceholder = document.getElementById('outputPlaceholder');
-  const videoWrap = document.getElementById('videoWrap');
-  const outputVideo = document.getElementById('outputVideo');
-  const downloadBtn = document.getElementById('downloadBtn');
+  const outputVideoWrap = document.getElementById('outputVideoWrap');
+  const outputVideo     = document.getElementById('outputVideo');
+  const downloadBtn     = document.getElementById('downloadBtn');
+  const shareBtn        = document.getElementById('shareBtn');
+  const regenBtn        = document.getElementById('regenBtn');
+  const outputBadge     = document.getElementById('outputBadge');
+  const videoBadgeRes   = document.getElementById('videoBadgeRes');
+  const videoBadgeRatio = document.getElementById('videoBadgeRatio');
+  const videoBadgeDur   = document.getElementById('videoBadgeDur');
 
-  // 2. STATE
-  let currentFile = null;
-  let isGenerating = false;
-  let pollInterval = null;
+  // Sidebar spec readout
+  const sRes    = document.getElementById('sRes');
+  const sRatio  = document.getElementById('sRatio');
+  const sFrames = document.getElementById('sFrames');
+  const sDur    = document.getElementById('sDur');
 
-  // 3. EVENT LISTENERS
+  // Status bar cells
+  const statQueue  = document.getElementById('statQueue');
+  const statEta    = document.getElementById('statEta');
+  const statFrames = document.getElementById('statFrames');
+
+  // ── STATE ──
+  let currentFileBase64 = null;
+  let currentFileType   = null;
+  let isGenerating      = false;
+  let pollInterval      = null;
+  let currentVideoUrl   = null;
+
+  // ── SETTINGS STATE ──
+  let selectedRatio    = '16:9';
+  let selectedDuration = 6;
+  let selectedRes      = '480p';
+
+  const RESOLUTION_DIMS = {
+    "480p:16:9": "854×480", "480p:9:16": "480×854", "480p:1:1": "480×480",
+    "720p:16:9": "1280×720","720p:9:16": "720×1280","720p:1:1": "720×720",
+    "1080p:16:9":"1920×1080","1080p:9:16":"1080×1920","1080p:1:1":"1080×1080",
+  };
+
+  // ── CHAR COUNTER ──
   promptInput.addEventListener('input', () => {
     charCount.textContent = promptInput.value.length;
   });
 
+  // ── PILL GROUPS ──
+  document.querySelectorAll('#ratioGroup .pill').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#ratioGroup .pill').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedRatio = btn.dataset.ratio;
+      updateSpecReadout();
+    });
+  });
+
+  document.querySelectorAll('#durGroup .pill').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#durGroup .pill').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedDuration = parseInt(btn.dataset.dur);
+      updateSpecReadout();
+    });
+  });
+
+  document.getElementById('resSelect').addEventListener('change', (e) => {
+    selectedRes = e.target.value;
+    updateSpecReadout();
+  });
+
+  function updateSpecReadout() {
+    const key    = `${selectedRes}:${selectedRatio}`;
+    const dims   = RESOLUTION_DIMS[key] || '854×480';
+    const frames = (selectedDuration * 24) + 1;
+    if (sRes)    sRes.textContent    = dims;
+    if (sRatio)  sRatio.textContent  = selectedRatio;
+    if (sFrames) sFrames.textContent = `${frames}f`;
+    if (sDur)    sDur.textContent    = `${selectedDuration}s @ 24fps`;
+  }
+  updateSpecReadout();
+
+  // ── IMAGE UPLOAD ──
+  const uploadDrop   = document.getElementById('uploadDrop');
+  const imageFile    = document.getElementById('imageFile');
+  const previewStrip = document.getElementById('previewStrip');
+  const previewImg   = document.getElementById('previewImg');
+  const clearImg     = document.getElementById('clearImg');
+
+  imageFile.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) handleImageFile(file);
+  });
+
+  uploadDrop.addEventListener('dragover', (e) => { e.preventDefault(); uploadDrop.classList.add('over'); });
+  uploadDrop.addEventListener('dragleave', () => uploadDrop.classList.remove('over'));
+  uploadDrop.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadDrop.classList.remove('over');
+    const file = e.dataTransfer.files[0];
+    if (file) handleImageFile(file);
+  });
+
+  clearImg.addEventListener('click', () => {
+    currentFileBase64 = null;
+    currentFileType   = null;
+    previewStrip.style.display = 'none';
+    previewImg.src = '';
+    imageFile.value = '';
+  });
+
+  function handleImageFile(file) {
+    if (!file.type.startsWith('image/')) {
+      showToast('Please upload an image file (PNG, JPG, WEBP)', 'error');
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      showToast('Image must be under 10MB', 'error');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUrl = e.target.result;
+      // Strip the data:image/...;base64, prefix — we send raw base64
+      currentFileBase64 = dataUrl.split(',')[1];
+      currentFileType   = file.type;
+      previewImg.src    = dataUrl;
+      previewStrip.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // ── GENERATE BUTTON ──
   generateBtn.addEventListener('click', startGeneration);
 
-  // 4. MAIN ACTION: START
+  regenBtn && regenBtn.addEventListener('click', () => {
+    outputVideoWrap.style.display = 'none';
+    outputPlaceholder.style.display = 'block';
+    startGeneration();
+  });
+
+  shareBtn && shareBtn.addEventListener('click', async () => {
+    if (!currentVideoUrl) return;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'T1ERA AI Video', url: currentVideoUrl });
+      } catch(e) { /* user cancelled */ }
+    } else {
+      navigator.clipboard.writeText(currentVideoUrl);
+      showToast('Video URL copied to clipboard', 'success');
+    }
+  });
+
+  // ── MAIN GENERATION FLOW ──
   async function startGeneration() {
     const prompt = promptInput.value.trim();
-    if (!prompt) return showToast("Please enter a prompt.", "error");
+    if (!prompt) {
+      showToast('Please enter a video description', 'error');
+      return;
+    }
+    if (isGenerating) return;
 
     setLoading(true);
-    updateStep(1); // Step: Requesting
+    setStep(0); // Queuing
+
+    // Build JSON payload — image already base64'd on client
+    const payload = {
+      prompt:       prompt,
+      resolution:   selectedRes,
+      aspect_ratio: selectedRatio,
+      duration:     selectedDuration,
+      fps:          24,
+      image_base64: currentFileBase64 || null,
+      image_type:   currentFileType   || null,
+    };
 
     try {
-      const formData = new FormData();
-      formData.append('payload', JSON.stringify({
-        prompt: prompt,
-        resolution: "480p", // You can link these to your UI pills
-        aspect_ratio: "16:9"
-      }));
-
-      // NOTE: Calling the -background function
+      // ── STEP 1: Send to proxy — SAFE fetch pattern ──
       const response = await fetch('/.netlify/functions/proxy-background', {
-        method: 'POST',
-        body: formData
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify(payload),
       });
 
-      const data = await response.json();
+      // Read body as text FIRST — never call .json() on unknown responses
+      const rawText = await response.text();
 
-      if (!response.ok) throw new Error(data.error || "Queue failed");
+      if (!rawText || rawText.trim() === '') {
+        throw new Error('Server returned an empty response. The function may have crashed — check Netlify logs.');
+      }
 
-      // The proxy-background returns a job_id (hash) and a check_status_url
-      showToast("Request queued on Azure GPU...", "info");
-      updateStep(2); // Step: Rendering
-      
-      // Start checking for the video every 5 seconds
-      startPolling(data.check_status_url);
+      let data;
+      try {
+        data = JSON.parse(rawText);
+      } catch (parseErr) {
+        // Server returned HTML (Netlify error page) or garbage
+        const preview = rawText.substring(0, 300);
+        throw new Error(`Server returned non-JSON response: ${preview}`);
+      }
+
+      if (!response.ok) {
+        throw new Error(data.message || data.error || `HTTP ${response.status}`);
+      }
+
+      if (!data.check_status_url) {
+        throw new Error('Server response missing check_status_url. Check proxy function logic.');
+      }
+
+      // ── STEP 2: Got job ID — start polling ──
+      const jobId          = data.job_id;
+      const checkStatusUrl = data.check_status_url;
+      const numFrames      = data.specs?.num_frames || ((selectedDuration * 24) + 1);
+
+      if (statFrames) statFrames.textContent = `${numFrames}f`;
+      if (statQueue)  statQueue.textContent  = '1';
+      setStep(1); // Loading model weights
+      showToast('Job queued on Azure GPU — rendering…', 'info');
+
+      startPolling(checkStatusUrl, numFrames);
 
     } catch (err) {
-      console.error(err);
-      showToast(err.message, "error");
+      console.error('[generate] Error:', err);
+      showToast('Error: ' + err.message, 'error');
       setLoading(false);
     }
   }
 
-  // 5. POLLING LOGIC
-  function startPolling(checkUrl) {
-    let attempts = 0;
-    const maxAttempts = 60; // 5 minutes total
+  // ── POLLING ──
+  function startPolling(checkUrl, numFrames) {
+    let attempts    = 0;
+    const maxAttempts = 72; // 6 minutes (72 × 5s)
+
+    clearInterval(pollInterval);
 
     pollInterval = setInterval(async () => {
       attempts++;
-      
-      // Simulate progress bar movement
-      const progress = Math.min(attempts * 2, 95); 
-      progressBar.style.width = `${progress}%`;
+
+      // Simulate progress while we wait — caps at 92% until done
+      const simProgress = Math.min(92, Math.round((attempts / maxAttempts) * 100));
+      if (progressFill) progressFill.style.width = `${simProgress}%`;
+
+      // Update step UI
+      if (attempts === 2)  setStep(1); // loading weights
+      if (attempts === 5)  setStep(2); // rendering
+      if (attempts === 18) setStep(3); // encoding
+
+      if (statEta) {
+        const remaining = Math.max(0, maxAttempts - attempts) * 5;
+        statEta.textContent = remaining > 0 ? `~${remaining}s` : '…';
+      }
+
+      if (attempts >= maxAttempts) {
+        clearInterval(pollInterval);
+        showToast('Generation timed out. The GPU may be busy — please retry.', 'error');
+        setLoading(false);
+        return;
+      }
 
       try {
-        const res = await fetch(checkUrl);
-        const statusData = await res.json();
+        const res     = await fetch(checkUrl);
+        const rawText = await res.text();
 
-        // Gradio typically returns a 'data' array when the job is done
-        if (statusData.data && statusData.data[0]) {
-          const videoUrl = statusData.data[0].name || statusData.data[0];
+        if (!rawText || rawText.trim() === '') return; // transient empty — keep polling
+
+        let statusData;
+        try {
+          statusData = JSON.parse(rawText);
+        } catch (e) {
+          return; // transient bad response — keep polling
+        }
+
+        // Gradio /queue/data returns server-sent events — handle both formats
+        // Format A: { data: [videoObj] }  (Gradio standard)
+        // Format B: { output: { data: [videoObj] } }
+        let videoUrl = null;
+
+        if (statusData.msg === 'process_completed') {
+          const output = statusData.output?.data || statusData.data;
+          if (Array.isArray(output) && output[0]) {
+            const v = output[0];
+            videoUrl = typeof v === 'string' ? v : (v.url || v.name || v.data || null);
+            // If relative path, prepend AZURE base URL
+            if (videoUrl && !videoUrl.startsWith('http')) {
+              videoUrl = (window.__AZURE_BASE || '') + videoUrl;
+            }
+          }
+        }
+
+        // Gradio error message
+        if (statusData.msg === 'process_errored') {
+          clearInterval(pollInterval);
+          const errMsg = statusData.output?.error || 'GPU processing error';
+          showToast('GPU error: ' + errMsg, 'error');
+          setLoading(false);
+          return;
+        }
+
+        if (videoUrl) {
+          clearInterval(pollInterval);
           finishGeneration(videoUrl);
         }
 
-        if (attempts >= maxAttempts) {
-          throw new Error("Generation timed out.");
-        }
-      } catch (err) {
-        clearInterval(pollInterval);
-        showToast("Check failed: GPU might be busy.", "error");
-        setLoading(false);
+      } catch (pollErr) {
+        // Network hiccup — keep going, don't abort
+        console.warn('[poll] transient error (continuing):', pollErr.message);
       }
-    }, 5000); // Check every 5 seconds
+    }, 5000);
   }
 
-  // 6. FINISH
+  // ── FINISH ──
   function finishGeneration(videoUrl) {
-    clearInterval(pollInterval);
-    progressBar.style.width = "100%";
-    updateStep(3); // Step: Finalizing
+    currentVideoUrl = videoUrl;
 
-    // If URL is relative, prepend Azure base (handled by proxy but safe to check)
-    outputVideo.src = videoUrl;
-    downloadBtn.href = videoUrl;
+    if (progressFill) progressFill.style.width = '100%';
+    setStep(4); // Done
+
+    // Update video element
+    const source = outputVideo.querySelector('source') || outputVideo;
+    source.src = videoUrl;
+    outputVideo.load();
+
+    // Update output badges
+    if (videoBadgeRes)   videoBadgeRes.textContent   = selectedRes;
+    if (videoBadgeRatio) videoBadgeRatio.textContent  = selectedRatio;
+    if (videoBadgeDur)   videoBadgeDur.textContent    = `${selectedDuration}s`;
+    if (outputBadge) {
+      outputBadge.textContent = 'Ready';
+      outputBadge.style.background = 'rgba(16,185,129,0.12)';
+      outputBadge.style.borderColor = 'rgba(16,185,129,0.4)';
+      outputBadge.style.color = '#10b981';
+    }
+
+    // Download button
+    if (downloadBtn) {
+      downloadBtn.onclick = () => {
+        const a = document.createElement('a');
+        a.href     = videoUrl;
+        a.download = `t1era_${Date.now()}.mp4`;
+        a.click();
+      };
+    }
 
     setTimeout(() => {
       setLoading(false);
-      outputPlaceholder.style.display = 'none';
-      videoWrap.style.display = 'block';
-      showToast("Video Generated Successfully!", "success");
-    }, 1000);
+      if (outputPlaceholder) outputPlaceholder.style.display  = 'none';
+      if (outputVideoWrap)   outputVideoWrap.style.display    = 'block';
+      showToast('Video generated successfully!', 'success');
+      addToHistory(promptInput.value.trim(), videoUrl);
+    }, 800);
   }
 
-  // 7. UI HELPERS
+  // ── UI HELPERS ──
   function setLoading(active) {
     isGenerating = active;
-    generateBtn.disabled = active;
-    document.querySelector('.spinner').style.display = active ? 'block' : 'none';
-    statusBar.classList.toggle('visible', active);
-    if (!active) progressBar.style.width = "0%";
+    if (generateBtn) generateBtn.disabled = active;
+    if (btnSpinner)  btnSpinner.style.display  = active ? 'block' : 'none';
+    if (btnLabel)    btnLabel.textContent = active ? 'GENERATING…' : 'GENERATE VIDEO';
+    if (statusBar)   statusBar.classList.toggle('visible', active);
+    if (!active && progressFill) setTimeout(() => { progressFill.style.width = '0%'; }, 1000);
   }
 
-  function updateStep(stepIndex) {
-    const steps = document.querySelectorAll('.step-row');
-    steps.forEach((step, i) => {
-      step.className = 'step-row ' + (i + 1 === stepIndex ? 'active' : i + 1 < stepIndex ? 'done' : 'pending');
+  function setStep(activeIndex) {
+    document.querySelectorAll('.step-row').forEach((row, i) => {
+      row.classList.remove('pending', 'active', 'done');
+      if (i < activeIndex)      row.classList.add('done');
+      else if (i === activeIndex) row.classList.add('active');
+      else                        row.classList.add('pending');
     });
   }
 
-  function showToast(msg, type) {
+  // ── HISTORY ──
+  let history = [];
+
+  function addToHistory(prompt, videoUrl) {
+    history.unshift({ prompt, videoUrl, ts: Date.now() });
+    if (history.length > 10) history.pop();
+    renderHistory();
+  }
+
+  function renderHistory() {
+    const list  = document.getElementById('historyList');
+    const empty = document.getElementById('historyEmpty');
+    if (!list) return;
+
+    if (history.length === 0) {
+      if (empty) empty.style.display = 'block';
+      return;
+    }
+    if (empty) empty.style.display = 'none';
+
+    // Clear existing items (keep empty el)
+    Array.from(list.children).forEach(c => {
+      if (c.id !== 'historyEmpty') c.remove();
+    });
+
+    history.forEach((item) => {
+      const div = document.createElement('div');
+      div.className = 'history-item';
+      div.innerHTML = `
+        <div class="hist-thumb">🎬</div>
+        <div class="hist-info">
+          <div class="hist-prompt">${item.prompt.substring(0, 60)}…</div>
+          <div class="hist-meta">${new Date(item.ts).toLocaleTimeString()}</div>
+        </div>
+      `;
+      div.onclick = () => {
+        outputVideo.src = item.videoUrl;
+        outputVideo.load();
+        if (outputPlaceholder) outputPlaceholder.style.display = 'none';
+        if (outputVideoWrap)   outputVideoWrap.style.display   = 'block';
+      };
+      list.appendChild(div);
+    });
+  }
+
+  document.getElementById('clearHistory') && document.getElementById('clearHistory').addEventListener('click', () => {
+    history = [];
+    renderHistory();
+    if (document.getElementById('historyEmpty')) document.getElementById('historyEmpty').style.display = 'block';
+  });
+
+  // ── TOAST ──
+  function showToast(msg, type = 'info') {
+    const existing = document.querySelectorAll('.toast.show');
+    existing.forEach(t => t.remove());
+
     const t = document.createElement('div');
     t.className = `toast show ${type}`;
     t.textContent = msg;
     document.body.appendChild(t);
-    setTimeout(() => t.remove(), 4000);
+    setTimeout(() => {
+      t.classList.remove('show');
+      setTimeout(() => t.remove(), 400);
+    }, 4000);
+  }
+
+  // ── SCROLL TO TIPS ──
+  function scrollToTips() {
+    const el = document.getElementById('tipCard');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 </script>
 </body>
