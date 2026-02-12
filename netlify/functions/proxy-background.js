@@ -76,7 +76,17 @@ exports.handler = async function (event, context) {
     return sendResponse(400, { error: "INVALID_REQUEST", message: "Prompt is required." }, cors);
   }
 
-  // 3. Payload Normalization
+  // 3. Mode Detection & Validation
+  const mode = payload.mode || 'text-to-video';
+  
+  if (mode === 'image-to-video' && !payload.image_base64) {
+    return sendResponse(400, { 
+      error: "IMAGE_REQUIRED", 
+      message: "Image is required for image-to-video mode." 
+    }, cors);
+  }
+
+  // 4. Payload Normalization
   const prompt = String(payload.prompt).trim();
   const negPrompt = "(low quality, worst quality, text, watermark, speech, talking, subtitles:1.4)";
   
@@ -85,14 +95,27 @@ exports.handler = async function (event, context) {
   const frames = parseInt(payload.num_frames) || DEFAULTS.FRAMES;
   const fps = parseInt(payload.fps) || DEFAULTS.FPS;
   
-  // 4. Data Array - CORRECTED ORDER based on GalleryData error
-  // The error "Input should be a valid list" at position 0 means:
-  // Position 0 = Image Gallery (must be array, empty [] for text-to-video)
-  // Position 1 = Text Prompt
+  // 5. Data Array - MODE-DEPENDENT STRUCTURE
+  // ✅ TEXT-TO-VIDEO: Position 0 = empty array [], Position 1 = prompt
+  // ✅ IMAGE-TO-VIDEO: Position 0 = image gallery array with image object
+  
+  let imageGallery = [];
+  
+  if (mode === 'image-to-video' && payload.image_base64) {
+    // Convert base64 to proper Gradio gallery format
+    imageGallery = [{
+      path: `data:${payload.image_type};base64,${payload.image_base64}`,
+      url: `data:${payload.image_type};base64,${payload.image_base64}`,
+      orig_name: "reference.png",
+      size: null,
+      mime_type: payload.image_type
+    }];
+  }
+  
   const dataArray = [
-    [],            // ✅ Image Gallery - empty array for text-to-video mode
-    prompt,        // ✅ Text Prompt - second position
-    negPrompt,     // Negative Prompt
+    imageGallery,  // ✅ Position 0: [] for text-to-video, [imageObj] for image-to-video
+    prompt,        // ✅ Position 1: Text prompt
+    negPrompt,     // Negative prompt
     FORCED_MODEL,  // Model selection
     width,
     height,
@@ -100,8 +123,8 @@ exports.handler = async function (event, context) {
     fps,
     1,             // Batch count
     DEFAULTS.GUIDANCE,
-    -1,            // Random Seed
-    true,          // CPU Offload
+    -1,            // Random seed
+    true,          // CPU offload
     "sdpa",        // Attention type
     "None",        // LoRA
     127            // Gradio internal
@@ -110,8 +133,10 @@ exports.handler = async function (event, context) {
   const session_hash = `prod_${Math.random().toString(36).substring(2, 12)}`;
   const joinEndpoint = `${AZURE_BASE}/gradio_api/queue/join`;
 
-  console.log(`[Queue] Session: ${session_hash} | Endpoint: ${joinEndpoint}`);
+  console.log(`[Queue] Mode: ${mode} | Session: ${session_hash}`);
+  console.log(`[Queue] Endpoint: ${joinEndpoint}`);
   console.log(`[Specs] ${width}x${height} | ${frames} frames @ ${fps}fps`);
+  console.log(`[Image] ${mode === 'image-to-video' ? 'Yes (gallery populated)' : 'No (text-only)'}`);
 
   // 5. Execution & Error Handling
   try {
@@ -153,16 +178,19 @@ exports.handler = async function (event, context) {
       
       return sendResponse(200, {
         success: true,
+        mode: mode,
         job_id: session_hash,
         event_id: result.event_id,
         status_url: statusUrl,
         check_status_url: statusUrl,  // ✅ Frontend expects this field
         specs: {
+          mode: mode,
           width: width,
           height: height,
           num_frames: frames,
           fps: fps,
-          model: FORCED_MODEL
+          model: FORCED_MODEL,
+          has_image: mode === 'image-to-video'
         }
       }, cors);
     } else {
