@@ -1962,9 +1962,87 @@
     webappModal.addEventListener('click', (e) => { if (e.target === webappModal) closeModal(); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && webappModal.classList.contains('active')) closeModal(); });
     modalNotifyMe.addEventListener('click', () => {
-      alert('🔔 Great! We\'ll notify you when the WebApp launches in April 2026!\n\nFor now, please use our Telegram bot for the full T1ERA experience.');
+      alert('Great! We\'ll notify you when the WebApp launches in April 2026!\n\nFor now, please use our Telegram bot for the full T1ERA experience.');
       closeModal();
     });
-  </script>
+
+    // ── T1ERA VIDEO GENERATION ENGINE ──
+
+    /** 1. Polling Function: Checks the status of a job every 2.5s */
+    async function pollJobStatus(jobId, onUpdate, onDone, onError) {
+        const POLL_INTERVAL = 2500; 
+        const MAX_POLLS = 100; // ~4 minutes total safety
+        let polls = 0;
+
+        const interval = setInterval(async () => {
+            polls++;
+            if (polls > MAX_POLLS) {
+                clearInterval(interval);
+                onError("Generation timed out. The GPU is taking longer than expected.");
+                return;
+            }
+
+            try {
+                const res = await fetch(`/.netlify/functions/status?action=check&job_id=${jobId}`);
+                if (!res.ok) throw new Error("Status check failed");
+                const data = await res.json();
+
+                onUpdate(data);
+
+                if (data.status === "done") {
+                    clearInterval(interval);
+                    onDone(data.video_url);
+                } else if (data.status === "error") {
+                    clearInterval(interval);
+                    onError(data.error_message || "GPU encountered an error.");
+                }
+            } catch (err) {
+                console.warn("Polling error (retrying):", err.message);
+            }
+        }, POLL_INTERVAL);
+    }
+
+    /** 2. Trigger Logic: Connects your UI to the Netlify Proxy */
+    async function handleGenerateVideo(payload) {
+        try {
+            // UI Feedback: Start Loading State
+            console.log("Starting generation...");
+            
+            // Step 1: Send request to Proxy
+            const response = await fetch('/.netlify/functions/proxy', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const initData = await response.json();
+            if (initData.error) throw new Error(initData.message);
+
+            const jobId = initData.job_id;
+
+            // Step 2: Start Polling the status.js function
+            pollJobStatus(
+                jobId,
+                (update) => {
+                    // Update your Progress Bar and Status Text here
+                    console.log(`Status: ${update.status} | Progress: ${update.progress_pct}%`);
+                    // Example: document.getElementById('statusText').innerText = update.status;
+                },
+                (videoUrl) => {
+                    // Success! Show the video
+                    console.log("Video Ready:", videoUrl);
+                    // Example: videoSource.src = videoUrl; videoPlayer.load();
+                },
+                (errorMsg) => {
+                    // Handle Error
+                    alert("Error: " + errorMsg);
+                }
+            );
+
+        } catch (err) {
+            alert("Failed to start generation: " + err.message);
+        }
+    }
+</script>
 </body>
 </html>
