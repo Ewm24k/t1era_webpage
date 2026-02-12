@@ -2,7 +2,8 @@
   functions = "netlify/functions"
 
 [functions]
-  node_bundle = true
+  # Use esbuild to handle the 'require' statements in your proxy.js
+  node_bundler = "esbuild"
 
 [[redirects]]
   from = "/api/*"
