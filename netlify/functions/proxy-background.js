@@ -76,9 +76,8 @@ exports.handler = async function (event, context) {
     return sendResponse(400, { error: "INVALID_REQUEST", message: "Prompt is required." }, cors);
   }
 
-  // 3. Payload Normalization (Ensuring correct types for Wan2GP)
-  // ✅ FIX: Plain strings, NOT arrays - Gradio expects raw text for prompt fields
-  const prompt = String(payload.prompt).trim(); 
+  // 3. Payload Normalization
+  const prompt = String(payload.prompt).trim();
   const negPrompt = "(low quality, worst quality, text, watermark, speech, talking, subtitles:1.4)";
   
   const width = parseInt(payload.width) || DEFAULTS.WIDTH;
@@ -86,13 +85,15 @@ exports.handler = async function (event, context) {
   const frames = parseInt(payload.num_frames) || DEFAULTS.FRAMES;
   const fps = parseInt(payload.fps) || DEFAULTS.FPS;
   
-  // 4. Data Array Alignment for Wan2GP fn_index: 2
-  // Alignment: [Prompt, NegPrompt, Image(null), Model, W, H, Frames, FPS, Batch, Guidance, Seed, Offload, Attn, LoRA, Reserved]
+  // 4. Data Array - CORRECTED ORDER based on GalleryData error
+  // The error "Input should be a valid list" at position 0 means:
+  // Position 0 = Image Gallery (must be array, empty [] for text-to-video)
+  // Position 1 = Text Prompt
   const dataArray = [
-    prompt,        // ✅ Plain string
-    negPrompt,     // ✅ Plain string
-    null,          // Image slot (must be null for Text-to-Video)
-    FORCED_MODEL,
+    [],            // ✅ Image Gallery - empty array for text-to-video mode
+    prompt,        // ✅ Text Prompt - second position
+    negPrompt,     // Negative Prompt
+    FORCED_MODEL,  // Model selection
     width,
     height,
     frames,
@@ -100,10 +101,10 @@ exports.handler = async function (event, context) {
     1,             // Batch count
     DEFAULTS.GUIDANCE,
     -1,            // Random Seed
-    true,          // Tiled/CPU Offload
-    "sdpa",        // Attention implementation
-    "None",        // LoRA selection
-    127            // Gradio Internal Parameter
+    true,          // CPU Offload
+    "sdpa",        // Attention type
+    "None",        // LoRA
+    127            // Gradio internal
   ];
 
   const session_hash = `prod_${Math.random().toString(36).substring(2, 12)}`;
