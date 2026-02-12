@@ -77,7 +77,11 @@ exports.handler = async function (event, context) {
   }
 
   // 3. Payload Normalization (Ensuring correct types for Wan2GP)
-  const prompt = String(payload.prompt).trim();
+  /** * FIX: Wrapped in arrays [] to satisfy Pydantic ValidationError for GalleryData 
+   */
+  const prompt = [String(payload.prompt).trim()]; 
+  const negPrompt = ["(low quality, worst quality, text, watermark, speech, talking, subtitles:1.4)"];
+  
   const width = parseInt(payload.width) || DEFAULTS.WIDTH;
   const height = parseInt(payload.height) || DEFAULTS.HEIGHT;
   const frames = parseInt(payload.num_frames) || DEFAULTS.FRAMES;
@@ -87,7 +91,7 @@ exports.handler = async function (event, context) {
   // Alignment: [Prompt, NegPrompt, Image(null), Model, W, H, Frames, FPS, Batch, Guidance, Seed, Offload, Attn, LoRA, Reserved]
   const dataArray = [
     prompt,
-    "(low quality, worst quality, text, watermark, speech, talking, subtitles:1.4)",
+    negPrompt,
     null, // Image slot (must be null for Text-to-Video)
     FORCED_MODEL,
     width,
