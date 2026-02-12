@@ -61,12 +61,17 @@ function err(statusCode, message, extraHeaders = {}) {
   return json(statusCode, { error: true, message }, extraHeaders);
 }
 
+/**
+ * FIXED: This now correctly handles both JSON and Multipart (Images)
+ */
 async function parsePayload(event) {
-  const contentType = (event.headers["content-type"] || "").toLowerCase();
+  const contentType = (event.headers["content-type"] || event.headers["Content-Type"] || "").toLowerCase();
   
-  // FIXED: Handle Multipart (FormData) which contains the 'data' string and 'image' file
+  // Handle Multipart (FormData from UI)
   if (contentType.includes("multipart/form-data")) {
     const result = await multipart.parse(event);
+    
+    // result.data contains the JSON string 'payload' from generate.html
     const fields = result.data ? JSON.parse(result.data) : {};
     const imageFile = result.files && result.files[0];
     
@@ -77,13 +82,13 @@ async function parsePayload(event) {
     };
   }
 
-  // Fallback for direct JSON
+  // Handle Standard JSON
   if (contentType.includes("application/json")) {
     const parsed = JSON.parse(event.body || "{}");
     return { fields: parsed, imageBase64: null, imageType: null };
   }
-
-  throw new Error("Unsupported content type. Use multipart/form-data or application/json");
+  
+  throw new Error("Unsupported Content-Type. Expected multipart/form-data or application/json");
 }
 
 // ═══════════════════════════════════════════════════════
@@ -95,7 +100,6 @@ function buildGradioPayload(fields, imageBase64, imageType) {
   const [width, height] = RESOLUTION_MAP[resKey] || [854, 480];
   const numFrames = (fields.fps || FPS) * (fields.duration || 6) + FRAME_BONUS;
 
-  // Optimized data array for LTX-2 (Wan2GP v10.x compatible)
   const data = [
     fields.prompt || "",          // [0] Positive prompt
     "(low quality, worst quality, text, watermark, speech, talking, subtitles:1.4)", // [1] Negative prompt
@@ -106,16 +110,16 @@ function buildGradioPayload(fields, imageBase64, imageType) {
     numFrames,                     // [6] Frames
     fields.fps || FPS,             // [7] FPS
     1,                             // [8] Steps (Distilled)
-    7.0,                           // [9] Guidance Scale (High = Action)
+    7.0,                           // [9] Guidance Scale
     -1,                            // [10] Seed
     true,                          // [11] VAE Tiling
     "sdpa",                        // [12] Attention
     "None",                        // [13] Upscaler
-    127,                           // [14] Motion Bucket (Higher = More movement/dancing)
+    127,                           // [14] Motion Bucket
   ];
 
   return {
-    fn_index: 1, // Wan2GP Video Gen is typically index 1
+    fn_index: 1, 
     data,
     session_hash: `t1era_${Date.now()}`,
   };
@@ -151,15 +155,14 @@ exports.handler = async function handler(event, _context) {
   try {
     ({ fields, imageBase64, imageType } = await parsePayload(event));
   } catch (parseErr) {
-    console.error("[proxy] Parse Error:", parseErr.message);
-    return err(400, "Invalid payload structure", cors);
+    console.error("[proxy] Parse Error Details:", parseErr);
+    return err(400, "Invalid payload structure. Check proxy logs.", cors);
   }
 
   const gradioPayload = buildGradioPayload(fields, imageBase64, imageType);
   const t0 = Date.now();
   
   try {
-    // Attempting the most reliable Gradio API route
     const endpoint = `${AZURE_BASE}/gradio_api/predict`;
     console.log(`[proxy] Requesting GPU at: ${endpoint}`);
 
@@ -181,7 +184,6 @@ exports.handler = async function handler(event, _context) {
 
     if (!rawPath) return err(502, "GPU failed to return a video path", cors);
 
-    // Build the final public video URL
     const videoUrl = rawPath.startsWith("http") ? rawPath : `${AZURE_BASE}/file=${rawPath.replace(/^\//, "")}`;
 
     return json(200, {
