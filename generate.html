@@ -370,6 +370,60 @@
     .card-body { padding: 20px; }
 
     /* ══════════════════════════════════════════
+       MODE SELECTOR
+    ══════════════════════════════════════════ */
+    .mode-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .mode-btn {
+      padding: 14px 16px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-primary);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s var(--ease);
+      text-align: center;
+    }
+
+    .mode-btn:hover {
+      border-color: var(--border-hover);
+      background: var(--bg-tertiary);
+    }
+
+    .mode-btn.active {
+      background: rgba(249,115,22,0.1);
+      border-color: rgba(249,115,22,0.45);
+      box-shadow: 0 0 16px rgba(249,115,22,0.15);
+    }
+
+    .mode-icon {
+      font-size: 24px;
+      margin-bottom: 6px;
+    }
+
+    .mode-title {
+      font-family: var(--font-display);
+      font-size: 16px;
+      letter-spacing: 0.08em;
+      color: var(--text-secondary);
+      margin-bottom: 2px;
+    }
+
+    .mode-btn.active .mode-title {
+      color: var(--accent-video);
+    }
+
+    .mode-desc {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-tertiary);
+    }
+
+    /* ══════════════════════════════════════════
        PROMPT SECTION
     ══════════════════════════════════════════ */
     .prompt-wrap { margin-bottom: 16px; }
@@ -444,6 +498,13 @@
       font-size: 10px;
     }
 
+    .upload-label .required {
+      text-transform: none;
+      letter-spacing: 0;
+      font-size: 10px;
+      color: var(--accent-video);
+    }
+
     .upload-drop {
       position: relative;
       border: 1px dashed rgba(249,115,22,0.2);
@@ -459,6 +520,11 @@
     .upload-drop.over {
       border-color: rgba(249,115,22,0.5);
       background: rgba(249,115,22,0.07);
+    }
+
+    .upload-drop.required {
+      border-color: rgba(249,115,22,0.4);
+      background: rgba(249,115,22,0.05);
     }
 
     .upload-drop input[type="file"] {
@@ -1123,6 +1189,7 @@
     @media (max-width: 480px) {
       .settings-grid { grid-template-columns: 1fr; }
       .page-title { font-size: 42px; }
+      .mode-selector { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -1174,6 +1241,28 @@
     <!-- ════ LEFT COL ════ -->
     <div>
 
+      <!-- ── Mode Selector Card ── -->
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-header">
+          <span class="card-label">Generation Mode</span>
+          <span class="card-badge badge-orange" id="modeBadge">TEXT-TO-VIDEO</span>
+        </div>
+        <div class="card-body">
+          <div class="mode-selector">
+            <div class="mode-btn active" id="modeText" data-mode="text-to-video">
+              <div class="mode-icon">📝</div>
+              <div class="mode-title">TEXT-TO-VIDEO</div>
+              <div class="mode-desc">Generate from prompt only</div>
+            </div>
+            <div class="mode-btn" id="modeImage" data-mode="image-to-video">
+              <div class="mode-icon">🖼️</div>
+              <div class="mode-title">IMAGE-TO-VIDEO</div>
+              <div class="mode-desc">Animate a reference image</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- ── Prompt Card ── -->
       <div class="card" style="margin-bottom:16px;">
         <div class="card-header">
@@ -1195,10 +1284,11 @@
           </div>
 
           <!-- Image upload -->
-          <div class="upload-section">
+          <div class="upload-section" id="uploadSection">
             <div class="upload-label">
               Reference Image
-              <span class="optional">(optional — enables image-to-video)</span>
+              <span class="optional" id="uploadOptional">(optional for text-to-video mode)</span>
+              <span class="required" id="uploadRequired" style="display:none;">(required for image-to-video mode)</span>
             </div>
             <div class="upload-drop" id="uploadDrop">
               <input type="file" id="imageFile" accept="image/png,image/jpeg,image/webp" />
@@ -1390,6 +1480,7 @@
           <span class="card-badge badge-blue">Auto</span>
         </div>
         <div class="spec-list">
+          <div class="spec-row"><span class="spec-key">Mode</span>       <span class="spec-val" id="sMode">Text-to-Video</span></div>
           <div class="spec-row"><span class="spec-key">Model</span>      <span class="spec-val">LTX-2 Q4_K_M</span></div>
           <div class="spec-row"><span class="spec-key">Resolution</span> <span class="spec-val" id="sRes">854×480</span></div>
           <div class="spec-row"><span class="spec-key">Ratio</span>      <span class="spec-val" id="sRatio">16:9</span></div>
@@ -1437,13 +1528,13 @@
 
 <script>
   /* ══════════════════════════════════════════
-     T1ERA — MINATHOR LOGIC (Fixed)
+     T1ERA — MINATHOR LOGIC WITH MODE SELECTOR
 
-     KEY FIXES:
-     1. Frontend sends application/json (not FormData) — avoids multipart parse crash
-     2. Image converted to base64 on client before sending
-     3. response.text() → JSON.parse() instead of response.json() directly
-     4. Every error path shows a useful message
+     KEY FEATURES:
+     1. Mode selector: text-to-video vs image-to-video
+     2. Frontend sends mode to backend
+     3. Image required for image-to-video mode
+     4. Clear parameter structure based on mode
   ══════════════════════════════════════════ */
 
   // ── SELECTORS ──
@@ -1465,7 +1556,16 @@
   const videoBadgeRatio = document.getElementById('videoBadgeRatio');
   const videoBadgeDur   = document.getElementById('videoBadgeDur');
 
+  // Mode selector
+  const modeText        = document.getElementById('modeText');
+  const modeImage       = document.getElementById('modeImage');
+  const modeBadge       = document.getElementById('modeBadge');
+  const uploadOptional  = document.getElementById('uploadOptional');
+  const uploadRequired  = document.getElementById('uploadRequired');
+  const uploadDrop      = document.getElementById('uploadDrop');
+
   // Sidebar spec readout
+  const sMode   = document.getElementById('sMode');
   const sRes    = document.getElementById('sRes');
   const sRatio  = document.getElementById('sRatio');
   const sFrames = document.getElementById('sFrames');
@@ -1484,6 +1584,7 @@
   let currentVideoUrl   = null;
 
   // ── SETTINGS STATE ──
+  let selectedMode     = 'text-to-video';
   let selectedRatio    = '16:9';
   let selectedDuration = 6;
   let selectedRes      = '480p';
@@ -1497,6 +1598,29 @@
   // ── CHAR COUNTER ──
   promptInput.addEventListener('input', () => {
     charCount.textContent = promptInput.value.length;
+  });
+
+  // ── MODE SELECTOR ──
+  modeText.addEventListener('click', () => {
+    selectedMode = 'text-to-video';
+    modeText.classList.add('active');
+    modeImage.classList.remove('active');
+    modeBadge.textContent = 'TEXT-TO-VIDEO';
+    uploadOptional.style.display = 'inline';
+    uploadRequired.style.display = 'none';
+    uploadDrop.classList.remove('required');
+    if (sMode) sMode.textContent = 'Text-to-Video';
+  });
+
+  modeImage.addEventListener('click', () => {
+    selectedMode = 'image-to-video';
+    modeImage.classList.add('active');
+    modeText.classList.remove('active');
+    modeBadge.textContent = 'IMAGE-TO-VIDEO';
+    uploadOptional.style.display = 'none';
+    uploadRequired.style.display = 'inline';
+    uploadDrop.classList.add('required');
+    if (sMode) sMode.textContent = 'Image-to-Video';
   });
 
   // ── PILL GROUPS ──
@@ -1535,7 +1659,6 @@
   updateSpecReadout();
 
   // ── IMAGE UPLOAD ──
-  const uploadDrop   = document.getElementById('uploadDrop');
   const imageFile    = document.getElementById('imageFile');
   const previewStrip = document.getElementById('previewStrip');
   const previewImg   = document.getElementById('previewImg');
@@ -1575,7 +1698,6 @@
     const reader = new FileReader();
     reader.onload = (e) => {
       const dataUrl = e.target.result;
-      // Strip the data:image/...;base64, prefix — we send raw base64
       currentFileBase64 = dataUrl.split(',')[1];
       currentFileType   = file.type;
       previewImg.src    = dataUrl;
@@ -1612,13 +1734,21 @@
       showToast('Please enter a video description', 'error');
       return;
     }
+
+    // Validation: image-to-video requires an image
+    if (selectedMode === 'image-to-video' && !currentFileBase64) {
+      showToast('Please upload a reference image for image-to-video mode', 'error');
+      return;
+    }
+
     if (isGenerating) return;
 
     setLoading(true);
     setStep(0); // Queuing
 
-    // Build JSON payload — image already base64'd on client
+    // Build JSON payload with explicit mode
     const payload = {
+      mode:         selectedMode,     // ✅ EXPLICIT MODE
       prompt:       prompt,
       resolution:   selectedRes,
       aspect_ratio: selectedRatio,
@@ -1629,25 +1759,22 @@
     };
 
     try {
-      // ── STEP 1: Send to proxy — SAFE fetch pattern ──
       const response = await fetch('/.netlify/functions/proxy-background', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify(payload),
       });
 
-      // Read body as text FIRST — never call .json() on unknown responses
       const rawText = await response.text();
 
       if (!rawText || rawText.trim() === '') {
-        throw new Error('Server returned an empty response. The function may have crashed — check Netlify logs.');
+        throw new Error('Server returned an empty response. Check Netlify logs.');
       }
 
       let data;
       try {
         data = JSON.parse(rawText);
       } catch (parseErr) {
-        // Server returned HTML (Netlify error page) or garbage
         const preview = rawText.substring(0, 300);
         throw new Error(`Server returned non-JSON response: ${preview}`);
       }
@@ -1657,18 +1784,17 @@
       }
 
       if (!data.check_status_url) {
-        throw new Error('Server response missing check_status_url. Check proxy function logic.');
+        throw new Error('Server response missing check_status_url.');
       }
 
-      // ── STEP 2: Got job ID — start polling ──
       const jobId          = data.job_id;
       const checkStatusUrl = data.check_status_url;
       const numFrames      = data.specs?.num_frames || ((selectedDuration * 24) + 1);
 
       if (statFrames) statFrames.textContent = `${numFrames}f`;
       if (statQueue)  statQueue.textContent  = '1';
-      setStep(1); // Loading model weights
-      showToast('Job queued on Azure GPU — rendering…', 'info');
+      setStep(1);
+      showToast(`Job queued — ${selectedMode === 'text-to-video' ? 'generating from text' : 'animating image'}…`, 'info');
 
       startPolling(checkStatusUrl, numFrames);
 
@@ -1682,21 +1808,19 @@
   // ── POLLING ──
   function startPolling(checkUrl, numFrames) {
     let attempts    = 0;
-    const maxAttempts = 72; // 6 minutes (72 × 5s)
+    const maxAttempts = 72;
 
     clearInterval(pollInterval);
 
     pollInterval = setInterval(async () => {
       attempts++;
 
-      // Simulate progress while we wait — caps at 92% until done
       const simProgress = Math.min(92, Math.round((attempts / maxAttempts) * 100));
       if (progressFill) progressFill.style.width = `${simProgress}%`;
 
-      // Update step UI
-      if (attempts === 2)  setStep(1); // loading weights
-      if (attempts === 5)  setStep(2); // rendering
-      if (attempts === 18) setStep(3); // encoding
+      if (attempts === 2)  setStep(1);
+      if (attempts === 5)  setStep(2);
+      if (attempts === 18) setStep(3);
 
       if (statEta) {
         const remaining = Math.max(0, maxAttempts - attempts) * 5;
@@ -1705,7 +1829,7 @@
 
       if (attempts >= maxAttempts) {
         clearInterval(pollInterval);
-        showToast('Generation timed out. The GPU may be busy — please retry.', 'error');
+        showToast('Generation timed out. Please retry.', 'error');
         setLoading(false);
         return;
       }
@@ -1714,18 +1838,15 @@
         const res     = await fetch(checkUrl);
         const rawText = await res.text();
 
-        if (!rawText || rawText.trim() === '') return; // transient empty — keep polling
+        if (!rawText || rawText.trim() === '') return;
 
         let statusData;
         try {
           statusData = JSON.parse(rawText);
         } catch (e) {
-          return; // transient bad response — keep polling
+          return;
         }
 
-        // Gradio /queue/data returns server-sent events — handle both formats
-        // Format A: { data: [videoObj] }  (Gradio standard)
-        // Format B: { output: { data: [videoObj] } }
         let videoUrl = null;
 
         if (statusData.msg === 'process_completed') {
@@ -1733,14 +1854,12 @@
           if (Array.isArray(output) && output[0]) {
             const v = output[0];
             videoUrl = typeof v === 'string' ? v : (v.url || v.name || v.data || null);
-            // If relative path, prepend AZURE base URL
             if (videoUrl && !videoUrl.startsWith('http')) {
               videoUrl = (window.__AZURE_BASE || '') + videoUrl;
             }
           }
         }
 
-        // Gradio error message
         if (statusData.msg === 'process_errored') {
           clearInterval(pollInterval);
           const errMsg = statusData.output?.error || 'GPU processing error';
@@ -1755,8 +1874,7 @@
         }
 
       } catch (pollErr) {
-        // Network hiccup — keep going, don't abort
-        console.warn('[poll] transient error (continuing):', pollErr.message);
+        console.warn('[poll] transient error:', pollErr.message);
       }
     }, 5000);
   }
@@ -1766,14 +1884,12 @@
     currentVideoUrl = videoUrl;
 
     if (progressFill) progressFill.style.width = '100%';
-    setStep(4); // Done
+    setStep(4);
 
-    // Update video element
     const source = outputVideo.querySelector('source') || outputVideo;
     source.src = videoUrl;
     outputVideo.load();
 
-    // Update output badges
     if (videoBadgeRes)   videoBadgeRes.textContent   = selectedRes;
     if (videoBadgeRatio) videoBadgeRatio.textContent  = selectedRatio;
     if (videoBadgeDur)   videoBadgeDur.textContent    = `${selectedDuration}s`;
@@ -1784,7 +1900,6 @@
       outputBadge.style.color = '#10b981';
     }
 
-    // Download button
     if (downloadBtn) {
       downloadBtn.onclick = () => {
         const a = document.createElement('a');
@@ -1842,7 +1957,6 @@
     }
     if (empty) empty.style.display = 'none';
 
-    // Clear existing items (keep empty el)
     Array.from(list.children).forEach(c => {
       if (c.id !== 'historyEmpty') c.remove();
     });
