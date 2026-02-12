@@ -1,5 +1,5 @@
 /**
- * T1ERA — Netlify Serverless Proxy (Gradio 5 Compatible)
+ * T1ERA — Netlify Serverless Proxy (Gradio 5 + Pydantic Fix)
  * File: netlify/functions/proxy-background.js
  */
 
@@ -34,10 +34,11 @@ exports.handler = async function (event, context) {
     return response(400, { error: "INVALID_JSON", message: "Request body was not valid JSON." }, cors);
   }
 
-  // 2. DATA ARRAY CONSTRUCTION
+  // 2. DATA ARRAY CONSTRUCTION (Gradio 5 / Pydantic Fix)
+  // We wrap prompt and negative prompt in [ ] because the server expects List[str]
   const dataArray = [
-    payload.prompt || "",
-    "(low quality, worst quality, text, watermark, speech, talking, subtitles:1.4)",
+    payload.prompt ? [payload.prompt.trim()] : [""], 
+    ["(low quality, worst quality, text, watermark, speech, talking, subtitles:1.4)"],
     payload.image_base64 ? { data: `data:${payload.image_type};base64,${payload.image_base64}`, name: "input.jpg" } : null,
     FORCED_MODEL,
     854, 480, 145, 24, // width, height, frames, fps
@@ -46,10 +47,7 @@ exports.handler = async function (event, context) {
 
   const session_hash = `t1_${Math.random().toString(36).substring(2, 10)}`;
   
-  /**
-   * IMPORTANT: Gradio 5 change!
-   * The new endpoint is /gradio_api/queue/join 
-   */
+  // Gradio 5 API endpoint
   const endpoint = `${AZURE_BASE}/gradio_api/queue/join`;
 
   try {
@@ -63,20 +61,18 @@ exports.handler = async function (event, context) {
         fn_index: 2, 
         session_hash: session_hash
       }),
-      signal: AbortSignal.timeout(20000) 
+      signal: AbortSignal.timeout(30000) // Increased to 30s for stability
     });
 
     const responseText = await azureRes.text();
+    console.log(`[Proxy] Azure Raw Response: ${responseText}`);
 
     if (!azureRes.ok) {
-      // Logic for handling specific Gradio errors
-      let errorMsg = `GPU Error ${azureRes.status}`;
-      if (azureRes.status === 404) errorMsg = "Gradio API path mismatch. Verify if the /gradio_api/ prefix is required.";
-      
       return response(azureRes.status, { 
         error: "GRADIO_ERROR", 
-        message: errorMsg,
-        debug: responseText.substring(0, 150) 
+        status: azureRes.status,
+        message: `GPU rejected request.`,
+        debug: responseText.substring(0, 200) 
       }, cors);
     }
 
@@ -85,12 +81,12 @@ exports.handler = async function (event, context) {
       success: true,
       job_id: session_hash,
       event_id: gData.event_id,
-      // Status polling also needs the /gradio_api/ prefix in Gradio 5
       status_url: `${AZURE_BASE}/gradio_api/queue/data?session_hash=${session_hash}`
     }, cors);
 
   } catch (err) {
     const isTimeout = err.name === "AbortError" || err.name === "TimeoutError";
+    console.error(`[Proxy] Fetch Error: ${err.message}`);
     return response(504, { 
       error: isTimeout ? "TIMEOUT" : "CONNECTION_FAILED",
       message: isTimeout ? "Azure VM didn't respond in time." : "Is the Gradio link still live?",
