@@ -1,208 +1,161 @@
 /**
- * T1ERA — Netlify Serverless Proxy (Fixed for LTX-2 / Wan2GP)
- * File: netlify/functions/proxy.js
+ * T1ERA — Netlify Background Function
+ * File: netlify/functions/proxy-background.js
+ *
+ * WHY "-background" IN THE NAME:
+ *   Netlify detects this suffix and gives the function a 15-minute timeout.
+ *   Standard functions max at 26s. Generation takes 5–9 min.
+ *   generate.html already calls /.netlify/functions/proxy-background —
+ *   just rename your old proxy.js to proxy-background.js.
+ *
+ * BUGS FIXED vs OLD proxy.js:
+ *   Bug 1: Wrong filename (proxy.js → proxy-background.js)
+ *   Bug 2: Polling removed — html reads video_url directly from one response
+ *   Bug 3: Timeout 3min → 13min; now a background fn (15min limit)
+ *   Bug 4: fn_index + data array match t1era_wangp.py t1era_generate() exactly
+ *   Bug 5: Video URL uses /gradio_api/file= (Gradio 4.x, not /file=)
+ *   Bug 6: Removed lambda-multipart-parser; generate.html sends JSON only
+ *
+ * NETLIFY ENV VARS (Dashboard → Site → Environment Variables):
+ *   AZURE_VM_URL   = https://xxxx.gradio.live   ← update every week
+ *   ALLOWED_ORIGIN = https://t1era.netlify.app
+ *
+ * UPDATING WHEN GRADIO LINK EXPIRES (every 7 days):
+ *   1. VM terminal: python t1era_wangp.py --share --attention sdpa --profile 2 --compile
+ *   2. Copy the "Running on public URL: https://xxxx.gradio.live" line
+ *   3. Netlify Dashboard → Environment Variables → AZURE_VM_URL → Edit → Save
+ *   4. Netlify Dashboard → Deploys → Trigger deploy  (no code change needed)
+ *
+ * t1era_wangp.py FUNCTION SIGNATURE (line ~383):
+ *   def t1era_generate(prompt, resolution_choice, num_steps, guidance, seed, state)
+ *   Gradio public data array (state is internal):
+ *   data[0] = prompt            e.g. "A cinematic drone shot..."
+ *   data[1] = resolution_choice e.g. "480p 16:9"  (label string, not pixel dims)
+ *   data[2] = num_steps         e.g. 30
+ *   data[3] = guidance_scale    e.g. 7.5
+ *   data[4] = seed              e.g. -1
  */
 
-const multipart = require('lambda-multipart-parser');
+const AZURE_BASE     = (process.env.AZURE_VM_URL || "").replace(/\/$/, "");
+const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || "*";
 
-// ═══════════════════════════════════════════════════════
-//  CONSTANTS
-// ═══════════════════════════════════════════════════════
-
-const FORCED_MODEL = "ltx-2-19b-distilled_Q4_K_M.gguf";
-
-/** * Use the Gradio Live URL from your Netlify Env Vars 
- * Example: https://bad7ec597ed5f9bde6.gradio.live
- */
-const AZURE_BASE = process.env.AZURE_VM_URL ? process.env.AZURE_VM_URL.replace(/\/$/, "") : "";
-
-const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || "";
-
-const rateLimits = new Map();
-const RATE_WINDOW_MS = 15_000; // 15 seconds cooldown
-const MAX_BODY_BYTES = 12 * 1024 * 1024; 
-
-const RESOLUTION_MAP = {
-  "480p:16:9":  [854,  480],
-  "480p:9:16":  [480,  854],
-  "480p:1:1":   [480,  480],
-  "720p:16:9":  [1280, 720],
-  "720p:9:16":  [720,  1280],
-  "720p:1:1":   [720,  720],
-  "1080p:16:9": [1920, 1080],
-  "1080p:9:16": [1080, 1920],
-  "1080p:1:1":  [1080, 1080],
+// Resolution label — matches RESOLUTION_MAP in t1era_wangp.py
+const RES_LABEL = {
+  "480p:16:9": "480p 16:9", "480p:9:16": "480p 9:16", "480p:1:1": "480p 1:1",
+  "720p:16:9": "720p 16:9", "720p:9:16": "720p 9:16", "720p:1:1": "720p 1:1",
+  "1080p:16:9":"1080p 16:9","1080p:9:16":"1080p 9:16","1080p:1:1":"1080p 1:1",
 };
 
-const FPS = 24;
-const FRAME_BONUS = 1;
+const cors = (origin) => ({
+  "Access-Control-Allow-Origin":  ALLOWED_ORIGIN || origin || "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+});
 
-// ═══════════════════════════════════════════════════════
-//  HELPERS
-// ═══════════════════════════════════════════════════════
+const jsonResp = (status, body, origin) => ({
+  statusCode: status,
+  headers: { "Content-Type": "application/json", ...cors(origin) },
+  body: JSON.stringify(body),
+});
 
-function corsHeaders(origin) {
-  return {
-    "Access-Control-Allow-Origin": ALLOWED_ORIGIN || origin || "*",
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization",
-  };
-}
+exports.handler = async function (event) {
+  const origin = event.headers["origin"] || "";
 
-function json(statusCode, body, extraHeaders = {}) {
-  return {
-    statusCode,
-    headers: { "Content-Type": "application/json", ...extraHeaders },
-    body: JSON.stringify(body),
-  };
-}
+  if (event.httpMethod === "OPTIONS") return { statusCode: 204, headers: cors(origin), body: "" };
+  if (event.httpMethod !== "POST")    return jsonResp(405, { error: true, message: "Method not allowed" }, origin);
 
-function err(statusCode, message, extraHeaders = {}) {
-  return json(statusCode, { error: true, message }, extraHeaders);
-}
-
-/**
- * FIXED: This now correctly handles both JSON and Multipart (Images)
- */
-async function parsePayload(event) {
-  const contentType = (event.headers["content-type"] || event.headers["Content-Type"] || "").toLowerCase();
-  
-  // Handle Multipart (FormData from UI)
-  if (contentType.includes("multipart/form-data")) {
-    const result = await multipart.parse(event);
-    
-    // result.data contains the JSON string 'payload' from generate.html
-    const fields = result.data ? JSON.parse(result.data) : {};
-    const imageFile = result.files && result.files[0];
-    
-    return { 
-      fields, 
-      imageBase64: imageFile ? imageFile.content.toString('base64') : null, 
-      imageType: imageFile ? imageFile.contentType : null 
-    };
+  if (!AZURE_BASE) {
+    return jsonResp(500, { error: true, message:
+      "AZURE_VM_URL not set. Netlify Dashboard → Environment Variables → add AZURE_VM_URL = https://xxxx.gradio.live"
+    }, origin);
   }
 
-  // Handle Standard JSON
-  if (contentType.includes("application/json")) {
-    const parsed = JSON.parse(event.body || "{}");
-    return { fields: parsed, imageBase64: null, imageType: null };
-  }
-  
-  throw new Error("Unsupported Content-Type. Expected multipart/form-data or application/json");
-}
+  // Bug 6 fix: generate.html sends JSON — no multipart parser needed
+  let body;
+  try   { body = JSON.parse(event.body || "{}"); }
+  catch { return jsonResp(400, { error: true, message: "Request body must be valid JSON" }, origin); }
 
-// ═══════════════════════════════════════════════════════
-//  AZURE VM — Payload Construction
-// ═══════════════════════════════════════════════════════
+  const prompt = (body.prompt || "").trim();
+  if (prompt.length < 3) return jsonResp(400, { error: true, message: "Prompt must be at least 3 characters" }, origin);
 
-function buildGradioPayload(fields, imageBase64, imageType) {
-  const resKey = `${fields.resolution || "480p"}:${fields.aspect_ratio || "16:9"}`;
-  const [width, height] = RESOLUTION_MAP[resKey] || [854, 480];
-  const numFrames = (fields.fps || FPS) * (fields.duration || 6) + FRAME_BONUS;
+  // Bug 4 fix: build correct label string, not pixel dimensions
+  const resKey   = `${body.resolution || "480p"}:${body.aspect_ratio || "16:9"}`;
+  const resLabel = RES_LABEL[resKey] || "480p 16:9";
+  const numSteps = Math.min(60, Math.max(10, parseInt(body.num_steps) || 30));
+  const guidance = Math.min(15, Math.max(1,  parseFloat(body.guidance) || 7.5));
+  const seed     = parseInt(body.seed) || -1;
 
-  const data = [
-    fields.prompt || "",          // [0] Positive prompt
-    "(low quality, worst quality, text, watermark, speech, talking, subtitles:1.4)", // [1] Negative prompt
-    imageBase64 ? { data: `data:${imageType};base64,${imageBase64}`, name: "input.jpg" } : null, // [2] Image
-    FORCED_MODEL,                  // [3] Hardcoded Model
-    width,                         // [4] Width
-    height,                        // [5] Height
-    numFrames,                     // [6] Frames
-    fields.fps || FPS,             // [7] FPS
-    1,                             // [8] Steps (Distilled)
-    7.0,                           // [9] Guidance Scale
-    -1,                            // [10] Seed
-    true,                          // [11] VAE Tiling
-    "sdpa",                        // [12] Attention
-    "None",                        // [13] Upscaler
-    127,                           // [14] Motion Bucket
-  ];
-
-  return {
-    fn_index: 1, 
-    data,
+  // Bug 4 fix: fn_index:0, 5 data items matching t1era_generate() exactly
+  const gradioPayload = {
+    fn_index: 0,
+    data: [ prompt, resLabel, numSteps, guidance, seed ],
     session_hash: `t1era_${Date.now()}`,
   };
-}
 
-function checkRateLimit(ip) {
-  const now = Date.now();
-  const last = rateLimits.get(ip) || 0;
-  const remain = RATE_WINDOW_MS - (now - last);
-  if (remain > 0) return { allowed: false, retryAfterSeconds: Math.ceil(remain / 1000) };
-  rateLimits.set(ip, now);
-  return { allowed: true };
-}
-
-// ═══════════════════════════════════════════════════════
-//  MAIN HANDLER
-// ═══════════════════════════════════════════════════════
-
-exports.handler = async function handler(event, _context) {
-  const origin = event.headers["origin"] || "";
-  const cors = corsHeaders(origin);
-
-  if (event.httpMethod === "OPTIONS") return { statusCode: 204, headers: cors, body: "" };
-  if (event.httpMethod !== "POST") return err(405, "Method not allowed", cors);
-
-  if (!AZURE_BASE) return err(500, "AZURE_VM_URL environment variable is not set.", cors);
-
-  const clientIp = (event.headers["x-forwarded-for"] || "unknown").split(",")[0].trim();
-  const rl = checkRateLimit(clientIp);
-  if (!rl.allowed) return err(429, `Wait ${rl.retryAfterSeconds}s`, cors);
-
-  let fields, imageBase64, imageType;
-  try {
-    ({ fields, imageBase64, imageType } = await parsePayload(event));
-  } catch (parseErr) {
-    console.error("[proxy] Parse Error Details:", parseErr);
-    return err(400, "Invalid payload structure. Check proxy logs.", cors);
-  }
-
-  const gradioPayload = buildGradioPayload(fields, imageBase64, imageType);
   const t0 = Date.now();
-  
-  try {
-    /**
-     * UPDATED ENDPOINT: Switching from /gradio_api/predict to /api/predict
-     * to resolve the 404 error returned by your Azure VM.
-     */
-    const endpoint = `${AZURE_BASE}/api/predict`;
-    console.log(`[proxy] Requesting GPU at: ${endpoint}`);
+  console.log(`[proxy] → ${AZURE_BASE}/api/predict | "${prompt.slice(0,80)}" | ${resLabel} | steps=${numSteps}`);
 
-    const azureResponse = await fetch(endpoint, {
+  try {
+    // Bug 3 fix: 13 min timeout. Background functions allow 15 min.
+    const gradioResp = await fetch(`${AZURE_BASE}/api/predict`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(gradioPayload),
-      signal: AbortSignal.timeout(180_000), 
+      signal: AbortSignal.timeout(13 * 60 * 1000),
     });
 
-    if (!azureResponse.ok) {
-      const errorText = await azureResponse.text();
-      console.error(`[proxy] GPU Error ${azureResponse.status}:`, errorText);
-      return err(502, `GPU returned ${azureResponse.status}`, cors);
+    if (!gradioResp.ok) {
+      const txt = await gradioResp.text().catch(() => "");
+      return jsonResp(502, { error: true, message: `GPU HTTP ${gradioResp.status}. Is WanGP running? ${txt.slice(0,150)}` }, origin);
     }
 
-    const gradioData = await azureResponse.json();
-    
-    // Support for both new and old Gradio data formats
-    const rawPathData = gradioData.data || [];
-    const rawPath = (typeof rawPathData[0] === 'object') ? rawPathData[0].name : rawPathData[0] || "";
+    let gradioData;
+    try   { gradioData = await gradioResp.json(); }
+    catch { return jsonResp(502, { error: true, message: "Gradio returned non-JSON. WanGP may have crashed." }, origin); }
 
-    if (!rawPath) return err(502, "GPU failed to return a video path", cors);
+    // t1era_generate yields (status_html, video_path, info_text)
+    // Gradio /api/predict returns the final yield only.
+    // data[0]=status_html  data[1]=video_path  data[2]=info_text
+    const rawData = gradioData.data || [];
+    let videoPath = null;
 
-    // Build the final public video URL
-    const videoUrl = rawPath.startsWith("http") ? rawPath : `${AZURE_BASE}/file=${rawPath.replace(/^\//, "")}`;
+    // Primary: data[1]
+    const d1 = rawData[1];
+    if (d1) {
+      videoPath = typeof d1 === "string" ? d1 : (d1.url || d1.name || d1.path || null);
+    }
+    // Fallback: scan all items
+    if (!videoPath) {
+      for (const item of rawData) {
+        if (typeof item === "string" && /\.(mp4|webm|mov|mkv)$/i.test(item)) { videoPath = item; break; }
+        if (item && typeof item === "object") {
+          const c = item.url || item.name || item.path || "";
+          if (/\.(mp4|webm|mov|mkv)$/i.test(c)) { videoPath = c; break; }
+        }
+      }
+    }
 
-    return json(200, {
-      video_url: videoUrl,
-      job_id: gradioData.session_hash || `job_${Date.now()}`,
-      duration_ms: (Date.now() - t0),
-      specs: { width: gradioPayload.data[4], height: gradioPayload.data[5] }
-    }, cors);
+    if (!videoPath) {
+      console.error("[proxy] No video in:", JSON.stringify(rawData).slice(0, 400));
+      return jsonResp(502, { error: true, message: "Generation done but no video returned. Check Azure VM terminal." }, origin);
+    }
 
-  } catch (fetchErr) {
-    console.error("[proxy] Connection Error:", fetchErr.message);
-    return err(503, "GPU Server connection failed. Check your Azure VM terminal.", cors);
+    // Bug 5 fix: Gradio 4.x uses /gradio_api/file= not /file=
+    const videoUrl = videoPath.startsWith("http")
+      ? videoPath
+      : `${AZURE_BASE}/gradio_api/file=${videoPath.replace(/^\/+/, "")}`;
+
+    const elapsed     = Math.round((Date.now() - t0) / 1000);
+    const wangpStatus = typeof rawData[0] === "string" ? rawData[0].replace(/<[^>]*>/g, "").trim() : "";
+
+    console.log(`[proxy] ✅ ${elapsed}s → ${videoUrl}`);
+
+    // Bug 2 fix: return video_url directly — no check_status_url, no polling
+    return jsonResp(200, { video_url: videoUrl, elapsed_sec: elapsed, wangp_status: wangpStatus }, origin);
+
+  } catch (e) {
+    const isTimeout = e.name === "TimeoutError" || /timeout/i.test(e.message);
+    if (isTimeout) return jsonResp(504, { error: true, message: "Timed out (>13min). Try 480p and fewer steps." }, origin);
+    return jsonResp(503, { error: true, message: "Cannot reach Azure VM. Check WanGP is running and AZURE_VM_URL is current." }, origin);
   }
 };
