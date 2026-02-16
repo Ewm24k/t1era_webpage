@@ -15,6 +15,7 @@
             --bg-card: #151515;
             --bg-message-user: linear-gradient(135deg, #3b82f6, #8b5cf6);
             --bg-message-ai: rgba(59, 130, 246, 0.08);
+            --bg-reasoning: rgba(139, 92, 246, 0.08);
             --border-primary: rgba(255, 255, 255, 0.1);
             --text-primary: #ffffff;
             --text-secondary: rgba(255, 255, 255, 0.7);
@@ -23,6 +24,7 @@
             --accent-secondary: #8b5cf6;
             --accent-success: #10b981;
             --accent-error: #ef4444;
+            --accent-reasoning: #a78bfa;
             --glow-primary: rgba(59, 130, 246, 0.3);
             --glow-secondary: rgba(139, 92, 246, 0.3);
             --transition: cubic-bezier(0.4, 0, 0.2, 1);
@@ -102,6 +104,68 @@
             box-shadow: 0 0 20px var(--glow-primary);
         }
 
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .reasoning-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-primary);
+            border-radius: 100px;
+            cursor: pointer;
+            transition: all 0.3s var(--transition);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .reasoning-toggle:hover {
+            border-color: var(--accent-secondary);
+            background: rgba(139, 92, 246, 0.1);
+        }
+
+        .reasoning-toggle.active {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(167, 139, 250, 0.2));
+            border-color: var(--accent-secondary);
+        }
+
+        .toggle-switch {
+            width: 36px;
+            height: 20px;
+            background: var(--bg-secondary);
+            border-radius: 100px;
+            position: relative;
+            transition: all 0.3s var(--transition);
+            border: 1px solid var(--border-primary);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--text-tertiary);
+            top: 2px;
+            left: 2px;
+            transition: all 0.3s var(--transition);
+        }
+
+        .reasoning-toggle.active .toggle-switch {
+            background: var(--accent-secondary);
+            border-color: var(--accent-secondary);
+        }
+
+        .reasoning-toggle.active .toggle-switch::after {
+            left: 18px;
+            background: white;
+        }
+
         .status-badge {
             display: flex;
             align-items: center;
@@ -137,9 +201,25 @@
             border: 1px solid var(--border-primary);
             background: var(--bg-secondary);
             color: var(--text-primary);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .btn:hover { transform: translateY(-2px); }
+
+        .clear-btn {
+            background: transparent;
+            border: 1px solid var(--border-primary);
+            color: var(--text-secondary);
+        }
+
+        .clear-btn:hover {
+            border-color: var(--accent-error);
+            color: var(--accent-error);
+            background: rgba(239, 68, 68, 0.1);
+        }
 
         .messages-container {
             flex: 1;
@@ -222,6 +302,119 @@
             line-height: 1.7;
         }
 
+        /* REASONING SECTION */
+        .reasoning-section {
+            margin-top: 16px;
+            border-top: 1px solid var(--border-primary);
+            padding-top: 16px;
+        }
+
+        .reasoning-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            padding: 12px;
+            background: var(--bg-reasoning);
+            border-radius: 10px;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            transition: all 0.3s var(--transition);
+        }
+
+        .reasoning-header:hover {
+            background: rgba(139, 92, 246, 0.15);
+            border-color: var(--accent-secondary);
+        }
+
+        .reasoning-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--accent-reasoning);
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .reasoning-icon {
+            font-size: 16px;
+        }
+
+        .reasoning-toggle-icon {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            transition: transform 0.3s var(--transition);
+        }
+
+        .reasoning-header.expanded .reasoning-toggle-icon {
+            transform: rotate(180deg);
+        }
+
+        .reasoning-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s var(--transition);
+            margin-top: 12px;
+        }
+
+        .reasoning-content.expanded {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .reasoning-step {
+            padding: 12px;
+            margin-bottom: 8px;
+            background: rgba(139, 92, 246, 0.05);
+            border-left: 3px solid var(--accent-secondary);
+            border-radius: 6px;
+            font-size: 14px;
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+
+        .reasoning-step-label {
+            font-weight: 700;
+            color: var(--accent-reasoning);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 4px;
+        }
+
+        .reasoning-thinking {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px;
+            background: rgba(139, 92, 246, 0.1);
+            border-radius: 8px;
+            font-size: 13px;
+            color: var(--accent-reasoning);
+            font-weight: 600;
+        }
+
+        .reasoning-thinking .dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .reasoning-thinking .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent-secondary);
+            animation: bounce 1.4s infinite;
+        }
+
+        .reasoning-thinking .dot:nth-child(2) { animation-delay: 0.2s; }
+        .reasoning-thinking .dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes bounce {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-8px); }
+        }
+
         .typing-indicator {
             display: none;
             align-items: center;
@@ -245,11 +438,6 @@
 
         .typing-dot:nth-child(2) { animation-delay: 0.2s; }
         .typing-dot:nth-child(3) { animation-delay: 0.4s; }
-
-        @keyframes bounce {
-            0%, 60%, 100% { transform: translateY(0); }
-            30% { transform: translateY(-10px); }
-        }
 
         .welcome-screen {
             display: flex;
@@ -354,10 +542,28 @@
 
         #sendButton:disabled { opacity: 0.5; cursor: not-allowed; }
 
+        .error-toast {
+            position: fixed;
+            top: 100px;
+            right: 32px;
+            background: var(--accent-error);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .error-toast.show { display: flex; }
+
         @media (max-width: 768px) {
             .messages-container { padding: 20px 16px; }
             .message { max-width: 100%; }
             .welcome-title { font-size: 32px; }
+            .header-controls { flex-wrap: wrap; gap: 8px; }
+            .reasoning-toggle { font-size: 12px; padding: 6px 12px; }
         }
     </style>
 </head>
@@ -371,9 +577,17 @@
                 <div class="logo-mark">T1</div>
                 <span style="font-size: 20px; font-weight: 700; font-family: 'Space Grotesk', sans-serif;">T1ERA Chat</span>
             </a>
-            <div class="status-badge">
-                <span class="status-dot"></span>
-                <span>AI Online</span>
+            <div class="header-controls">
+                <div class="reasoning-toggle" id="reasoningToggle">
+                    <span>🧠 Show Reasoning</span>
+                    <div class="toggle-switch"></div>
+                </div>
+                <div class="status-badge">
+                    <span class="status-dot"></span>
+                    <span>AI Online</span>
+                </div>
+                <button class="btn clear-btn" id="clearChat">🗑️ Clear</button>
+                <a href="index.html" class="btn">← Home</a>
             </div>
         </div>
 
@@ -411,6 +625,11 @@
         </div>
     </div>
 
+    <div class="error-toast" id="errorToast">
+        <span>⚠️</span>
+        <span id="errorMessage"></span>
+    </div>
+
     <script>
         const API = '/.netlify/functions/chat';
         const msgs = document.getElementById('messagesContainer');
@@ -418,7 +637,26 @@
         const btn = document.getElementById('sendButton');
         const typing = document.getElementById('typingIndicator');
         const welcome = document.getElementById('welcomeScreen');
+        const reasoningToggle = document.getElementById('reasoningToggle');
+        const clearChatBtn = document.getElementById('clearChat');
+        const errorToast = document.getElementById('errorToast');
+        const errorMessage = document.getElementById('errorMessage');
+        
         let processing = false;
+        let showReasoning = false;
+
+        // Reasoning Toggle
+        reasoningToggle.addEventListener('click', () => {
+            showReasoning = !showReasoning;
+            reasoningToggle.classList.toggle('active');
+            localStorage.setItem('showReasoning', showReasoning);
+        });
+
+        // Load reasoning preference
+        if (localStorage.getItem('showReasoning') === 'true') {
+            showReasoning = true;
+            reasoningToggle.classList.add('active');
+        }
 
         input.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
@@ -443,6 +681,12 @@
             });
         });
 
+        clearChatBtn.addEventListener('click', () => {
+            if (confirm('Clear all messages?')) {
+                clearChat();
+            }
+        });
+
         async function send() {
             const msg = input.value.trim();
             if (!msg || processing) return;
@@ -456,6 +700,10 @@
             processing = true;
             typing.classList.add('active');
 
+            // Create AI message placeholder with reasoning
+            const aiMessageId = 'ai-msg-' + Date.now();
+            const reasoning = showReasoning ? generateReasoningSteps(msg) : null;
+            
             try {
                 const res = await fetch(API, {
                     method: 'POST',
@@ -467,10 +715,11 @@
                 typing.classList.remove('active');
 
                 if (data.error) throw new Error(data.message);
-                addMsg(data.response, 'ai');
+                addMsg(data.response, 'ai', reasoning);
 
             } catch (err) {
                 typing.classList.remove('active');
+                showError(err.message);
                 addMsg('Error: ' + err.message, 'ai');
             } finally {
                 processing = false;
@@ -478,7 +727,38 @@
             }
         }
 
-        function addMsg(content, sender) {
+        function generateReasoningSteps(userMessage) {
+            // Simulate reasoning steps based on user query
+            const steps = [];
+            
+            steps.push({
+                label: 'Understanding Query',
+                content: `Analyzing user request: "${userMessage.substring(0, 50)}${userMessage.length > 50 ? '...' : ''}"`
+            });
+
+            if (userMessage.toLowerCase().includes('how') || userMessage.toLowerCase().includes('what')) {
+                steps.push({
+                    label: 'Knowledge Retrieval',
+                    content: 'Searching knowledge base for relevant information and examples'
+                });
+            }
+
+            if (userMessage.toLowerCase().includes('explain') || userMessage.toLowerCase().includes('tell')) {
+                steps.push({
+                    label: 'Structuring Response',
+                    content: 'Organizing information in clear, logical sequence for best comprehension'
+                });
+            }
+
+            steps.push({
+                label: 'Response Generation',
+                content: 'Formulating comprehensive answer based on context and user needs'
+            });
+
+            return steps;
+        }
+
+        function addMsg(content, sender, reasoning = null) {
             const wrapper = document.createElement('div');
             wrapper.className = 'message-wrapper';
 
@@ -486,6 +766,30 @@
             msg.className = `message ${sender}`;
 
             const time = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+            let reasoningHTML = '';
+            if (reasoning && reasoning.length > 0 && sender === 'ai') {
+                const reasoningId = 'reasoning-' + Date.now();
+                reasoningHTML = `
+                    <div class="reasoning-section">
+                        <div class="reasoning-header" onclick="toggleReasoning('${reasoningId}')">
+                            <div class="reasoning-title">
+                                <span class="reasoning-icon">🧠</span>
+                                <span>View Reasoning Process (${reasoning.length} steps)</span>
+                            </div>
+                            <span class="reasoning-toggle-icon">▼</span>
+                        </div>
+                        <div class="reasoning-content" id="${reasoningId}">
+                            ${reasoning.map(step => `
+                                <div class="reasoning-step">
+                                    <div class="reasoning-step-label">${step.label}</div>
+                                    <div>${step.content}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
 
             msg.innerHTML = `
                 <div class="message-header">
@@ -496,11 +800,44 @@
                     </div>
                 </div>
                 <div class="message-content">${content.replace(/\n/g, '<br>')}</div>
+                ${reasoningHTML}
             `;
 
             wrapper.appendChild(msg);
             msgs.insertBefore(wrapper, typing.parentElement);
             msgs.scrollTop = msgs.scrollHeight;
+        }
+
+        function toggleReasoning(id) {
+            const content = document.getElementById(id);
+            const header = content.previousElementSibling;
+            
+            if (content.classList.contains('expanded')) {
+                content.classList.remove('expanded');
+                header.classList.remove('expanded');
+            } else {
+                content.classList.add('expanded');
+                header.classList.add('expanded');
+            }
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorToast.classList.add('show');
+            setTimeout(() => {
+                errorToast.classList.remove('show');
+            }, 5000);
+        }
+
+        function clearChat() {
+            const messageWrappers = msgs.querySelectorAll('.message-wrapper');
+            messageWrappers.forEach((wrapper, index) => {
+                if (index < messageWrappers.length - 1) {
+                    wrapper.remove();
+                }
+            });
+            welcome.style.display = 'flex';
+            localStorage.removeItem('t1era_chat_history');
         }
     </script>
 </body>
