@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatT1ERA - AI Assistant</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-primary: #000000;
+            --bg-secondary: #0a0a0a;
+            --bg-card: #151515;
+            --bg-message-user: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            --bg-message-ai: rgba(59, 130, 246, 0.08);
+            --border-primary: rgba(255, 255, 255, 0.1);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --text-tertiary: rgba(255, 255, 255, 0.5);
+            --accent-primary: #3b82f6;
+            --accent-secondary: #8b5cf6;
+            --accent-success: #10b981;
+            --accent-error: #ef4444;
+            --glow-primary: rgba(59, 130, 246, 0.3);
+            --glow-secondary: rgba(139, 92, 246, 0.3);
+            --transition: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .bg-grid {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 60px 60px;
+            mask-image: radial-gradient(ellipse at center, black 0%, transparent 80%);
+            pointer-events: none;
+        }
+
+        .bg-gradient {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background: radial-gradient(ellipse at 50% 0%, rgba(59, 130, 246, 0.15), transparent 50%),
+                        radial-gradient(ellipse at 0% 50%, rgba(139, 92, 246, 0.1), transparent 50%);
+            pointer-events: none;
+        }
+
+        .chat-container {
+            position: relative;
+            z-index: 1;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .chat-header {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-primary);
+            padding: 20px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .logo-mark {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 18px;
+            font-family: 'Space Grotesk', sans-serif;
+            box-shadow: 0 0 20px var(--glow-primary);
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 100px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-primary);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-success);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 8px var(--accent-success); }
+            50% { opacity: 0.6; }
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s var(--transition);
+            border: 1px solid var(--border-primary);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .btn:hover { transform: translateY(-2px); }
+
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            scroll-behavior: smooth;
+        }
+
+        .messages-container::-webkit-scrollbar { width: 8px; }
+        .messages-container::-webkit-scrollbar-thumb { background: var(--border-primary); border-radius: 4px; }
+
+        .message-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: slideIn 0.4s forwards;
+        }
+
+        @keyframes slideIn { to { opacity: 1; transform: translateY(0); } }
+
+        .message {
+            max-width: 800px;
+            width: 100%;
+            padding: 20px 24px;
+            border-radius: 16px;
+            word-wrap: break-word;
+        }
+
+        .message.user {
+            background: var(--bg-message-user);
+            box-shadow: 0 0 30px var(--glow-primary);
+        }
+
+        .message.ai {
+            background: var(--bg-message-ai);
+            border: 1px solid var(--border-primary);
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .message.ai .message-avatar {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            box-shadow: 0 0 16px var(--glow-primary);
+        }
+
+        .message-sender {
+            font-weight: 700;
+            font-size: 14px;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .message-time {
+            font-size: 12px;
+            color: var(--text-tertiary);
+        }
+
+        .message-content {
+            font-size: 15px;
+            line-height: 1.7;
+        }
+
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .typing-indicator.active { display: flex; }
+
+        .typing-dots {
+            display: flex;
+            gap: 6px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-primary);
+            animation: bounce 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes bounce {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+
+        .welcome-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            text-align: center;
+        }
+
+        .welcome-icon {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            margin-bottom: 32px;
+            box-shadow: 0 0 40px var(--glow-primary);
+        }
+
+        .welcome-title {
+            font-size: 42px;
+            font-weight: 800;
+            font-family: 'Space Grotesk', sans-serif;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .suggestion-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 32px;
+        }
+
+        .chip {
+            padding: 12px 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-primary);
+            border-radius: 100px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .chip:hover {
+            border-color: var(--accent-primary);
+            transform: translateY(-2px);
+        }
+
+        .input-area {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--border-primary);
+            padding: 24px 32px;
+        }
+
+        .input-wrapper {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            gap: 12px;
+        }
+
+        #messageInput {
+            flex: 1;
+            min-height: 56px;
+            max-height: 200px;
+            padding: 16px 20px;
+            background: var(--bg-card);
+            border: 2px solid var(--border-primary);
+            border-radius: 14px;
+            color: var(--text-primary);
+            font-size: 15px;
+            font-family: 'Inter', sans-serif;
+            resize: none;
+            outline: none;
+        }
+
+        #messageInput:focus {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px var(--glow-primary);
+        }
+
+        #sendButton {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border: none;
+            border-radius: 14px;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 0 20px var(--glow-primary);
+        }
+
+        #sendButton:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        @media (max-width: 768px) {
+            .messages-container { padding: 20px 16px; }
+            .message { max-width: 100%; }
+            .welcome-title { font-size: 32px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+    <div class="bg-gradient"></div>
+
+    <div class="chat-container">
+        <div class="chat-header">
+            <a href="index.html" class="logo">
+                <div class="logo-mark">T1</div>
+                <span style="font-size: 20px; font-weight: 700; font-family: 'Space Grotesk', sans-serif;">T1ERA Chat</span>
+            </a>
+            <div class="status-badge">
+                <span class="status-dot"></span>
+                <span>AI Online</span>
+            </div>
+        </div>
+
+        <div class="messages-container" id="messagesContainer">
+            <div class="welcome-screen" id="welcomeScreen">
+                <div class="welcome-icon">🤖</div>
+                <h1 class="welcome-title">Welcome to T1ERA Chat</h1>
+                <p style="color: var(--text-secondary); margin-bottom: 16px;">
+                    Powered by Qwen3:8b on Azure A10 GPU
+                </p>
+                <div class="suggestion-chips">
+                    <div class="chip" data-prompt="Explain quantum computing">⚛️ Quantum Computing</div>
+                    <div class="chip" data-prompt="Write a creative AI story">✍️ Creative Story</div>
+                    <div class="chip" data-prompt="Marketing strategy help">📊 Marketing</div>
+                </div>
+            </div>
+
+            <div class="message-wrapper">
+                <div class="typing-indicator" id="typingIndicator">
+                    <div class="message-avatar" style="background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));">🤖</div>
+                    <div class="typing-dots">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="input-area">
+            <div class="input-wrapper">
+                <textarea id="messageInput" placeholder="Type your message... (Enter to send)" rows="1"></textarea>
+                <button id="sendButton" disabled>➤</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = '/.netlify/functions/chat';
+        const msgs = document.getElementById('messagesContainer');
+        const input = document.getElementById('messageInput');
+        const btn = document.getElementById('sendButton');
+        const typing = document.getElementById('typingIndicator');
+        const welcome = document.getElementById('welcomeScreen');
+        let processing = false;
+
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                send();
+            }
+        });
+
+        input.addEventListener('input', () => {
+            input.style.height = 'auto';
+            input.style.height = input.scrollHeight + 'px';
+            btn.disabled = !input.value.trim() || processing;
+        });
+
+        btn.addEventListener('click', send);
+
+        document.querySelectorAll('.chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                input.value = chip.dataset.prompt;
+                input.dispatchEvent(new Event('input'));
+                send();
+            });
+        });
+
+        async function send() {
+            const msg = input.value.trim();
+            if (!msg || processing) return;
+
+            welcome.style.display = 'none';
+            addMsg(msg, 'user');
+
+            input.value = '';
+            input.style.height = 'auto';
+            btn.disabled = true;
+            processing = true;
+            typing.classList.add('active');
+
+            try {
+                const res = await fetch(API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: msg })
+                });
+
+                const data = await res.json();
+                typing.classList.remove('active');
+
+                if (data.error) throw new Error(data.message);
+                addMsg(data.response, 'ai');
+
+            } catch (err) {
+                typing.classList.remove('active');
+                addMsg('Error: ' + err.message, 'ai');
+            } finally {
+                processing = false;
+                btn.disabled = !input.value.trim();
+            }
+        }
+
+        function addMsg(content, sender) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'message-wrapper';
+
+            const msg = document.createElement('div');
+            msg.className = `message ${sender}`;
+
+            const time = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+            msg.innerHTML = `
+                <div class="message-header">
+                    <div class="message-avatar">${sender === 'user' ? '👤' : '🤖'}</div>
+                    <div>
+                        <div class="message-sender">${sender === 'user' ? 'You' : 'T1ERA AI'}</div>
+                        <div class="message-time">${time}</div>
+                    </div>
+                </div>
+                <div class="message-content">${content.replace(/\n/g, '<br>')}</div>
+            `;
+
+            wrapper.appendChild(msg);
+            msgs.insertBefore(wrapper, typing.parentElement);
+            msgs.scrollTop = msgs.scrollHeight;
+        }
+    </script>
+</body>
+</html>
