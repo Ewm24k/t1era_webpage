@@ -1,16 +1,30 @@
 {
-  "name": "t1era-video-gen",
+  "name": "t1era-complete-suite",
   "version": "1.0.0",
-  "description": "LTX-2 Video Generation Proxy",
+  "description": "T1ERA - Complete AI Suite: Video Generation, AI Chat, and Web Platform",
   "main": "index.js",
   "dependencies": {
     "axios": "^1.6.0",
-    "lambda-multipart-parser": "^1.0.1"
+    "lambda-multipart-parser": "^1.0.1",
+    "node-fetch": "^2.7.0"
   },
   "devDependencies": {},
   "scripts": {
-    "test": "echo \"Error: no test spec defined\" && exit 1"
+    "test": "echo \"Error: no test spec defined\" && exit 1",
+    "dev": "netlify dev",
+    "build": "netlify build",
+    "deploy": "netlify deploy --prod"
   },
-  "author": "",
+  "keywords": [
+    "t1era",
+    "ai",
+    "video-generation",
+    "chat",
+    "ollama",
+    "ltx-2",
+    "azure",
+    "netlify"
+  ],
+  "author": "T1ERA",
   "license": "ISC"
 }
