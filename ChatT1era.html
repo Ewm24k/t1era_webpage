@@ -262,7 +262,73 @@
             line-height: 1.6;
         }
 
-        /* REASONING SECTION */
+        /* THINKING DROPDOWN */
+        .thinking-dropdown {
+            margin-bottom: 12px;
+            border: 1px solid var(--border-primary);
+            border-radius: 8px;
+            overflow: hidden;
+            background: var(--bg-reasoning);
+        }
+
+        .thinking-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s;
+        }
+
+        .thinking-header:hover {
+            background: rgba(139, 92, 246, 0.12);
+        }
+
+        .thinking-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--accent-reasoning);
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .thinking-chevron {
+            font-size: 10px;
+            transition: transform 0.3s var(--transition);
+            color: var(--accent-reasoning);
+        }
+
+        .thinking-dropdown.expanded .thinking-chevron {
+            transform: rotate(180deg);
+        }
+
+        .thinking-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s var(--transition);
+            padding: 0 12px;
+        }
+
+        .thinking-dropdown.expanded .thinking-content {
+            max-height: 500px;
+            padding: 0 12px 12px 12px;
+        }
+
+        .thinking-text {
+            font-size: 12px;
+            line-height: 1.6;
+            color: var(--text-secondary);
+            white-space: pre-wrap;
+            padding: 10px;
+            background: rgba(139, 92, 246, 0.05);
+            border-radius: 6px;
+            border-left: 2px solid var(--accent-secondary);
+        }
+
+        /* REASONING SECTION (for simulated reasoning when toggle is on) */
         .reasoning-section {
             margin-bottom: 14px;
             padding: 12px;
@@ -487,7 +553,7 @@
             </a>
             <div class="header-controls">
                 <div class="reasoning-toggle" id="reasoningToggle">
-                    <span>🧠 Reasoning</span>
+                    <span>🧠 Show Thinking</span>
                     <div class="toggle-switch"></div>
                 </div>
                 <button class="btn" id="clearChat">🗑️</button>
@@ -500,7 +566,7 @@
                 <div class="welcome-icon">🤖</div>
                 <h1 class="welcome-title">Welcome to T1ERA Chat</h1>
                 <p class="welcome-subtitle">
-                    Powered by Qwen3:8b on Azure A10 GPU • Live Streaming Responses
+                    Powered by T1ERA Custom Model on Azure A10 GPU • Live Streaming Responses
                 </p>
                 <div class="suggestion-chips">
                     <div class="chip" data-prompt="Explain quantum computing in simple terms">⚛️ Quantum Computing</div>
@@ -528,16 +594,16 @@
         const clearChatBtn = document.getElementById('clearChat');
         
         let processing = false;
-        let showReasoning = localStorage.getItem('showReasoning') === 'true';
+        let showThinking = localStorage.getItem('showThinking') === 'true';
 
-        if (showReasoning) {
+        if (showThinking) {
             reasoningToggle.classList.add('active');
         }
 
         reasoningToggle.addEventListener('click', () => {
-            showReasoning = !showReasoning;
+            showThinking = !showThinking;
             reasoningToggle.classList.toggle('active');
-            localStorage.setItem('showReasoning', showReasoning);
+            localStorage.setItem('showThinking', showThinking);
         });
 
         input.addEventListener('keydown', (e) => {
@@ -589,7 +655,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
                         message: msg,
-                        enableReasoning: showReasoning 
+                        enableReasoning: showThinking 
                     })
                 });
 
@@ -597,7 +663,7 @@
 
                 if (data.error) throw new Error(data.message);
                 
-                await streamResponse(data.response);
+                await streamResponse(data.response, data.thinking, data.hasThinking);
 
             } catch (err) {
                 addAIMessage('Error: ' + err.message);
@@ -632,7 +698,7 @@
             msgs.scrollTop = msgs.scrollHeight;
         }
 
-        async function streamResponse(fullResponse) {
+        async function streamResponse(finalResponse, thinkingText, hasThinking) {
             const wrapper = document.createElement('div');
             wrapper.className = 'message-wrapper';
 
@@ -657,64 +723,46 @@
 
             const contentDiv = msg.querySelector('#streaming-content');
             
-            // Show reasoning first if enabled
-            if (showReasoning) {
-                await simulateReasoning(contentDiv);
+            // Show thinking dropdown if available and toggle is ON
+            if (hasThinking && thinkingText && showThinking) {
+                addThinkingDropdown(contentDiv, thinkingText);
             }
 
-            // Then stream the response letter by letter
-            await typeWriter(contentDiv, fullResponse, showReasoning);
+            // Then stream the final response letter by letter
+            await typeWriter(contentDiv, finalResponse, hasThinking && showThinking);
             
             msgs.scrollTop = msgs.scrollHeight;
         }
 
-        async function simulateReasoning(container) {
-            const reasoningSection = document.createElement('div');
-            reasoningSection.className = 'reasoning-section';
-            reasoningSection.innerHTML = '<div class="reasoning-title"><span>🧠</span> Reasoning Process</div>';
-            container.appendChild(reasoningSection);
-
-            const steps = [
-                { label: 'Understanding', text: 'Analyzing the user query and identifying key requirements...' },
-                { label: 'Knowledge Retrieval', text: 'Searching through relevant information and examples...' },
-                { label: 'Planning Response', text: 'Structuring the answer for clarity and completeness...' }
-            ];
-
-            for (let i = 0; i < steps.length; i++) {
-                // Show thinking indicator
-                const thinking = document.createElement('div');
-                thinking.className = 'thinking-indicator';
-                thinking.innerHTML = `
-                    <span>Thinking...</span>
-                    <div class="thinking-dots">
-                        <div class="thinking-dot"></div>
-                        <div class="thinking-dot"></div>
-                        <div class="thinking-dot"></div>
+        function addThinkingDropdown(container, thinkingText) {
+            const dropdown = document.createElement('div');
+            dropdown.className = 'thinking-dropdown';
+            dropdown.innerHTML = `
+                <div class="thinking-header">
+                    <div class="thinking-title">
+                        <span>🧠</span>
+                        <span>Thinking Process</span>
                     </div>
-                `;
-                reasoningSection.appendChild(thinking);
-                
-                await sleep(800);
-                thinking.remove();
+                    <div class="thinking-chevron">▼</div>
+                </div>
+                <div class="thinking-content">
+                    <div class="thinking-text">${thinkingText.replace(/\n/g, '<br>')}</div>
+                </div>
+            `;
 
-                // Show step
-                const step = document.createElement('div');
-                step.className = 'reasoning-step';
-                step.innerHTML = `
-                    <div class="reasoning-step-label">Step ${i + 1}: ${steps[i].label}</div>
-                    <div>${steps[i].text}</div>
-                `;
-                reasoningSection.appendChild(step);
-                
-                await sleep(600);
-                msgs.scrollTop = msgs.scrollHeight;
-            }
+            container.appendChild(dropdown);
 
-            await sleep(400);
+            // Add click handler to toggle dropdown
+            const header = dropdown.querySelector('.thinking-header');
+            header.addEventListener('click', () => {
+                dropdown.classList.toggle('expanded');
+            });
+
+            msgs.scrollTop = msgs.scrollHeight;
         }
 
-        async function typeWriter(container, text, hasReasoning) {
-            if (hasReasoning) {
+        async function typeWriter(container, text, hasThinking) {
+            if (hasThinking) {
                 const divider = document.createElement('div');
                 divider.style.cssText = 'margin: 16px 0; padding-top: 16px; border-top: 1px solid var(--border-primary);';
                 container.appendChild(divider);
