@@ -74,8 +74,6 @@
             height: 100dvh; /* Dynamic viewport height for mobile */
             display: flex;
             flex-direction: column;
-            max-width: 1200px;
-            margin: 0 auto;
             width: 100%;
         }
 
@@ -86,8 +84,17 @@
             padding: 16px 28px;
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: center;
             flex-shrink: 0;
+            width: 100%;
+        }
+
+        .header-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 1400px;
         }
 
         .logo {
@@ -631,6 +638,8 @@
         @media (max-width: 768px) {
             .chat-header { 
                 padding: 10px 12px;
+            }
+            .header-wrapper {
                 flex-wrap: wrap;
                 gap: 8px;
             }
@@ -741,10 +750,14 @@
             .chat-header {
                 padding: 8px 10px;
             }
+            .header-wrapper {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
             .header-controls {
                 width: 100%;
                 justify-content: flex-end;
-                margin-top: 4px;
             }
             .message-bubble {
                 padding: 10px 12px;
@@ -763,17 +776,19 @@
 
     <div class="chat-container">
         <div class="chat-header">
-            <a href="index.html" class="logo">
-                <div class="logo-mark">T1</div>
-                <span style="font-size: 16px; font-weight: 700; font-family: 'Space Grotesk', sans-serif;">T1ERA Chat</span>
-            </a>
-            <div class="header-controls">
-                <div class="reasoning-toggle" id="reasoningToggle">
-                    <span>🧠 Show Thinking</span>
-                    <div class="toggle-switch"></div>
+            <div class="header-wrapper">
+                <a href="index.html" class="logo">
+                    <div class="logo-mark">T1</div>
+                    <span style="font-size: 16px; font-weight: 700; font-family: 'Space Grotesk', sans-serif;">T1ERA Chat</span>
+                </a>
+                <div class="header-controls">
+                    <div class="reasoning-toggle" id="reasoningToggle">
+                        <span>🧠 Show Thinking</span>
+                        <div class="toggle-switch"></div>
+                    </div>
+                    <button class="btn" id="clearChat">🗑️</button>
+                    <a href="index.html" class="btn">← Home</a>
                 </div>
-                <button class="btn" id="clearChat">🗑️</button>
-                <a href="index.html" class="btn">← Home</a>
             </div>
         </div>
 
