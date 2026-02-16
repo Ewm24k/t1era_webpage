@@ -659,14 +659,44 @@
                     })
                 });
 
+                // Handle non-200 responses
+                if (!res.ok) {
+                    const errorData = await res.json().catch(() => ({ message: 'Server error' }));
+                    throw new Error(errorData.message || `Server error: ${res.status}`);
+                }
+
                 const data = await res.json();
 
                 if (data.error) throw new Error(data.message);
                 
+                // Enhanced debug logging
+                console.log('=== RESPONSE RECEIVED ===');
+                console.log('Has thinking:', data.hasThinking);
+                console.log('Thinking text:', data.thinking);
+                console.log('Final response:', data.response);
+                if (data.debug) {
+                    console.log('Debug info:', data.debug);
+                    console.log('Raw response preview:', data.debug.rawResponsePreview);
+                }
+                console.log('=== END RESPONSE ===');
+                
                 await streamResponse(data.response, data.thinking, data.hasThinking);
 
             } catch (err) {
-                addAIMessage('Error: ' + err.message);
+                console.error('Error details:', err);
+                
+                // User-friendly error messages
+                let errorMsg = err.message;
+                
+                if (errorMsg.includes('unexpected token') || errorMsg.includes('JSON')) {
+                    errorMsg = '⚠️ The query was too complex and timed out. Please try:\n• Breaking your question into smaller parts\n• Asking a more specific question\n• Trying again in a moment';
+                } else if (errorMsg.includes('timeout') || errorMsg.includes('overloaded')) {
+                    errorMsg = '⚠️ The server took too long to respond. Please try again with a shorter question.';
+                } else if (errorMsg.includes('Failed to fetch') || errorMsg.includes('network')) {
+                    errorMsg = '⚠️ Network error. Please check your connection and try again.';
+                }
+                
+                addAIMessage(errorMsg);
             } finally {
                 processing = false;
                 btn.disabled = !input.value.trim();
@@ -723,9 +753,23 @@
 
             const contentDiv = msg.querySelector('#streaming-content');
             
+            // Debug: Log what we're about to display
+            console.log('streamResponse called with:', {
+                hasThinking,
+                thinkingText: thinkingText ? thinkingText.substring(0, 100) : null,
+                showThinking,
+                willShowDropdown: hasThinking && thinkingText && showThinking
+            });
+            
             // Show thinking dropdown if available and toggle is ON
             if (hasThinking && thinkingText && showThinking) {
+                console.log('✅ Displaying thinking dropdown');
                 addThinkingDropdown(contentDiv, thinkingText);
+            } else {
+                console.log('❌ Not displaying thinking dropdown because:');
+                console.log('  hasThinking:', hasThinking);
+                console.log('  thinkingText exists:', !!thinkingText);
+                console.log('  showThinking toggle:', showThinking);
             }
 
             // Then stream the final response letter by letter
