@@ -39,7 +39,7 @@ exports.handler = async (event, context) => {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                model: 't1era',  // ✅ UPDATED: Changed to your custom model
+                model: 't1era',
                 prompt: message,
                 stream: false,
                 options: {
@@ -58,14 +58,30 @@ exports.handler = async (event, context) => {
         }
 
         const data = await ollamaResponse.json();
+        const fullResponse = data.response || 'No response from AI';
+
+        // Parse thinking and final response
+        let thinking = null;
+        let finalResponse = fullResponse;
+
+        // Check if response contains thinking process
+        // Pattern: "Thinking...\n<thinking text>\n...done thinking.\n<final response>"
+        const thinkingMatch = fullResponse.match(/Thinking\.\.\.([\s\S]*?)\.\.\.done thinking\.([\s\S]*)/);
+        
+        if (thinkingMatch) {
+            thinking = thinkingMatch[1].trim();
+            finalResponse = thinkingMatch[2].trim();
+        }
 
         return {
             statusCode: 200,
             headers,
             body: JSON.stringify({
                 error: false,
-                response: data.response || 'No response from AI',
-                model: 't1era'
+                response: finalResponse,
+                thinking: thinking,
+                model: 't1era',
+                hasThinking: thinking !== null
             })
         };
 
