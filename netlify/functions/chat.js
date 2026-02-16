@@ -34,20 +34,22 @@ exports.handler = async (event, context) => {
             };
         }
 
-        // Call Azure VM Ollama
+        // Call Azure VM Ollama with CORRECT model name: qwen3:8b (not qwen2.5:3b)
         const ollamaResponse = await fetch('http://70.153.112.17:11434/api/generate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                model: 'qwen2.5:3b',
+                model: 'qwen3:8b',  // ✅ FIXED: Changed from qwen2.5:3b to qwen3:8b
                 prompt: message,
                 stream: false
             }),
-            timeout: 30000 // 30 second timeout
+            timeout: 60000 // 60 second timeout for longer responses
         });
 
         if (!ollamaResponse.ok) {
-            throw new Error(`Ollama responded with status: ${ollamaResponse.status}`);
+            const errorText = await ollamaResponse.text();
+            console.error('Ollama error:', ollamaResponse.status, errorText);
+            throw new Error(`Ollama responded with status: ${ollamaResponse.status} - ${errorText}`);
         }
 
         const data = await ollamaResponse.json();
