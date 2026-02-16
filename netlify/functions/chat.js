@@ -24,8 +24,8 @@ exports.handler = async (event, context) => {
     }
 
     try {
-        const { message } = JSON.parse(event.body);
-
+        const { message, enableReasoning } = JSON.parse(event.body);
+        
         if (!message || message.trim() === '') {
             return {
                 statusCode: 400,
@@ -34,14 +34,19 @@ exports.handler = async (event, context) => {
             };
         }
 
-        // Call Azure VM Ollama with CORRECT model name: qwen3:8b (not qwen2.5:3b)
+        // Call Azure VM Ollama with your custom t1era model
         const ollamaResponse = await fetch('http://70.153.112.17:11434/api/generate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                model: 'qwen3:8b',  // ✅ FIXED: Changed from qwen2.5:3b to qwen3:8b
+                model: 't1era',  // ✅ UPDATED: Changed to your custom model
                 prompt: message,
-                stream: false
+                stream: false,
+                options: {
+                    temperature: 0.7,
+                    top_p: 0.9,
+                    top_k: 40
+                }
             }),
             timeout: 60000 // 60 second timeout for longer responses
         });
@@ -59,7 +64,8 @@ exports.handler = async (event, context) => {
             headers,
             body: JSON.stringify({
                 error: false,
-                response: data.response || 'No response from AI'
+                response: data.response || 'No response from AI',
+                model: 't1era'
             })
         };
 
