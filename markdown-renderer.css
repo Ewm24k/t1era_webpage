@@ -8,6 +8,10 @@
     border: 1px solid rgba(255, 255, 255, 0.1);
     background: #0d0d14;
     position: relative;
+    /* Critical: prevent container from expanding beyond parent */
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .code-block-header {
@@ -17,6 +21,8 @@
     padding: 8px 14px;
     background: rgba(255, 255, 255, 0.05);
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .code-language {
@@ -38,13 +44,22 @@
 .code-block {
     margin: 0;
     padding: 16px;
+    /* Scroll horizontally INSIDE the box — never push outside */
     overflow-x: auto;
+    overflow-y: visible;
     font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
     font-size: 13px;
     line-height: 1.6;
     color: #e2e8f0;
+    /* pre-wrap: wraps long lines. Use 'pre' for horizontal scroll only */
     white-space: pre;
     background: transparent;
+    /* Constrain to parent width */
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    /* Ensure the pre itself doesn't overflow its container */
+    display: block;
 }
 
 .code-block code {
@@ -54,12 +69,35 @@
     border: none;
     padding: 0;
     color: inherit;
+    /* Let code be as wide as it needs — scroll handles overflow */
+    display: block;
+    width: max-content;
+    min-width: 100%;
 }
 
+/* Scrollbar styling */
 .code-block::-webkit-scrollbar { height: 4px; }
 .code-block::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.15);
     border-radius: 4px;
+}
+.code-block::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+/* ── MESSAGE BUBBLE OVERFLOW FIX ────────────────────────────────────────────── */
+/* Ensure the message bubble itself never overflows the screen */
+.message-bubble {
+    min-width: 0;
+    overflow: hidden;
+    word-break: break-word;
+}
+
+.message-content {
+    min-width: 0;
+    overflow: hidden;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 /* ── BASE SPACING RESET ──────────────────────────────────────────────────────── */
@@ -113,6 +151,7 @@
     font-size: 14px;
     line-height: 1.65;
     color: rgba(255,255,255,0.88);
+    word-break: break-word;
 }
 
 /* ── FRAMEWORK LABEL ────────────────────────────────────────────────────────── */
@@ -149,6 +188,8 @@
     background: rgba(139, 92, 246, 0.07);
     border-left: 3px solid rgba(139, 92, 246, 0.5);
     border-radius: 0 8px 8px 0;
+    box-sizing: border-box;
+    width: 100%;
 }
 
 .message-content .md-copy-key {
@@ -166,6 +207,9 @@
     font-size: 13px;
     line-height: 1.55;
     color: rgba(255,255,255,0.85);
+    word-break: break-word;
+    flex: 1;
+    min-width: 0;
 }
 
 /* ── LISTS ───────────────────────────────────────────────────────────────────── */
@@ -175,6 +219,8 @@
     display: flex;
     flex-direction: column;
     gap: 5px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .message-content .md-ul li,
@@ -182,6 +228,7 @@
     font-size: 14px;
     line-height: 1.6;
     color: rgba(255,255,255,0.85);
+    word-break: break-word;
 }
 
 .message-content .md-ul li::marker { color: var(--accent-secondary, #8b5cf6); }
@@ -202,6 +249,7 @@
     font-size: 13px;
     font-style: italic;
     color: rgba(255,255,255,0.75);
+    word-break: break-word;
 }
 
 /* ── HORIZONTAL RULE ─────────────────────────────────────────────────────────── */
@@ -220,6 +268,7 @@
     color: var(--accent-primary, #667eea);
     text-decoration: underline;
     text-underline-offset: 2px;
+    word-break: break-all;
 }
 .message-content .md-link:hover { color: #a78bfa; }
 .message-content .md-emdash { color: rgba(255,255,255,0.5); }
@@ -235,21 +284,89 @@
     font-family: 'Fira Code', 'Cascadia Code', monospace;
     font-size: 12px;
     color: #e2e8f0;
+    word-break: break-all;
 }
 
 /* ── MOBILE ──────────────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
+
+    /* Message bubble — lock to screen width */
+    .message-bubble {
+        max-width: 100%;
+        overflow: hidden;
+    }
+
+    .message-content {
+        max-width: 100%;
+        overflow: hidden;
+    }
+
+    /* Code block container — must not bleed outside bubble */
+    .code-block-container {
+        width: 100%;
+        max-width: 100%;
+        margin: 8px 0;
+        border-radius: 8px;
+        /* Contain overflow at this level */
+        overflow: hidden;
+    }
+
+    /* The pre scrolls horizontally — does NOT push the container wider */
+    .code-block {
+        font-size: 11.5px;
+        padding: 12px;
+        overflow-x: auto;
+        overflow-y: visible;
+        /* Prevent pre from expanding its parent on mobile */
+        max-width: 100%;
+        /* Touch scroll for iOS */
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .code-block code {
+        /* Code content scrolls inside, min 100% so short code doesn't shrink */
+        min-width: 100%;
+        width: max-content;
+        max-width: none;
+    }
+
+    .code-block-header {
+        padding: 6px 12px;
+    }
+
+    .code-language {
+        font-size: 10px;
+    }
+
+    /* Text content */
     .message-content .md-p,
     .message-content .md-ul li,
     .message-content .md-ol li,
     .message-content .md-copy-val { font-size: 13px; }
 
-    .message-content .md-copy-row { flex-direction: column; gap: 4px; }
+    .message-content .md-copy-row {
+        flex-direction: column;
+        gap: 4px;
+    }
     .message-content .md-copy-key { min-width: unset; }
     .message-content .md-framework-label { font-size: 10px; }
     .message-content .md-h1 { font-size: 15px; }
     .message-content .md-h2 { font-size: 14px; }
     .message-content .md-h3 { font-size: 12px; }
-    .code-block { font-size: 12px; padding: 12px; }
-    .code-block-header { padding: 6px 12px; }
+
+    /* Inline code wraps instead of overflowing */
+    .message-content .inline-code,
+    .inline-code {
+        font-size: 11px;
+        word-break: break-all;
+        white-space: pre-wrap;
+    }
+}
+
+/* Extra small phones */
+@media (max-width: 360px) {
+    .code-block {
+        font-size: 11px;
+        padding: 10px;
+    }
 }
