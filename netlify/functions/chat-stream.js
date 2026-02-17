@@ -59,63 +59,111 @@ exports.handler = async (event, context) => {
         console.log(`[SMART ROUTING] Using model: ${modelName} | Coding: ${isCodingQuery}`);
 
         // ========================================
-        // CALL OLLAMA - COLLECT FULL RESPONSE
-        // Netlify doesn't support true SSE streaming
-        // but we collect fast and return full response
+        // CALL OLLAMA WITH TIMEOUT PROTECTION
         // ========================================
-        const ollamaResponse = await fetch('http://70.153.112.17:11434/api/generate', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                model: modelName,
-                prompt: message,
-                stream: true,
-                options: {
-                    temperature: 0.7,
-                    top_p: 0.9,
-                    top_k: 40,
-                    num_predict: isCodingQuery ? 4096 : 2048
-                }
-            })
-        });
+        const controller = new AbortController();
+        const timeout = setTimeout(() => {
+            controller.abort();
+        }, 20000); // 20 second timeout to stay under Netlify's 26s limit
+
+        let ollamaResponse;
+        try {
+            ollamaResponse = await fetch('http://70.153.112.17:11434/api/generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: modelName,
+                    prompt: message,
+                    stream: true,
+                    options: {
+                        temperature: 0.7,
+                        top_p: 0.9,
+                        top_k: 40,
+                        num_predict: isCodingQuery ? 4096 : 2048,
+                        // Add faster response options
+                        num_ctx: 2048,
+                        repeat_penalty: 1.1
+                    }
+                }),
+                signal: controller.signal
+            });
+        } catch (fetchError) {
+            clearTimeout(timeout);
+            if (fetchError.name === 'AbortError') {
+                throw new Error('Request timed out. Please try a simpler query or break it into smaller parts.');
+            }
+            throw fetchError;
+        }
+
+        clearTimeout(timeout);
 
         if (!ollamaResponse.ok) {
             const errorText = await ollamaResponse.text();
             throw new Error(`Ollama API error (${ollamaResponse.status}): ${errorText.substring(0, 200)}`);
         }
 
-        // Collect full response from streaming
+        // ========================================
+        // FAST RESPONSE COLLECTION WITH TIMEOUT
+        // ========================================
         let fullResponse = '';
         let buffer = '';
+        const startTime = Date.now();
+        const MAX_COLLECTION_TIME = 18000; // 18 seconds max collection time
 
-        for await (const chunk of ollamaResponse.body) {
-            buffer += chunk.toString();
-            const lines = buffer.split('\n');
-            buffer = lines.pop() || '';
+        try {
+            for await (const chunk of ollamaResponse.body) {
+                // Check if we're running out of time
+                if (Date.now() - startTime > MAX_COLLECTION_TIME) {
+                    console.log('[TIMEOUT] Collection time exceeded, returning partial response');
+                    if (fullResponse.trim() === '') {
+                        throw new Error('Response generation is taking too long. Please try a shorter query.');
+                    }
+                    break;
+                }
 
-            for (const line of lines) {
-                if (line.trim()) {
-                    try {
-                        const data = JSON.parse(line);
-                        if (data.response) {
-                            fullResponse += data.response;
+                buffer += chunk.toString();
+                const lines = buffer.split('\n');
+                buffer = lines.pop() || '';
+
+                for (const line of lines) {
+                    if (line.trim()) {
+                        try {
+                            const data = JSON.parse(line);
+                            if (data.response) {
+                                fullResponse += data.response;
+                            }
+                            // If model signals it's done, break early
+                            if (data.done === true) {
+                                buffer = '';
+                                break;
+                            }
+                        } catch (e) {
+                            // Skip invalid JSON
+                            continue;
                         }
-                    } catch (e) {
-                        // Skip invalid JSON
                     }
                 }
             }
-        }
 
-        if (buffer.trim()) {
-            try {
-                const data = JSON.parse(buffer);
-                if (data.response) fullResponse += data.response;
-            } catch (e) {}
+            // Process remaining buffer
+            if (buffer.trim()) {
+                try {
+                    const data = JSON.parse(buffer);
+                    if (data.response) fullResponse += data.response;
+                } catch (e) {
+                    // Ignore parse error for final buffer
+                }
+            }
+        } catch (streamError) {
+            console.error('[STREAM ERROR]', streamError);
+            if (fullResponse.trim() === '') {
+                throw new Error('Failed to receive response from AI model');
+            }
+            // Continue with partial response if we have something
         }
 
         if (!fullResponse || fullResponse.trim() === '') {
-            fullResponse = 'No response from AI';
+            fullResponse = 'The AI model did not generate a response. Please try rephrasing your question.';
         }
 
         // ========================================
@@ -124,8 +172,7 @@ exports.handler = async (event, context) => {
         let thinking = null;
         let finalResponse = fullResponse;
 
-        console.log('=== RAW RESPONSE (first 500 chars) ===');
-        console.log(fullResponse.substring(0, 500));
+        console.log('=== RESPONSE LENGTH:', fullResponse.length);
 
         let thinkingMatch = fullResponse.match(/Thinking\.\.\.\s*([\s\S]*?)\s*\.\.\.done thinking\.\s*([\s\S]*)/i);
 
@@ -149,6 +196,9 @@ exports.handler = async (event, context) => {
             console.log('❌ NO THINKING PATTERN FOUND');
         }
 
+        const totalTime = ((Date.now() - startTime) / 1000).toFixed(2);
+        console.log(`[COMPLETE] Total processing time: ${totalTime}s`);
+
         return {
             statusCode: 200,
             headers: { ...headers, 'Content-Type': 'application/json' },
@@ -160,12 +210,14 @@ exports.handler = async (event, context) => {
                 model: modelName,
                 isCodingQuery: isCodingQuery,
                 hasThinking: thinking !== null,
+                processingTime: totalTime,
                 debug: {
                     rawResponseLength: fullResponse.length,
                     thinkingFound: thinking !== null,
                     thinkingLength: thinking ? thinking.length : 0,
                     modelUsed: modelName,
-                    codingDetected: isCodingQuery
+                    codingDetected: isCodingQuery,
+                    processingTimeSeconds: totalTime
                 }
             })
         };
@@ -174,20 +226,30 @@ exports.handler = async (event, context) => {
         console.error('Error:', error);
 
         let errorMessage = 'Internal server error';
+        let statusCode = 500;
 
-        if (error.message.includes('ECONNREFUSED') || error.message.includes('fetch failed')) {
+        if (error.message.includes('timed out') || error.message.includes('taking too long')) {
+            errorMessage = 'The request is taking too long. For complex code generation, try:\n\n1. Breaking your request into smaller parts\n2. Being more specific about what you need\n3. Asking for a simpler version first';
+            statusCode = 504;
+        } else if (error.message.includes('ECONNREFUSED') || error.message.includes('fetch failed')) {
             errorMessage = 'Cannot connect to AI server. Please try again in a moment.';
+            statusCode = 503;
         } else if (error.message.includes('Ollama API error')) {
             errorMessage = 'AI model is currently unavailable. Please try again.';
+            statusCode = 503;
+        } else if (error.message.includes('AbortError')) {
+            errorMessage = 'Request was cancelled due to timeout. Please try a simpler query.';
+            statusCode = 504;
         }
 
         return {
-            statusCode: 500,
+            statusCode: statusCode,
             headers: { ...headers, 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 error: true,
                 message: errorMessage,
-                technicalDetails: error.message
+                technicalDetails: error.message,
+                suggestion: 'Try breaking complex requests into smaller, more focused questions.'
             })
         };
     }
