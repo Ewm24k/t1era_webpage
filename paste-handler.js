@@ -1,9 +1,9 @@
 /**
- * T1ERA Paste Handler v2
+ * T1ERA Paste Handler v3
  * - Detects long pastes (300+ chars) in the message input
- * - Auto-detects language/format (Python, JS, JSON, SQL, etc.)
- * - Shows animated popup preview above the input field
- * - Chip bar collapses the snippet so input stays clean
+ * - Auto-detects language/format
+ * - Shows compact popup above input field
+ * - Chip collapses snippet so input stays clean
  */
 
 class PasteHandler {
@@ -31,7 +31,7 @@ class PasteHandler {
             return { lang:'python',     label:'Python',      icon:'Py',  color:'#3776ab' };
         if (/:\s*(string|number|boolean|any|void)\b|interface\s+\w+/.test(t))
             return { lang:'typescript', label:'TypeScript',  icon:'TS',  color:'#3178c6' };
-        if (/\b(const|let|var)\s+\w+|=>\s*{|require\s*\(|console\.log/.test(t))
+        if (/\b(const|let|var)\s+\w+|=>\s*\{|require\s*\(|console\.log/.test(t))
             return { lang:'javascript', label:'JavaScript',  icon:'JS',  color:'#f7df1e' };
         if (/<(!DOCTYPE|html|head|body|div|span|p\b|script)[^>]*>/i.test(t))
             return { lang:'html',       label:'HTML',        icon:'</>',  color:'#e34c26' };
@@ -42,17 +42,17 @@ class PasteHandler {
         if (/^#!/.test(t) || /\b(sudo|apt|npm|pip|echo|chmod|grep|curl)\b/.test(t))
             return { lang:'bash',       label:'Bash/Shell',  icon:'$_',  color:'#4eaa25' };
         if (/\bpublic\s+(class|static|void)\b|System\.out\.print/.test(t))
-            return { lang:'java',       label:'Java',        icon:'☕',  color:'#007396' };
+            return { lang:'java',       label:'Java',        icon:'Jv',  color:'#007396' };
         if (/\bfunc\s+\w+\s*\(|package\s+main/.test(t))
             return { lang:'go',         label:'Go',          icon:'Go',  color:'#00add8' };
         if (/\bfn\s+\w+\s*\(|let\s+mut\s/.test(t))
             return { lang:'rust',       label:'Rust',        icon:'Rs',  color:'#ce422b' };
         if (/^[\w\-]+:\s*.+$/m.test(t) && /^\s{2}\w/m.test(t))
-            return { lang:'yaml',       label:'YAML',        icon:'⚙',  color:'#cb171e' };
+            return { lang:'yaml',       label:'YAML',        icon:'YM',  color:'#cb171e' };
         if (/<\?xml|<\/\w+>/.test(t))
             return { lang:'xml',        label:'XML',         icon:'</>',  color:'#e34c26' };
 
-        return { lang:'plaintext', label:'Plain Text', icon:'📄', color:'#888888' };
+        return { lang:'plaintext', label:'Plain Text', icon:'Aa', color:'#888888' };
     }
 
     _validJSON(s) { try { JSON.parse(s); return true; } catch { return false; } }
@@ -60,89 +60,92 @@ class PasteHandler {
     // ─── BUILD POPUP ─────────────────────────────────────────────────────────
 
     _buildPopup() {
-        // Insert popup INSIDE .input-area, ABOVE .input-wrapper
-        const inputArea = this.input.closest('.input-area');
+        const inputArea   = this.input.closest('.input-area');
         const inputWrapper = this.input.closest('.input-wrapper');
 
         this.popup = document.createElement('div');
         this.popup.className = 'ph-popup';
-        this.popup.innerHTML = `
-            <div class="ph-popup-header">
-                <div class="ph-popup-left">
-                    <span class="ph-icon"></span>
-                    <span class="ph-label"></span>
-                    <span class="ph-meta"></span>
-                </div>
-                <div class="ph-popup-right">
-                    <button class="ph-btn ph-send-inline">Send as text</button>
-                    <button class="ph-btn ph-btn-accent ph-attach">Attach snippet</button>
-                    <button class="ph-dismiss">✕</button>
-                </div>
-            </div>
-            <div class="ph-preview-wrap">
-                <pre class="ph-preview-code"></pre>
-            </div>
-        `;
+        this.popup.innerHTML =
+            '<div class="ph-header">' +
+              '<div class="ph-header-left">' +
+                '<span class="ph-icon"></span>' +
+                '<span class="ph-label"></span>' +
+                '<span class="ph-meta"></span>' +
+              '</div>' +
+              '<div class="ph-header-right">' +
+                '<button class="ph-btn ph-inline-btn">Send as text</button>' +
+                '<button class="ph-btn ph-accent-btn ph-attach-btn">Attach snippet ✦</button>' +
+                '<button class="ph-close">✕</button>' +
+              '</div>' +
+            '</div>' +
+            '<div class="ph-preview-wrap">' +
+              '<pre class="ph-preview-code"></pre>' +
+            '</div>';
 
-        // Insert before input-wrapper
+        // Insert before input-wrapper so it appears above it
         inputArea.insertBefore(this.popup, inputWrapper);
 
-        this.popup.querySelector('.ph-dismiss').addEventListener('click', () => this._closePopup());
-        this.popup.querySelector('.ph-send-inline').addEventListener('click', () => this._sendInline());
-        this.popup.querySelector('.ph-attach').addEventListener('click', () => this._attachSnippet());
+        this.popup.querySelector('.ph-close').addEventListener('click', () => this._close());
+        this.popup.querySelector('.ph-inline-btn').addEventListener('click', () => this._sendInline());
+        this.popup.querySelector('.ph-attach-btn').addEventListener('click', () => this._attach());
     }
 
     _wireChip() {
-        // Chip bar is already in the HTML — just grab references
-        this.chipBar    = document.getElementById('pasteChipBar');
-        this.chipIcon   = document.getElementById('pasteChipIcon');
-        this.chipLabel  = document.getElementById('pasteChipLabel');
-        this.chipSize   = document.getElementById('pasteChipSize');
-        const removeBtn = document.getElementById('pasteChipRemove');
-        if (removeBtn) removeBtn.addEventListener('click', () => this._removeChip());
+        this.chipBar  = document.getElementById('pasteChipBar');
+        this.chipIcon = document.getElementById('pasteChipIcon');
+        this.chipLabel= document.getElementById('pasteChipLabel');
+        this.chipSize = document.getElementById('pasteChipSize');
+        const rm = document.getElementById('pasteChipRemove');
+        if (rm) rm.addEventListener('click', () => this._removeChip());
     }
 
     // ─── PASTE EVENT ─────────────────────────────────────────────────────────
 
     _bindPaste() {
         this.input.addEventListener('paste', (e) => {
-            const text = e.clipboardData?.getData('text') || '';
-            if (text.length >= this.THRESHOLD) {
+            const text = (e.clipboardData || window.clipboardData).getData('text');
+            if (text && text.length >= this.THRESHOLD) {
                 e.preventDefault();
-                this._openPopup(text);
+                this._open(text);
             }
         });
     }
 
-    // ─── POPUP ACTIONS ───────────────────────────────────────────────────────
+    // ─── POPUP CONTROL ───────────────────────────────────────────────────────
 
-    _openPopup(text) {
+    _open(text) {
         this.pendingText  = text;
         this.detectedLang = this.detect(text);
-        const lang        = this.detectedLang;
+        const d = this.detectedLang;
 
-        // Fill header
-        const iconEl  = this.popup.querySelector('.ph-icon');
-        const labelEl = this.popup.querySelector('.ph-label');
-        const metaEl  = this.popup.querySelector('.ph-meta');
-        iconEl.textContent  = lang.icon;
-        iconEl.style.color  = lang.color;
-        labelEl.textContent = lang.label;
-        labelEl.style.color = lang.color;
+        this.popup.querySelector('.ph-icon').textContent  = d.icon;
+        this.popup.querySelector('.ph-icon').style.color  = d.color;
+        this.popup.querySelector('.ph-label').textContent = d.label;
+        this.popup.querySelector('.ph-label').style.color = d.color;
+
         const lines = text.split('\n').length;
-        metaEl.textContent  = `${text.length.toLocaleString()} chars · ${lines} line${lines !== 1 ? 's' : ''}`;
+        this.popup.querySelector('.ph-meta').textContent =
+            text.length.toLocaleString() + ' chars · ' + lines + ' lines';
 
-        // Preview — first 40 lines
-        const preview = text.split('\n').slice(0, 40).join('\n')
-            + (lines > 40 ? '\n\n…and more' : '');
-        const pre = this.popup.querySelector('.ph-preview-code');
-        pre.textContent = preview;
+        const preview = text.split('\n').slice(0, 35).join('\n') +
+            (lines > 35 ? '\n…' : '');
+        this.popup.querySelector('.ph-preview-code').textContent = preview;
 
+        // Show with max-height animation
+        this.popup.style.display = 'flex';
+        // Force reflow then animate
+        this.popup.getBoundingClientRect();
         this.popup.classList.add('ph-visible');
     }
 
-    _closePopup() {
+    _close() {
         this.popup.classList.remove('ph-visible');
+        // Hide after transition
+        setTimeout(() => {
+            if (!this.popup.classList.contains('ph-visible')) {
+                this.popup.style.display = 'none';
+            }
+        }, 300);
         this.pendingText = null;
     }
 
@@ -150,36 +153,30 @@ class PasteHandler {
         if (!this.pendingText) return;
         this.input.value = this.pendingText;
         this.input.dispatchEvent(new Event('input'));
-        this._closePopup();
+        this._close();
         this.input.focus();
     }
 
-    _attachSnippet() {
+    _attach() {
         if (!this.pendingText) return;
-
         const attached = { content: this.pendingText, lang: this.detectedLang };
 
-        // Update chip
-        if (this.chipBar && this.chipIcon && this.chipLabel && this.chipSize) {
-            this.chipIcon.textContent  = this.detectedLang.icon;
-            this.chipIcon.style.color  = this.detectedLang.color;
-            this.chipLabel.textContent = this.detectedLang.label + ' snippet';
-            this.chipSize.textContent  = this.pendingText.length.toLocaleString() + ' chars';
+        if (this.chipBar) {
+            const d = this.detectedLang;
+            if (this.chipIcon)  { this.chipIcon.textContent = d.icon; this.chipIcon.style.color = d.color; }
+            if (this.chipLabel)   this.chipLabel.textContent = d.label + ' snippet';
+            if (this.chipSize)    this.chipSize.textContent  = this.pendingText.length.toLocaleString() + ' chars';
 
             const chip = document.getElementById('pasteChip');
-            if (chip) {
-                chip.style.borderColor = this.detectedLang.color + '55';
-            }
+            if (chip) chip.style.borderColor = d.color + '66';
 
             this.chipBar.style.display = 'flex';
         }
 
-        this._closePopup();
+        this._close();
         this.input.focus();
 
-        if (typeof this.onAttach === 'function') {
-            this.onAttach(attached);
-        }
+        if (typeof this.onAttach === 'function') this.onAttach(attached);
     }
 
     _removeChip() {
@@ -194,78 +191,74 @@ class PasteHandler {
         const s = document.createElement('style');
         s.id = 'ph-styles';
         s.textContent = `
-        /* ── PASTE POPUP ────────────────────────────────────────────────── */
+        /* ── PASTE POPUP ─────────────────────────────────────────────── */
         .ph-popup {
+            display: none;
+            flex-direction: column;
             max-width: 900px;
             margin: 0 auto;
             width: 100%;
             box-sizing: border-box;
-            background: #12121a;
-            border: 1px solid rgba(139,92,246,.4);
+            background: #0f0f1a;
+            border: 1px solid rgba(139,92,246,.45);
             border-bottom: none;
-            border-radius: 14px 14px 0 0;
+            border-radius: 12px 12px 0 0;
             overflow: hidden;
-            display: grid;
-            grid-template-rows: 0fr;
-            transition: grid-template-rows .3s cubic-bezier(.4,0,.2,1),
-                        opacity .25s ease,
-                        margin .3s ease;
+            max-height: 0;
             opacity: 0;
-            pointer-events: none;
+            transition: max-height .32s cubic-bezier(.4,0,.2,1), opacity .25s ease;
         }
 
         .ph-popup.ph-visible {
-            grid-template-rows: 1fr;
+            max-height: 320px;
             opacity: 1;
-            pointer-events: all;
-            margin-bottom: 0;
         }
 
-        /* inner wrapper needed for grid row animation */
-        .ph-popup > * { overflow: hidden; }
-
-        .ph-popup-header {
+        .ph-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 9px 14px;
-            background: rgba(139,92,246,.09);
+            background: rgba(139,92,246,.1);
             border-bottom: 1px solid rgba(255,255,255,.07);
-            flex-wrap: wrap;
             gap: 8px;
-        }
-
-        .ph-popup-left {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            min-width: 0;
             flex-wrap: wrap;
-        }
-
-        .ph-icon {
-            font-size: 13px;
-            font-weight: 800;
-            font-family: 'Space Grotesk', monospace;
             flex-shrink: 0;
         }
 
-        .ph-label {
+        .ph-header-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            min-width: 0;
+        }
+
+        .ph-icon {
             font-size: 12px;
+            font-weight: 800;
+            font-family: 'Space Grotesk', monospace;
+            flex-shrink: 0;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .ph-label {
+            font-size: 11px;
             font-weight: 700;
             font-family: 'Space Grotesk', sans-serif;
             text-transform: uppercase;
-            letter-spacing: .05em;
+            letter-spacing: .06em;
             flex-shrink: 0;
         }
 
         .ph-meta {
-            font-size: 11px;
-            color: rgba(255,255,255,.38);
+            font-size: 10px;
+            color: rgba(255,255,255,.35);
             font-family: 'Space Grotesk', monospace;
         }
 
-        .ph-popup-right {
+        .ph-header-right {
             display: flex;
             align-items: center;
             gap: 7px;
@@ -273,15 +266,15 @@ class PasteHandler {
         }
 
         .ph-btn {
-            padding: 5px 12px;
+            padding: 4px 11px;
             border-radius: 100px;
             font-size: 11px;
             font-weight: 600;
             font-family: 'Space Grotesk', sans-serif;
             cursor: pointer;
-            border: 1px solid rgba(255,255,255,.15);
+            border: 1px solid rgba(255,255,255,.14);
             background: rgba(255,255,255,.07);
-            color: rgba(255,255,255,.75);
+            color: rgba(255,255,255,.7);
             transition: all .2s;
             white-space: nowrap;
         }
@@ -292,25 +285,25 @@ class PasteHandler {
             color: #fff;
         }
 
-        .ph-btn-accent {
-            background: rgba(139,92,246,.18);
-            border-color: rgba(139,92,246,.45);
-            color: #a78bfa;
+        .ph-accent-btn {
+            background: rgba(139,92,246,.2);
+            border-color: rgba(139,92,246,.5);
+            color: #c4b5fd;
         }
 
-        .ph-btn-accent:hover {
-            background: rgba(139,92,246,.38);
+        .ph-accent-btn:hover {
+            background: rgba(139,92,246,.4);
             color: #fff;
         }
 
-        .ph-dismiss {
-            width: 26px;
-            height: 26px;
+        .ph-close {
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
             border: 1px solid rgba(255,255,255,.14);
             background: rgba(255,255,255,.06);
-            color: rgba(255,255,255,.45);
-            font-size: 12px;
+            color: rgba(255,255,255,.4);
+            font-size: 11px;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -319,20 +312,20 @@ class PasteHandler {
             flex-shrink: 0;
         }
 
-        .ph-dismiss:hover {
-            background: rgba(255,80,80,.2);
-            border-color: rgba(255,80,80,.4);
-            color: #ff5050;
+        .ph-close:hover {
+            background: rgba(255,70,70,.2);
+            border-color: rgba(255,70,70,.4);
+            color: #ff4444;
         }
 
         .ph-preview-wrap {
             overflow-x: auto;
             overflow-y: auto;
-            max-height: 260px;
+            flex: 1;
             -webkit-overflow-scrolling: touch;
         }
 
-        .ph-preview-wrap::-webkit-scrollbar { width: 4px; height: 4px; }
+        .ph-preview-wrap::-webkit-scrollbar { width:4px; height:4px; }
         .ph-preview-wrap::-webkit-scrollbar-thumb {
             background: rgba(255,255,255,.1);
             border-radius: 4px;
@@ -340,7 +333,7 @@ class PasteHandler {
 
         .ph-preview-code {
             margin: 0;
-            padding: 12px 16px;
+            padding: 11px 16px;
             font-family: 'Fira Code','Cascadia Code','Consolas',monospace;
             font-size: 12px;
             line-height: 1.55;
@@ -350,9 +343,8 @@ class PasteHandler {
             min-width: max-content;
         }
 
-        /* ── CHIP BAR ───────────────────────────────────────────────────── */
+        /* ── CHIP BAR ─────────────────────────────────────────────────── */
         .paste-chip-bar {
-            display: flex;
             align-items: center;
         }
 
@@ -360,18 +352,16 @@ class PasteHandler {
             display: inline-flex;
             align-items: center;
             gap: 7px;
-            padding: 5px 11px;
+            padding: 5px 12px;
             background: rgba(139,92,246,.1);
             border: 1px solid rgba(139,92,246,.3);
             border-radius: 100px;
             font-size: 12px;
             font-family: 'Space Grotesk', sans-serif;
-            max-width: 100%;
-            box-sizing: border-box;
         }
 
         .paste-chip-icon {
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 800;
             font-family: 'Space Grotesk', monospace;
             flex-shrink: 0;
@@ -381,8 +371,6 @@ class PasteHandler {
             font-weight: 600;
             color: rgba(255,255,255,.85);
             white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
         }
 
         .paste-chip-size {
@@ -394,29 +382,26 @@ class PasteHandler {
         .paste-chip-remove {
             background: none;
             border: none;
-            color: rgba(255,255,255,.38);
+            color: rgba(255,255,255,.35);
             font-size: 11px;
             cursor: pointer;
-            padding: 0 0 0 3px;
-            line-height: 1;
-            flex-shrink: 0;
+            padding: 0 0 0 2px;
             transition: color .2s;
+            line-height: 1;
         }
+        .paste-chip-remove:hover { color: #ff4444; }
 
-        .paste-chip-remove:hover { color: #ff5050; }
-
-        /* ── MOBILE ─────────────────────────────────────────────────────── */
+        /* ── MOBILE ───────────────────────────────────────────────────── */
         @media (max-width: 768px) {
-            .ph-popup-header { padding: 8px 12px; }
-            .ph-btn { font-size: 10px; padding: 4px 10px; }
-            .ph-preview-code { font-size: 11px; padding: 10px 12px; }
-            .ph-preview-wrap { max-height: 200px; }
-            .ph-dismiss { width: 24px; height: 24px; font-size: 11px; }
+            .ph-header { padding: 8px 12px; }
+            .ph-btn { font-size: 10px; padding: 4px 9px; }
+            .ph-preview-code { font-size: 11px; padding: 9px 12px; }
+            .ph-popup.ph-visible { max-height: 230px; }
         }
 
-        @media (max-width: 420px) {
-            .ph-popup-header { flex-direction: column; align-items: flex-start; gap: 6px; }
-            .ph-popup-right { width: 100%; justify-content: flex-end; }
+        @media (max-width: 400px) {
+            .ph-header { flex-direction: column; align-items: flex-start; }
+            .ph-header-right { width: 100%; justify-content: flex-end; }
         }
         `;
         document.head.appendChild(s);
