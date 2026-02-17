@@ -1159,7 +1159,8 @@
         let showThinking = localStorage.getItem('showThinking') === 'true';
         let generationStartTime = null;
         let timingInterval = null;
-        let conversationHistory = JSON.parse(localStorage.getItem('conversationHistory') || '[]');
+        // Load history but only keep user messages - strip any saved assistant code blocks
+        let conversationHistory = JSON.parse(localStorage.getItem('conversationHistory') || '[]').filter(msg => msg.role === 'user');
 
         // Initialize code highlighter
         const codeHighlighter = new CodeHighlighter();
