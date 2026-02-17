@@ -1,7 +1,68 @@
 /* ─── T1ERA Markdown Renderer Styles ───────────────────────────────────────── */
-/* Add this inside your existing <style> block or as a linked stylesheet        */
 
-/* Base spacing reset inside message content */
+/* ── CODE BLOCK CONTAINER ───────────────────────────────────────────────────── */
+.code-block-container {
+    margin: 10px 0;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: #0d0d14;
+    position: relative;
+}
+
+.code-block-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px;
+    background: rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.code-language {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: 'Space Grotesk', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.code-icon {
+    opacity: 0.6;
+    font-size: 12px;
+}
+
+.code-block {
+    margin: 0;
+    padding: 16px;
+    overflow-x: auto;
+    font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #e2e8f0;
+    white-space: pre;
+    background: transparent;
+}
+
+.code-block code {
+    font-family: inherit;
+    font-size: inherit;
+    background: none;
+    border: none;
+    padding: 0;
+    color: inherit;
+}
+
+.code-block::-webkit-scrollbar { height: 4px; }
+.code-block::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
+}
+
+/* ── BASE SPACING RESET ──────────────────────────────────────────────────────── */
 .message-content .md-p,
 .message-content .md-h1,
 .message-content .md-h2,
@@ -16,10 +77,7 @@
     padding: 0;
 }
 
-/* Spacer between blocks */
-.message-content .md-spacer {
-    height: 10px;
-}
+.message-content .md-spacer { height: 10px; }
 
 /* ── HEADINGS ────────────────────────────────────────────────────────────────── */
 .message-content .md-h1 {
@@ -57,7 +115,7 @@
     color: rgba(255,255,255,0.88);
 }
 
-/* ── FRAMEWORK LABEL  e.g. "PAS Version" ───────────────────────────────────── */
+/* ── FRAMEWORK LABEL ────────────────────────────────────────────────────────── */
 .message-content .md-framework-label {
     display: inline-block;
     margin: 8px 0 6px 0;
@@ -73,7 +131,7 @@
     text-transform: uppercase;
 }
 
-/* ── BOLD LABEL  (non-framework **…**:) ─────────────────────────────────────── */
+/* ── BOLD LABEL ─────────────────────────────────────────────────────────────── */
 .message-content .md-bold-label {
     font-size: 13px;
     font-weight: 700;
@@ -81,7 +139,7 @@
     margin: 8px 0 4px 0;
 }
 
-/* ── COPY-FRAMEWORK ROW  "Problem: …" ──────────────────────────────────────── */
+/* ── COPY-FRAMEWORK ROW ─────────────────────────────────────────────────────── */
 .message-content .md-copy-row {
     display: flex;
     align-items: baseline;
@@ -126,9 +184,7 @@
     color: rgba(255,255,255,0.85);
 }
 
-.message-content .md-ul li::marker {
-    color: var(--accent-secondary, #8b5cf6);
-}
+.message-content .md-ul li::marker { color: var(--accent-secondary, #8b5cf6); }
 
 .message-content .md-ol li::marker {
     color: var(--accent-primary, #667eea);
@@ -156,42 +212,22 @@
 }
 
 /* ── INLINE ELEMENTS ─────────────────────────────────────────────────────────── */
-.message-content strong {
-    font-weight: 700;
-    color: #fff;
-}
-
-.message-content em {
-    font-style: italic;
-    color: rgba(255,255,255,0.85);
-}
-
-.message-content del {
-    opacity: 0.5;
-    text-decoration: line-through;
-}
+.message-content strong { font-weight: 700; color: #fff; }
+.message-content em { font-style: italic; color: rgba(255,255,255,0.85); }
+.message-content del { opacity: 0.5; text-decoration: line-through; }
 
 .message-content .md-link {
     color: var(--accent-primary, #667eea);
     text-decoration: underline;
     text-underline-offset: 2px;
 }
-
-.message-content .md-link:hover {
-    color: #a78bfa;
-}
-
-.message-content .md-emdash {
-    color: rgba(255,255,255,0.5);
-}
-
-.message-content .md-arrow {
-    color: var(--accent-secondary, #8b5cf6);
-    font-weight: 700;
-}
+.message-content .md-link:hover { color: #a78bfa; }
+.message-content .md-emdash { color: rgba(255,255,255,0.5); }
+.message-content .md-arrow { color: var(--accent-secondary, #8b5cf6); font-weight: 700; }
 
 /* ── INLINE CODE ─────────────────────────────────────────────────────────────── */
-.message-content .inline-code {
+.message-content .inline-code,
+.inline-code {
     padding: 2px 6px;
     background: rgba(255,255,255,0.1);
     border: 1px solid rgba(255,255,255,0.15);
@@ -201,29 +237,19 @@
     color: #e2e8f0;
 }
 
-/* ── MOBILE ADJUSTMENTS ──────────────────────────────────────────────────────── */
+/* ── MOBILE ──────────────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
     .message-content .md-p,
     .message-content .md-ul li,
     .message-content .md-ol li,
-    .message-content .md-copy-val {
-        font-size: 13px;
-    }
+    .message-content .md-copy-val { font-size: 13px; }
 
-    .message-content .md-copy-row {
-        flex-direction: column;
-        gap: 4px;
-    }
-
-    .message-content .md-copy-key {
-        min-width: unset;
-    }
-
-    .message-content .md-framework-label {
-        font-size: 10px;
-    }
-
+    .message-content .md-copy-row { flex-direction: column; gap: 4px; }
+    .message-content .md-copy-key { min-width: unset; }
+    .message-content .md-framework-label { font-size: 10px; }
     .message-content .md-h1 { font-size: 15px; }
     .message-content .md-h2 { font-size: 14px; }
     .message-content .md-h3 { font-size: 12px; }
+    .code-block { font-size: 12px; padding: 12px; }
+    .code-block-header { padding: 6px 12px; }
 }
