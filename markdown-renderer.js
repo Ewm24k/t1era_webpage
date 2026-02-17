@@ -1,5 +1,5 @@
 /**
- * T1ERA Enhanced Markdown Renderer
+ * T1ERA Enhanced Markdown Renderer v2
  * Drop-in upgrade for CodeHighlighter.processText()
  * Renders: bold, italic, headers, bullet lists, numbered lists,
  *          framework labels, dividers, inline code, code blocks, line breaks
@@ -8,25 +8,38 @@
 class T1ERARenderer {
     constructor() {
         this.languages = {
-            'javascript': { name: 'JavaScript', color: '#f7df1e' },
-            'python':     { name: 'Python',     color: '#3776ab' },
-            'java':       { name: 'Java',        color: '#007396' },
-            'cpp':        { name: 'C++',         color: '#00599c' },
-            'csharp':     { name: 'C#',          color: '#239120' },
-            'php':        { name: 'PHP',         color: '#777bb4' },
-            'ruby':       { name: 'Ruby',        color: '#cc342d' },
-            'go':         { name: 'Go',          color: '#00add8' },
-            'rust':       { name: 'Rust',        color: '#ce422b' },
-            'typescript': { name: 'TypeScript',  color: '#3178c6' },
-            'html':       { name: 'HTML',        color: '#e34c26' },
-            'css':        { name: 'CSS',         color: '#1572b6' },
-            'sql':        { name: 'SQL',         color: '#4479a1' },
-            'bash':       { name: 'Bash',        color: '#4eaa25' },
-            'shell':      { name: 'Shell',       color: '#4eaa25' },
-            'json':       { name: 'JSON',        color: '#cbcb41' },
-            'xml':        { name: 'XML',         color: '#e34c26' },
-            'markdown':   { name: 'Markdown',    color: '#519aba' },
-            'yaml':       { name: 'YAML',        color: '#cb171e' }
+            'javascript':  { name: 'JavaScript',  color: '#f7df1e' },
+            'js':          { name: 'JavaScript',  color: '#f7df1e' },
+            'python':      { name: 'Python',      color: '#3776ab' },
+            'py':          { name: 'Python',      color: '#3776ab' },
+            'java':        { name: 'Java',         color: '#007396' },
+            'cpp':         { name: 'C++',          color: '#00599c' },
+            'c':           { name: 'C',            color: '#00599c' },
+            'csharp':      { name: 'C#',           color: '#239120' },
+            'cs':          { name: 'C#',           color: '#239120' },
+            'php':         { name: 'PHP',          color: '#777bb4' },
+            'ruby':        { name: 'Ruby',         color: '#cc342d' },
+            'rb':          { name: 'Ruby',         color: '#cc342d' },
+            'go':          { name: 'Go',           color: '#00add8' },
+            'rust':        { name: 'Rust',         color: '#ce422b' },
+            'rs':          { name: 'Rust',         color: '#ce422b' },
+            'typescript':  { name: 'TypeScript',   color: '#3178c6' },
+            'ts':          { name: 'TypeScript',   color: '#3178c6' },
+            'html':        { name: 'HTML',         color: '#e34c26' },
+            'css':         { name: 'CSS',          color: '#1572b6' },
+            'sql':         { name: 'SQL',          color: '#4479a1' },
+            'bash':        { name: 'Bash',         color: '#4eaa25' },
+            'sh':          { name: 'Shell',        color: '#4eaa25' },
+            'shell':       { name: 'Shell',        color: '#4eaa25' },
+            'json':        { name: 'JSON',         color: '#cbcb41' },
+            'xml':         { name: 'XML',          color: '#e34c26' },
+            'markdown':    { name: 'Markdown',     color: '#519aba' },
+            'md':          { name: 'Markdown',     color: '#519aba' },
+            'yaml':        { name: 'YAML',         color: '#cb171e' },
+            'yml':         { name: 'YAML',         color: '#cb171e' },
+            'plaintext':   { name: 'Plain Text',   color: '#888888' },
+            'text':        { name: 'Plain Text',   color: '#888888' },
+            'txt':         { name: 'Plain Text',   color: '#888888' },
         };
 
         // Known copywriting / storytelling framework names for pill rendering
@@ -52,20 +65,25 @@ class T1ERARenderer {
     // ─── MAIN RENDER PIPELINE ─────────────────────────────────────────────────
 
     _render(text) {
-        // 1. Protect fenced code blocks from inline processing
-        // Handles: ```python\n code ``` or ```\n code ``` or ``` code ```
+        // 1. Extract and protect fenced code blocks FIRST before any line splitting
+        //    Handles: ```python\ncode``` or ```\ncode``` or ```plaintext\ncode```
         const codeBlocks = [];
-        text = text.replace(/```(\w*)\n?([\s\S]*?)```/g, (_, lang, code) => {
+        text = text.replace(/```(\w*)[^\S\r\n]*\r?\n([\s\S]*?)```/g, (_, lang, code) => {
             const idx = codeBlocks.length;
-            codeBlocks.push({ lang: lang.trim() || '', code: code.trim() });
+            codeBlocks.push({ lang: lang.trim().toLowerCase() || 'plaintext', code: code.trimEnd() });
+            return `\n\x00CODE${idx}\x00\n`;
+        });
+
+        // Also handle single-line code blocks: ```code```
+        text = text.replace(/```([^`\n]+)```/g, (_, code) => {
+            const idx = codeBlocks.length;
+            codeBlocks.push({ lang: 'plaintext', code: code.trim() });
             return `\n\x00CODE${idx}\x00\n`;
         });
 
         // 2. Split into lines for block-level processing
         const lines = text.split('\n');
-        const html = this._processLines(lines, codeBlocks);
-
-        return html;
+        return this._processLines(lines, codeBlocks);
     }
 
     // ─── BLOCK-LEVEL PROCESSING ───────────────────────────────────────────────
@@ -77,42 +95,41 @@ class T1ERARenderer {
         while (i < lines.length) {
             const line = lines[i];
 
-            // Restore fenced code block placeholder
-            if (/\x00CODE\d+\x00/.test(line)) {
-                const idx = parseInt(line.match(/\x00CODE(\d+)\x00/)[1]);
+            // ── Code block placeholder ──
+            const codeMatch = line.match(/^\x00CODE(\d+)\x00$/);
+            if (codeMatch) {
+                const idx = parseInt(codeMatch[1]);
                 const { lang, code } = codeBlocks[idx];
                 output.push(this._renderCodeBlock(code, lang));
                 i++; continue;
             }
 
-            // Horizontal rule  ───  or ---
+            // ── Horizontal rule --- or *** or ___ ──
             if (/^[-*_]{3,}\s*$/.test(line.trim())) {
                 output.push('<hr class="md-hr">');
                 i++; continue;
             }
 
-            // H3 ###
+            // ── Headings ──
             if (/^###\s+/.test(line)) {
                 output.push(`<h3 class="md-h3">${this._inline(line.replace(/^###\s+/, ''))}</h3>`);
                 i++; continue;
             }
-
-            // H2 ##
             if (/^##\s+/.test(line)) {
                 output.push(`<h2 class="md-h2">${this._inline(line.replace(/^##\s+/, ''))}</h2>`);
                 i++; continue;
             }
-
-            // H1 #
             if (/^#\s+/.test(line)) {
                 output.push(`<h1 class="md-h1">${this._inline(line.replace(/^#\s+/, ''))}</h1>`);
                 i++; continue;
             }
 
-            // Framework label line  e.g. "**PAS Version:**" or "**Bonus — PAS + AIDA Combination:**"
+            // ── Framework label: **PAS Version:** on its own line ──
             if (/^\*\*[^*]+\*\*:?\s*$/.test(line.trim())) {
                 const label = line.trim().replace(/^\*\*/, '').replace(/\*\*:?\s*$/, '');
-                const isFramework = [...this.frameworkNames].some(f => label.toUpperCase().includes(f.toUpperCase()));
+                const isFramework = [...this.frameworkNames].some(f =>
+                    label.toUpperCase().includes(f.toUpperCase())
+                );
                 if (isFramework) {
                     output.push(`<div class="md-framework-label">${this._escapeHtml(label)}</div>`);
                 } else {
@@ -121,7 +138,7 @@ class T1ERARenderer {
                 i++; continue;
             }
 
-            // Bullet list — collect consecutive bullet lines
+            // ── Bullet list ──
             if (/^[-*•]\s+/.test(line)) {
                 const items = [];
                 while (i < lines.length && /^[-*•]\s+/.test(lines[i])) {
@@ -132,7 +149,7 @@ class T1ERARenderer {
                 continue;
             }
 
-            // Numbered list — collect consecutive numbered lines
+            // ── Numbered list ──
             if (/^\d+[.)]\s+/.test(line)) {
                 const items = [];
                 while (i < lines.length && /^\d+[.)]\s+/.test(lines[i])) {
@@ -143,9 +160,8 @@ class T1ERARenderer {
                 continue;
             }
 
-            // Section key-value line e.g. "Problem: "Tired of..."" or "Attention: ..."
-            // Renders as a styled copy-framework row
-            if (/^(Attention|Interest|Desire|Action|Problem|Agitate|Solution|Before|After|Bridge|Promise|Picture|Proof|Push|Stop|Look|Act|Purchase|Amplify|Story|Transformation|Offer|Response|Character|Guide|Plan|CTA|Success|Failure|Feature|Advantage|Benefit)\s*:/.test(line.trim())) {
+            // ── Copywriting framework key-value row ──
+            if (/^(Attention|Interest|Desire|Action|Problem|Agitate|Solution|Before|After|Bridge|Promise|Picture|Proof|Push|Stop|Look|Act|Purchase|Amplify|Story|Transformation|Offer|Response|Character|Guide|Plan|CTA|Success|Failure|Feature|Advantage|Benefit)\s*:/i.test(line.trim())) {
                 const colonIdx = line.indexOf(':');
                 const key = line.slice(0, colonIdx).trim();
                 const val = line.slice(colonIdx + 1).trim();
@@ -157,19 +173,19 @@ class T1ERARenderer {
                 i++; continue;
             }
 
-            // Blockquote >
+            // ── Blockquote ──
             if (/^>\s+/.test(line)) {
                 output.push(`<blockquote class="md-blockquote">${this._inline(line.replace(/^>\s+/, ''))}</blockquote>`);
                 i++; continue;
             }
 
-            // Empty line → spacer
+            // ── Empty line → spacer ──
             if (line.trim() === '') {
                 output.push('<div class="md-spacer"></div>');
                 i++; continue;
             }
 
-            // Plain paragraph
+            // ── Plain paragraph ──
             output.push(`<p class="md-p">${this._inline(line)}</p>`);
             i++;
         }
@@ -182,10 +198,10 @@ class T1ERARenderer {
     _inline(text) {
         if (!text) return '';
 
-        // Restore code block placeholders as inline code if they sneak through
+        // Orphaned code block placeholders → inline code
         text = text.replace(/\x00CODE(\d+)\x00/g, '<code class="inline-code">[code]</code>');
 
-        // Inline code `...`
+        // Inline code `...`  (do this BEFORE bold/italic to avoid conflicts)
         text = text.replace(/`([^`]+)`/g, (_, code) =>
             `<code class="inline-code">${this._escapeHtml(code)}</code>`);
 
@@ -193,10 +209,10 @@ class T1ERARenderer {
         text = text.replace(/\*\*\*([^*]+)\*\*\*/g, '<strong><em>$1</em></strong>');
 
         // Bold **text**
-        text = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+        text = text.replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>');
 
-        // Italic *text*
-        text = text.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+        // Italic *text*  (only single *)
+        text = text.replace(/(?<!\*)\*([^*\n]+)\*(?!\*)/g, '<em>$1</em>');
 
         // Strikethrough ~~text~~
         text = text.replace(/~~([^~]+)~~/g, '<del>$1</del>');
@@ -214,20 +230,19 @@ class T1ERARenderer {
         return text;
     }
 
-    // ─── CODE BLOCK ───────────────────────────────────────────────────────────
+    // ─── CODE BLOCK RENDERER ─────────────────────────────────────────────────
 
     _renderCodeBlock(code, language) {
-        const lang = (language || 'plaintext').toLowerCase();
-        const langInfo = this.languages[lang] || { name: language || 'Code', color: '#888' };
+        const lang = (language || 'plaintext').toLowerCase().trim();
+        const langInfo = this.languages[lang] || { name: lang || 'Code', color: '#888888' };
         const escapedCode = this._escapeHtml(code);
         const blockId = 'code-' + Math.random().toString(36).substr(2, 9);
 
-        return `
-        <div class="code-block-container">
+        return `<div class="code-block-container">
             <div class="code-block-header">
                 <div class="code-language" style="color:${langInfo.color}">
                     <span class="code-icon">⟨/⟩</span>
-                    ${langInfo.name}
+                    ${this._escapeHtml(langInfo.name)}
                 </div>
             </div>
             <div style="position:relative;">
@@ -240,11 +255,11 @@ class T1ERARenderer {
     // ─── HELPERS ──────────────────────────────────────────────────────────────
 
     _escapeHtml(text) {
+        if (!text) return '';
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
     }
 }
 
-// ─── GLOBAL copy helper (keep existing copyCodeBlock working) ─────────────────
-// copyCodeBlock() already defined in your HTML — no change needed.
+// copyCodeBlock() is defined in chat.html — no change needed here.
