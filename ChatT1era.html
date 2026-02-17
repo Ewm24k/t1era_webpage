@@ -1404,24 +1404,23 @@
             }
 
             // SAME TOPIC — build smart context window
-            // Filter to only same-topic messages from recent history
             const recentHistory = conversationHistory.slice(-6);
             const sameTopic = recentHistory.filter(msg => {
                 const msgCategory = msg.topic || detectTopicCategory(msg.content);
-                return msgCategory === topicAnalysis.currentCategory || 
+                return msgCategory === topicAnalysis.currentCategory ||
                        topicAnalysis.currentCategory === 'general' ||
                        msgCategory === 'general';
             });
 
             if (sameTopic.length === 0) return userMessage;
 
-            // Build context — include both user and clean assistant messages
-            let context = 'Previous conversation on same topic:\n';
+            // Build context in a clear format the AI will recognize as real memory
+            let context = `[CONVERSATION HISTORY - You DO have access to this history, use it to answer]\n`;
             sameTopic.slice(-4).forEach(msg => {
                 const role = msg.role === 'user' ? 'User' : 'Assistant';
                 context += `${role}: ${msg.content}\n`;
             });
-            context += `\nUser: ${userMessage}\nAssistant:`;
+            context += `\n[END OF HISTORY]\n\nUser: ${userMessage}\nAssistant:`;
 
             console.log(`[CONTEXT] Same topic (${topicAnalysis.currentCategory}) — including ${sameTopic.slice(-4).length} messages`);
             return context;
