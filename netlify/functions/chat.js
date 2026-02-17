@@ -50,7 +50,7 @@ exports.handler = async (event, context) => {
                     body: JSON.stringify({
                         model: 't1era',
                         prompt: message,
-                        stream: false,
+                        stream: true,  // ✅ CHANGED: Enable streaming
                         options: {
                             temperature: 0.7,
                             top_p: 0.9,
@@ -67,16 +67,46 @@ exports.handler = async (event, context) => {
                     throw new Error(`Ollama API error (${ollamaResponse.status}): ${errorText.substring(0, 200)}`);
                 }
 
-                // Check content type before parsing
-                const contentType = ollamaResponse.headers.get('content-type');
-                if (!contentType || !contentType.includes('application/json')) {
-                    const text = await ollamaResponse.text();
-                    console.error('Non-JSON response:', text.substring(0, 200));
-                    throw new Error('Ollama returned non-JSON response. The model might be overloaded or the query too complex.');
+                // ✅ CHANGED: Handle streaming response
+                let fullResponse = '';
+                let buffer = '';
+
+                // Read streaming chunks
+                for await (const chunk of ollamaResponse.body) {
+                    buffer += chunk.toString();
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop() || ''; // Keep incomplete line in buffer
+
+                    for (const line of lines) {
+                        if (line.trim()) {
+                            try {
+                                const data = JSON.parse(line);
+                                if (data.response) {
+                                    fullResponse += data.response;
+                                }
+                            } catch (e) {
+                                // Skip invalid JSON lines
+                                console.log('Skipping invalid JSON:', line.substring(0, 50));
+                            }
+                        }
+                    }
                 }
 
-                const data = await ollamaResponse.json();
-                const fullResponse = data.response || 'No response from AI';
+                // Process any remaining buffer
+                if (buffer.trim()) {
+                    try {
+                        const data = JSON.parse(buffer);
+                        if (data.response) {
+                            fullResponse += data.response;
+                        }
+                    } catch (e) {
+                        // Ignore
+                    }
+                }
+
+                if (!fullResponse || fullResponse.trim() === '') {
+                    fullResponse = 'No response from AI';
+                }
 
                 // ========================================
                 // ENHANCED THINKING EXTRACTION
@@ -121,7 +151,7 @@ exports.handler = async (event, context) => {
                     console.log('Searched patterns: Thinking... / ...done thinking.');
                 }
 
-                // Return with full debugging info
+                // ✅ ADDED: Return fullText for frontend streaming simulation
                 return {
                     statusCode: 200,
                     headers,
@@ -129,6 +159,7 @@ exports.handler = async (event, context) => {
                         error: false,
                         response: finalResponse,
                         thinking: thinking,
+                        fullText: fullResponse,  // ✅ ADDED: Full text for live streaming
                         model: 't1era',
                         hasThinking: thinking !== null,
                         // Debug info
