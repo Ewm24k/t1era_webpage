@@ -4,6 +4,16 @@
 [functions]
   node_bundler = "esbuild"
 
+# ← NEW: Extended timeout for AI functions
+[functions."chat"]
+  timeout = 26
+
+[functions."chat-stream"]
+  timeout = 26
+
+[functions."chat-background"]
+  timeout = 26
+
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
