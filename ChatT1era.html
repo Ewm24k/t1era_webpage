@@ -129,6 +129,19 @@
             gap: 12px;
         }
 
+        /* ── PATCH 1: Dialect badge style ── */
+        #dialect-badge {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 100px;
+            font-family: 'Space Grotesk', sans-serif;
+            transition: all 0.4s var(--transition);
+            display: none;
+            white-space: nowrap;
+        }
+        /* ── END PATCH 1 ── */
+
         .reasoning-toggle {
             display: flex;
             align-items: center;
@@ -880,6 +893,11 @@
                 font-size: 8px;
                 padding: 2px 5px;
             }
+            /* ── PATCH 1b: Mobile dialect badge ── */
+            #dialect-badge {
+                font-size: 9px;
+                padding: 2px 8px;
+            }
         }
 
         /* Extra small phones */
@@ -1039,6 +1057,9 @@
                     <span style="font-size: 16px; font-weight: 700; font-family: 'Space Grotesk', sans-serif;">T1ERA Chat</span>
                 </a>
                 <div class="header-controls">
+                    <!-- ── PATCH 2: Dialect badge element inserted before toggle ── -->
+                    <div id="dialect-badge"></div>
+                    <!-- ── END PATCH 2 ── -->
                     <div class="reasoning-toggle" id="reasoningToggle">
                         <span>Show Thinking</span>
                         <div class="toggle-switch"></div>
@@ -1297,6 +1318,7 @@
             localStorage.setItem('conversationHistory', JSON.stringify(conversationHistory));
         }
 
+        // ── PATCH 3: addToHistory — now tags each message with dialect ──
         function addToHistory(role, content, topicCategory) {
             conversationHistory.push({
                 role: role,
@@ -1304,40 +1326,139 @@
                     ? content.replace(/```[\s\S]*?```/g, '[code block]').substring(0, 300)
                     : content,
                 timestamp: Date.now(),
-                topic: topicCategory || 'general'
+                topic: topicCategory || 'general',
+                dialect: currentDialectMode   // ← NEW: tag with current dialect
             });
             saveConversation();
         }
+        // ── END PATCH 3 ──
 
-        function buildContext(userMessage) {
+        // ── PATCH 4: Dialect system — inserted before buildContext ────────
+
+        // Dialect mode config: trigger keywords → badge label + color
+        const DIALECT_CONFIG = {
+            sarawak:  { triggers: ['loghat sarawak','cakap sarawak','dialek sarawak','bahasa sarawak','sarawak mode','borneo dialect'], label: '🗺️ Sarawak', color: '#f59e0b' },
+            utara:    { triggers: ['loghat utara','dialek kedah','bahasa penang','pulau pinang','loghat penang','cakap utara'], label: '🌴 Utara', color: '#10b981' },
+            rojak:    { triggers: ['pasar rojak','bahasa rojak','cakap rojak','gaya rojak','casual je','mix language','campur je'], label: '🍱 Rojak', color: '#ec4899' },
+            genz:     { triggers: ['gaya genz','gen z','caption tiktok','caption ig','bahasa sosmed','tiktok style'], label: '✨ GenZ', color: '#8b5cf6' },
+            standard: { triggers: ['bahasa standard','formal','bahasa baku','bahasa rasmi'], label: '📘 Standard BM', color: '#667eea' },
+            english:  { triggers: ['in english','english only','bahasa inggeris','speak english','reply in english'], label: '🇬🇧 English', color: '#06b6d4' }
+        };
+
+        // Memory/recall question triggers — ALWAYS use full history regardless of dialect
+        const MEMORY_TRIGGERS = [
+            'what did i say','what was my','my first message','my last message',
+            'what i asked','what i told','do you remember','you remember',
+            'earlier i said','recall','what did we talk','previous message',
+            'first question','last question','apa yang saya','apa tadi saya',
+            'ingat tak','ingat saya','soalan pertama','soalan lepas',
+            'mesej pertama','mesej lepas','tadi saya','sebelum ni saya'
+        ];
+
+        // Load persisted dialect mode (survives page refresh)
+        let currentDialectMode = localStorage.getItem('currentDialectMode') || null;
+
+        // Detect if message is asking about past conversation memory
+        function isMemoryQuestion(text) {
+            const lower = text.toLowerCase();
+            return MEMORY_TRIGGERS.some(t => lower.includes(t));
+        }
+
+        // Detect if message contains a dialect switch request
+        function detectDialectSwitch(text) {
+            const lower = text.toLowerCase();
+            for (const [mode, config] of Object.entries(DIALECT_CONFIG)) {
+                if (config.triggers.some(t => lower.includes(t))) return mode;
+            }
+            return null;
+        }
+
+        // Update dialect badge in header
+        function setDialectBadge(mode) {
+            const badge = document.getElementById('dialect-badge');
+            if (mode && DIALECT_CONFIG[mode]) {
+                const { label, color } = DIALECT_CONFIG[mode];
+                badge.textContent = label;
+                badge.style.background = color + '22';
+                badge.style.border = '1px solid ' + color + '55';
+                badge.style.color = color;
+                badge.style.display = 'inline-block';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        // Initialise badge from persisted mode on page load
+        setDialectBadge(currentDialectMode);
+        // ── END PATCH 4 ──
+
+        // ── PATCH 5: buildContext — dialect-aware, memory-safe ────────────
+        function buildContext(userMessage, detectedDialectSwitch) {
+            // RULE 1: Memory/recall question → always send full numbered history
+            // regardless of dialect mode so model can answer "what did I say earlier"
+            if (isMemoryQuestion(userMessage)) {
+                if (conversationHistory.length === 0) return userMessage;
+                let context = '[CONVERSATION HISTORY — user is asking about past messages]\n';
+                conversationHistory.slice(-20).forEach((m, i) => {
+                    const role = m.role === 'user' ? 'User' : 'You';
+                    context += '[' + (i + 1) + '] ' + role + ': ' + m.content.substring(0, 200) + '\n';
+                });
+                context += '\nCurrent question: ' + userMessage + '\nAnswer based on the history above:';
+                console.log('[CONTEXT] Memory question — full history included');
+                return context;
+            }
+
+            // RULE 2: Dialect switch → send bare message only
+            // History is PRESERVED in localStorage but NOT sent to model
+            // This prevents old dialect words bleeding into the new mode
+            if (detectedDialectSwitch) {
+                console.log('[CONTEXT] Dialect switch to "' + detectedDialectSwitch + '" — clean message, no history');
+                return userMessage;
+            }
+
+            // RULE 3: No history at all → send clean
             if (conversationHistory.length === 0) return userMessage;
+
+            // RULE 4: Normal flow — use existing topic analysis
             const topicAnalysis = analyzeTopicShift(userMessage, conversationHistory);
             if (topicAnalysis.isNewTopic) {
                 console.log('[CONTEXT] New topic detected — sending clean message only');
                 return userMessage;
             }
+
+            // RULE 5: Same topic — filter history to same dialect only
+            // Prevents Sarawak words from previous session leaking into Rojak context
             const recentHistory = conversationHistory.slice(-6);
             const sameTopic = recentHistory.filter(msg => {
                 const msgCategory = msg.topic || detectTopicCategory(msg.content);
-                return msgCategory === topicAnalysis.currentCategory ||
-                       topicAnalysis.currentCategory === 'general' ||
-                       msgCategory === 'general';
+                const msgDialect = msg.dialect || null;
+                const topicMatch = msgCategory === topicAnalysis.currentCategory ||
+                                   topicAnalysis.currentCategory === 'general' ||
+                                   msgCategory === 'general';
+                // Only include messages from same dialect mode (or no dialect on either side)
+                const dialectMatch = msgDialect === currentDialectMode ||
+                                     msgDialect === null ||
+                                     currentDialectMode === null;
+                return topicMatch && dialectMatch;
             });
+
             if (sameTopic.length === 0) return userMessage;
+
             const contextMessages = sameTopic.slice(-6).filter(msg => msg.content !== userMessage);
             let context = '';
             if (contextMessages.length > 0) {
-                context += `[PAST CONVERSATION - these are PREVIOUS messages, NOT the current question]\n`;
-                contextMessages.forEach((msg, idx) => {
+                context += '[PAST CONVERSATION - these are PREVIOUS messages, NOT the current question]\n';
+                contextMessages.forEach((msg) => {
                     const role = msg.role === 'user' ? 'User said' : 'You replied';
-                    context += `${role}: ${msg.content}\n`;
+                    context += role + ': ' + msg.content + '\n';
                 });
-                context += `[END OF PAST CONVERSATION]\n\n`;
+                context += '[END OF PAST CONVERSATION]\n\n';
             }
-            context += `Current question: ${userMessage}\nAnswer:`;
-            console.log(`[CONTEXT] Same topic (${topicAnalysis.currentCategory}) — including ${sameTopic.slice(-4).length} messages`);
+            context += 'Current question: ' + userMessage + '\nAnswer:';
+            console.log('[CONTEXT] Same topic (' + topicAnalysis.currentCategory + '), dialect (' + currentDialectMode + ') — ' + contextMessages.length + ' messages included');
             return context;
         }
+        // ── END PATCH 5 ──
 
         // Mobile keyboard handling
         let lastHeight = window.innerHeight;
@@ -1401,6 +1522,11 @@
                 welcome.style.display = 'flex';
                 conversationHistory = [];
                 currentTopicId = null;
+                // ── PATCH 6: Also clear dialect mode on full clear ──
+                currentDialectMode = null;
+                localStorage.removeItem('currentDialectMode');
+                setDialectBadge(null);
+                // ── END PATCH 6 ──
                 localStorage.removeItem('conversationHistory');
                 localStorage.removeItem('currentTopicId');
             }
@@ -1425,6 +1551,16 @@
             welcome.style.display = 'none';
             const userGroup = addUserMessage(msg);
 
+            // ── PATCH 7: Detect dialect BEFORE building context ──────────
+            const detectedDialectSwitch = detectDialectSwitch(msg);
+            if (detectedDialectSwitch) {
+                currentDialectMode = detectedDialectSwitch;
+                localStorage.setItem('currentDialectMode', currentDialectMode);
+                setDialectBadge(currentDialectMode);
+                console.log('[DIALECT] Switched to: ' + currentDialectMode);
+            }
+            // ── END PATCH 7 ──
+
             const userTopic = detectTopicCategory(msg);
             addToHistory('user', msg, userTopic);
             currentTopicId = userTopic;
@@ -1439,7 +1575,9 @@
             const generatingIndicator = addGeneratingIndicator(userGroup);
 
             try {
-                const messageToSend = buildContext(msg);
+                // ── PATCH 8: Pass detectedDialectSwitch into buildContext ──
+                const messageToSend = buildContext(msg, detectedDialectSwitch);
+                // ── END PATCH 8 ──
 
                 const res = await fetch(API, {
                     method: 'POST',
