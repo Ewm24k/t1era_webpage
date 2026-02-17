@@ -498,6 +498,39 @@
             border-left: 3px solid var(--accent-secondary);
         }
 
+        /* REASONING STEPS */
+        .reasoning-step {
+            padding: 12px;
+            margin-bottom: 10px;
+            background: rgba(139, 92, 246, 0.08);
+            border-radius: 8px;
+            border-left: 3px solid var(--accent-secondary);
+            opacity: 0;
+            animation: fadeInStep 0.4s forwards;
+        }
+
+        @keyframes fadeInStep {
+            to { opacity: 1; }
+        }
+
+        .reasoning-step-label {
+            font-weight: 700;
+            color: var(--accent-secondary);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .reasoning-step div:last-child {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
         .cursor-blink {
             display: inline-block;
             width: 2px;
@@ -778,9 +811,104 @@
                 padding: 10px 12px;
             }
         }
+
+        /* VIDEO POPUP OVERLAY */
+        .video-popup-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        .video-popup-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .video-popup-container {
+            position: relative;
+            max-width: 90vw;
+            max-height: 90vh;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            transform: scale(0.8);
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .video-popup-overlay.show .video-popup-container {
+            transform: scale(1);
+        }
+
+        .popup-video {
+            display: block;
+            width: 100%;
+            height: auto;
+            max-height: 90vh;
+            object-fit: contain;
+        }
+
+        .popup-close-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            color: white;
+            font-size: 24px;
+            font-weight: 300;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            z-index: 10000;
+            backdrop-filter: blur(10px);
+        }
+
+        .popup-close-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.6);
+            transform: rotate(90deg) scale(1.1);
+        }
+
+        @media (max-width: 768px) {
+            .video-popup-container {
+                max-width: 95vw;
+                border-radius: 12px;
+            }
+            .popup-close-btn {
+                width: 36px;
+                height: 36px;
+                top: 12px;
+                right: 12px;
+                font-size: 20px;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- Video Popup Overlay -->
+    <div class="video-popup-overlay" id="videoPopup">
+        <div class="video-popup-container">
+            <button class="popup-close-btn" id="closePopup">×</button>
+            <video class="popup-video" autoplay loop muted playsinline id="popupVideo">
+                <source src="https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/assets/Purple_Modern.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+    </div>
+
     <div class="bg-grid"></div>
     <div class="bg-gradient"></div>
 
@@ -846,6 +974,55 @@
         if (showThinking) {
             reasoningToggle.classList.add('active');
         }
+
+        // ========================================
+        // VIDEO POPUP LOGIC
+        // ========================================
+        const videoPopup = document.getElementById('videoPopup');
+        const closePopupBtn = document.getElementById('closePopup');
+        const popupVideo = document.getElementById('popupVideo');
+        
+        // Check if user has seen the popup before
+        const hasSeenPopup = localStorage.getItem('hasSeenWelcomeVideo');
+        
+        if (!hasSeenPopup) {
+            // Show popup after a short delay
+            setTimeout(() => {
+                videoPopup.classList.add('show');
+                popupVideo.play().catch(err => {
+                    console.log('Autoplay prevented:', err);
+                });
+            }, 500);
+        }
+        
+        // Close popup function
+        function closeVideoPopup() {
+            videoPopup.classList.remove('show');
+            popupVideo.pause();
+            
+            // Mark as seen
+            localStorage.setItem('hasSeenWelcomeVideo', 'true');
+        }
+        
+        // Close button click
+        closePopupBtn.addEventListener('click', closeVideoPopup);
+        
+        // Close on overlay click (outside video)
+        videoPopup.addEventListener('click', (e) => {
+            if (e.target === videoPopup) {
+                closeVideoPopup();
+            }
+        });
+        
+        // Close on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && videoPopup.classList.contains('show')) {
+                closeVideoPopup();
+            }
+        });
+        // ========================================
+        // END VIDEO POPUP LOGIC
+        // ========================================
 
         // Save conversation to localStorage
         function saveConversation() {
@@ -978,6 +1155,92 @@
                 const contextPrompt = buildContext(msg);
                 const messageToSend = contextPrompt || msg;
 
+                // Create AI message container immediately
+                const aiGroup = document.createElement('div');
+                aiGroup.className = 'message-group';
+                const aiWrapper = document.createElement('div');
+                aiWrapper.className = 'message-wrapper ai';
+                const time = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+                
+                const bubbleDiv = document.createElement('div');
+                bubbleDiv.className = 'message-bubble';
+                
+                bubbleDiv.innerHTML = `
+                    <div class="message-header">
+                        <div class="message-header-left">
+                            <div class="message-avatar">AI</div>
+                            <div class="message-sender">T1ERA AI</div>
+                        </div>
+                        <div class="message-time">${time}</div>
+                    </div>
+                `;
+                
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'message-content';
+                contentDiv.id = 'ai-streaming-content';
+                bubbleDiv.appendChild(contentDiv);
+                
+                aiWrapper.appendChild(bubbleDiv);
+                aiGroup.appendChild(aiWrapper);
+                msgs.appendChild(aiGroup);
+                
+                // Remove generating indicator
+                generatingIndicator.remove();
+
+                // Create dropdowns if thinking is enabled
+                let thinkingDropdown, reasoningDropdown, thinkingTextDiv, responseDiv;
+                
+                if (showThinking) {
+                    // Add thinking dropdown
+                    thinkingDropdown = document.createElement('div');
+                    thinkingDropdown.className = 'thinking-dropdown expanded';
+                    thinkingDropdown.innerHTML = `
+                        <div class="thinking-header">
+                            <div class="thinking-title">
+                                <span>Thinking Process (Live)</span>
+                            </div>
+                            <div class="thinking-chevron">▼</div>
+                        </div>
+                        <div class="thinking-content">
+                            <div class="thinking-text" id="live-thinking"></div>
+                        </div>
+                    `;
+                    contentDiv.appendChild(thinkingDropdown);
+                    thinkingTextDiv = thinkingDropdown.querySelector('#live-thinking');
+                    
+                    // Add click handler
+                    thinkingDropdown.querySelector('.thinking-header').addEventListener('click', () => {
+                        thinkingDropdown.classList.toggle('expanded');
+                    });
+                    
+                    // Add reasoning dropdown
+                    reasoningDropdown = document.createElement('div');
+                    reasoningDropdown.className = 'thinking-dropdown expanded';
+                    reasoningDropdown.innerHTML = `
+                        <div class="thinking-header">
+                            <div class="thinking-title">
+                                <span>Reasoning Steps (Live)</span>
+                            </div>
+                            <div class="thinking-chevron">▼</div>
+                        </div>
+                        <div class="thinking-content">
+                            <div id="reasoning-steps"></div>
+                        </div>
+                    `;
+                    contentDiv.appendChild(reasoningDropdown);
+                    
+                    // Add click handler
+                    reasoningDropdown.querySelector('.thinking-header').addEventListener('click', () => {
+                        reasoningDropdown.classList.toggle('expanded');
+                    });
+                }
+                
+                // Add response div
+                responseDiv = document.createElement('div');
+                responseDiv.id = 'live-response';
+                contentDiv.appendChild(responseDiv);
+
+                // Call API with streaming
                 const res = await fetch(API, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -988,29 +1251,38 @@
                 });
 
                 if (!res.ok) {
-                    const errorData = await res.json().catch(() => ({ message: 'Server error' }));
-                    throw new Error(errorData.message || `Server error: ${res.status}`);
+                    throw new Error(`Server error: ${res.status}`);
                 }
 
                 const data = await res.json();
-
+                
                 if (data.error) throw new Error(data.message);
-                
-                // Remove generating indicator
-                generatingIndicator.remove();
-                
+
                 // Calculate generation time
                 const generationTime = ((Date.now() - generationStartTime) / 1000).toFixed(2);
-                
-                // Add AI response to history
+
+                // Simulate live streaming of the response
+                const fullText = data.fullText || data.response;
+                await simulateLiveStreaming(fullText, thinkingTextDiv, responseDiv, showThinking);
+
+                // Add to history
                 addToHistory('assistant', data.response);
-                
-                await streamResponse(data.response, data.thinking, data.hasThinking, generationTime);
+
+                // Add copy button
+                const copyBtn = document.createElement('button');
+                copyBtn.className = 'copy-button';
+                copyBtn.innerHTML = 'Copy';
+                copyBtn.onclick = () => copyToClipboard(copyBtn, data.response);
+                bubbleDiv.appendChild(copyBtn);
+
+                // Add generation time
+                const timeDisplay = document.createElement('div');
+                timeDisplay.className = 'generation-time';
+                timeDisplay.textContent = `Generated in ${generationTime}s`;
+                aiWrapper.appendChild(timeDisplay);
 
             } catch (err) {
                 console.error('Error details:', err);
-                
-                generatingIndicator.remove();
                 
                 let errorMsg = err.message;
                 
@@ -1027,6 +1299,115 @@
                 processing = false;
                 btn.disabled = !input.value.trim();
                 if (timingInterval) clearInterval(timingInterval);
+            }
+        }
+
+        // Simulate live streaming effect
+        async function simulateLiveStreaming(fullText, thinkingDiv, responseDiv, hasThinking) {
+            let thinkingText = '';
+            let finalResponse = '';
+            let inThinking = false;
+            let reasoningSteps = [];
+            
+            // Parse thinking and response
+            if (fullText.includes('Thinking...')) {
+                const match = fullText.match(/Thinking\.\.\.([\s\S]*?)\.\.\.done thinking\.([\s\S]*)/i);
+                if (match) {
+                    thinkingText = match[1].trim();
+                    finalResponse = match[2].trim();
+                    inThinking = true;
+                }
+            } else {
+                finalResponse = fullText;
+            }
+
+            // Stream thinking text if available
+            if (hasThinking && thinkingText && thinkingDiv) {
+                const cursor = document.createElement('span');
+                cursor.className = 'cursor-blink';
+                thinkingDiv.appendChild(cursor);
+                
+                for (let char of thinkingText) {
+                    const textNode = document.createTextNode(char);
+                    thinkingDiv.insertBefore(textNode, cursor);
+                    await sleep(20); // Fast streaming for thinking
+                    msgs.scrollTop = msgs.scrollHeight;
+                    
+                    // Extract reasoning steps on the fly
+                    const currentText = thinkingDiv.textContent.replace('▌', '');
+                    if (currentText.toLowerCase().includes('step 1') && reasoningSteps.length === 0) {
+                        addReasoningStep(1, 'Understanding', 'Analyzing the user query...');
+                        reasoningSteps.push(1);
+                    }
+                    if (currentText.toLowerCase().includes('step 2') && reasoningSteps.length === 1) {
+                        completeReasoningStep(1);
+                        addReasoningStep(2, 'Knowledge Retrieval', 'Searching information...');
+                        reasoningSteps.push(2);
+                    }
+                    if (currentText.toLowerCase().includes('step 3') && reasoningSteps.length === 2) {
+                        completeReasoningStep(2);
+                        addReasoningStep(3, 'Planning Response', 'Structuring the answer...');
+                        reasoningSteps.push(3);
+                    }
+                }
+                cursor.remove();
+                
+                // Complete all reasoning steps
+                for (let step of reasoningSteps) {
+                    completeReasoningStep(step);
+                }
+            }
+
+            // Add divider before response
+            if (hasThinking) {
+                const divider = document.createElement('div');
+                divider.style.cssText = 'margin: 16px 0; padding-top: 16px; border-top: 1px solid var(--border-primary);';
+                responseDiv.appendChild(divider);
+            }
+
+            // Stream final response
+            const cursor2 = document.createElement('span');
+            cursor2.className = 'cursor-blink';
+            responseDiv.appendChild(cursor2);
+            
+            for (let char of finalResponse) {
+                const textNode = document.createTextNode(char);
+                responseDiv.insertBefore(textNode, cursor2);
+                
+                const delay = char === ' ' ? 20 : 
+                             char === '.' || char === '!' || char === '?' ? 150 :
+                             char === ',' ? 80 : 40;
+                
+                await sleep(delay);
+                msgs.scrollTop = msgs.scrollHeight;
+            }
+            cursor2.remove();
+            
+            // Format with line breaks
+            responseDiv.innerHTML = responseDiv.textContent.replace(/\n/g, '<br>');
+        }
+
+        function addReasoningStep(num, title, description) {
+            const stepsContainer = document.getElementById('reasoning-steps');
+            if (!stepsContainer) return;
+            
+            const step = document.createElement('div');
+            step.className = 'reasoning-step';
+            step.id = `reasoning-step-${num}`;
+            step.innerHTML = `
+                <div class="reasoning-step-label">⏳ Step ${num}: ${title}</div>
+                <div>${description}</div>
+            `;
+            stepsContainer.appendChild(step);
+            msgs.scrollTop = msgs.scrollHeight;
+        }
+
+        function completeReasoningStep(num) {
+            const step = document.getElementById(`reasoning-step-${num}`);
+            if (step) {
+                const label = step.querySelector('.reasoning-step-label');
+                label.innerHTML = label.innerHTML.replace('⏳', '✓');
+                label.style.color = 'var(--accent-success)';
             }
         }
 
