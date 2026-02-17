@@ -1270,7 +1270,13 @@
                 'expand on','clarify','example','for example','such as',
                 'related to','about that','on that','same topic','previous',
                 'yes','no','ok','okay','sure','correct','right','wrong',
-                'that one','this one','first','second','third','last'
+                'that one','this one','first','second','third','last',
+                // Memory/history recall phrases - always continuation
+                'what did i','what was i','what i said','my last','i told you',
+                'i said','i told','i asked','i mentioned','i shared','i told you',
+                'do you remember','you remember','recall','earlier','before',
+                'what i just','my previous','last message','last question',
+                'last request','what i asked','what i told'
             ];
             return continuationPhrases.some(p => lower.includes(p));
         }
