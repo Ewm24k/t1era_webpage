@@ -31,6 +31,9 @@
             --glow-primary: rgba(102, 126, 234, 0.4);
             --glow-secondary: rgba(139, 92, 246, 0.3);
             --transition: cubic-bezier(0.4, 0, 0.2, 1);
+            /* ← NEW: Coder model accent colors */
+            --accent-coder: #06b6d4;
+            --glow-coder: rgba(6, 182, 212, 0.3);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -276,6 +279,12 @@
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
         }
 
+        /* ← NEW: Coder model bubble highlight */
+        .message-wrapper.ai.coder-model .message-bubble {
+            border-color: rgba(6, 182, 212, 0.3);
+            box-shadow: 0 4px 16px rgba(6, 182, 212, 0.1);
+        }
+
         .message-header {
             display: flex;
             align-items: center;
@@ -315,6 +324,12 @@
             color: var(--accent-secondary);
         }
 
+        /* ← NEW: Coder avatar color */
+        .message-wrapper.ai.coder-model .message-avatar {
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.3), rgba(34, 211, 238, 0.2));
+            color: var(--accent-coder);
+        }
+
         .message-sender {
             font-weight: 700;
             font-size: 13px;
@@ -327,6 +342,29 @@
 
         .message-wrapper.ai .message-sender {
             color: var(--text-secondary);
+        }
+
+        /* ← NEW: Model badge styles */
+        .model-badge {
+            font-size: 9px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 100px;
+            font-family: 'Space Grotesk', sans-serif;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .model-badge.general {
+            background: rgba(139, 92, 246, 0.2);
+            border: 1px solid rgba(139, 92, 246, 0.4);
+            color: var(--accent-secondary);
+        }
+
+        .model-badge.coder {
+            background: rgba(6, 182, 212, 0.2);
+            border: 1px solid rgba(6, 182, 212, 0.4);
+            color: var(--accent-coder);
         }
 
         .message-time {
@@ -830,6 +868,11 @@
             .generation-time {
                 font-size: 9px;
             }
+            /* ← NEW: Mobile badge size */
+            .model-badge {
+                font-size: 8px;
+                padding: 2px 5px;
+            }
         }
 
         /* Extra small phones */
@@ -1103,7 +1146,8 @@
         }
     </script>
     <script>
-        const API = '/.netlify/functions/chat-background';  // ← UPDATED: Changed from 'chat' to 'chat-background'
+        // ← UPDATED: Changed from 'chat-background' to 'chat-stream'
+        const API = '/.netlify/functions/chat-stream';
         const msgs = document.getElementById('messagesContainer');
         const input = document.getElementById('messageInput');
         const btn = document.getElementById('sendButton');
@@ -1352,21 +1396,29 @@
         }
 
         async function createLiveStreamingResponse(data, generationTime) {
+            // ← NEW: Detect if coder model was used
+            const isCoder = data.model === 't1era-coder';
+
             // Create AI message container
             const aiGroup = document.createElement('div');
             aiGroup.className = 'message-group';
             const aiWrapper = document.createElement('div');
-            aiWrapper.className = 'message-wrapper ai';
+            // ← NEW: Add coder-model class if coder model was used
+            aiWrapper.className = `message-wrapper ai${isCoder ? ' coder-model' : ''}`;
             const time = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
             
             const bubbleDiv = document.createElement('div');
             bubbleDiv.className = 'message-bubble';
             
+            // ← NEW: Dynamic avatar, sender name, and model badge based on model used
             bubbleDiv.innerHTML = `
                 <div class="message-header">
                     <div class="message-header-left">
-                        <div class="message-avatar">AI</div>
-                        <div class="message-sender">T1ERA AI</div>
+                        <div class="message-avatar">${isCoder ? '💻' : 'AI'}</div>
+                        <div class="message-sender">${isCoder ? 'T1ERA CODER' : 'T1ERA AI'}</div>
+                        <span class="model-badge ${isCoder ? 'coder' : 'general'}">
+                            ${isCoder ? 'Coder' : 'General'}
+                        </span>
                     </div>
                     <div class="message-time">${time}</div>
                 </div>
@@ -1383,8 +1435,9 @@
             // Show "Generating response..." while preparing
             const generatingDiv = document.createElement('div');
             generatingDiv.className = 'generating-indicator';
+            // ← NEW: Dynamic generating text based on model
             generatingDiv.innerHTML = `
-                <span>Generating response</span>
+                <span>${isCoder ? 'Writing code' : 'Generating response'}</span>
                 <div class="generating-dots">
                     <div class="generating-dot"></div>
                     <div class="generating-dot"></div>
@@ -1503,10 +1556,10 @@
             copyBtn.onclick = () => copyToClipboard(copyBtn, data.response);
             bubbleDiv.appendChild(copyBtn);
 
-            // Add generation time
+            // ← NEW: Generation time now shows which model was used
             const timeDisplay = document.createElement('div');
             timeDisplay.className = 'generation-time';
-            timeDisplay.textContent = `Generated in ${generationTime}s`;
+            timeDisplay.textContent = `Generated in ${generationTime}s · ${isCoder ? 't1era-coder' : 't1era'}`;
             aiWrapper.appendChild(timeDisplay);
             
             msgs.scrollTop = msgs.scrollHeight;
