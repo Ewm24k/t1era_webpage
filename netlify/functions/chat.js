@@ -78,17 +78,17 @@ exports.handler = async (event, context) => {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        model: modelName,  // ← UPDATED: Dynamic model selection
+                        model: modelName,
                         prompt: message,
                         stream: true,
                         options: {
                             temperature: 0.7,
                             top_p: 0.9,
                             top_k: 40,
-                            num_predict: isCodingQuery ? 4096 : 2048  // ← NEW: More tokens for coding
+                            num_predict: isCodingQuery ? 4096 : 2048
                         }
-                    }),
-                    timeout: 120000
+                    })
+                    // ← UPDATED: timeout removed - no artificial limit
                 });
 
                 if (!ollamaResponse.ok) {
@@ -190,8 +190,8 @@ exports.handler = async (event, context) => {
                         response: finalResponse,
                         thinking: thinking,
                         fullText: fullResponse,
-                        model: modelName,  // ← NEW: Return which model was used
-                        isCodingQuery: isCodingQuery,  // ← NEW: Return query type
+                        model: modelName,
+                        isCodingQuery: isCodingQuery,
                         hasThinking: thinking !== null,
                         // Debug info
                         debug: {
@@ -200,8 +200,8 @@ exports.handler = async (event, context) => {
                             thinkingFound: thinking !== null,
                             thinkingLength: thinking ? thinking.length : 0,
                             patterns_tested: 4,
-                            modelUsed: modelName,  // ← NEW: Model info in debug
-                            codingDetected: isCodingQuery  // ← NEW: Detection info in debug
+                            modelUsed: modelName,
+                            codingDetected: isCodingQuery
                         }
                     })
                 };
