@@ -1381,7 +1381,7 @@
         input.addEventListener('input', () => {
             input.style.height = 'auto';
             input.style.height = input.scrollHeight + 'px';
-            btn.disabled = !input.value.trim() || processing;
+            btn.disabled = (!input.value.trim() && !pasteAttachment) || processing;
         });
 
         btn.addEventListener('click', send);
@@ -1411,7 +1411,10 @@
             // If a paste snippet is attached, prepend it to the message
             let msg = rawMsg;
             if (pasteAttachment && pasteAttachment.content) {
-                const snippetHeader = \`[Attached \${pasteAttachment.lang.label} snippet]\n\\`\\`\\`\${pasteAttachment.lang.lang}\n\${pasteAttachment.content}\n\\`\\`\\`\n\n\`;
+                const lang = pasteAttachment.lang.lang;
+                const label = pasteAttachment.lang.label;
+                const code = pasteAttachment.content;
+                const snippetHeader = '[Attached ' + label + ' snippet]\n```' + lang + '\n' + code + '\n```\n\n';
                 msg = rawMsg ? snippetHeader + rawMsg : snippetHeader.trim();
                 // Clear the chip
                 pasteAttachment = null;
