@@ -70,7 +70,7 @@ app.post('/api/chat-stream', async (req, res) => {
             'fix', 'solve', 'optimize', 'refactor', 'test',
             'method', 'constructor', 'inheritance', 'interface',
             'component', 'module', 'package', 'import', 'export',
-            'fetch', 'axios', 'request', 'response', 'endpoint',
+            'fetch', 'axios', 'endpoint',
             'query', 'mutation', 'schema', 'model', 'controller',
             'route', 'middleware', 'auth', 'token', 'session',
             'docker', 'container', 'deploy', 'webpack',
@@ -149,6 +149,17 @@ app.post('/api/chat-stream', async (req, res) => {
         if (thinkingMatch) {
             thinking = thinkingMatch[1].trim();
             finalResponse = thinkingMatch[2].trim();
+        }
+
+        // Strip any leaked thinking patterns from finalResponse
+        finalResponse = finalResponse
+            .replace(/^Thinking\.\.\.[\s\S]*?\.\.\.done thinking\.?\s*/i, '')
+            .replace(/^<think>[\s\S]*?<\/think>\s*/i, '')
+            .trim();
+
+        // If finalResponse is empty after stripping, use fullResponse as fallback
+        if (!finalResponse || finalResponse.trim() === '') {
+            finalResponse = fullResponse.replace(/^Thinking\.\.\.[\s\S]*?\.\.\.done thinking\.?\s*/i, '').trim();
         }
 
         res.json({
