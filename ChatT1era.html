@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="code-highlighter.css">
+    <link rel="stylesheet" href="markdown-renderer.css">
     
     <style>
         :root {
@@ -1064,86 +1064,12 @@
             </div>
         </div>
     </div>
+
+    <!-- ✅ CHANGE 1: Replaced embedded CodeHighlighter with external markdown-renderer.js -->
+    <script src="markdown-renderer.js"></script>
+
     <script>
-        /**
-         * Code Highlighter - Embedded
-         */
-        class CodeHighlighter {
-            constructor() {
-                this.languages = {
-                    'javascript': { name: 'JavaScript', color: '#f7df1e' },
-                    'python': { name: 'Python', color: '#3776ab' },
-                    'java': { name: 'Java', color: '#007396' },
-                    'cpp': { name: 'C++', color: '#00599c' },
-                    'csharp': { name: 'C#', color: '#239120' },
-                    'php': { name: 'PHP', color: '#777bb4' },
-                    'ruby': { name: 'Ruby', color: '#cc342d' },
-                    'go': { name: 'Go', color: '#00add8' },
-                    'rust': { name: 'Rust', color: '#000000' },
-                    'typescript': { name: 'TypeScript', color: '#3178c6' },
-                    'html': { name: 'HTML', color: '#e34c26' },
-                    'css': { name: 'CSS', color: '#1572b6' },
-                    'sql': { name: 'SQL', color: '#4479a1' },
-                    'bash': { name: 'Bash', color: '#4eaa25' },
-                    'shell': { name: 'Shell', color: '#4eaa25' },
-                    'json': { name: 'JSON', color: '#000000' },
-                    'xml': { name: 'XML', color: '#e34c26' },
-                    'markdown': { name: 'Markdown', color: '#000000' },
-                    'yaml': { name: 'YAML', color: '#cb171e' }
-                };
-            }
-
-            processText(text) {
-                if (!text) return '';
-                text = text.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
-                    return this.createCodeBlock(code.trim(), lang);
-                });
-                text = text.replace(/`([^`]+)`/g, (match, code) => {
-                    return this.createInlineCode(code);
-                });
-                text = text.replace(/\n/g, '<br>');
-                return text;
-            }
-
-            createCodeBlock(code, language) {
-                const lang = language ? language.toLowerCase() : 'plaintext';
-                const langInfo = this.languages[lang] || { name: 'Code', color: '#666' };
-                const escapedCode = this.escapeHtml(code);
-                const blockId = 'code-' + Math.random().toString(36).substr(2, 9);
-                
-                return `
-                    <div class="code-block-container">
-                        <div class="code-block-header">
-                            <div class="code-language" style="color: ${langInfo.color}">
-                                <span class="code-icon">⟨/⟩</span>
-                                ${langInfo.name}
-                            </div>
-                        </div>
-                        <div style="position:relative;">
-                            <pre class="code-block"><code id="${blockId}" class="language-${lang}">${escapedCode}</code></pre>
-                            <button class="code-copy-btn" onclick="copyCodeBlock('${blockId}')">📋</button>
-                        </div>
-                    </div>
-                `;
-            }
-
-            createInlineCode(code) {
-                const escapedCode = this.escapeHtml(code);
-                return `<code class="inline-code">${escapedCode}</code>`;
-            }
-
-            escapeHtml(text) {
-                const div = document.createElement('div');
-                div.textContent = text;
-                return div.innerHTML;
-            }
-
-            hasCode(text) {
-                return /```[\s\S]*?```/.test(text) || /`[^`]+`/.test(text);
-            }
-        }
-
-        // Global copy function
+        // Global copy function for code blocks
         function copyCodeBlock(elementId) {
             const codeElement = document.getElementById(elementId);
             if (!codeElement) return;
@@ -1172,7 +1098,6 @@
         }
     </script>
     <script>
-        // ← UPDATED: Changed from 'chat-background' to 'chat-stream'
         const API = 'https://t1era-webpage.onrender.com/api/chat-stream';
         const msgs = document.getElementById('messagesContainer');
         const input = document.getElementById('messageInput');
@@ -1185,23 +1110,22 @@
         let showThinking = localStorage.getItem('showThinking') === 'true';
         let generationStartTime = null;
         let timingInterval = null;
+
         // ========================================
         // ADVANCED CONTEXT & TOPIC MANAGEMENT
         // ========================================
 
-        // Load full history (user + assistant) but sanitize code from assistant
         let conversationHistory = JSON.parse(localStorage.getItem('conversationHistory') || '[]').map(msg => {
             if (msg.role === 'assistant') {
-                // Strip code blocks from saved assistant messages to keep context clean
                 msg.content = msg.content.replace(/```[\s\S]*?```/g, '[code block]').substring(0, 300);
             }
             return msg;
         });
 
-        // Initialize code highlighter
-        const codeHighlighter = new CodeHighlighter();
+        // ✅ CHANGE 2: Instantiate T1ERARenderer instead of CodeHighlighter
+        const codeHighlighter = new T1ERARenderer();
 
-        const MAX_HISTORY = 20; // max stored messages
+        const MAX_HISTORY = 20;
         let currentTopicId = localStorage.getItem('currentTopicId') || null;
 
         // ── TOPIC CATEGORIES ──────────────────────────────────────────────
@@ -1216,52 +1140,39 @@
             general:     []
         };
 
-        // ── EXTRACT TOPIC KEYWORDS FROM MESSAGE ───────────────────────────
         function extractTopicKeywords(text) {
             const lower = text.toLowerCase();
             const stopWords = new Set(['the','a','an','is','are','was','were','be','been','being','have','has','had','do','does','did','will','would','could','should','may','might','shall','can','need','dare','ought','used','able','i','you','he','she','it','we','they','me','him','her','us','them','my','your','his','its','our','their','this','that','these','those','what','which','who','how','when','where','why','and','or','but','if','then','else','for','of','in','on','at','to','from','with','by','about','into','through','during','before','after','above','below','up','down','out','off','over','under','again','further','once','here','there','all','both','each','few','more','most','other','some','such','no','not','only','same','so','than','too','very','just','because','as','until','while','although','though','even','still','yet','also','however','therefore']);
-            
             return lower.split(/\W+/).filter(w => w.length > 3 && !stopWords.has(w));
         }
 
-        // ── DETECT TOPIC CATEGORY ─────────────────────────────────────────
         function detectTopicCategory(text) {
             const keywords = extractTopicKeywords(text);
             const scores = {};
-
             for (const [category, catKeywords] of Object.entries(TOPIC_CATEGORIES)) {
                 if (category === 'general') continue;
                 scores[category] = keywords.filter(k => 
                     catKeywords.some(ck => k.includes(ck) || ck.includes(k))
                 ).length;
             }
-
             const topCategory = Object.entries(scores).sort((a, b) => b[1] - a[1])[0];
             return topCategory && topCategory[1] > 0 ? topCategory[0] : 'general';
         }
 
-        // ── CALCULATE TOPIC SIMILARITY SCORE ─────────────────────────────
         function getTopicSimilarity(msg1, msg2) {
             const words1 = new Set(extractTopicKeywords(msg1));
             const words2 = new Set(extractTopicKeywords(msg2));
             if (words1.size === 0 || words2.size === 0) return 0;
             const intersection = [...words1].filter(w => words2.has(w)).length;
             const union = new Set([...words1, ...words2]).size;
-            return intersection / union; // Jaccard similarity
+            return intersection / union;
         }
 
-        // ── DETECT TOPIC CONTINUATION SIGNALS ────────────────────────────
         function isContinuationSignal(text) {
             const lower = text.toLowerCase().trim();
-
-            // Very short messages (1-2 words, under 15 chars) = always continuation
-            // e.g. "3", "yes", "ok", "no", "why", "how", "1", "option 2"
             if (lower.length <= 15 && lower.split(' ').length <= 3) return true;
-
-            // Single number or letter = choosing from a list = continuation
             if (/^[0-9a-z]$/i.test(lower)) return true;
             if (/^(option\s*)?[1-9]$/.test(lower)) return true;
-
             const continuationPhrases = [
                 'explain more','tell me more','elaborate','continue','go on',
                 'what about','and also','additionally','furthermore','moreover',
@@ -1271,7 +1182,6 @@
                 'related to','about that','on that','same topic','previous',
                 'yes','no','ok','okay','sure','correct','right','wrong',
                 'that one','this one','first','second','third','last',
-                // Memory/history recall phrases - always continuation
                 'what did i','what was i','what i said','my last','i told you',
                 'i said','i told','i asked','i mentioned','i shared','i told you',
                 'do you remember','you remember','recall','earlier','before',
@@ -1281,7 +1191,6 @@
             return continuationPhrases.some(p => lower.includes(p));
         }
 
-        // ── DETECT NEW TOPIC SIGNALS ──────────────────────────────────────
         function isNewTopicSignal(text) {
             const lower = text.toLowerCase().trim();
             const newTopicPhrases = [
@@ -1293,35 +1202,28 @@
             return newTopicPhrases.some(p => lower.includes(p));
         }
 
-        // ── MAIN TOPIC ANALYSIS ───────────────────────────────────────────
         function analyzeTopicShift(currentMessage, history) {
             if (history.length === 0) {
                 return { isNewTopic: true, similarity: 0, currentCategory: detectTopicCategory(currentMessage) };
             }
-
             const recentMessages = history.slice(-4);
             const recentText = recentMessages.map(m => m.content).join(' ');
-            
             const currentCategory = detectTopicCategory(currentMessage);
             const previousCategory = detectTopicCategory(recentText);
             const similarity = getTopicSimilarity(currentMessage, recentText);
             const continuation = isContinuationSignal(currentMessage);
             const newTopicSignal = isNewTopicSignal(currentMessage);
-
             let isNewTopic = false;
-
             if (continuation) {
-                isNewTopic = false; // Explicit continuation
+                isNewTopic = false;
             } else if (newTopicSignal && similarity < 0.15) {
-                isNewTopic = true; // Explicit new topic signal + low similarity
+                isNewTopic = true;
             } else if (currentCategory !== previousCategory && currentCategory !== 'general' && previousCategory !== 'general') {
-                isNewTopic = similarity < 0.1; // Different categories and very low overlap
+                isNewTopic = similarity < 0.1;
             } else {
-                isNewTopic = similarity < 0.05 && !continuation; // Very low similarity
+                isNewTopic = similarity < 0.05 && !continuation;
             }
-
             console.log(`[TOPIC] Current: ${currentCategory} | Previous: ${previousCategory} | Similarity: ${similarity.toFixed(3)} | NewTopic: ${isNewTopic}`);
-
             return { isNewTopic, similarity, currentCategory, previousCategory };
         }
 
@@ -1336,7 +1238,6 @@
         const closePopupBtn = document.getElementById('closePopup');
         const popupVideo = document.getElementById('popupVideo');
         
-        // Show popup every time page loads
         setTimeout(() => {
             videoPopup.classList.add('show');
             popupVideo.play().catch(err => {
@@ -1344,23 +1245,19 @@
             });
         }, 500);
         
-        // Close popup function
         function closeVideoPopup() {
             videoPopup.classList.remove('show');
             popupVideo.pause();
         }
         
-        // Close button click
         closePopupBtn.addEventListener('click', closeVideoPopup);
         
-        // Close on overlay click (outside video)
         videoPopup.addEventListener('click', (e) => {
             if (e.target === videoPopup) {
                 closeVideoPopup();
             }
         });
         
-        // Close on Escape key
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && videoPopup.classList.contains('show')) {
                 closeVideoPopup();
@@ -1370,7 +1267,6 @@
         // END VIDEO POPUP LOGIC
         // ========================================
 
-        // ── SAVE CONVERSATION ─────────────────────────────────────────────
         function saveConversation() {
             if (conversationHistory.length > MAX_HISTORY) {
                 conversationHistory = conversationHistory.slice(-MAX_HISTORY);
@@ -1378,7 +1274,6 @@
             localStorage.setItem('conversationHistory', JSON.stringify(conversationHistory));
         }
 
-        // ── ADD TO HISTORY ────────────────────────────────────────────────
         function addToHistory(role, content, topicCategory) {
             conversationHistory.push({
                 role: role,
@@ -1391,19 +1286,13 @@
             saveConversation();
         }
 
-        // ── BUILD SMART CONTEXT ───────────────────────────────────────────
         function buildContext(userMessage) {
             if (conversationHistory.length === 0) return userMessage;
-
             const topicAnalysis = analyzeTopicShift(userMessage, conversationHistory);
-
-            // NEW TOPIC — send only current message, no history
             if (topicAnalysis.isNewTopic) {
                 console.log('[CONTEXT] New topic detected — sending clean message only');
                 return userMessage;
             }
-
-            // SAME TOPIC — build smart context window
             const recentHistory = conversationHistory.slice(-6);
             const sameTopic = recentHistory.filter(msg => {
                 const msgCategory = msg.topic || detectTopicCategory(msg.content);
@@ -1411,13 +1300,9 @@
                        topicAnalysis.currentCategory === 'general' ||
                        msgCategory === 'general';
             });
-
             if (sameTopic.length === 0) return userMessage;
-
-            // Build context — exclude current message from history to avoid confusion
             const contextMessages = sameTopic.slice(-6).filter(msg => msg.content !== userMessage);
             let context = '';
-
             if (contextMessages.length > 0) {
                 context += `[PAST CONVERSATION - these are PREVIOUS messages, NOT the current question]\n`;
                 contextMessages.forEach((msg, idx) => {
@@ -1426,9 +1311,7 @@
                 });
                 context += `[END OF PAST CONVERSATION]\n\n`;
             }
-
             context += `Current question: ${userMessage}\nAnswer:`;
-
             console.log(`[CONTEXT] Same topic (${topicAnalysis.currentCategory}) — including ${sameTopic.slice(-4).length} messages`);
             return context;
         }
@@ -1438,11 +1321,8 @@
         window.visualViewport?.addEventListener('resize', () => {
             const currentHeight = window.visualViewport.height;
             const diff = lastHeight - currentHeight;
-            
-            // Keyboard opened (height decreased significantly)
             if (diff > 100) {
                 msgs.style.height = `calc(${currentHeight}px - ${input.offsetHeight + 100}px)`;
-                // Scroll to bottom when keyboard opens
                 setTimeout(() => {
                     msgs.scrollTop = msgs.scrollHeight;
                 }, 100);
@@ -1452,12 +1332,10 @@
             lastHeight = currentHeight;
         });
 
-        // Prevent zoom on input focus (iOS)
         input.addEventListener('focus', () => {
             document.body.style.zoom = '100%';
         });
 
-        // Auto-scroll to input when focused on mobile
         input.addEventListener('focus', () => {
             setTimeout(() => {
                 input.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -1498,8 +1376,6 @@
                 const groups = msgs.querySelectorAll('.message-group');
                 groups.forEach(g => g.remove());
                 welcome.style.display = 'flex';
-                
-                // Clear conversation history and topic
                 conversationHistory = [];
                 currentTopicId = null;
                 localStorage.removeItem('conversationHistory');
@@ -1514,7 +1390,6 @@
             welcome.style.display = 'none';
             const userGroup = addUserMessage(msg);
 
-            // Add user message to history with topic detection
             const userTopic = detectTopicCategory(msg);
             addToHistory('user', msg, userTopic);
             currentTopicId = userTopic;
@@ -1525,12 +1400,10 @@
             btn.disabled = true;
             processing = true;
 
-            // Start generation timing
             generationStartTime = Date.now();
             const generatingIndicator = addGeneratingIndicator(userGroup);
 
             try {
-                // Build smart context from conversation history
                 const messageToSend = buildContext(msg);
 
                 const res = await fetch(API, {
@@ -1550,16 +1423,12 @@
                 
                 if (data.error) throw new Error(data.message);
 
-                // Remove generating indicator
                 generatingIndicator.remove();
 
-                // Calculate generation time
                 const generationTime = ((Date.now() - generationStartTime) / 1000).toFixed(2);
 
-                // Create AI message with live streaming
                 await createLiveStreamingResponse(data, generationTime);
 
-                // Add to history with topic
                 addToHistory('assistant', data.response, userTopic);
 
             } catch (err) {
@@ -1586,21 +1455,17 @@
         }
 
         async function createLiveStreamingResponse(data, generationTime) {
-            // ← NEW: Detect if coder model was used
             const isCoder = data.model === 't1era-coder';
 
-            // Create AI message container
             const aiGroup = document.createElement('div');
             aiGroup.className = 'message-group';
             const aiWrapper = document.createElement('div');
-            // ← NEW: Add coder-model class if coder model was used
             aiWrapper.className = `message-wrapper ai${isCoder ? ' coder-model' : ''}`;
             const time = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
             
             const bubbleDiv = document.createElement('div');
             bubbleDiv.className = 'message-bubble';
             
-            // ← NEW: Dynamic avatar, sender name, and model badge based on model used
             bubbleDiv.innerHTML = `
                 <div class="message-header">
                     <div class="message-header-left">
@@ -1622,10 +1487,8 @@
             aiGroup.appendChild(aiWrapper);
             msgs.appendChild(aiGroup);
 
-            // Show "Generating response..." while preparing
             const generatingDiv = document.createElement('div');
             generatingDiv.className = 'generating-indicator';
-            // ← NEW: Dynamic generating text based on model
             generatingDiv.innerHTML = `
                 <span>${isCoder ? 'Writing code' : 'Generating response'}</span>
                 <div class="generating-dots">
@@ -1637,15 +1500,12 @@
             contentDiv.appendChild(generatingDiv);
             msgs.scrollTop = msgs.scrollHeight;
 
-            // Wait a moment then start streaming
             await sleep(300);
 
-            // Get full text
             const fullText = data.fullText || data.response;
             let thinkingText = '';
             let finalResponse = '';
             
-            // Parse thinking and response - try multiple patterns like backend
             let match = fullText.match(/Thinking\.\.\.\s*([\s\S]*?)\s*\.\.\.done thinking\.\s*([\s\S]*)/i);
             if (!match) {
                 match = fullText.match(/Thinking\.\.\.\s*([\s\S]*?)\s*\.\.\.done thinking\s*([\s\S]*)/i);
@@ -1664,10 +1524,8 @@
                 finalResponse = fullText;
             }
 
-            // Remove generating indicator
             generatingDiv.remove();
 
-            // Only create thinking dropdown if there's thinking text and toggle is ON
             let thinkingDropdown;
             if (showThinking && thinkingText) {
                 thinkingDropdown = document.createElement('div');
@@ -1687,12 +1545,10 @@
                 
                 const thinkingTextDiv = thinkingDropdown.querySelector('#live-thinking');
                 
-                // Add click handler
                 thinkingDropdown.querySelector('.thinking-header').addEventListener('click', () => {
                     thinkingDropdown.classList.toggle('expanded');
                 });
 
-                // Stream thinking text
                 const cursor = document.createElement('span');
                 cursor.className = 'cursor-blink';
                 thinkingTextDiv.appendChild(cursor);
@@ -1700,61 +1556,64 @@
                 for (let char of thinkingText) {
                     const textNode = document.createTextNode(char);
                     thinkingTextDiv.insertBefore(textNode, cursor);
-                    await sleep(15); // Fast streaming for thinking
+                    await sleep(15);
                     msgs.scrollTop = msgs.scrollHeight;
                 }
                 cursor.remove();
                 
-                // Format with line breaks
                 thinkingTextDiv.innerHTML = thinkingTextDiv.textContent.replace(/\n/g, '<br>');
             }
 
-            // Add divider before response if thinking was shown
             if (showThinking && thinkingText) {
                 const divider = document.createElement('div');
                 divider.style.cssText = 'margin: 16px 0; padding-top: 16px; border-top: 1px solid var(--border-primary);';
                 contentDiv.appendChild(divider);
             }
 
-            // Stream final response
             const responseDiv = document.createElement('div');
             contentDiv.appendChild(responseDiv);
 
-            // Check if response has code blocks
+            // ✅ CHANGE 3: T1ERARenderer.processText() now handles ALL markdown + code
+            // Always use processText for rich formatting — no plain typewriter for markdown content
             if (codeHighlighter.hasCode(finalResponse)) {
-                // Process code blocks immediately (no typing effect for code)
+                // Has code blocks — render immediately with full markdown
                 responseDiv.innerHTML = codeHighlighter.processText(finalResponse);
             } else {
-                // Normal typing animation for non-code responses
-                const cursor2 = document.createElement('span');
-                cursor2.className = 'cursor-blink';
-                responseDiv.appendChild(cursor2);
+                // No code blocks — check if response has markdown formatting
+                const hasMarkdown = /\*\*|^#{1,3}\s|^[-*]\s|^>\s|\bProblem:|Attention:|Solution:|Before:|After:/m.test(finalResponse);
                 
-                for (let char of finalResponse) {
-                    const textNode = document.createTextNode(char);
-                    responseDiv.insertBefore(textNode, cursor2);
+                if (hasMarkdown) {
+                    // Has markdown — render immediately with full formatting
+                    responseDiv.innerHTML = codeHighlighter.processText(finalResponse);
+                } else {
+                    // Plain text — use typewriter animation
+                    const cursor2 = document.createElement('span');
+                    cursor2.className = 'cursor-blink';
+                    responseDiv.appendChild(cursor2);
                     
-                    const delay = char === ' ' ? 20 : 
-                                 char === '.' || char === '!' || char === '?' ? 150 :
-                                 char === ',' ? 80 : 40;
+                    for (let char of finalResponse) {
+                        const textNode = document.createTextNode(char);
+                        responseDiv.insertBefore(textNode, cursor2);
+                        
+                        const delay = char === ' ' ? 20 : 
+                                     char === '.' || char === '!' || char === '?' ? 150 :
+                                     char === ',' ? 80 : 40;
+                        
+                        await sleep(delay);
+                        msgs.scrollTop = msgs.scrollHeight;
+                    }
+                    cursor2.remove();
                     
-                    await sleep(delay);
-                    msgs.scrollTop = msgs.scrollHeight;
+                    responseDiv.innerHTML = responseDiv.textContent.replace(/\n/g, '<br>');
                 }
-                cursor2.remove();
-                
-                // Format with line breaks
-                responseDiv.innerHTML = responseDiv.textContent.replace(/\n/g, '<br>');
             }
 
-            // Add copy button
             const copyBtn = document.createElement('button');
             copyBtn.className = 'copy-button';
             copyBtn.innerHTML = 'Copy';
             copyBtn.onclick = () => copyToClipboard(copyBtn, data.response);
             bubbleDiv.appendChild(copyBtn);
 
-            // ← NEW: Generation time now shows which model was used
             const timeDisplay = document.createElement('div');
             timeDisplay.className = 'generation-time';
             timeDisplay.textContent = `Generated in ${generationTime}s · ${isCoder ? 't1era-coder' : 't1era'}`;
@@ -1816,7 +1675,6 @@
             parentGroup.appendChild(indicator);
             parentGroup.appendChild(timingDisplay);
 
-            // Update timing display
             timingInterval = setInterval(() => {
                 const elapsed = ((Date.now() - generationStartTime) / 1000).toFixed(1);
                 timingDisplay.textContent = `${elapsed}s`;
@@ -1839,7 +1697,6 @@
             const bubbleDiv = document.createElement('div');
             bubbleDiv.className = 'message-bubble';
 
-            // Add header inside bubble
             const headerHTML = `
                 <div class="message-header">
                     <div class="message-header-left">
@@ -1860,25 +1717,21 @@
             group.appendChild(wrapper);
             msgs.appendChild(group);
             
-            // Show thinking dropdown if available and toggle is ON
             if (hasThinking && thinkingText && showThinking) {
                 addThinkingDropdown(contentDiv, thinkingText);
             }
 
-            // Stream the final response
             const responseDiv = document.createElement('div');
             contentDiv.appendChild(responseDiv);
 
             await typeWriter(responseDiv, finalResponse);
 
-            // Add copy button
             const copyBtn = document.createElement('button');
             copyBtn.className = 'copy-button';
             copyBtn.innerHTML = 'Copy';
             copyBtn.onclick = () => copyToClipboard(copyBtn, finalResponse);
             bubbleDiv.appendChild(copyBtn);
 
-            // Add generation time below the bubble
             const timeDisplay = document.createElement('div');
             timeDisplay.className = 'generation-time';
             timeDisplay.textContent = `Generated in ${generationTime}s`;
@@ -1969,7 +1822,6 @@
         }
 
         function copyToClipboard(btn, text) {
-            // Remove HTML tags for copying
             const plainText = text.replace(/<br>/g, '\n').replace(/<[^>]*>/g, '');
             
             navigator.clipboard.writeText(plainText).then(() => {
