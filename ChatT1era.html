@@ -256,14 +256,14 @@
         }
 
         .message-wrapper.user .message-bubble {
-            background: var(--bg-user-bubble);
+            background: rgba(0, 0, 0, 0.15);
             color: white;
-            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.25);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .message-wrapper.user .message-header {
-            background: rgba(0, 0, 0, 0.3);
+            background: var(--bg-user-bubble);
             margin: -16px -18px 12px -18px;
             padding: 12px 18px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -561,6 +561,11 @@
             text-align: center;
         }
 
+        .welcome-title-wrapper {
+            display: inline-block;
+            position: relative;
+        }
+
         .welcome-icon {
             width: 80px;
             height: 80px;
@@ -585,6 +590,37 @@
             background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            display: inline-block;
+            padding-right: 20px;
+        }
+
+        .welcome-title::after {
+            content: '|';
+            position: absolute;
+            right: 0;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: var(--accent-primary);
+            animation: blink-cursor 1s step-end infinite;
+        }
+
+        @keyframes blink-cursor {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        .welcome-title.typing {
+            overflow: hidden;
+            white-space: nowrap;
+            animation: typing 3s steps(30, end) forwards;
+            max-width: 0;
+        }
+
+        @keyframes typing {
+            from { max-width: 0; }
+            to { max-width: 100%; }
         }
 
         .welcome-subtitle {
@@ -910,7 +946,7 @@
         <div class="video-popup-container">
             <button class="popup-close-btn" id="closePopup">×</button>
             <video class="popup-video" autoplay loop muted playsinline id="popupVideo">
-                <source src="https://raw.githubusercontent.com/Ewm24k/t1era_webpage/main/assets/Purple_Modern.mp4" type="video/mp4">
+                <source src="https://cdn.jsdelivr.net/gh/Ewm24k/t1era_webpage@main/assets/Purple_Modern.mp4" type="video/mp4">
                 Your browser does not support the video tag.
             </video>
         </div>
@@ -940,9 +976,9 @@
         <div class="messages-container" id="messagesContainer">
             <div class="welcome-screen" id="welcomeScreen">
                 <div class="welcome-icon">T1</div>
-                <h1 class="welcome-title">Welcome to T1ERA Chat</h1>
+                <h1 class="welcome-title typing">Welcome to T1ERA Chat</h1>
                 <p class="welcome-subtitle">
-                    Powered by T1ERA Custom Model on Azure A10 GPU
+                    Powered by T1ERA Model Private LLMa Base 2026
                 </p>
                 <div class="suggestion-chips">
                     <div class="chip" data-prompt="Explain quantum computing in simple terms">Quantum Computing</div>
