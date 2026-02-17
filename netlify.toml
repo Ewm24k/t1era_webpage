@@ -6,13 +6,13 @@
 
 # ← NEW: Extended timeout for AI functions
 [functions."chat"]
-  timeout = 26
+  timeout = 35
 
 [functions."chat-stream"]
-  timeout = 26
+  timeout = 35
 
 [functions."chat-background"]
-  timeout = 26
+  timeout = 35
 
 [[redirects]]
   from = "/api/*"
