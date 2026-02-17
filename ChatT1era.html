@@ -262,6 +262,13 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
+        .message-wrapper.user .message-header {
+            background: rgba(0, 0, 0, 0.3);
+            margin: -16px -18px 12px -18px;
+            padding: 12px 18px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
         .message-wrapper.ai .message-bubble {
             background: var(--bg-ai-bubble);
             border: 1px solid var(--border-ai);
@@ -903,7 +910,7 @@
         <div class="video-popup-container">
             <button class="popup-close-btn" id="closePopup">×</button>
             <video class="popup-video" autoplay loop muted playsinline id="popupVideo">
-                <source src="https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/assets/Purple_Modern.mp4" type="video/mp4">
+                <source src="https://raw.githubusercontent.com/Ewm24k/t1era_webpage/main/assets/Purple_Modern.mp4" type="video/mp4">
                 Your browser does not support the video tag.
             </video>
         </div>
@@ -1155,92 +1162,6 @@
                 const contextPrompt = buildContext(msg);
                 const messageToSend = contextPrompt || msg;
 
-                // Create AI message container immediately
-                const aiGroup = document.createElement('div');
-                aiGroup.className = 'message-group';
-                const aiWrapper = document.createElement('div');
-                aiWrapper.className = 'message-wrapper ai';
-                const time = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-                
-                const bubbleDiv = document.createElement('div');
-                bubbleDiv.className = 'message-bubble';
-                
-                bubbleDiv.innerHTML = `
-                    <div class="message-header">
-                        <div class="message-header-left">
-                            <div class="message-avatar">AI</div>
-                            <div class="message-sender">T1ERA AI</div>
-                        </div>
-                        <div class="message-time">${time}</div>
-                    </div>
-                `;
-                
-                const contentDiv = document.createElement('div');
-                contentDiv.className = 'message-content';
-                contentDiv.id = 'ai-streaming-content';
-                bubbleDiv.appendChild(contentDiv);
-                
-                aiWrapper.appendChild(bubbleDiv);
-                aiGroup.appendChild(aiWrapper);
-                msgs.appendChild(aiGroup);
-                
-                // Remove generating indicator
-                generatingIndicator.remove();
-
-                // Create dropdowns if thinking is enabled
-                let thinkingDropdown, reasoningDropdown, thinkingTextDiv, responseDiv;
-                
-                if (showThinking) {
-                    // Add thinking dropdown
-                    thinkingDropdown = document.createElement('div');
-                    thinkingDropdown.className = 'thinking-dropdown expanded';
-                    thinkingDropdown.innerHTML = `
-                        <div class="thinking-header">
-                            <div class="thinking-title">
-                                <span>Thinking Process (Live)</span>
-                            </div>
-                            <div class="thinking-chevron">▼</div>
-                        </div>
-                        <div class="thinking-content">
-                            <div class="thinking-text" id="live-thinking"></div>
-                        </div>
-                    `;
-                    contentDiv.appendChild(thinkingDropdown);
-                    thinkingTextDiv = thinkingDropdown.querySelector('#live-thinking');
-                    
-                    // Add click handler
-                    thinkingDropdown.querySelector('.thinking-header').addEventListener('click', () => {
-                        thinkingDropdown.classList.toggle('expanded');
-                    });
-                    
-                    // Add reasoning dropdown
-                    reasoningDropdown = document.createElement('div');
-                    reasoningDropdown.className = 'thinking-dropdown expanded';
-                    reasoningDropdown.innerHTML = `
-                        <div class="thinking-header">
-                            <div class="thinking-title">
-                                <span>Reasoning Steps (Live)</span>
-                            </div>
-                            <div class="thinking-chevron">▼</div>
-                        </div>
-                        <div class="thinking-content">
-                            <div id="reasoning-steps"></div>
-                        </div>
-                    `;
-                    contentDiv.appendChild(reasoningDropdown);
-                    
-                    // Add click handler
-                    reasoningDropdown.querySelector('.thinking-header').addEventListener('click', () => {
-                        reasoningDropdown.classList.toggle('expanded');
-                    });
-                }
-                
-                // Add response div
-                responseDiv = document.createElement('div');
-                responseDiv.id = 'live-response';
-                contentDiv.appendChild(responseDiv);
-
-                // Call API with streaming
                 const res = await fetch(API, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1258,31 +1179,22 @@
                 
                 if (data.error) throw new Error(data.message);
 
+                // Remove generating indicator
+                generatingIndicator.remove();
+
                 // Calculate generation time
                 const generationTime = ((Date.now() - generationStartTime) / 1000).toFixed(2);
 
-                // Simulate live streaming of the response
-                const fullText = data.fullText || data.response;
-                await simulateLiveStreaming(fullText, thinkingTextDiv, responseDiv, showThinking);
+                // Create AI message with live streaming
+                await createLiveStreamingResponse(data, generationTime);
 
                 // Add to history
                 addToHistory('assistant', data.response);
 
-                // Add copy button
-                const copyBtn = document.createElement('button');
-                copyBtn.className = 'copy-button';
-                copyBtn.innerHTML = 'Copy';
-                copyBtn.onclick = () => copyToClipboard(copyBtn, data.response);
-                bubbleDiv.appendChild(copyBtn);
-
-                // Add generation time
-                const timeDisplay = document.createElement('div');
-                timeDisplay.className = 'generation-time';
-                timeDisplay.textContent = `Generated in ${generationTime}s`;
-                aiWrapper.appendChild(timeDisplay);
-
             } catch (err) {
                 console.error('Error details:', err);
+                
+                generatingIndicator.remove();
                 
                 let errorMsg = err.message;
                 
@@ -1302,12 +1214,56 @@
             }
         }
 
-        // Simulate live streaming effect
-        async function simulateLiveStreaming(fullText, thinkingDiv, responseDiv, hasThinking) {
+        async function createLiveStreamingResponse(data, generationTime) {
+            // Create AI message container
+            const aiGroup = document.createElement('div');
+            aiGroup.className = 'message-group';
+            const aiWrapper = document.createElement('div');
+            aiWrapper.className = 'message-wrapper ai';
+            const time = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+            
+            const bubbleDiv = document.createElement('div');
+            bubbleDiv.className = 'message-bubble';
+            
+            bubbleDiv.innerHTML = `
+                <div class="message-header">
+                    <div class="message-header-left">
+                        <div class="message-avatar">AI</div>
+                        <div class="message-sender">T1ERA AI</div>
+                    </div>
+                    <div class="message-time">${time}</div>
+                </div>
+            `;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            bubbleDiv.appendChild(contentDiv);
+            
+            aiWrapper.appendChild(bubbleDiv);
+            aiGroup.appendChild(aiWrapper);
+            msgs.appendChild(aiGroup);
+
+            // Show "Generating response..." while preparing
+            const generatingDiv = document.createElement('div');
+            generatingDiv.className = 'generating-indicator';
+            generatingDiv.innerHTML = `
+                <span>Generating response</span>
+                <div class="generating-dots">
+                    <div class="generating-dot"></div>
+                    <div class="generating-dot"></div>
+                    <div class="generating-dot"></div>
+                </div>
+            `;
+            contentDiv.appendChild(generatingDiv);
+            msgs.scrollTop = msgs.scrollHeight;
+
+            // Wait a moment then start streaming
+            await sleep(300);
+
+            // Get full text
+            const fullText = data.fullText || data.response;
             let thinkingText = '';
             let finalResponse = '';
-            let inThinking = false;
-            let reasoningSteps = [];
             
             // Parse thinking and response
             if (fullText.includes('Thinking...')) {
@@ -1315,57 +1271,67 @@
                 if (match) {
                     thinkingText = match[1].trim();
                     finalResponse = match[2].trim();
-                    inThinking = true;
                 }
             } else {
                 finalResponse = fullText;
             }
 
-            // Stream thinking text if available
-            if (hasThinking && thinkingText && thinkingDiv) {
+            // Remove generating indicator
+            generatingDiv.remove();
+
+            // Only create thinking dropdown if there's thinking text and toggle is ON
+            let thinkingDropdown;
+            if (showThinking && thinkingText) {
+                thinkingDropdown = document.createElement('div');
+                thinkingDropdown.className = 'thinking-dropdown expanded';
+                thinkingDropdown.innerHTML = `
+                    <div class="thinking-header">
+                        <div class="thinking-title">
+                            <span>Thinking Process (Live)</span>
+                        </div>
+                        <div class="thinking-chevron">▼</div>
+                    </div>
+                    <div class="thinking-content">
+                        <div class="thinking-text" id="live-thinking"></div>
+                    </div>
+                `;
+                contentDiv.appendChild(thinkingDropdown);
+                
+                const thinkingTextDiv = thinkingDropdown.querySelector('#live-thinking');
+                
+                // Add click handler
+                thinkingDropdown.querySelector('.thinking-header').addEventListener('click', () => {
+                    thinkingDropdown.classList.toggle('expanded');
+                });
+
+                // Stream thinking text
                 const cursor = document.createElement('span');
                 cursor.className = 'cursor-blink';
-                thinkingDiv.appendChild(cursor);
+                thinkingTextDiv.appendChild(cursor);
                 
                 for (let char of thinkingText) {
                     const textNode = document.createTextNode(char);
-                    thinkingDiv.insertBefore(textNode, cursor);
-                    await sleep(20); // Fast streaming for thinking
+                    thinkingTextDiv.insertBefore(textNode, cursor);
+                    await sleep(15); // Fast streaming for thinking
                     msgs.scrollTop = msgs.scrollHeight;
-                    
-                    // Extract reasoning steps on the fly
-                    const currentText = thinkingDiv.textContent.replace('▌', '');
-                    if (currentText.toLowerCase().includes('step 1') && reasoningSteps.length === 0) {
-                        addReasoningStep(1, 'Understanding', 'Analyzing the user query...');
-                        reasoningSteps.push(1);
-                    }
-                    if (currentText.toLowerCase().includes('step 2') && reasoningSteps.length === 1) {
-                        completeReasoningStep(1);
-                        addReasoningStep(2, 'Knowledge Retrieval', 'Searching information...');
-                        reasoningSteps.push(2);
-                    }
-                    if (currentText.toLowerCase().includes('step 3') && reasoningSteps.length === 2) {
-                        completeReasoningStep(2);
-                        addReasoningStep(3, 'Planning Response', 'Structuring the answer...');
-                        reasoningSteps.push(3);
-                    }
                 }
                 cursor.remove();
                 
-                // Complete all reasoning steps
-                for (let step of reasoningSteps) {
-                    completeReasoningStep(step);
-                }
+                // Format with line breaks
+                thinkingTextDiv.innerHTML = thinkingTextDiv.textContent.replace(/\n/g, '<br>');
             }
 
-            // Add divider before response
-            if (hasThinking) {
+            // Add divider before response if thinking was shown
+            if (showThinking && thinkingText) {
                 const divider = document.createElement('div');
                 divider.style.cssText = 'margin: 16px 0; padding-top: 16px; border-top: 1px solid var(--border-primary);';
-                responseDiv.appendChild(divider);
+                contentDiv.appendChild(divider);
             }
 
             // Stream final response
+            const responseDiv = document.createElement('div');
+            contentDiv.appendChild(responseDiv);
+
             const cursor2 = document.createElement('span');
             cursor2.className = 'cursor-blink';
             responseDiv.appendChild(cursor2);
@@ -1385,30 +1351,21 @@
             
             // Format with line breaks
             responseDiv.innerHTML = responseDiv.textContent.replace(/\n/g, '<br>');
-        }
 
-        function addReasoningStep(num, title, description) {
-            const stepsContainer = document.getElementById('reasoning-steps');
-            if (!stepsContainer) return;
+            // Add copy button
+            const copyBtn = document.createElement('button');
+            copyBtn.className = 'copy-button';
+            copyBtn.innerHTML = 'Copy';
+            copyBtn.onclick = () => copyToClipboard(copyBtn, data.response);
+            bubbleDiv.appendChild(copyBtn);
+
+            // Add generation time
+            const timeDisplay = document.createElement('div');
+            timeDisplay.className = 'generation-time';
+            timeDisplay.textContent = `Generated in ${generationTime}s`;
+            aiWrapper.appendChild(timeDisplay);
             
-            const step = document.createElement('div');
-            step.className = 'reasoning-step';
-            step.id = `reasoning-step-${num}`;
-            step.innerHTML = `
-                <div class="reasoning-step-label">⏳ Step ${num}: ${title}</div>
-                <div>${description}</div>
-            `;
-            stepsContainer.appendChild(step);
             msgs.scrollTop = msgs.scrollHeight;
-        }
-
-        function completeReasoningStep(num) {
-            const step = document.getElementById(`reasoning-step-${num}`);
-            if (step) {
-                const label = step.querySelector('.reasoning-step-label');
-                label.innerHTML = label.innerHTML.replace('⏳', '✓');
-                label.style.color = 'var(--accent-success)';
-            }
         }
 
         function addUserMessage(content) {
