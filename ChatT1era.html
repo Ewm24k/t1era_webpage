@@ -1025,26 +1025,18 @@
         const closePopupBtn = document.getElementById('closePopup');
         const popupVideo = document.getElementById('popupVideo');
         
-        // Check if user has seen the popup before
-        const hasSeenPopup = localStorage.getItem('hasSeenWelcomeVideo');
-        
-        if (!hasSeenPopup) {
-            // Show popup after a short delay
-            setTimeout(() => {
-                videoPopup.classList.add('show');
-                popupVideo.play().catch(err => {
-                    console.log('Autoplay prevented:', err);
-                });
-            }, 500);
-        }
+        // Show popup every time page loads
+        setTimeout(() => {
+            videoPopup.classList.add('show');
+            popupVideo.play().catch(err => {
+                console.log('Autoplay prevented:', err);
+            });
+        }, 500);
         
         // Close popup function
         function closeVideoPopup() {
             videoPopup.classList.remove('show');
             popupVideo.pause();
-            
-            // Mark as seen
-            localStorage.setItem('hasSeenWelcomeVideo', 'true');
         }
         
         // Close button click
