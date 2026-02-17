@@ -899,6 +899,31 @@
             }
         }
 
+        /* CODE COPY BUTTON - bottom right corner, icon only */
+        .code-copy-btn {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            padding: 4px 6px;
+            line-height: 1;
+            opacity: 0;
+        }
+        .code-block-container:hover .code-copy-btn {
+            opacity: 1;
+        }
+        .code-copy-btn:hover {
+            background: rgba(255, 255, 255, 0.18);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
         /* VIDEO POPUP OVERLAY */
         .video-popup-overlay {
             position: fixed;
@@ -1093,12 +1118,11 @@
                                 <span class="code-icon">⟨/⟩</span>
                                 ${langInfo.name}
                             </div>
-                            <button class="code-copy-btn" onclick="copyCodeBlock('${blockId}')">
-                                <span class="copy-icon">📋</span>
-                                <span class="copy-text">Copy</span>
-                            </button>
                         </div>
-                        <pre class="code-block"><code id="${blockId}" class="language-${lang}">${escapedCode}</code></pre>
+                        <div style="position:relative;">
+                            <pre class="code-block"><code id="${blockId}" class="language-${lang}">${escapedCode}</code></pre>
+                            <button class="code-copy-btn" onclick="copyCodeBlock('${blockId}')">📋</button>
+                        </div>
                     </div>
                 `;
             }
@@ -1132,12 +1156,14 @@
                 
                 if (copyBtn) {
                     const originalHTML = copyBtn.innerHTML;
-                    copyBtn.innerHTML = '<span class="copy-icon">✓</span><span class="copy-text">Copied!</span>';
+                    copyBtn.innerHTML = '✓';
                     copyBtn.style.background = 'var(--accent-success)';
+                    copyBtn.style.opacity = '1';
                     
                     setTimeout(() => {
                         copyBtn.innerHTML = originalHTML;
                         copyBtn.style.background = '';
+                        copyBtn.style.opacity = '';
                     }, 2000);
                 }
             }).catch(err => {
