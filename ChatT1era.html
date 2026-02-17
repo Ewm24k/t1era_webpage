@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="code-highlighter.css">
     
     <style>
         :root {
@@ -995,7 +996,112 @@
             </div>
         </div>
     </div>
+    <script>
+        /**
+         * Code Highlighter - Embedded
+         */
+        class CodeHighlighter {
+            constructor() {
+                this.languages = {
+                    'javascript': { name: 'JavaScript', color: '#f7df1e' },
+                    'python': { name: 'Python', color: '#3776ab' },
+                    'java': { name: 'Java', color: '#007396' },
+                    'cpp': { name: 'C++', color: '#00599c' },
+                    'csharp': { name: 'C#', color: '#239120' },
+                    'php': { name: 'PHP', color: '#777bb4' },
+                    'ruby': { name: 'Ruby', color: '#cc342d' },
+                    'go': { name: 'Go', color: '#00add8' },
+                    'rust': { name: 'Rust', color: '#000000' },
+                    'typescript': { name: 'TypeScript', color: '#3178c6' },
+                    'html': { name: 'HTML', color: '#e34c26' },
+                    'css': { name: 'CSS', color: '#1572b6' },
+                    'sql': { name: 'SQL', color: '#4479a1' },
+                    'bash': { name: 'Bash', color: '#4eaa25' },
+                    'shell': { name: 'Shell', color: '#4eaa25' },
+                    'json': { name: 'JSON', color: '#000000' },
+                    'xml': { name: 'XML', color: '#e34c26' },
+                    'markdown': { name: 'Markdown', color: '#000000' },
+                    'yaml': { name: 'YAML', color: '#cb171e' }
+                };
+            }
 
+            processText(text) {
+                if (!text) return '';
+                text = text.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
+                    return this.createCodeBlock(code.trim(), lang);
+                });
+                text = text.replace(/`([^`]+)`/g, (match, code) => {
+                    return this.createInlineCode(code);
+                });
+                text = text.replace(/\n/g, '<br>');
+                return text;
+            }
+
+            createCodeBlock(code, language) {
+                const lang = language ? language.toLowerCase() : 'plaintext';
+                const langInfo = this.languages[lang] || { name: 'Code', color: '#666' };
+                const escapedCode = this.escapeHtml(code);
+                const blockId = 'code-' + Math.random().toString(36).substr(2, 9);
+                
+                return `
+                    <div class="code-block-container">
+                        <div class="code-block-header">
+                            <div class="code-language" style="color: ${langInfo.color}">
+                                <span class="code-icon">⟨/⟩</span>
+                                ${langInfo.name}
+                            </div>
+                            <button class="code-copy-btn" onclick="copyCodeBlock('${blockId}')">
+                                <span class="copy-icon">📋</span>
+                                <span class="copy-text">Copy</span>
+                            </button>
+                        </div>
+                        <pre class="code-block"><code id="${blockId}" class="language-${lang}">${escapedCode}</code></pre>
+                    </div>
+                `;
+            }
+
+            createInlineCode(code) {
+                const escapedCode = this.escapeHtml(code);
+                return `<code class="inline-code">${escapedCode}</code>`;
+            }
+
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            hasCode(text) {
+                return /```[\s\S]*?```/.test(text) || /`[^`]+`/.test(text);
+            }
+        }
+
+        // Global copy function
+        function copyCodeBlock(elementId) {
+            const codeElement = document.getElementById(elementId);
+            if (!codeElement) return;
+
+            const code = codeElement.textContent;
+            
+            navigator.clipboard.writeText(code).then(() => {
+                const codeBlock = codeElement.closest('.code-block-container');
+                const copyBtn = codeBlock.querySelector('.code-copy-btn');
+                
+                if (copyBtn) {
+                    const originalHTML = copyBtn.innerHTML;
+                    copyBtn.innerHTML = '<span class="copy-icon">✓</span><span class="copy-text">Copied!</span>';
+                    copyBtn.style.background = 'var(--accent-success)';
+                    
+                    setTimeout(() => {
+                        copyBtn.innerHTML = originalHTML;
+                        copyBtn.style.background = '';
+                    }, 2000);
+                }
+            }).catch(err => {
+                console.error('Failed to copy code:', err);
+            });
+        }
+    </script>
     <script>
         const API = '/.netlify/functions/chat';
         const msgs = document.getElementById('messagesContainer');
@@ -1010,6 +1116,9 @@
         let generationStartTime = null;
         let timingInterval = null;
         let conversationHistory = JSON.parse(localStorage.getItem('conversationHistory') || '[]');
+
+        // Initialize code highlighter
+        const codeHighlighter = new CodeHighlighter();
 
         // Limit conversation history to last 10 exchanges (20 messages)
         const MAX_HISTORY = 20;
@@ -1360,25 +1469,32 @@
             const responseDiv = document.createElement('div');
             contentDiv.appendChild(responseDiv);
 
-            const cursor2 = document.createElement('span');
-            cursor2.className = 'cursor-blink';
-            responseDiv.appendChild(cursor2);
-            
-            for (let char of finalResponse) {
-                const textNode = document.createTextNode(char);
-                responseDiv.insertBefore(textNode, cursor2);
+            // Check if response has code blocks
+            if (codeHighlighter.hasCode(finalResponse)) {
+                // Process code blocks immediately (no typing effect for code)
+                responseDiv.innerHTML = codeHighlighter.processText(finalResponse);
+            } else {
+                // Normal typing animation for non-code responses
+                const cursor2 = document.createElement('span');
+                cursor2.className = 'cursor-blink';
+                responseDiv.appendChild(cursor2);
                 
-                const delay = char === ' ' ? 20 : 
-                             char === '.' || char === '!' || char === '?' ? 150 :
-                             char === ',' ? 80 : 40;
+                for (let char of finalResponse) {
+                    const textNode = document.createTextNode(char);
+                    responseDiv.insertBefore(textNode, cursor2);
+                    
+                    const delay = char === ' ' ? 20 : 
+                                 char === '.' || char === '!' || char === '?' ? 150 :
+                                 char === ',' ? 80 : 40;
+                    
+                    await sleep(delay);
+                    msgs.scrollTop = msgs.scrollHeight;
+                }
+                cursor2.remove();
                 
-                await sleep(delay);
-                msgs.scrollTop = msgs.scrollHeight;
+                // Format with line breaks
+                responseDiv.innerHTML = responseDiv.textContent.replace(/\n/g, '<br>');
             }
-            cursor2.remove();
-            
-            // Format with line breaks
-            responseDiv.innerHTML = responseDiv.textContent.replace(/\n/g, '<br>');
 
             // Add copy button
             const copyBtn = document.createElement('button');
