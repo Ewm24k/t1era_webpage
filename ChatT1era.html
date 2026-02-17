@@ -1253,13 +1253,24 @@
         // ── DETECT TOPIC CONTINUATION SIGNALS ────────────────────────────
         function isContinuationSignal(text) {
             const lower = text.toLowerCase().trim();
+
+            // Very short messages (1-2 words, under 15 chars) = always continuation
+            // e.g. "3", "yes", "ok", "no", "why", "how", "1", "option 2"
+            if (lower.length <= 15 && lower.split(' ').length <= 3) return true;
+
+            // Single number or letter = choosing from a list = continuation
+            if (/^[0-9a-z]$/i.test(lower)) return true;
+            if (/^(option\s*)?[1-9]$/.test(lower)) return true;
+
             const continuationPhrases = [
                 'explain more','tell me more','elaborate','continue','go on',
                 'what about','and also','additionally','furthermore','moreover',
                 'can you','could you','please','more detail','in detail',
                 'why is','how does','what does','give me','show me more',
                 'expand on','clarify','example','for example','such as',
-                'related to','about that','on that','same topic','previous'
+                'related to','about that','on that','same topic','previous',
+                'yes','no','ok','okay','sure','correct','right','wrong',
+                'that one','this one','first','second','third','last'
             ];
             return continuationPhrases.some(p => lower.includes(p));
         }
