@@ -1573,39 +1573,33 @@
             const responseDiv = document.createElement('div');
             contentDiv.appendChild(responseDiv);
 
-            // ✅ CHANGE 3: T1ERARenderer.processText() now handles ALL markdown + code
-            // Always use processText for rich formatting — no plain typewriter for markdown content
-            if (codeHighlighter.hasCode(finalResponse)) {
-                // Has code blocks — render immediately with full markdown
+            // Detect if response needs rich rendering (code blocks OR any markdown)
+            const hasCode = codeHighlighter.hasCode(finalResponse);
+            const hasMarkdown = /\*\*|^#{1,3}\s|^[-*•]\s|\d+[.)]\s|^>\s|\bProblem:|\bAttention:|\bSolution:|\bBefore:|\bAfter:|\bInterest:|\bDesire:|\bAction:/m.test(finalResponse);
+
+            if (hasCode || hasMarkdown) {
+                // Rich content — render immediately with full markdown + code formatting
                 responseDiv.innerHTML = codeHighlighter.processText(finalResponse);
             } else {
-                // No code blocks — check if response has markdown formatting
-                const hasMarkdown = /\*\*|^#{1,3}\s|^[-*]\s|^>\s|\bProblem:|Attention:|Solution:|Before:|After:/m.test(finalResponse);
+                // Truly plain text — use typewriter animation
+                const cursor2 = document.createElement('span');
+                cursor2.className = 'cursor-blink';
+                responseDiv.appendChild(cursor2);
                 
-                if (hasMarkdown) {
-                    // Has markdown — render immediately with full formatting
-                    responseDiv.innerHTML = codeHighlighter.processText(finalResponse);
-                } else {
-                    // Plain text — use typewriter animation
-                    const cursor2 = document.createElement('span');
-                    cursor2.className = 'cursor-blink';
-                    responseDiv.appendChild(cursor2);
+                for (let char of finalResponse) {
+                    const textNode = document.createTextNode(char);
+                    responseDiv.insertBefore(textNode, cursor2);
                     
-                    for (let char of finalResponse) {
-                        const textNode = document.createTextNode(char);
-                        responseDiv.insertBefore(textNode, cursor2);
-                        
-                        const delay = char === ' ' ? 20 : 
-                                     char === '.' || char === '!' || char === '?' ? 150 :
-                                     char === ',' ? 80 : 40;
-                        
-                        await sleep(delay);
-                        msgs.scrollTop = msgs.scrollHeight;
-                    }
-                    cursor2.remove();
+                    const delay = char === ' ' ? 20 : 
+                                 char === '.' || char === '!' || char === '?' ? 150 :
+                                 char === ',' ? 80 : 40;
                     
-                    responseDiv.innerHTML = responseDiv.textContent.replace(/\n/g, '<br>');
+                    await sleep(delay);
+                    msgs.scrollTop = msgs.scrollHeight;
                 }
+                cursor2.remove();
+                
+                responseDiv.innerHTML = responseDiv.textContent.replace(/\n/g, '<br>');
             }
 
             const copyBtn = document.createElement('button');
