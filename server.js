@@ -24,39 +24,27 @@ app.post('/api/chat-stream', async (req, res) => {
             return res.status(400).json({ error: true, message: 'Message is required' });
         }
 
-        // Strip conversation history — extract ONLY the final user message
+        // Extract ONLY the final user question for model routing
+        // Context format is now: "...\nCurrent question: XYZ\nAnswer:"
         let cleanMessage = message;
-        if (message.includes('Previous conversation') || message.includes('User:')) {
-            // Find the LAST "User:" occurrence before final "Assistant:"
-            // Handles both single and multi-line user messages
+
+        // New context format: extract "Current question: ..."
+        const currentQMatch = message.match(/Current question:\s*([^\n]+)/);
+        if (currentQMatch) {
+            cleanMessage = currentQMatch[1].trim();
+        } else if (message.includes('User:') || message.includes('Previous conversation')) {
+            // Fallback: find last User: line
             const lines = message.split('\n');
-            let lastUserLines = [];
-            let collecting = false;
-
-            for (let i = 0; i < lines.length; i++) {
-                const line = lines[i];
-                if (line.startsWith('User:')) {
-                    lastUserLines = [line.replace(/^User:\s*/, '').trim()];
-                    collecting = true;
-                } else if (line.startsWith('Assistant:') && collecting) {
-                    // Stop at next Assistant marker
-                    if (i === lines.length - 1 || lines.slice(i+1).every(l => l.trim() === '')) {
-                        // This is the final Assistant: marker — we have our message
-                        break;
-                    }
-                    collecting = false;
-                    lastUserLines = [];
-                } else if (collecting && line.trim() !== '') {
-                    lastUserLines.push(line.trim());
+            for (let i = lines.length - 1; i >= 0; i--) {
+                const line = lines[i].trim();
+                if (line.startsWith('User:') && line.length > 5) {
+                    cleanMessage = line.replace(/^User:\s*/, '').trim();
+                    break;
                 }
-            }
-
-            if (lastUserLines.length > 0) {
-                cleanMessage = lastUserLines.join(' ').trim();
             }
         }
 
-        console.log('[CLEAN MESSAGE]', cleanMessage.substring(0, 120));
+        console.log('[CLEAN MESSAGE FOR ROUTING]', cleanMessage.substring(0, 120));
 
         // Smart model routing
         const codingKeywords = [
@@ -78,6 +66,7 @@ app.post('/api/chat-stream', async (req, res) => {
             'calculator', 'compute', 'math', 'calculate'
         ];
 
+        // IMPORTANT: Use cleanMessage only for routing — NOT full message which contains history
         const isCodingQuery = codingKeywords.some(k => cleanMessage.toLowerCase().includes(k));
         const modelName = isCodingQuery ? 't1era-coder' : 't1era';
 
