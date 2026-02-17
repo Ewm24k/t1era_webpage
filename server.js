@@ -88,7 +88,7 @@ app.post('/api/chat-stream', async (req, res) => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 model: modelName,
-                prompt: cleanMessage,
+                prompt: message, // Send full context to Ollama, cleanMessage only used for model routing
                 stream: true,
                 options: {
                     temperature: 0.7,
