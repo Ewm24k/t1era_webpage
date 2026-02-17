@@ -84,7 +84,7 @@ app.post('/api/chat-stream', async (req, res) => {
                     top_p: 0.9,
                     top_k: 40,
                     num_predict: isCodingQuery ? 4096 : 2048,
-                    num_ctx: 4096,
+                    num_ctx: 16384,
                     repeat_penalty: 1.1
                 }
             })
