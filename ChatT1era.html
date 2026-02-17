@@ -290,16 +290,21 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 16px;
+            font-size: 10px;
+            font-weight: 700;
             flex-shrink: 0;
+            font-family: 'Space Grotesk', sans-serif;
+            letter-spacing: -0.5px;
         }
 
         .message-wrapper.user .message-avatar {
             background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+            color: white;
         }
 
         .message-wrapper.ai .message-avatar {
             background: linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(167, 139, 250, 0.2));
+            color: var(--accent-secondary);
         }
 
         .message-sender {
@@ -331,20 +336,22 @@
 
         .message-content {
             padding-top: 4px;
+            padding-bottom: 24px;
+            position: relative;
         }
 
         .copy-button {
             position: absolute;
-            top: 12px;
-            right: 12px;
-            padding: 6px 8px;
+            bottom: 8px;
+            right: 8px;
+            padding: 4px 8px;
             background: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 6px;
             cursor: pointer;
             opacity: 0;
             transition: all 0.2s;
-            font-size: 11px;
+            font-size: 10px;
             color: var(--text-secondary);
             display: flex;
             align-items: center;
@@ -361,7 +368,7 @@
         /* Always show copy button on mobile */
         @media (max-width: 768px) {
             .copy-button {
-                opacity: 1;
+                opacity: 0.7;
                 background: rgba(255, 255, 255, 0.15);
             }
         }
@@ -522,9 +529,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 40px;
+            font-size: 32px;
+            font-weight: 800;
+            font-family: 'Space Grotesk', sans-serif;
             margin-bottom: 24px;
             box-shadow: 0 0 40px var(--glow-primary);
+            color: white;
         }
 
         .welcome-title {
@@ -783,26 +793,26 @@
                 </a>
                 <div class="header-controls">
                     <div class="reasoning-toggle" id="reasoningToggle">
-                        <span>🧠 Show Thinking</span>
+                        <span>Show Thinking</span>
                         <div class="toggle-switch"></div>
                     </div>
-                    <button class="btn" id="clearChat">🗑️</button>
-                    <a href="index.html" class="btn">← Home</a>
+                    <button class="btn" id="clearChat">Clear</button>
+                    <a href="index.html" class="btn">Home</a>
                 </div>
             </div>
         </div>
 
         <div class="messages-container" id="messagesContainer">
             <div class="welcome-screen" id="welcomeScreen">
-                <div class="welcome-icon">🤖</div>
+                <div class="welcome-icon">T1</div>
                 <h1 class="welcome-title">Welcome to T1ERA Chat</h1>
                 <p class="welcome-subtitle">
                     Powered by T1ERA Custom Model on Azure A10 GPU
                 </p>
                 <div class="suggestion-chips">
-                    <div class="chip" data-prompt="Explain quantum computing in simple terms">⚛️ Quantum Computing</div>
-                    <div class="chip" data-prompt="Write a creative story about AI and humanity">✍️ Creative Story</div>
-                    <div class="chip" data-prompt="Help me create a marketing strategy">📊 Marketing Strategy</div>
+                    <div class="chip" data-prompt="Explain quantum computing in simple terms">Quantum Computing</div>
+                    <div class="chip" data-prompt="Write a creative story about AI and humanity">Creative Story</div>
+                    <div class="chip" data-prompt="Help me create a marketing strategy">Marketing Strategy</div>
                 </div>
             </div>
         </div>
@@ -828,9 +838,48 @@
         let showThinking = localStorage.getItem('showThinking') === 'true';
         let generationStartTime = null;
         let timingInterval = null;
+        let conversationHistory = JSON.parse(localStorage.getItem('conversationHistory') || '[]');
+
+        // Limit conversation history to last 10 exchanges (20 messages)
+        const MAX_HISTORY = 20;
 
         if (showThinking) {
             reasoningToggle.classList.add('active');
+        }
+
+        // Save conversation to localStorage
+        function saveConversation() {
+            // Keep only the last MAX_HISTORY messages
+            if (conversationHistory.length > MAX_HISTORY) {
+                conversationHistory = conversationHistory.slice(-MAX_HISTORY);
+            }
+            localStorage.setItem('conversationHistory', JSON.stringify(conversationHistory));
+        }
+
+        // Add message to conversation history
+        function addToHistory(role, content) {
+            conversationHistory.push({
+                role: role,
+                content: content,
+                timestamp: Date.now()
+            });
+            saveConversation();
+        }
+
+        // Build context for API call
+        function buildContext(userMessage) {
+            let context = '';
+            
+            if (conversationHistory.length > 0) {
+                context = 'Previous conversation:\n';
+                conversationHistory.slice(-10).forEach(msg => {
+                    const role = msg.role === 'user' ? 'User' : 'Assistant';
+                    context += `${role}: ${msg.content}\n`;
+                });
+                context += `\nUser: ${userMessage}\nAssistant:`;
+            }
+            
+            return context;
         }
 
         // Mobile keyboard handling
@@ -894,10 +943,14 @@
         });
 
         clearChatBtn.addEventListener('click', () => {
-            if (confirm('Clear all messages?')) {
+            if (confirm('Clear all messages and conversation history?')) {
                 const groups = msgs.querySelectorAll('.message-group');
                 groups.forEach(g => g.remove());
                 welcome.style.display = 'flex';
+                
+                // Clear conversation history
+                conversationHistory = [];
+                localStorage.removeItem('conversationHistory');
             }
         });
 
@@ -907,6 +960,9 @@
 
             welcome.style.display = 'none';
             const userGroup = addUserMessage(msg);
+
+            // Add user message to history
+            addToHistory('user', msg);
 
             input.value = '';
             input.style.height = 'auto';
@@ -918,11 +974,15 @@
             const generatingIndicator = addGeneratingIndicator(userGroup);
 
             try {
+                // Build context from conversation history
+                const contextPrompt = buildContext(msg);
+                const messageToSend = contextPrompt || msg;
+
                 const res = await fetch(API, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
-                        message: msg,
+                        message: messageToSend,
                         enableReasoning: showThinking 
                     })
                 });
@@ -941,6 +1001,9 @@
                 
                 // Calculate generation time
                 const generationTime = ((Date.now() - generationStartTime) / 1000).toFixed(2);
+                
+                // Add AI response to history
+                addToHistory('assistant', data.response);
                 
                 await streamResponse(data.response, data.thinking, data.hasThinking, generationTime);
 
@@ -980,7 +1043,7 @@
                 <div class="message-bubble">
                     <div class="message-header">
                         <div class="message-header-left">
-                            <div class="message-avatar">👤</div>
+                            <div class="message-avatar">U</div>
                             <div class="message-sender">You</div>
                         </div>
                         <div class="message-time">${time}</div>
@@ -989,7 +1052,7 @@
                         ${content.replace(/\n/g, '<br>')}
                     </div>
                     <button class="copy-button" onclick="copyToClipboard(this, \`${content.replace(/`/g, '\\`')}\`)">
-                        📋 Copy
+                        Copy
                     </button>
                 </div>
             `;
@@ -1047,7 +1110,7 @@
             const headerHTML = `
                 <div class="message-header">
                     <div class="message-header-left">
-                        <div class="message-avatar">🤖</div>
+                        <div class="message-avatar">AI</div>
                         <div class="message-sender">T1ERA AI</div>
                     </div>
                     <div class="message-time">${time}</div>
@@ -1078,7 +1141,7 @@
             // Add copy button
             const copyBtn = document.createElement('button');
             copyBtn.className = 'copy-button';
-            copyBtn.innerHTML = '📋 Copy';
+            copyBtn.innerHTML = 'Copy';
             copyBtn.onclick = () => copyToClipboard(copyBtn, finalResponse);
             bubbleDiv.appendChild(copyBtn);
 
@@ -1097,7 +1160,6 @@
             dropdown.innerHTML = `
                 <div class="thinking-header">
                     <div class="thinking-title">
-                        <span>🧠</span>
                         <span>Thinking Process</span>
                     </div>
                     <div class="thinking-chevron">▼</div>
@@ -1154,7 +1216,7 @@
                 <div class="message-bubble">
                     <div class="message-header">
                         <div class="message-header-left">
-                            <div class="message-avatar">🤖</div>
+                            <div class="message-avatar">AI</div>
                             <div class="message-sender">T1ERA AI</div>
                         </div>
                         <div class="message-time">${time}</div>
@@ -1163,7 +1225,7 @@
                         ${content}
                     </div>
                     <button class="copy-button" onclick="copyToClipboard(this, \`${content.replace(/`/g, '\\`')}\`)">
-                        📋 Copy
+                        Copy
                     </button>
                 </div>
             `;
@@ -1179,7 +1241,7 @@
             
             navigator.clipboard.writeText(plainText).then(() => {
                 const originalHTML = btn.innerHTML;
-                btn.innerHTML = '✓ Copied!';
+                btn.innerHTML = 'Copied!';
                 btn.classList.add('copied');
                 
                 setTimeout(() => {
@@ -1188,9 +1250,9 @@
                 }, 2000);
             }).catch(err => {
                 console.error('Failed to copy:', err);
-                btn.innerHTML = '✗ Failed';
+                btn.innerHTML = 'Failed';
                 setTimeout(() => {
-                    btn.innerHTML = '📋 Copy';
+                    btn.innerHTML = 'Copy';
                 }, 2000);
             });
         }
