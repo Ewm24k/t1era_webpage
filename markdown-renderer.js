@@ -53,11 +53,12 @@ class T1ERARenderer {
 
     _render(text) {
         // 1. Protect fenced code blocks from inline processing
+        // Handles: ```python\n code ``` or ```\n code ``` or ``` code ```
         const codeBlocks = [];
-        text = text.replace(/```(\w+)?\n?([\s\S]*?)```/g, (_, lang, code) => {
+        text = text.replace(/```(\w*)\n?([\s\S]*?)```/g, (_, lang, code) => {
             const idx = codeBlocks.length;
-            codeBlocks.push({ lang: lang || '', code: code.trim() });
-            return `\x00CODE${idx}\x00`;
+            codeBlocks.push({ lang: lang.trim() || '', code: code.trim() });
+            return `\n\x00CODE${idx}\x00\n`;
         });
 
         // 2. Split into lines for block-level processing
