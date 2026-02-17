@@ -1,0 +1,229 @@
+/* ─── T1ERA Markdown Renderer Styles ───────────────────────────────────────── */
+/* Add this inside your existing <style> block or as a linked stylesheet        */
+
+/* Base spacing reset inside message content */
+.message-content .md-p,
+.message-content .md-h1,
+.message-content .md-h2,
+.message-content .md-h3,
+.message-content .md-ul,
+.message-content .md-ol,
+.message-content .md-blockquote,
+.message-content .md-copy-row,
+.message-content .md-framework-label,
+.message-content .md-bold-label {
+    margin: 0;
+    padding: 0;
+}
+
+/* Spacer between blocks */
+.message-content .md-spacer {
+    height: 10px;
+}
+
+/* ── HEADINGS ────────────────────────────────────────────────────────────────── */
+.message-content .md-h1 {
+    font-size: 17px;
+    font-weight: 800;
+    font-family: 'Space Grotesk', sans-serif;
+    color: #fff;
+    margin-bottom: 4px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(139, 92, 246, 0.3);
+}
+
+.message-content .md-h2 {
+    font-size: 15px;
+    font-weight: 700;
+    font-family: 'Space Grotesk', sans-serif;
+    color: rgba(255,255,255,0.95);
+    margin-bottom: 2px;
+}
+
+.message-content .md-h3 {
+    font-size: 13px;
+    font-weight: 700;
+    font-family: 'Space Grotesk', sans-serif;
+    color: var(--accent-secondary, #8b5cf6);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 2px;
+}
+
+/* ── PARAGRAPH ──────────────────────────────────────────────────────────────── */
+.message-content .md-p {
+    font-size: 14px;
+    line-height: 1.65;
+    color: rgba(255,255,255,0.88);
+}
+
+/* ── FRAMEWORK LABEL  e.g. "PAS Version" ───────────────────────────────────── */
+.message-content .md-framework-label {
+    display: inline-block;
+    margin: 8px 0 6px 0;
+    padding: 4px 12px;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(167, 139, 250, 0.15));
+    border: 1px solid rgba(139, 92, 246, 0.45);
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: 'Space Grotesk', sans-serif;
+    color: #a78bfa;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+/* ── BOLD LABEL  (non-framework **…**:) ─────────────────────────────────────── */
+.message-content .md-bold-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.9);
+    margin: 8px 0 4px 0;
+}
+
+/* ── COPY-FRAMEWORK ROW  "Problem: …" ──────────────────────────────────────── */
+.message-content .md-copy-row {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding: 8px 12px;
+    margin: 4px 0;
+    background: rgba(139, 92, 246, 0.07);
+    border-left: 3px solid rgba(139, 92, 246, 0.5);
+    border-radius: 0 8px 8px 0;
+}
+
+.message-content .md-copy-key {
+    min-width: 90px;
+    flex-shrink: 0;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: 'Space Grotesk', sans-serif;
+    color: var(--accent-secondary, #8b5cf6);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.message-content .md-copy-val {
+    font-size: 13px;
+    line-height: 1.55;
+    color: rgba(255,255,255,0.85);
+}
+
+/* ── LISTS ───────────────────────────────────────────────────────────────────── */
+.message-content .md-ul,
+.message-content .md-ol {
+    padding-left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.message-content .md-ul li,
+.message-content .md-ol li {
+    font-size: 14px;
+    line-height: 1.6;
+    color: rgba(255,255,255,0.85);
+}
+
+.message-content .md-ul li::marker {
+    color: var(--accent-secondary, #8b5cf6);
+}
+
+.message-content .md-ol li::marker {
+    color: var(--accent-primary, #667eea);
+    font-weight: 700;
+    font-family: 'Space Grotesk', sans-serif;
+}
+
+/* ── BLOCKQUOTE ──────────────────────────────────────────────────────────────── */
+.message-content .md-blockquote {
+    margin: 6px 0;
+    padding: 10px 14px;
+    background: rgba(102, 126, 234, 0.08);
+    border-left: 3px solid var(--accent-primary, #667eea);
+    border-radius: 0 8px 8px 0;
+    font-size: 13px;
+    font-style: italic;
+    color: rgba(255,255,255,0.75);
+}
+
+/* ── HORIZONTAL RULE ─────────────────────────────────────────────────────────── */
+.message-content .md-hr {
+    border: none;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    margin: 12px 0;
+}
+
+/* ── INLINE ELEMENTS ─────────────────────────────────────────────────────────── */
+.message-content strong {
+    font-weight: 700;
+    color: #fff;
+}
+
+.message-content em {
+    font-style: italic;
+    color: rgba(255,255,255,0.85);
+}
+
+.message-content del {
+    opacity: 0.5;
+    text-decoration: line-through;
+}
+
+.message-content .md-link {
+    color: var(--accent-primary, #667eea);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.message-content .md-link:hover {
+    color: #a78bfa;
+}
+
+.message-content .md-emdash {
+    color: rgba(255,255,255,0.5);
+}
+
+.message-content .md-arrow {
+    color: var(--accent-secondary, #8b5cf6);
+    font-weight: 700;
+}
+
+/* ── INLINE CODE ─────────────────────────────────────────────────────────────── */
+.message-content .inline-code {
+    padding: 2px 6px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 5px;
+    font-family: 'Fira Code', 'Cascadia Code', monospace;
+    font-size: 12px;
+    color: #e2e8f0;
+}
+
+/* ── MOBILE ADJUSTMENTS ──────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    .message-content .md-p,
+    .message-content .md-ul li,
+    .message-content .md-ol li,
+    .message-content .md-copy-val {
+        font-size: 13px;
+    }
+
+    .message-content .md-copy-row {
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .message-content .md-copy-key {
+        min-width: unset;
+    }
+
+    .message-content .md-framework-label {
+        font-size: 10px;
+    }
+
+    .message-content .md-h1 { font-size: 15px; }
+    .message-content .md-h2 { font-size: 14px; }
+    .message-content .md-h3 { font-size: 12px; }
+}
