@@ -1414,13 +1414,20 @@
 
             if (sameTopic.length === 0) return userMessage;
 
-            // Build context in a clear format the AI will recognize as real memory
-            let context = `[CONVERSATION HISTORY - You DO have access to this history, use it to answer]\n`;
-            sameTopic.slice(-4).forEach(msg => {
+            // Build context with numbered turns so AI knows exact order
+            const contextMessages = sameTopic.slice(-6);
+            let context = `[CONVERSATION HISTORY]\n`;
+            context += `Note: Messages are ordered oldest to newest. The user may refer to earlier messages in their current question.\n\n`;
+
+            contextMessages.forEach((msg, idx) => {
                 const role = msg.role === 'user' ? 'User' : 'Assistant';
-                context += `${role}: ${msg.content}\n`;
+                const turnNum = idx + 1;
+                context += `[Turn ${turnNum}] ${role}: ${msg.content}\n`;
             });
-            context += `\n[END OF HISTORY]\n\nUser: ${userMessage}\nAssistant:`;
+
+            context += `\n[END OF HISTORY]\n`;
+            context += `\nThe user's CURRENT question refers to the above history. Answer based on the history provided.\n`;
+            context += `\nUser: ${userMessage}\nAssistant:`;
 
             console.log(`[CONTEXT] Same topic (${topicAnalysis.currentCategory}) — including ${sameTopic.slice(-4).length} messages`);
             return context;
