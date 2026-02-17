@@ -24,21 +24,39 @@ app.post('/api/chat-stream', async (req, res) => {
             return res.status(400).json({ error: true, message: 'Message is required' });
         }
 
-        // Strip conversation history — only send last user message
+        // Strip conversation history — extract ONLY the final user message
         let cleanMessage = message;
-        if (message.includes('Previous conversation:')) {
-            const lastUserMatch = message.match(/User:\s*([^\n]+)\s*\nAssistant:\s*$/);
-            if (lastUserMatch) {
-                cleanMessage = lastUserMatch[1].trim();
-            } else {
-                const parts = message.split('User:');
-                const lastPart = parts[parts.length - 1];
-                const assistantIdx = lastPart.indexOf('\nAssistant:');
-                cleanMessage = assistantIdx !== -1
-                    ? lastPart.substring(0, assistantIdx).trim()
-                    : lastPart.trim();
+        if (message.includes('Previous conversation') || message.includes('User:')) {
+            // Find the LAST "User:" occurrence before final "Assistant:"
+            // Handles both single and multi-line user messages
+            const lines = message.split('\n');
+            let lastUserLines = [];
+            let collecting = false;
+
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                if (line.startsWith('User:')) {
+                    lastUserLines = [line.replace(/^User:\s*/, '').trim()];
+                    collecting = true;
+                } else if (line.startsWith('Assistant:') && collecting) {
+                    // Stop at next Assistant marker
+                    if (i === lines.length - 1 || lines.slice(i+1).every(l => l.trim() === '')) {
+                        // This is the final Assistant: marker — we have our message
+                        break;
+                    }
+                    collecting = false;
+                    lastUserLines = [];
+                } else if (collecting && line.trim() !== '') {
+                    lastUserLines.push(line.trim());
+                }
+            }
+
+            if (lastUserLines.length > 0) {
+                cleanMessage = lastUserLines.join(' ').trim();
             }
         }
+
+        console.log('[CLEAN MESSAGE]', cleanMessage.substring(0, 120));
 
         // Smart model routing
         const codingKeywords = [
