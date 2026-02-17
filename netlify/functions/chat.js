@@ -34,6 +34,36 @@ exports.handler = async (event, context) => {
             };
         }
 
+        // ========================================
+        // NEW FEATURE: SMART MODEL ROUTING
+        // ========================================
+        const codingKeywords = [
+            'code', 'function', 'class', 'debug', 'error', 'bug',
+            'python', 'javascript', 'java', 'cpp', 'c++', 'html', 'css',
+            'react', 'node', 'typescript', 'sql', 'database',
+            'algorithm', 'program', 'script', 'api', 'framework',
+            'library', 'syntax', 'compile', 'runtime', 'variable',
+            'loop', 'array', 'object', 'async', 'promise', 'callback',
+            'write', 'create', 'build', 'develop', 'implement',
+            'fix', 'solve', 'optimize', 'refactor', 'test',
+            'method', 'constructor', 'inheritance', 'interface',
+            'component', 'module', 'package', 'import', 'export',
+            'fetch', 'axios', 'request', 'response', 'endpoint',
+            'query', 'mutation', 'schema', 'model', 'controller',
+            'route', 'middleware', 'auth', 'token', 'session',
+            'docker', 'container', 'deploy', 'build', 'webpack',
+            'npm', 'yarn', 'pip', 'install', 'dependency'
+        ];
+
+        const lowerMessage = message.toLowerCase();
+        const isCodingQuery = codingKeywords.some(keyword => lowerMessage.includes(keyword));
+
+        // Choose model based on query type
+        const modelName = isCodingQuery ? 't1era-coder' : 't1era';
+        
+        console.log(`[SMART ROUTING] Using model: ${modelName} for query: "${message.substring(0, 60)}..."`);
+        console.log(`[SMART ROUTING] Coding query detected: ${isCodingQuery}`);
+
         // Retry logic for handling timeouts
         let attempts = 0;
         const maxAttempts = 2;
@@ -43,22 +73,22 @@ exports.handler = async (event, context) => {
             attempts++;
             
             try {
-                // Call Azure VM Ollama with your custom t1era model
+                // Call Azure VM Ollama with dynamically selected model
                 const ollamaResponse = await fetch('http://70.153.112.17:11434/api/generate', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        model: 't1era',
+                        model: modelName,  // ← UPDATED: Dynamic model selection
                         prompt: message,
-                        stream: true,  // ✅ CHANGED: Enable streaming
+                        stream: true,
                         options: {
                             temperature: 0.7,
                             top_p: 0.9,
                             top_k: 40,
-                            num_predict: 2048  // Limit tokens to prevent timeout
+                            num_predict: isCodingQuery ? 4096 : 2048  // ← NEW: More tokens for coding
                         }
                     }),
-                    timeout: 120000 // Increased to 120 seconds (2 minutes)
+                    timeout: 120000
                 });
 
                 if (!ollamaResponse.ok) {
@@ -67,7 +97,7 @@ exports.handler = async (event, context) => {
                     throw new Error(`Ollama API error (${ollamaResponse.status}): ${errorText.substring(0, 200)}`);
                 }
 
-                // ✅ CHANGED: Handle streaming response
+                // Handle streaming response
                 let fullResponse = '';
                 let buffer = '';
 
@@ -151,7 +181,7 @@ exports.handler = async (event, context) => {
                     console.log('Searched patterns: Thinking... / ...done thinking.');
                 }
 
-                // ✅ ADDED: Return fullText for frontend streaming simulation
+                // Return response with model info
                 return {
                     statusCode: 200,
                     headers,
@@ -159,8 +189,9 @@ exports.handler = async (event, context) => {
                         error: false,
                         response: finalResponse,
                         thinking: thinking,
-                        fullText: fullResponse,  // ✅ ADDED: Full text for live streaming
-                        model: 't1era',
+                        fullText: fullResponse,
+                        model: modelName,  // ← NEW: Return which model was used
+                        isCodingQuery: isCodingQuery,  // ← NEW: Return query type
                         hasThinking: thinking !== null,
                         // Debug info
                         debug: {
@@ -168,7 +199,9 @@ exports.handler = async (event, context) => {
                             rawResponsePreview: fullResponse.substring(0, 300),
                             thinkingFound: thinking !== null,
                             thinkingLength: thinking ? thinking.length : 0,
-                            patterns_tested: 4
+                            patterns_tested: 4,
+                            modelUsed: modelName,  // ← NEW: Model info in debug
+                            codingDetected: isCodingQuery  // ← NEW: Detection info in debug
                         }
                     })
                 };
