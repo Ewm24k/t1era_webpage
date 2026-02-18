@@ -1,0 +1,725 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#000000" />
+  <title>T1ERA — Sign In</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700;800&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:       #000000;
+      --bg2:      #0a0a0a;
+      --bgcard:   #111111;
+      --bginp:    #0d0d0d;
+      --bdr:      rgba(255,255,255,0.09);
+      --bdrf:     rgba(59,130,246,0.55);
+      --bdrok:    rgba(16,185,129,0.55);
+      --bdrerr:   rgba(239,68,68,0.55);
+      --txt:      #ffffff;
+      --txt2:     rgba(255,255,255,0.6);
+      --txt3:     rgba(255,255,255,0.32);
+      --blue:     #3b82f6;
+      --purple:   #8b5cf6;
+      --cyan:     #06b6d4;
+      --green:    #10b981;
+      --red:      #ef4444;
+      --amber:    #f59e0b;
+      --glow:     rgba(59,130,246,0.22);
+      --ease:     cubic-bezier(0.4,0,0.2,1);
+    }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+    html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+
+    /* BG */
+    .bgf{position:fixed;inset:0;z-index:0;pointer-events:none;}
+    .bggrid{background-image:linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px);background-size:60px 60px;}
+    .bgglow{background:radial-gradient(ellipse at 15% 15%,rgba(59,130,246,.11),transparent 55%),radial-gradient(ellipse at 85% 85%,rgba(139,92,246,.09),transparent 55%);}
+
+    /* PARTICLES */
+    .ptw{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;}
+    .pt{position:absolute;width:2px;height:2px;background:rgba(59,130,246,.5);border-radius:50%;box-shadow:0 0 6px rgba(59,130,246,.7);animation:ptf 10s infinite ease-in-out;}
+    @keyframes ptf{0%,100%{opacity:0;transform:translate(0,0) scale(1)}10%{opacity:1}90%{opacity:1}100%{opacity:0;transform:translate(var(--tx),var(--ty)) scale(0)}}
+
+    /* LAYOUT */
+    .page{position:relative;z-index:1;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 16px;}
+    .card{width:100%;max-width:460px;background:var(--bgcard);border:1px solid var(--bdr);border-radius:24px;padding:40px 36px;box-shadow:0 0 0 1px rgba(59,130,246,.05),0 24px 60px rgba(0,0,0,.75),0 0 70px rgba(59,130,246,.07);animation:cardIn .5s var(--ease) both;}
+    @keyframes cardIn{from{opacity:0;transform:translateY(22px) scale(.97)}to{opacity:1;transform:none}}
+
+    /* LOGO */
+    .logorow{display:flex;align-items:center;gap:12px;justify-content:center;margin-bottom:28px;text-decoration:none;}
+    .logomark{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-weight:900;font-size:15px;box-shadow:0 0 24px var(--glow);position:relative;overflow:hidden;}
+    .logomark::before{content:'';position:absolute;inset:-50%;background:linear-gradient(45deg,transparent,rgba(255,255,255,.25),transparent);animation:shine 3s linear infinite;}
+    @keyframes shine{from{transform:translateX(-100%) translateY(-100%) rotate(45deg)}to{transform:translateX(200%) translateY(200%) rotate(45deg)}}
+    .logotxt{font-family:'Orbitron',sans-serif;font-weight:900;font-size:22px;letter-spacing:.08em;background:linear-gradient(135deg,var(--blue),var(--purple),var(--cyan));background-size:200% 200%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:gs 4s ease infinite;}
+    @keyframes gs{0%,100%{background-position:0 50%}50%{background-position:100% 50%}}
+
+    /* HEADING */
+    .hdg{text-align:center;margin-bottom:26px;}
+    .hdg h1{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:800;margin-bottom:5px;}
+    .hdg p{font-size:13px;color:var(--txt2);}
+
+    /* TABS */
+    .tabs{display:flex;background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:4px;margin-bottom:24px;gap:4px;}
+    .tab{flex:1;padding:10px;border-radius:9px;border:none;background:transparent;color:var(--txt2);font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .25s var(--ease);}
+    .tab.on{background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;box-shadow:0 4px 16px var(--glow);}
+
+    /* PANELS */
+    .panel{display:none;}
+    .panel.on{display:block;animation:fin .3s var(--ease);}
+    @keyframes fin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+    /* ALERTS */
+    .alert{display:none;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:10px;font-size:13px;font-weight:500;line-height:1.5;margin-bottom:14px;}
+    .alert.on{display:flex;animation:fin .25s var(--ease);}
+    .alert.err{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#fca5a5;}
+    .alert.ok{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);color:#6ee7b7;}
+    .alert.warn{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);color:#fcd34d;}
+    .aico{font-size:16px;flex-shrink:0;margin-top:1px;}
+
+    /* LOCKOUT */
+    .lockbar{display:none;padding:12px 14px;border-radius:10px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.35);color:#fca5a5;font-size:13px;font-weight:600;text-align:center;margin-bottom:14px;}
+    .lockbar.on{display:block;animation:fin .25s var(--ease);}
+
+    /* ATTEMPT DOTS */
+    .dots{display:none;align-items:center;gap:6px;margin-top:8px;justify-content:center;}
+    .dot{width:8px;height:8px;border-radius:50%;background:var(--bdr);border:1px solid rgba(255,255,255,.1);transition:background .3s;}
+    .dot.bad{background:var(--red);}
+
+    /* FIELD */
+    .field{margin-bottom:13px;}
+    .flbl{display:flex;align-items:center;justify-content:space-between;font-size:12px;font-weight:600;color:var(--txt2);margin-bottom:7px;letter-spacing:.02em;}
+    .fst{font-size:11px;}
+    .fst.ok{color:var(--green);}
+    .fst.err{color:var(--red);}
+
+    .inpw{position:relative;}
+    .iico{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:15px;pointer-events:none;opacity:.45;transition:opacity .2s;}
+    .inpw:focus-within .iico{opacity:.7;}
+    input{width:100%;padding:12px 40px 12px 40px;background:var(--bginp);border:1.5px solid var(--bdr);border-radius:10px;color:var(--txt);font-size:14px;font-family:'Inter',sans-serif;outline:none;transition:border-color .2s,box-shadow .2s;}
+    input::placeholder{color:var(--txt3);}
+    input:focus{border-color:var(--bdrf);box-shadow:0 0 0 3px rgba(59,130,246,.1);}
+    input.vld{border-color:var(--bdrok);box-shadow:0 0 0 3px rgba(16,185,129,.08);}
+    input.inv{border-color:var(--bdrerr);box-shadow:0 0 0 3px rgba(239,68,68,.08);}
+    .iend{position:absolute;right:10px;top:50%;transform:translateY(-50%);display:flex;align-items:center;gap:4px;}
+    .eye{background:none;border:none;cursor:pointer;font-size:15px;padding:4px;color:var(--txt3);transition:color .2s;}
+    .eye:hover{color:var(--txt);}
+    .ichk{font-size:15px;}
+
+    /* PASSWORD RULES */
+    .pwrules{background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;padding:12px 14px;margin-top:8px;display:none;}
+    .pwrules.on{display:block;animation:fin .2s var(--ease);}
+    .rule{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--txt3);padding:3px 0;transition:color .2s;}
+    .rule.met{color:var(--green);}
+    .rdot{width:6px;height:6px;border-radius:50%;flex-shrink:0;background:var(--txt3);transition:background .2s,box-shadow .2s;}
+    .rule.met .rdot{background:var(--green);box-shadow:0 0 6px var(--green);}
+
+    /* STRENGTH */
+    .srow{display:flex;align-items:center;gap:8px;margin-top:7px;}
+    .strk{flex:1;height:4px;border-radius:4px;background:var(--bdr);overflow:hidden;}
+    .sfill{height:100%;border-radius:4px;width:0%;transition:width .35s var(--ease),background .35s;}
+    .sword{font-size:11px;font-weight:700;min-width:44px;text-align:right;}
+
+    /* SUBMIT BTN */
+    .bsub{width:100%;padding:14px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all .3s var(--ease);box-shadow:0 4px 20px var(--glow);display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;position:relative;overflow:hidden;}
+    .bsub::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.15),transparent);}
+    .bsub:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 28px rgba(59,130,246,.42);}
+    .bsub:active:not(:disabled){transform:translateY(1px);}
+    .bsub:disabled{opacity:.55;cursor:not-allowed;}
+    .bsub .spin{width:17px;height:17px;border-radius:50%;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;animation:spin .7s linear infinite;display:none;}
+    .bsub.ld .spin{display:block;}
+    .bsub.ld .lbl{display:none;}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* DIVIDER */
+    .dvd{display:flex;align-items:center;gap:10px;margin:16px 0;color:var(--txt3);font-size:12px;font-weight:600;}
+    .dvd::before,.dvd::after{content:'';flex:1;height:1px;background:var(--bdr);}
+
+    /* GOOGLE BTN */
+    .bgoo{width:100%;padding:12px;border-radius:12px;border:1px solid var(--bdr);background:var(--bg2);color:var(--txt);font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .3s var(--ease);}
+    .bgoo:hover{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.18);transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.4);}
+    .bgoo:disabled{opacity:.5;cursor:not-allowed;}
+    .bgoo svg{width:19px;height:19px;flex-shrink:0;}
+
+    /* FORGOT / BACK */
+    .forgot{display:block;text-align:right;font-size:12px;color:var(--blue);text-decoration:none;margin-top:5px;transition:opacity .2s;}
+    .forgot:hover{opacity:.7;}
+    .backbtn{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--blue);background:none;border:none;cursor:pointer;padding:0;margin-bottom:16px;font-family:'Inter',sans-serif;transition:opacity .2s;}
+    .backbtn:hover{opacity:.7;}
+
+    /* LOGGED IN */
+    #lgdin{display:none;text-align:center;}
+    #lgdin.on{display:block;animation:fin .4s var(--ease);}
+    .avt{width:76px;height:76px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:800;margin:0 auto 14px;border:3px solid rgba(59,130,246,.4);box-shadow:0 0 30px var(--glow);overflow:hidden;}
+    .avt img{width:100%;height:100%;object-fit:cover;}
+    .wname{font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:800;margin-bottom:4px;}
+    .wemail{font-size:13px;color:var(--txt2);margin-bottom:8px;}
+    .vbadge{display:inline-flex;align-items:center;gap:5px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);color:#6ee7b7;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;margin-bottom:24px;}
+    .blaunch{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;cursor:pointer;text-decoration:none;transition:all .3s var(--ease);box-shadow:0 4px 20px var(--glow);margin-bottom:10px;}
+    .blaunch:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(59,130,246,.5);}
+    .ldot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s ease-in-out infinite;}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+    .bout{width:100%;padding:11px;border-radius:10px;border:1px solid var(--bdr);background:transparent;color:var(--txt2);font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .25s;}
+    .bout:hover{border-color:rgba(239,68,68,.5);color:#fca5a5;}
+
+    /* FOOTER */
+    .foot{text-align:center;font-size:11px;color:var(--txt3);margin-top:20px;line-height:1.7;}
+    .foot a{color:var(--blue);text-decoration:none;}
+    .foot a:hover{text-decoration:underline;}
+
+    @media(max-width:480px){.card{padding:28px 18px;border-radius:20px;}.hdg h1{font-size:20px;}}
+  </style>
+</head>
+<body>
+  <div class="bgf bggrid"></div>
+  <div class="bgf bgglow"></div>
+  <div class="ptw" id="pts"></div>
+
+  <div class="page">
+    <div class="card">
+
+      <a href="home.html" class="logorow">
+        <div class="logomark">T1</div>
+        <span class="logotxt">T1ERA</span>
+      </a>
+
+      <!-- LOGGED IN STATE -->
+      <div id="lgdin">
+        <div class="avt" id="av"></div>
+        <div class="wname" id="wn"></div>
+        <div class="wemail" id="we"></div>
+        <div class="vbadge" id="vb">✅ Verified Account</div>
+        <a href="https://t.me/T1ERA_SecBot" target="_blank" rel="noopener" class="blaunch">
+          <span class="ldot"></span>Launch T1ERA on Telegram
+        </a>
+        <button class="bout" id="outBtn">Sign Out</button>
+      </div>
+
+      <!-- AUTH FORMS -->
+      <div id="authF">
+        <div class="hdg">
+          <h1>Welcome to T1ERA</h1>
+          <p>Sign in or create your account to get started</p>
+        </div>
+
+        <div class="tabs">
+          <button class="tab on" id="tLgn" onclick="sw('login')">Sign In</button>
+          <button class="tab"    id="tSgn" onclick="sw('signup')">Create Account</button>
+        </div>
+
+        <!-- LOGIN PANEL -->
+        <div class="panel on" id="pLgn">
+          <div class="lockbar" id="lockbar"></div>
+          <div class="alert err" id="lErr"></div>
+          <div class="alert ok"  id="lOk"></div>
+
+          <div class="field">
+            <div class="flbl">Email address<span class="fst" id="lESt"></span></div>
+            <div class="inpw">
+              <span class="iico">✉️</span>
+              <input type="email" id="lE" placeholder="you@gmail.com" autocomplete="email"
+                oninput="chkEmail('lE','lESt')" onblur="chkEmail('lE','lESt',true)"/>
+              <div class="iend"><span class="ichk" id="lEChk"></span></div>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="flbl">Password</div>
+            <div class="inpw">
+              <span class="iico">🔒</span>
+              <input type="password" id="lP" placeholder="Your password" autocomplete="current-password"/>
+              <div class="iend"><button class="eye" type="button" onclick="eye('lP',this)">👁</button></div>
+            </div>
+            <a href="#" class="forgot" id="fgLink">Forgot password?</a>
+          </div>
+
+          <div class="dots" id="dotRow">
+            <span style="font-size:11px;color:var(--txt3)">Attempts:</span>
+            <div class="dot" id="d1"></div><div class="dot" id="d2"></div>
+            <div class="dot" id="d3"></div><div class="dot" id="d4"></div>
+            <div class="dot" id="d5"></div>
+          </div>
+
+          <button class="bsub" id="lBtn" onclick="doLogin()">
+            <div class="spin"></div><span class="lbl">Sign In</span>
+          </button>
+          <div class="dvd">or</div>
+          <button class="bgoo" id="lGBtn" onclick="doGoogle('login')">
+            <svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+            Sign in with Google
+          </button>
+        </div>
+
+        <!-- SIGNUP PANEL -->
+        <div class="panel" id="pSgn">
+          <div class="alert err" id="sErr"></div>
+          <div class="alert ok"  id="sOk"></div>
+
+          <div class="field">
+            <div class="flbl">Full name<span class="fst" id="sNSt"></span></div>
+            <div class="inpw">
+              <span class="iico">👤</span>
+              <input type="text" id="sN" placeholder="Your full name" autocomplete="name"
+                oninput="chkName()" onblur="chkName(true)"/>
+              <div class="iend"><span class="ichk" id="sNChk"></span></div>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="flbl">Email address<span class="fst" id="sESt"></span></div>
+            <div class="inpw">
+              <span class="iico">✉️</span>
+              <input type="email" id="sE" placeholder="you@gmail.com" autocomplete="email"
+                oninput="chkEmail('sE','sESt')" onblur="chkEmail('sE','sESt',true)"/>
+              <div class="iend"><span class="ichk" id="sEChk"></span></div>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="flbl">Password<span class="fst" id="sPSt"></span></div>
+            <div class="inpw">
+              <span class="iico">🔒</span>
+              <input type="password" id="sP" placeholder="Create a strong password" autocomplete="new-password"
+                oninput="onPwInput()" onfocus="document.getElementById('pwr').classList.add('on')"/>
+              <div class="iend"><button class="eye" type="button" onclick="eye('sP',this)">👁</button></div>
+            </div>
+            <!-- live checklist -->
+            <div class="pwrules" id="pwr">
+              <div class="rule" id="r8">   <span class="rdot"></span>At least 8 characters</div>
+              <div class="rule" id="rUp">  <span class="rdot"></span>One uppercase letter (A–Z)</div>
+              <div class="rule" id="rNum"> <span class="rdot"></span>One number (0–9)</div>
+              <div class="rule" id="rSpc"> <span class="rdot"></span>One special character (!@#$%^&amp;*)</div>
+            </div>
+            <!-- strength bar -->
+            <div class="srow">
+              <div class="strk"><div class="sfill" id="sfill"></div></div>
+              <span class="sword" id="sword"></span>
+            </div>
+          </div>
+
+          <button class="bsub" id="sBtn" onclick="doSignup()">
+            <div class="spin"></div><span class="lbl">Create Account</span>
+          </button>
+          <div class="dvd">or</div>
+          <button class="bgoo" onclick="doGoogle('signup')">
+            <svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+            Sign up with Google
+          </button>
+        </div>
+
+        <!-- RESET PANEL -->
+        <div class="panel" id="pRst">
+          <button class="backbtn" onclick="sw('login')">← Back to Sign In</button>
+          <div class="hdg" style="margin-bottom:16px;">
+            <h1>Reset Password</h1>
+            <p>We'll send a reset link to your email</p>
+          </div>
+          <div class="alert err" id="rErr"></div>
+          <div class="alert ok"  id="rOk"></div>
+          <div class="field">
+            <div class="flbl">Email address<span class="fst" id="rESt"></span></div>
+            <div class="inpw">
+              <span class="iico">✉️</span>
+              <input type="email" id="rE" placeholder="you@gmail.com"
+                oninput="chkEmail('rE','rESt')" onblur="chkEmail('rE','rESt',true)"/>
+              <div class="iend"><span class="ichk" id="rEChk"></span></div>
+            </div>
+          </div>
+          <button class="bsub" id="rBtn" onclick="doReset()">
+            <div class="spin"></div><span class="lbl">Send Reset Link</span>
+          </button>
+        </div>
+
+      </div><!-- /authF -->
+
+      <div class="foot">
+        By continuing you agree to T1ERA's <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+      </div>
+    </div>
+  </div>
+
+  <!-- FIREBASE MODULE -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+    import {
+      getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+      signOut, sendPasswordResetEmail, updateProfile,
+      GoogleAuthProvider, signInWithPopup, onAuthStateChanged,
+      fetchSignInMethodsForEmail, getAdditionalUserInfo
+    } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+
+    const app  = initializeApp({
+      apiKey:            "AIzaSyALMqX8Cw_LvdztWX3laDcDL8tK5vrMh8Y",
+      authDomain:        "t1era-authv1.firebaseapp.com",
+      projectId:         "t1era-authv1",
+      storageBucket:     "t1era-authv1.firebasestorage.app",
+      messagingSenderId: "668617935470",
+      appId:             "1:668617935470:web:184478248a0b0ec84e347f"
+    });
+    const auth = getAuth(app);
+    const gp   = new GoogleAuthProvider();
+
+    window._auth = auth;
+    window._gp   = gp;
+    window._fb   = { createUserWithEmailAndPassword, signInWithEmailAndPassword,
+                     signOut, sendPasswordResetEmail, updateProfile,
+                     signInWithPopup, fetchSignInMethodsForEmail, getAdditionalUserInfo };
+
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        document.getElementById('authF').style.display = 'none';
+        const p = document.getElementById('lgdin');
+        p.classList.add('on');
+        const av = document.getElementById('av');
+        av.innerHTML = user.photoURL
+          ? `<img src="${user.photoURL}" alt="av">`
+          : (user.displayName||user.email||'U')[0].toUpperCase();
+        document.getElementById('wn').textContent = user.displayName || 'T1ERA User';
+        document.getElementById('we').textContent = user.email || '';
+        const vb = document.getElementById('vb');
+        vb.textContent = user.emailVerified ? '✅ Verified Account' : '📧 Verify your email to unlock all features';
+        vb.style.color  = user.emailVerified ? '' : '#fcd34d';
+      } else {
+        document.getElementById('authF').style.display = '';
+        document.getElementById('lgdin').classList.remove('on');
+      }
+    });
+
+    document.getElementById('outBtn').addEventListener('click', () =>
+      window._fb.signOut(window._auth));
+  </script>
+
+  <!-- UI + VALIDATION SCRIPT -->
+  <script>
+    /* PARTICLES */
+    const ptw = document.getElementById('pts');
+    for(let i=0;i<30;i++){
+      const p=document.createElement('div'); p.className='pt';
+      p.style.left=Math.random()*100+'%'; p.style.top=Math.random()*100+'%';
+      p.style.setProperty('--tx',(Math.random()-.5)*280+'px');
+      p.style.setProperty('--ty',(Math.random()-.5)*280+'px');
+      p.style.animationDelay=Math.random()*10+'s';
+      p.style.animationDuration=(8+Math.random()*6)+'s';
+      ptw.appendChild(p);
+    }
+
+    /* ═══════════════════════════════════
+       BRUTE FORCE PROTECTION
+       5 failed attempts → 60 s lockout
+    ═══════════════════════════════════ */
+    const MAX=5, LOCK_S=60;
+    let fails    = +( sessionStorage.getItem('t1f') ||'0');
+    let lockTil  = +( sessionStorage.getItem('t1l') ||'0');
+    let lockTmr  = null;
+
+    const locked = ()=> Date.now() < lockTil;
+
+    function markFail(){
+      fails++; sessionStorage.setItem('t1f', fails);
+      updDots();
+      if(fails>=MAX){ lockTil=Date.now()+LOCK_S*1000; sessionStorage.setItem('t1l',lockTil); startLock(); }
+    }
+    function markOk(){
+      fails=0; lockTil=0;
+      sessionStorage.removeItem('t1f'); sessionStorage.removeItem('t1l');
+      updDots();
+    }
+    function updDots(){
+      for(let i=1;i<=5;i++){
+        const d=document.getElementById('d'+i);
+        if(!d)return;
+        d.classList.remove('bad');
+        if(i<=fails) d.classList.add('bad');
+      }
+      document.getElementById('dotRow').style.display=(fails>0&&!locked())?'flex':'none';
+    }
+    function startLock(){
+      clearInterval(lockTmr);
+      const bar=document.getElementById('lockbar');
+      const lb=document.getElementById('lBtn');
+      const gb=document.getElementById('lGBtn');
+      lockTmr=setInterval(()=>{
+        const rem=Math.ceil((lockTil-Date.now())/1000);
+        if(rem<=0){
+          clearInterval(lockTmr); bar.classList.remove('on');
+          lb.disabled=gb.disabled=false;
+          fails=0; sessionStorage.removeItem('t1f'); sessionStorage.removeItem('t1l');
+          updDots();
+        } else {
+          bar.textContent=`🔒 Too many failed attempts. Please wait ${rem}s before trying again.`;
+          bar.classList.add('on'); lb.disabled=gb.disabled=true;
+        }
+      },500);
+    }
+    if(locked()) startLock();
+    updDots();
+
+    /* ═══════════════════════════════════
+       EMAIL VALIDATION
+       - Full RFC regex
+       - Typo domain detection
+       - Specific hints per error type
+    ═══════════════════════════════════ */
+    const EMAIL_RE = /^(?!.*\.\.)(?!^\.)([a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*)@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/;
+
+    const TYPOS = {
+      'gmai.com':'gmail.com','gmial.com':'gmail.com','gmal.com':'gmail.com',
+      'gamil.com':'gmail.com','gnail.com':'gmail.com','gmail.co':'gmail.com',
+      'gmailc.om':'gmail.com','gmail.cm':'gmail.com','gmaill.com':'gmail.com',
+      'hotmal.com':'hotmail.com','hotmial.com':'hotmail.com','hotmail.co':'hotmail.com',
+      'hotmai.com':'hotmail.com','hotmal.com':'hotmail.com',
+      'yahooo.com':'yahoo.com','yaho.com':'yahoo.com','yahoo.co':'yahoo.com','yhoo.com':'yahoo.com',
+      'outlok.com':'outlook.com','outloo.com':'outlook.com','outllok.com':'outlook.com',
+      'iclod.com':'icloud.com','icoud.com':'icloud.com','iclould.com':'icloud.com',
+    };
+
+    // map input-id → check-icon-id
+    const CHK = { lE:'lEChk', sE:'sEChk', rE:'rEChk' };
+
+    function chkEmail(inpId, stId, blur=false){
+      const inp=document.getElementById(inpId);
+      const st =document.getElementById(stId);
+      const chk=document.getElementById(CHK[inpId]||'');
+      const val=inp.value.trim();
+
+      if(!val){ inp.className=''; st.textContent=''; if(chk)chk.textContent=''; return false; }
+
+      // typo check
+      const dom=val.split('@')[1]?.toLowerCase();
+      const fix=dom&&TYPOS[dom];
+      if(fix){
+        inp.className='inv'; st.className='fst err';
+        st.textContent=`Did you mean @${fix}?`; if(chk)chk.textContent='⚠️'; return false;
+      }
+
+      if(!EMAIL_RE.test(val)){
+        if(blur||val.length>7){
+          inp.className='inv'; st.className='fst err';
+          if(!val.includes('@'))                 st.textContent='Missing @ symbol';
+          else if(val.endsWith('@'))             st.textContent='Missing domain (e.g. gmail.com)';
+          else if(!val.includes('.'))            st.textContent='Missing . in domain';
+          else if(!/\.[a-zA-Z]{2,}$/.test(val)) st.textContent='Invalid domain (e.g. .com / .my)';
+          else                                   st.textContent='Invalid email format';
+          if(chk)chk.textContent='❌';
+        }
+        return false;
+      }
+
+      inp.className='vld'; st.className='fst ok'; st.textContent='✓ Looks good';
+      if(chk)chk.textContent='✅'; return true;
+    }
+    window.chkEmail=chkEmail;
+
+    /* NAME */
+    function chkName(blur=false){
+      const inp=document.getElementById('sN');
+      const st =document.getElementById('sNSt');
+      const chk=document.getElementById('sNChk');
+      const val=inp.value.trim();
+      if(!val){ inp.className=''; st.textContent=''; chk.textContent=''; return false; }
+      if(/<[^>]*>/.test(val)||/[<>;"'`]/.test(val)){
+        inp.className='inv'; st.className='fst err'; st.textContent='Invalid characters'; chk.textContent='❌'; return false;
+      }
+      if(val.length<2){ if(blur){inp.className='inv';st.className='fst err';st.textContent='Too short';chk.textContent='❌';} return false; }
+      inp.className='vld'; st.className='fst ok'; st.textContent='✓'; chk.textContent='✅'; return true;
+    }
+    window.chkName=chkName;
+
+    /* ═══════════════════════════════════
+       PASSWORD RULES + STRENGTH
+    ═══════════════════════════════════ */
+    const RULES=[
+      {id:'r8',  fn:v=>v.length>=8},
+      {id:'rUp', fn:v=>/[A-Z]/.test(v)},
+      {id:'rNum',fn:v=>/[0-9]/.test(v)},
+      {id:'rSpc',fn:v=>/[!@#$%^&*()\-_=+\[\]{};:'"\\|,.<>/?`~]/.test(v)},
+    ];
+    const STR=[
+      {w:'0%',  bg:'transparent', lbl:'',       c:'var(--txt3)'},
+      {w:'25%', bg:'#ef4444',     lbl:'Weak',   c:'#ef4444'},
+      {w:'50%', bg:'#f97316',     lbl:'Fair',   c:'#f97316'},
+      {w:'75%', bg:'#eab308',     lbl:'Good',   c:'#eab308'},
+      {w:'100%',bg:'#10b981',     lbl:'Strong', c:'#10b981'},
+    ];
+    function onPwInput(){
+      const val=document.getElementById('sP').value;
+      let met=0;
+      RULES.forEach(r=>{
+        const ok=r.fn(val); if(ok)met++;
+        const el=document.getElementById(r.id);
+        el.className='rule '+(ok?'met':'');
+      });
+      const s=STR[met];
+      document.getElementById('sfill').style.width=s.w;
+      document.getElementById('sfill').style.background=s.bg;
+      document.getElementById('sword').textContent=s.lbl;
+      document.getElementById('sword').style.color=s.c;
+      const inp=document.getElementById('sP');
+      const st =document.getElementById('sPSt');
+      inp.className=val.length===0?'':(met===4?'vld':'inv');
+      if(val.length>0){ st.className='fst '+(met===4?'ok':'err'); st.textContent=met===4?'✓ Strong':`${met}/4 rules`; }
+      else st.textContent='';
+    }
+    window.onPwInput=onPwInput;
+
+    /* HELPERS */
+    function setLd(id,on){ const b=document.getElementById(id); b.disabled=on; b.classList.toggle('ld',on); }
+    function showA(id,msg,type){ const e=document.getElementById(id); const ico=type==='err'?'⚠️':type==='ok'?'✅':'ℹ️'; e.innerHTML=`<span class="aico">${ico}</span><span>${msg}</span>`; e.className=`alert ${type} on`; }
+    function clrA(id){ document.getElementById(id).className='alert'; }
+    function eye(id,btn){ const i=document.getElementById(id); i.type=i.type==='password'?'text':'password'; btn.textContent=i.type==='password'?'👁':'🙈'; }
+    window.eye=eye;
+    function sanitize(v){ return v.replace(/<[^>]*>/g,'').replace(/[<>;"'`]/g,'').trim(); }
+
+    function fbMsg(code){
+      const m={
+        'auth/user-not-found':'No account found with this email. Please sign up first.',
+        'auth/wrong-password':'Incorrect password. Please check and try again.',
+        'auth/invalid-credential':'Email or password is incorrect.',
+        'auth/email-already-in-use':'This email is already registered. Sign in instead.',
+        'auth/weak-password':'Password does not meet the requirements.',
+        'auth/invalid-email':'The email address is not valid.',
+        'auth/too-many-requests':'Account temporarily locked. Please reset your password or wait.',
+        'auth/network-request-failed':'Network error. Check your internet connection.',
+        'auth/popup-closed-by-user':'Google sign-in was cancelled.',
+        'auth/popup-blocked':'Popup blocked. Please allow popups for this site.',
+        'auth/account-exists-with-different-credential':'An account already exists with this email using a different sign-in method.',
+      };
+      return m[code]||'Something went wrong. Please try again.';
+    }
+
+    /* TAB SWITCH */
+    function sw(tab){
+      ['tLgn','tSgn'].forEach(t=>document.getElementById(t)?.classList.remove('on'));
+      ['pLgn','pSgn','pRst'].forEach(p=>document.getElementById(p)?.classList.remove('on'));
+      if(tab==='login') { document.getElementById('tLgn').classList.add('on'); document.getElementById('pLgn').classList.add('on'); }
+      if(tab==='signup'){ document.getElementById('tSgn').classList.add('on'); document.getElementById('pSgn').classList.add('on'); }
+      if(tab==='reset') { document.getElementById('pRst').classList.add('on'); }
+    }
+    window.sw=sw;
+
+    document.getElementById('fgLink').addEventListener('click',e=>{
+      e.preventDefault();
+      const v=document.getElementById('lE').value.trim();
+      if(v) document.getElementById('rE').value=v;
+      sw('reset');
+    });
+
+    /* ═══════════════════════════════════
+       LOGIN
+    ═══════════════════════════════════ */
+    async function doLogin(){
+      clrA('lErr'); clrA('lOk');
+      if(locked()) return;
+      const email=sanitize(document.getElementById('lE').value);
+      const pass =document.getElementById('lP').value;
+      if(!chkEmail('lE','lESt',true)){ showA('lErr','Please enter a valid email address.','err'); return; }
+      if(!pass){ showA('lErr','Please enter your password.','err'); return; }
+      setLd('lBtn',true);
+      try{
+        await window._fb.signInWithEmailAndPassword(window._auth, email, pass);
+        markOk();
+        showA('lOk','Signed in successfully!','ok');
+      } catch(err){
+        markFail();
+        const rem=MAX-fails;
+        let msg=fbMsg(err.code);
+        if(rem>0&&rem<MAX) msg+=` (${rem} attempt${rem===1?'':'s'} left before lockout)`;
+        showA('lErr', msg, 'err');
+        setLd('lBtn',false);
+      }
+    }
+    window.doLogin=doLogin;
+
+    /* ═══════════════════════════════════
+       SIGNUP
+    ═══════════════════════════════════ */
+    async function doSignup(){
+      clrA('sErr'); clrA('sOk');
+      const name =sanitize(document.getElementById('sN').value);
+      const email=sanitize(document.getElementById('sE').value);
+      const pass =document.getElementById('sP').value;
+      let ok=true;
+      if(!chkName(true))             ok=false;
+      if(!chkEmail('sE','sESt',true))ok=false;
+      const allRules=RULES.every(r=>r.fn(pass));
+      if(!allRules){ document.getElementById('sP').className='inv'; document.getElementById('pwr').classList.add('on'); ok=false; }
+      if(!ok){ showA('sErr','Please fix the errors highlighted above.','err'); return; }
+
+      setLd('sBtn',true);
+      // pre-check: is email already registered?
+      try{
+        const methods=await window._fb.fetchSignInMethodsForEmail(window._auth, email);
+        if(methods.length>0){
+          showA('sErr','This email already has an account. <a href="#" onclick="sw(\'login\');return false;" style="color:var(--blue);text-decoration:underline">Sign in instead →</a>','err');
+          setLd('sBtn',false); return;
+        }
+      } catch(e){ /* proceed */ }
+
+      try{
+        const cred=await window._fb.createUserWithEmailAndPassword(window._auth, email, pass);
+        await window._fb.updateProfile(cred.user,{displayName:name});
+        showA('sOk','Account created! Welcome to T1ERA 🎉','ok');
+      } catch(err){
+        showA('sErr', fbMsg(err.code), 'err');
+        setLd('sBtn',false);
+      }
+    }
+    window.doSignup=doSignup;
+
+    /* ═══════════════════════════════════
+       GOOGLE SIGN-IN
+       Sign In tab  → reject if brand new user (not registered)
+       Sign Up tab  → allow new accounts
+    ═══════════════════════════════════ */
+    async function doGoogle(mode){
+      clrA('lErr'); clrA('sErr');
+      if(mode==='login'&&locked()) return;
+      try{
+        const result=await window._fb.signInWithPopup(window._auth, window._gp);
+        const info  =window._fb.getAdditionalUserInfo(result);
+
+        if(mode==='login'&&info.isNewUser){
+          // New account created via Google on Sign In tab — not allowed
+          await window._fb.signOut(window._auth);
+          markFail();
+          showA('lErr',
+            'No T1ERA account found for this Google address. <a href="#" onclick="sw(\'signup\');return false;" style="color:var(--blue);text-decoration:underline">Create an account first →</a>',
+            'err');
+          return;
+        }
+        if(mode==='login') markOk();
+        // onAuthStateChanged handles UI
+      } catch(err){
+        showA(mode==='login'?'lErr':'sErr', fbMsg(err.code), 'err');
+      }
+    }
+    window.doGoogle=doGoogle;
+
+    /* ═══════════════════════════════════
+       RESET PASSWORD
+    ═══════════════════════════════════ */
+    async function doReset(){
+      clrA('rErr'); clrA('rOk');
+      const email=sanitize(document.getElementById('rE').value);
+      if(!chkEmail('rE','rESt',true)){ showA('rErr','Please enter a valid email address.','err'); return; }
+      setLd('rBtn',true);
+      try{
+        await window._fb.sendPasswordResetEmail(window._auth, email);
+        showA('rOk','Reset link sent! Check your inbox (and spam folder).','ok');
+      } catch(err){ showA('rErr', fbMsg(err.code), 'err'); }
+      setLd('rBtn',false);
+    }
+    window.doReset=doReset;
+
+    /* ENTER KEY */
+    document.addEventListener('keydown',e=>{
+      if(e.key!=='Enter') return;
+      if(document.getElementById('pLgn').classList.contains('on')) doLogin();
+      if(document.getElementById('pSgn').classList.contains('on')) doSignup();
+      if(document.getElementById('pRst').classList.contains('on')) doReset();
+    });
+  </script>
+</body>
+</html>
