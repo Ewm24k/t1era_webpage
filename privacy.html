@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="theme-color" content="#000000"/>
+  <title>Privacy Policy — T1ERA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#000;--bg2:#080810;--bgcard:#0d0d18;
+      --bdr:rgba(99,102,241,.15);
+      --txt:#e8e8f0;--txt2:rgba(232,232,240,.55);--txt3:rgba(232,232,240,.28);
+      --ind:#6366f1;--pur:#8b5cf6;--cyn:#06b6d4;--grn:#10b981;
+      --glow:rgba(99,102,241,.2);
+      --ease:cubic-bezier(0.4,0,0.2,1);
+    }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+    html{scroll-behavior:smooth;}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);-webkit-font-smoothing:antialiased;overflow-x:hidden;line-height:1.7;}
+
+    /* BG */
+    .bgf{position:fixed;inset:0;z-index:0;pointer-events:none;}
+    .bggrid{background-image:linear-gradient(rgba(99,102,241,.014) 1px,transparent 1px),linear-gradient(90deg,rgba(99,102,241,.014) 1px,transparent 1px);background-size:72px 72px;}
+    .bgglow{background:radial-gradient(ellipse at 10% 0%,rgba(99,102,241,.09),transparent 50%),radial-gradient(ellipse at 90% 100%,rgba(139,92,246,.07),transparent 50%);}
+
+    /* NAV */
+    nav{position:sticky;top:0;z-index:100;padding:0 max(24px,5vw);height:60px;display:flex;align-items:center;justify-content:space-between;background:rgba(0,0,0,.7);backdrop-filter:blur(16px);border-bottom:1px solid var(--bdr);}
+    .nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+    .nav-mark{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--ind),var(--pur));display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-weight:900;font-size:12px;color:#fff;box-shadow:0 0 16px var(--glow);}
+    .nav-txt{font-family:'Orbitron',sans-serif;font-weight:900;font-size:16px;letter-spacing:.08em;background:linear-gradient(135deg,var(--ind),var(--pur),var(--cyn));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+    .nav-back{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:var(--txt2);text-decoration:none;transition:color .2s;}
+    .nav-back:hover{color:var(--ind);}
+
+    /* HERO */
+    .hero{position:relative;z-index:1;padding:72px max(24px,5vw) 48px;max-width:860px;margin:0 auto;}
+    .hero-badge{display:inline-flex;align-items:center;gap:7px;background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.25);color:#a5b4fc;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:5px 14px;border-radius:20px;margin-bottom:20px;}
+    .hero-badge span{width:6px;height:6px;border-radius:50%;background:var(--ind);box-shadow:0 0 8px var(--ind);display:inline-block;animation:pulse 2s ease infinite;}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+    .hero h1{font-family:'Syne',sans-serif;font-size:clamp(32px,5vw,52px);font-weight:800;line-height:1.1;margin-bottom:16px;background:linear-gradient(135deg,#fff 40%,#a5b4fc);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+    .hero-meta{display:flex;align-items:center;gap:20px;flex-wrap:wrap;font-size:13px;color:var(--txt3);}
+    .hero-meta span{display:flex;align-items:center;gap:6px;}
+    .hero-divider{height:1px;background:linear-gradient(90deg,var(--ind),transparent);margin-top:32px;opacity:.4;}
+
+    /* CONTENT */
+    .content{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:0 max(24px,5vw) 80px;}
+
+    /* TOC */
+    .toc{background:var(--bgcard);border:1px solid var(--bdr);border-radius:16px;padding:22px 24px;margin:36px 0;position:relative;overflow:hidden;}
+    .toc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--ind),var(--pur),var(--cyn));}
+    .toc-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:14px;}
+    .toc ol{padding-left:18px;}
+    .toc li{margin-bottom:6px;}
+    .toc a{color:#a5b4fc;font-size:13px;text-decoration:none;transition:color .2s;}
+    .toc a:hover{color:#fff;}
+
+    /* SECTIONS */
+    .section{margin-bottom:48px;}
+    .section-num{font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;color:var(--ind);letter-spacing:.12em;margin-bottom:8px;}
+    .section h2{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#fff;margin-bottom:16px;scroll-margin-top:80px;}
+    .section p{color:var(--txt2);font-size:15px;margin-bottom:14px;}
+    .section ul{padding-left:0;list-style:none;margin-bottom:14px;}
+    .section ul li{display:flex;gap:10px;align-items:flex-start;color:var(--txt2);font-size:15px;margin-bottom:8px;}
+    .section ul li::before{content:'›';color:var(--ind);font-size:18px;line-height:1.4;flex-shrink:0;}
+
+    /* INFO BOX */
+    .infobox{background:rgba(99,102,241,.07);border:1px solid rgba(99,102,241,.2);border-radius:12px;padding:16px 18px;margin-bottom:16px;display:flex;gap:12px;align-items:flex-start;}
+    .infobox-ico{font-size:18px;flex-shrink:0;margin-top:1px;}
+    .infobox p{color:#a5b4fc;font-size:14px;margin:0;}
+
+    .warnbox{background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2);border-radius:12px;padding:16px 18px;margin-bottom:16px;display:flex;gap:12px;align-items:flex-start;}
+    .warnbox p{color:#fcd34d;font-size:14px;margin:0;}
+
+    /* TABLE */
+    .data-table{width:100%;border-collapse:collapse;margin-bottom:16px;font-size:14px;}
+    .data-table th{text-align:left;padding:10px 14px;background:rgba(99,102,241,.1);color:#a5b4fc;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--bdr);}
+    .data-table td{padding:10px 14px;color:var(--txt2);border-bottom:1px solid rgba(255,255,255,.04);vertical-align:top;}
+    .data-table tr:last-child td{border-bottom:none;}
+
+    /* CONTACT CARD */
+    .contact-card{background:linear-gradient(135deg,rgba(99,102,241,.1),rgba(139,92,246,.07));border:1px solid rgba(99,102,241,.25);border-radius:16px;padding:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;}
+    .contact-card h3{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;color:#fff;margin-bottom:4px;}
+    .contact-card p{font-size:13px;color:var(--txt2);}
+    .contact-btn{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;border-radius:10px;background:linear-gradient(135deg,var(--ind),var(--pur));color:#fff;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;text-decoration:none;transition:all .25s;white-space:nowrap;}
+    .contact-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(99,102,241,.4);}
+
+    /* FOOTER */
+    footer{position:relative;z-index:1;border-top:1px solid var(--bdr);padding:28px max(24px,5vw);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+    .foot-l{font-size:12px;color:var(--txt3);}
+    .foot-r{display:flex;gap:20px;}
+    .foot-r a{font-size:12px;color:var(--txt3);text-decoration:none;transition:color .2s;}
+    .foot-r a:hover{color:var(--ind);}
+
+    @media(max-width:600px){
+      .data-table{font-size:12px;}
+      .data-table th,.data-table td{padding:8px 10px;}
+      .contact-card{flex-direction:column;}
+    }
+  </style>
+</head>
+<body>
+  <div class="bgf bggrid"></div>
+  <div class="bgf bgglow"></div>
+
+  <nav>
+    <a href="home.html" class="nav-logo">
+      <div class="nav-mark">T1</div>
+      <span class="nav-txt">T1ERA</span>
+    </a>
+    <a href="auth.html" class="nav-back">← Back to Sign In</a>
+  </nav>
+
+  <div class="hero">
+    <div class="hero-badge"><span></span>Legal Document</div>
+    <h1>Privacy Policy</h1>
+    <div class="hero-meta">
+      <span>📅 Effective: January 1, 2025</span>
+      <span>🔄 Last updated: February 2025</span>
+      <span>🌐 t1era.netlify.app</span>
+    </div>
+    <div class="hero-divider"></div>
+  </div>
+
+  <div class="content">
+
+    <div class="infobox">
+      <span class="infobox-ico">🛡️</span>
+      <p>T1ERA is committed to protecting your privacy. This policy explains what data we collect, why we collect it, and how we keep it safe. Please read it carefully before using our platform.</p>
+    </div>
+
+    <div class="toc">
+      <div class="toc-title">Table of Contents</div>
+      <ol>
+        <li><a href="#s1">Who We Are</a></li>
+        <li><a href="#s2">Information We Collect</a></li>
+        <li><a href="#s3">How We Use Your Information</a></li>
+        <li><a href="#s4">Data Sharing & Third Parties</a></li>
+        <li><a href="#s5">Data Security</a></li>
+        <li><a href="#s6">Your Rights</a></li>
+        <li><a href="#s7">Cookies & Tracking</a></li>
+        <li><a href="#s8">Children's Privacy</a></li>
+        <li><a href="#s9">Changes to This Policy</a></li>
+        <li><a href="#s10">Contact Us</a></li>
+      </ol>
+    </div>
+
+    <div class="section" id="s1">
+      <div class="section-num">01 —</div>
+      <h2>Who We Are</h2>
+      <p>T1ERA ("we", "our", or "us") is a cybersecurity intelligence platform accessible at <strong>t1era.netlify.app</strong>. We provide security monitoring, threat intelligence, and related services through our web platform and Telegram bot integration.</p>
+      <p>By accessing or using T1ERA, you agree to the collection and use of information in accordance with this Privacy Policy.</p>
+    </div>
+
+    <div class="section" id="s2">
+      <div class="section-num">02 —</div>
+      <h2>Information We Collect</h2>
+      <p>We collect the following categories of information when you register and use T1ERA:</p>
+      <table class="data-table">
+        <thead>
+          <tr><th>Data Type</th><th>What We Collect</th><th>Source</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Account Information</strong></td><td>Full name, email address, profile photo</td><td>You provide directly or via Google Sign-In</td></tr>
+          <tr><td><strong>Authentication Data</strong></td><td>Encrypted password hash, sign-in method, verification status</td><td>Firebase Authentication</td></tr>
+          <tr><td><strong>Usage Data</strong></td><td>Login timestamps, session duration, pages visited</td><td>Automatically collected</td></tr>
+          <tr><td><strong>Device Information</strong></td><td>Browser type, operating system, IP address</td><td>Automatically collected</td></tr>
+          <tr><td><strong>Telegram Data</strong></td><td>Telegram user ID if you connect via our bot</td><td>Telegram API</td></tr>
+        </tbody>
+      </table>
+      <div class="warnbox">
+        <span class="infobox-ico">⚠️</span>
+        <p>We do not collect payment information, government ID, or sensitive personal data beyond what is listed above.</p>
+      </div>
+    </div>
+
+    <div class="section" id="s3">
+      <div class="section-num">03 —</div>
+      <h2>How We Use Your Information</h2>
+      <p>Your data is used exclusively to operate and improve T1ERA services:</p>
+      <ul>
+        <li>To create and manage your T1ERA account securely</li>
+        <li>To authenticate your identity and prevent unauthorized access</li>
+        <li>To send verification emails and important account notifications</li>
+        <li>To connect your account to the T1ERA Telegram bot</li>
+        <li>To monitor and improve platform security and performance</li>
+        <li>To comply with legal obligations where required</li>
+      </ul>
+      <p>We do <strong>not</strong> use your data for advertising, sell it to third parties, or use it for any purpose beyond operating T1ERA.</p>
+    </div>
+
+    <div class="section" id="s4">
+      <div class="section-num">04 —</div>
+      <h2>Data Sharing &amp; Third Parties</h2>
+      <p>T1ERA uses the following trusted third-party services to operate the platform. Each has its own privacy policy:</p>
+      <table class="data-table">
+        <thead>
+          <tr><th>Service</th><th>Purpose</th><th>Data Shared</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Firebase (Google)</strong></td><td>Authentication & database</td><td>Email, name, password hash</td></tr>
+          <tr><td><strong>Google OAuth</strong></td><td>Social sign-in</td><td>Name, email, profile photo</td></tr>
+          <tr><td><strong>Netlify</strong></td><td>Web hosting</td><td>IP address, request logs</td></tr>
+          <tr><td><strong>Telegram</strong></td><td>Bot integration</td><td>Telegram user ID (if connected)</td></tr>
+        </tbody>
+      </table>
+      <p>We do not share your personal information with any other third parties without your explicit consent, except when required by law.</p>
+    </div>
+
+    <div class="section" id="s5">
+      <div class="section-num">05 —</div>
+      <h2>Data Security</h2>
+      <p>We take security seriously as a cybersecurity platform. Measures in place include:</p>
+      <ul>
+        <li>All passwords are hashed and encrypted — we never store plaintext passwords</li>
+        <li>Authentication is handled by Firebase with industry-standard encryption</li>
+        <li>Email verification required before full account access</li>
+        <li>HOV Security (Human Over Verification) system to prevent bot registrations</li>
+        <li>Brute-force protection with automatic account lockout</li>
+        <li>All data transmission over HTTPS/TLS encryption</li>
+      </ul>
+      <div class="infobox">
+        <span class="infobox-ico">🔒</span>
+        <p>Despite our best efforts, no system is 100% secure. If you suspect a security issue with your account, contact us immediately.</p>
+      </div>
+    </div>
+
+    <div class="section" id="s6">
+      <div class="section-num">06 —</div>
+      <h2>Your Rights</h2>
+      <p>You have the following rights regarding your personal data:</p>
+      <ul>
+        <li><strong>Access</strong> — Request a copy of the data we hold about you</li>
+        <li><strong>Correction</strong> — Update inaccurate or incomplete information via your account settings</li>
+        <li><strong>Deletion</strong> — Request deletion of your account and all associated data</li>
+        <li><strong>Portability</strong> — Request your data in a portable format</li>
+        <li><strong>Objection</strong> — Object to how we process your data</li>
+      </ul>
+      <p>To exercise any of these rights, contact us using the details in Section 10. We will respond within 30 days.</p>
+    </div>
+
+    <div class="section" id="s7">
+      <div class="section-num">07 —</div>
+      <h2>Cookies &amp; Tracking</h2>
+      <p>T1ERA uses minimal cookies strictly necessary for the platform to function:</p>
+      <ul>
+        <li><strong>Session cookies</strong> — to keep you signed in during your visit</li>
+        <li><strong>Firebase cookies</strong> — for authentication state management</li>
+      </ul>
+      <p>We do not use advertising cookies, tracking pixels, or third-party analytics beyond what Firebase provides. You can clear cookies at any time through your browser settings.</p>
+    </div>
+
+    <div class="section" id="s8">
+      <div class="section-num">08 —</div>
+      <h2>Children's Privacy</h2>
+      <p>T1ERA is not intended for users under the age of 13. We do not knowingly collect personal information from children under 13. If you believe a child has provided us with personal information, please contact us immediately and we will delete it.</p>
+    </div>
+
+    <div class="section" id="s9">
+      <div class="section-num">09 —</div>
+      <h2>Changes to This Policy</h2>
+      <p>We may update this Privacy Policy from time to time. When we do, we will update the "Last updated" date at the top of this page. For significant changes, we will notify registered users by email.</p>
+      <p>Your continued use of T1ERA after changes are posted constitutes your acceptance of the updated policy.</p>
+    </div>
+
+    <div class="section" id="s10">
+      <div class="section-num">10 —</div>
+      <h2>Contact Us</h2>
+      <p>If you have any questions about this Privacy Policy or your personal data, please reach out:</p>
+      <div class="contact-card">
+        <div>
+          <h3>T1ERA Support</h3>
+          <p>Questions about your privacy or data rights</p>
+        </div>
+        <a href="https://t.me/T1ERA_SecBot" target="_blank" rel="noopener" class="contact-btn">🚀 Contact via Telegram</a>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <div class="foot-l">© 2025 T1ERA. All rights reserved.</div>
+    <div class="foot-r">
+      <a href="privacy.html">Privacy Policy</a>
+      <a href="terms.html">Terms of Service</a>
+      <a href="auth.html">Sign In</a>
+      <a href="home.html">Home</a>
+    </div>
+  </footer>
+
+</body>
+</html>
