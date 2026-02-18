@@ -248,6 +248,110 @@
       transform:scale(1.1);
     }
     #csPopupClose:active{transform:scale(.95);}
+    /* ═══════════════════════════════════
+       HOV SECURITY — HUMAN OVER VERIFICATION
+    ═══════════════════════════════════ */
+    #hovOverlay{
+      position:fixed;inset:0;z-index:10000;
+      display:none;align-items:center;justify-content:center;
+      padding:16px;
+      background:rgba(0,0,0,.92);
+      backdrop-filter:blur(12px);
+      -webkit-backdrop-filter:blur(12px);
+    }
+    #hovOverlay.on{display:flex;animation:hovFadeIn .4s cubic-bezier(0.4,0,0.2,1) both;}
+    @keyframes hovFadeIn{from{opacity:0}to{opacity:1}}
+    #hovBox{
+      width:100%;max-width:520px;
+      background:linear-gradient(145deg,#0c0c14,#0f0f1a);
+      border:1px solid rgba(99,102,241,.35);
+      border-radius:24px;
+      overflow:hidden;
+      box-shadow:0 0 0 1px rgba(99,102,241,.1),0 40px 100px rgba(0,0,0,.9),0 0 80px rgba(99,102,241,.15);
+      animation:hovBoxIn .45s cubic-bezier(0.4,0,0.2,1) .05s both;
+      max-height:92vh;overflow-y:auto;
+    }
+    @keyframes hovBoxIn{from{opacity:0;transform:scale(.94) translateY(20px)}to{opacity:1;transform:none}}
+    #hovBox::-webkit-scrollbar{width:4px;}
+    #hovBox::-webkit-scrollbar-track{background:transparent;}
+    #hovBox::-webkit-scrollbar-thumb{background:rgba(99,102,241,.3);border-radius:4px;}
+    .hov-accent{height:4px;background:linear-gradient(90deg,#6366f1,#8b5cf6,#06b6d4,#6366f1);background-size:300% 100%;animation:hovBar 3s linear infinite;}
+    @keyframes hovBar{from{background-position:0 0}to{background-position:300% 0}}
+    .hov-header{padding:22px 28px 16px;border-bottom:1px solid rgba(99,102,241,.12);}
+    .hov-brand{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+    .hov-shield{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 0 20px rgba(99,102,241,.4);flex-shrink:0;position:relative;overflow:hidden;}
+    .hov-shield::before{content:"";position:absolute;inset:-50%;background:linear-gradient(45deg,transparent,rgba(255,255,255,.2),transparent);animation:shine 2.5s linear infinite;}
+    .hov-brandtxt{font-family:"Orbitron",sans-serif;font-size:11px;font-weight:700;letter-spacing:.12em;color:rgba(255,255,255,.4);line-height:1.3;}
+    .hov-brandtxt strong{display:block;font-size:13px;letter-spacing:.06em;background:linear-gradient(135deg,#6366f1,#a5b4fc);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+    .hov-title{font-family:"Space Grotesk",sans-serif;font-size:19px;font-weight:800;color:#fff;margin-bottom:4px;}
+    .hov-sub{font-size:12px;color:rgba(255,255,255,.45);}
+    .hov-steps{display:flex;align-items:center;gap:0;padding:14px 28px;border-bottom:1px solid rgba(99,102,241,.1);}
+    .hov-step{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;position:relative;}
+    .hov-step:not(:last-child)::after{content:"";position:absolute;top:12px;left:calc(50% + 14px);right:calc(-50% + 14px);height:1px;background:rgba(99,102,241,.2);}
+    .hov-step.done::after{background:rgba(99,102,241,.6);}
+    .hov-snum{width:24px;height:24px;border-radius:50%;border:1.5px solid rgba(99,102,241,.3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:rgba(255,255,255,.35);background:transparent;transition:all .3s;z-index:1;}
+    .hov-step.active .hov-snum{border-color:#6366f1;color:#fff;background:linear-gradient(135deg,#6366f1,#8b5cf6);box-shadow:0 0 12px rgba(99,102,241,.5);}
+    .hov-step.done .hov-snum{border-color:#10b981;background:#10b981;color:#fff;}
+    .hov-slbl{font-size:10px;color:rgba(255,255,255,.3);font-weight:600;letter-spacing:.03em;}
+    .hov-step.active .hov-slbl{color:rgba(255,255,255,.6);}
+    .hov-step.done .hov-slbl{color:#10b981;}
+    .hov-panel{display:none;padding:20px 28px 24px;animation:hovFadeIn .3s ease both;}
+    .hov-panel.on{display:block;}
+    .hov-qlbl{font-family:"Space Grotesk",sans-serif;font-size:12px;font-weight:700;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;display:flex;align-items:center;gap:7px;}
+    .hov-qlbl span{display:inline-block;width:6px;height:6px;border-radius:50%;background:#6366f1;box-shadow:0 0 8px #6366f1;animation:pulse 1.5s ease infinite;}
+    .hov-math{background:rgba(99,102,241,.07);border:1px solid rgba(99,102,241,.2);border-radius:14px;padding:20px;text-align:center;margin-bottom:16px;}
+    .hov-mathq{font-family:"Orbitron",sans-serif;font-size:28px;font-weight:700;color:#fff;letter-spacing:.05em;text-shadow:0 0 20px rgba(99,102,241,.5);}
+    .hov-inp{width:100%;padding:13px 16px;background:rgba(255,255,255,.04);border:1.5px solid rgba(99,102,241,.25);border-radius:11px;color:#fff;font-family:"Space Grotesk",sans-serif;font-size:16px;font-weight:700;text-align:center;outline:none;transition:border-color .2s,box-shadow .2s;}
+    .hov-inp:focus{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.15);}
+    .hov-inp.ok{border-color:#10b981;box-shadow:0 0 0 3px rgba(16,185,129,.1);}
+    .hov-inp.bad{border-color:#ef4444;box-shadow:0 0 0 3px rgba(239,68,68,.1);}
+    .hov-canvas{background:linear-gradient(135deg,rgba(99,102,241,.06),rgba(139,92,246,.04));border:1px solid rgba(99,102,241,.2);border-radius:14px;padding:18px 14px;min-height:120px;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:12px;margin-bottom:14px;position:relative;overflow:hidden;}
+    .hov-canvas::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 30% 50%,rgba(99,102,241,.06),transparent 60%),radial-gradient(ellipse at 70% 50%,rgba(139,92,246,.05),transparent 60%);pointer-events:none;}
+    .hov-obj{border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:26px;animation:objPop .4s cubic-bezier(0.34,1.56,0.64,1) both;filter:drop-shadow(0 4px 12px rgba(0,0,0,.5));flex-shrink:0;}
+    @keyframes objPop{from{opacity:0;transform:scale(0) rotate(-15deg)}to{opacity:1;transform:scale(1) rotate(0)}}
+    .hov-swatches{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+    .hov-swatch{flex:1;min-width:68px;padding:9px 6px;border-radius:10px;border:2px solid transparent;background:rgba(255,255,255,.04);color:#fff;font-family:"Space Grotesk",sans-serif;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .2s;}
+    .hov-swatch:hover{background:rgba(255,255,255,.08);transform:translateY(-2px);}
+    .hov-swatch.sel{border-color:#6366f1;background:rgba(99,102,241,.15);box-shadow:0 0 12px rgba(99,102,241,.2);}
+    .hov-swatch .sdot{width:11px;height:11px;border-radius:50%;flex-shrink:0;}
+    .hov-counter{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+    .hov-cbtn{width:42px;height:42px;border-radius:10px;border:1.5px solid rgba(99,102,241,.3);background:rgba(99,102,241,.08);color:#fff;font-size:22px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;}
+    .hov-cbtn:hover{background:rgba(99,102,241,.2);border-color:#6366f1;}
+    .hov-cval{flex:1;padding:10px;background:rgba(255,255,255,.04);border:1.5px solid rgba(99,102,241,.25);border-radius:10px;color:#fff;font-family:"Orbitron",sans-serif;font-size:22px;font-weight:700;text-align:center;outline:none;transition:border-color .2s;}
+    .hov-cval:focus{border-color:#6366f1;}
+    .hov-cval.ok{border-color:#10b981;}
+    .hov-cval.bad{border-color:#ef4444;}
+    .hov-btn{width:100%;padding:13px;border-radius:12px;border:none;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-family:"Space Grotesk",sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all .3s;box-shadow:0 4px 20px rgba(99,102,241,.3);display:flex;align-items:center;justify-content:center;gap:8px;position:relative;overflow:hidden;margin-top:4px;}
+    .hov-btn::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.12),transparent);}
+    .hov-btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(99,102,241,.45);}
+    .hov-btn:active{transform:translateY(1px);}
+    .hov-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+    .hov-err{display:none;align-items:center;gap:8px;padding:10px 13px;border-radius:10px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#fca5a5;font-size:12px;font-weight:600;margin-bottom:12px;}
+    .hov-err.on{display:flex;animation:hovFadeIn .25s ease both;}
+    .hov-tries{display:flex;align-items:center;justify-content:center;gap:5px;margin-top:10px;}
+    .hov-try{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.1);transition:background .3s;}
+    .hov-try.used{background:#ef4444;box-shadow:0 0 6px #ef4444;}
+    .hov-success{display:none;padding:32px 28px;text-align:center;}
+    .hov-success.on{display:block;animation:hovFadeIn .4s ease both;}
+    .hov-checkring{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#10b981,#059669);display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 16px;box-shadow:0 0 40px rgba(16,185,129,.4);animation:ringPop .5s cubic-bezier(0.34,1.56,0.64,1) both;}
+    @keyframes ringPop{from{transform:scale(0)}to{transform:scale(1)}}
+    .hov-stitle{font-family:"Space Grotesk",sans-serif;font-size:20px;font-weight:800;color:#fff;margin-bottom:6px;}
+    .hov-ssub{font-size:13px;color:rgba(255,255,255,.5);margin-bottom:24px;}
+    .hov-locked{display:none;padding:32px 28px;text-align:center;}
+    .hov-locked.on{display:block;animation:hovFadeIn .4s ease both;}
+    .hov-lockicon{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#ef4444,#dc2626);display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 16px;box-shadow:0 0 40px rgba(239,68,68,.4);animation:ringPop .5s cubic-bezier(0.34,1.56,0.64,1) both;}
+    .hov-ltitle{font-family:"Space Grotesk",sans-serif;font-size:20px;font-weight:800;color:#fca5a5;margin-bottom:6px;}
+    .hov-lsub{font-size:13px;color:rgba(255,255,255,.45);margin-bottom:8px;line-height:1.6;}
+    .hov-timer{font-family:"Orbitron",sans-serif;font-size:28px;font-weight:700;color:#ef4444;margin:12px 0;text-shadow:0 0 20px rgba(239,68,68,.4);}
+    .hov-lbtn{width:100%;padding:12px;border-radius:11px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:rgba(255,255,255,.6);font-family:"Space Grotesk",sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .25s;margin-top:8px;}
+    .hov-lbtn:hover{background:rgba(255,255,255,.08);color:#fff;}
+    @media(max-width:480px){
+      #hovBox{border-radius:20px;}
+      .hov-header,.hov-panel,.hov-success,.hov-locked{padding-left:18px;padding-right:18px;}
+      .hov-steps{padding-left:18px;padding-right:18px;}
+      .hov-mathq{font-size:22px;}
+    }
+
   </style>
 </head>
 <body>
@@ -258,10 +362,106 @@
   <!-- ═══════════════════════════════════
        CYBERSECURITY IMAGE POPUP
   ═══════════════════════════════════ -->
+
+  <!-- ═══════════════════════════════════
+       HOV SECURITY — HUMAN OVER VERIFICATION
+  ═══════════════════════════════════ -->
+  <div id="hovOverlay" role="dialog" aria-modal="true" aria-label="Human Verification">
+    <div id="hovBox">
+      <div class="hov-accent"></div>
+
+      <!-- HEADER -->
+      <div class="hov-header">
+        <div class="hov-brand">
+          <div class="hov-shield">🛡️</div>
+          <div class="hov-brandtxt">
+            <strong>HOV SECURITY</strong>
+            HUMAN OVER VERIFICATION
+          </div>
+        </div>
+        <div class="hov-title">Verify You Are Human</div>
+        <div class="hov-sub">Anti-bot protection powered by T1ERA HOV Security System</div>
+      </div>
+
+      <!-- STEP INDICATORS -->
+      <div class="hov-steps">
+        <div class="hov-step active" id="hstep1">
+          <div class="hov-snum">1</div>
+          <div class="hov-slbl">Math</div>
+        </div>
+        <div class="hov-step" id="hstep2">
+          <div class="hov-snum">2</div>
+          <div class="hov-slbl">Count</div>
+        </div>
+        <div class="hov-step" id="hstep3">
+          <div class="hov-snum">3</div>
+          <div class="hov-slbl">Colour</div>
+        </div>
+      </div>
+
+      <!-- STEP 1: MATH -->
+      <div class="hov-panel on" id="hpanel1">
+        <div class="hov-err" id="hErr1"><span>⚠️</span><span id="hErr1Txt"></span></div>
+        <div class="hov-qlbl"><span></span>Solve the equation</div>
+        <div class="hov-math">
+          <div class="hov-mathq" id="hMathQ">?</div>
+        </div>
+        <input class="hov-inp" id="hMathA" type="number" placeholder="Your answer" autocomplete="off" />
+        <div class="hov-tries" id="hTries1"></div>
+        <button class="hov-btn" onclick="hovNextStep(1)" style="margin-top:14px;">
+          Continue <span>→</span>
+        </button>
+      </div>
+
+      <!-- STEP 2: COUNT OBJECTS -->
+      <div class="hov-panel" id="hpanel2">
+        <div class="hov-err" id="hErr2"><span>⚠️</span><span id="hErr2Txt"></span></div>
+        <div class="hov-qlbl"><span></span>How many objects do you see?</div>
+        <div class="hov-canvas" id="hCanvas"></div>
+        <div class="hov-counter">
+          <button class="hov-cbtn" onclick="hovCount(-1)">−</button>
+          <input class="hov-cval" id="hCountA" type="number" min="0" max="30" value="0" readonly />
+          <button class="hov-cbtn" onclick="hovCount(1)">+</button>
+        </div>
+        <div class="hov-tries" id="hTries2"></div>
+        <button class="hov-btn" onclick="hovNextStep(2)">Continue <span>→</span></button>
+      </div>
+
+      <!-- STEP 3: COLOUR -->
+      <div class="hov-panel" id="hpanel3">
+        <div class="hov-err" id="hErr3"><span>⚠️</span><span id="hErr3Txt"></span></div>
+        <div class="hov-qlbl"><span></span>What colour is shown below?</div>
+        <div class="hov-canvas" id="hColCanvas" style="min-height:90px;"></div>
+        <div class="hov-swatches" id="hSwatches"></div>
+        <div class="hov-tries" id="hTries3"></div>
+        <button class="hov-btn" onclick="hovNextStep(3)">Verify &amp; Continue <span>🔓</span></button>
+      </div>
+
+      <!-- SUCCESS -->
+      <div class="hov-success" id="hSuccess">
+        <div class="hov-checkring">✓</div>
+        <div class="hov-stitle">Human Verified!</div>
+        <div class="hov-ssub">HOV Security clearance granted. Creating your account...</div>
+      </div>
+
+      <!-- LOCKED -->
+      <div class="hov-locked" id="hLocked">
+        <div class="hov-lockicon">🔒</div>
+        <div class="hov-ltitle">Access Temporarily Blocked</div>
+        <div class="hov-lsub">Too many failed verification attempts detected.<br>HOV Security has flagged this session as suspicious.</div>
+        <div class="hov-timer" id="hLockTimer">60</div>
+        <div class="hov-lsub" style="font-size:11px;opacity:.6;">seconds remaining before you can try again</div>
+        <button class="hov-lbtn" onclick="location.href='home.html'">🏠 Go to Home Page</button>
+        <button class="hov-lbtn" onclick="location.href='https://t.me/T1ERA_SecBot'" style="margin-top:4px;">🚀 Open Telegram Instead</button>
+      </div>
+
+    </div>
+  </div>
+
   <div id="csPopupOverlay" role="dialog" aria-modal="true" aria-label="Cybersecurity notice">
     <div id="csPopupBox">
       <button id="csPopupClose" aria-label="Close popup" title="Close">&#x2715;</button>
-      <img id="csPopupImg" src="assets/cybersecurity1.png" alt="Cybersecurity Notice" draggable="false" />
+      <img id="csPopupImg" src="assets/cybersecurity.png" alt="Cybersecurity Notice" draggable="false" />
     </div>
   </div>
 
@@ -736,6 +936,14 @@
       if(!ok){ showA('sErr','Please fix the errors highlighted above.','err'); return; }
 
       setLd('sBtn',true);
+      // Launch HOV Security verification before creating account
+      openHov(async function(){
+        await doSignupFirebase(name, email, pass);
+      });
+    }
+    window.doSignup=doSignup;
+
+    async function doSignupFirebase(name, email, pass){
       // pre-check: is email already registered?
       try{
         const methods=await window._fb.fetchSignInMethodsForEmail(window._auth, email);
@@ -749,13 +957,20 @@
         const cred=await window._fb.createUserWithEmailAndPassword(window._auth, email, pass);
         await window._fb.updateProfile(cred.user,{displayName:name});
         await window._fb.sendEmailVerification(cred.user);
-        showA('sOk','Account created! A verification email has been sent to <strong>'+email+'</strong>. Please check your inbox (and spam folder) to verify your account. 🎉','ok');
+        showA('sOk',
+          '🎉 Account created! A verification email has been sent to <strong>'+email+'</strong>.<br><br>' +
+          '⏳ <strong>Email may take 10–30 minutes</strong> to arrive. Check your inbox and spam folder.<br><br>' +
+          'While waiting you can:<br>' +
+          '<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">' +
+            '<a href="https://t.me/T1ERA_SecBot" target="_blank" rel="noopener" style="flex:1;min-width:120px;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 14px;border-radius:9px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;font-family:Space Grotesk,sans-serif;font-size:13px;font-weight:700;text-decoration:none;">🚀 Open Telegram</a>' +
+            '<a href="home.html" style="flex:1;min-width:120px;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 14px;border-radius:9px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);color:#fff;font-family:Space Grotesk,sans-serif;font-size:13px;font-weight:700;text-decoration:none;">🏠 Go to Home</a>' +
+          '</div>',
+          'ok');
       } catch(err){
         showA('sErr', fbMsg(err.code), 'err');
         setLd('sBtn',false);
       }
     }
-    window.doSignup=doSignup;
 
     /* ═══════════════════════════════════
        GOOGLE SIGN-IN
@@ -809,6 +1024,286 @@
       if(document.getElementById('pSgn').classList.contains('on')) doSignup();
       if(document.getElementById('pRst').classList.contains('on')) doReset();
     });
+
+
+    /* ═══════════════════════════════════
+       HOV SECURITY — HUMAN OVER VERIFICATION
+       3-step: Math → Count → Colour
+       Max 3 wrong per step → lockout
+    ═══════════════════════════════════ */
+    (function(){
+      const STEP_MAX_TRIES = 3;
+      const LOCK_SECONDS   = 60;
+
+      // State
+      let hovStep       = 1;
+      let stepTries     = {1:0, 2:0, 3:0};
+      let hovData       = {};   // {mathAns, objCount, colourAnswer, selectedColour}
+      let hovCallback   = null; // called with true on success
+      let lockTimer     = null;
+
+      // ── EMOJI OBJECTS POOL ──
+      const OBJS = ['🔴','🟠','🟡','🟢','🔵','🟣','⚫','⚪','🟤',
+                    '★','◆','▲','●','■','♦','✦','❋','⬟'];
+
+      // ── COLOUR DEFINITIONS ──
+      const COLOURS = [
+        {name:'Red',    hex:'#ef4444', text:'#fff'},
+        {name:'Blue',   hex:'#3b82f6', text:'#fff'},
+        {name:'Green',  hex:'#10b981', text:'#fff'},
+        {name:'Yellow', hex:'#eab308', text:'#000'},
+        {name:'Purple', hex:'#8b5cf6', text:'#fff'},
+        {name:'Orange', hex:'#f97316', text:'#fff'},
+        {name:'Cyan',   hex:'#06b6d4', text:'#000'},
+        {name:'Pink',   hex:'#ec4899', text:'#fff'},
+      ];
+
+      function rnd(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+      function pick(arr){ return arr[rnd(0,arr.length-1)]; }
+
+      // ── GENERATE CHALLENGES ──
+      function genMath(){
+        const ops = ['+', '-'];
+        const op  = pick(ops);
+        let a, b;
+        if(op==='+'){
+          a = rnd(1,49); b = rnd(1,49);
+        } else {
+          a = rnd(10,99); b = rnd(1,a);
+        }
+        hovData.mathAns = op==='+' ? a+b : a-b;
+        document.getElementById('hMathQ').textContent = a + ' ' + op + ' ' + b + ' = ?';
+        document.getElementById('hMathA').value = '';
+        document.getElementById('hMathA').className = 'hov-inp';
+      }
+
+      function genObjects(){
+        const count = rnd(3,12);
+        hovData.objCount = count;
+        const canvas = document.getElementById('hCanvas');
+        canvas.innerHTML = '';
+        document.getElementById('hCountA').value = '0';
+        document.getElementById('hCountA').className = 'hov-cval';
+        const pool = [...OBJS].sort(()=>Math.random()-.5);
+        for(let i=0;i<count;i++){
+          const el = document.createElement('div');
+          el.className = 'hov-obj';
+          el.style.animationDelay = (i*0.06)+'s';
+          el.textContent = pool[i % pool.length];
+          // random size variation
+          const sz = rnd(28,42)+'px';
+          el.style.fontSize = sz;
+          canvas.appendChild(el);
+        }
+      }
+
+      function genColour(){
+        // pick correct colour + 3 distractors
+        const shuffled = [...COLOURS].sort(()=>Math.random()-.5);
+        const correct  = shuffled[0];
+        const options  = shuffled.slice(0,4).sort(()=>Math.random()-.5);
+        hovData.colourAnswer = correct.name;
+        hovData.selectedColour = null;
+
+        // show big colour block
+        const cc = document.getElementById('hColCanvas');
+        cc.innerHTML = '';
+        cc.style.background = correct.hex;
+        cc.style.minHeight  = '90px';
+        // subtle shimmer overlay
+        cc.style.boxShadow  = '0 0 40px '+correct.hex+'55, inset 0 0 60px rgba(0,0,0,.3)';
+
+        // build swatches
+        const sw = document.getElementById('hSwatches');
+        sw.innerHTML = '';
+        options.forEach(col=>{
+          const btn = document.createElement('button');
+          btn.className = 'hov-swatch';
+          btn.innerHTML = '<span class="sdot" style="background:'+col.hex+'"></span>'+col.name;
+          btn.onclick = function(){
+            document.querySelectorAll('.hov-swatch').forEach(s=>s.classList.remove('sel'));
+            btn.classList.add('sel');
+            hovData.selectedColour = col.name;
+          };
+          sw.appendChild(btn);
+        });
+      }
+
+      // ── RENDER TRY DOTS ──
+      function renderTries(step){
+        const el = document.getElementById('hTries'+step);
+        el.innerHTML = '';
+        for(let i=0;i<STEP_MAX_TRIES;i++){
+          const d=document.createElement('div');
+          d.className='hov-try'+(i<stepTries[step]?' used':'');
+          el.appendChild(d);
+        }
+      }
+
+      // ── STEP INDICATOR UPDATE ──
+      function updateSteps(current){
+        for(let i=1;i<=3;i++){
+          const el=document.getElementById('hstep'+i);
+          el.classList.remove('active','done');
+          if(i<current) el.classList.add('done');
+          else if(i===current) el.classList.add('active');
+        }
+      }
+
+      // ── SHOW ERROR ──
+      function hovErr(step, msg){
+        const el  = document.getElementById('hErr'+step);
+        const txt = document.getElementById('hErr'+step+'Txt');
+        txt.textContent = msg;
+        el.classList.add('on');
+        setTimeout(()=>el.classList.remove('on'), 3500);
+      }
+
+      // ── WRONG ANSWER HANDLER ──
+      function handleWrong(step, regenerate){
+        stepTries[step]++;
+        renderTries(step);
+        const remaining = STEP_MAX_TRIES - stepTries[step];
+
+        if(stepTries[step] >= STEP_MAX_TRIES){
+          startLockout();
+          return;
+        }
+
+        const msgs = [
+          'Incorrect. ' + remaining + ' attempt' + (remaining===1?'':'s') + ' remaining.',
+          'Wrong answer — please try again carefully. ' + remaining + ' left.',
+          'Not quite right. ' + remaining + ' attempt' + (remaining===1?'':'s') + ' left.',
+        ];
+        hovErr(step, msgs[rnd(0,msgs.length-1)]);
+        // regenerate challenge on wrong
+        if(regenerate) regenerate();
+      }
+
+      // ── NEXT STEP / VALIDATE ──
+      window.hovNextStep = function(step){
+        if(step===1){
+          const ans = parseInt(document.getElementById('hMathA').value);
+          if(isNaN(ans)){
+            hovErr(1,'Please enter your answer first.'); return;
+          }
+          if(ans !== hovData.mathAns){
+            document.getElementById('hMathA').className='hov-inp bad';
+            handleWrong(1, genMath); return;
+          }
+          document.getElementById('hMathA').className='hov-inp ok';
+          goStep(2);
+        } else if(step===2){
+          const ans = parseInt(document.getElementById('hCountA').value);
+          if(ans !== hovData.objCount){
+            document.getElementById('hCountA').className='hov-cval bad';
+            handleWrong(2, genObjects); return;
+          }
+          document.getElementById('hCountA').className='hov-cval ok';
+          goStep(3);
+        } else if(step===3){
+          if(!hovData.selectedColour){
+            hovErr(3,'Please select a colour.'); return;
+          }
+          if(hovData.selectedColour !== hovData.colourAnswer){
+            handleWrong(3, genColour); return;
+          }
+          // ALL PASSED
+          hovSuccess();
+        }
+      };
+
+      window.hovCount = function(delta){
+        const el = document.getElementById('hCountA');
+        let v = parseInt(el.value)||0;
+        v = Math.max(0, Math.min(30, v+delta));
+        el.value = v;
+        el.className='hov-cval';
+      };
+
+      function goStep(n){
+        // hide all panels
+        [1,2,3].forEach(i=>{
+          document.getElementById('hpanel'+i).classList.remove('on');
+        });
+        document.getElementById('hpanel'+n).classList.add('on');
+        hovStep = n;
+        updateSteps(n);
+        stepTries[n] = 0;
+        renderTries(n);
+        if(n===2) genObjects();
+        if(n===3) genColour();
+        // scroll to top
+        document.getElementById('hovBox').scrollTop=0;
+      }
+
+      function hovSuccess(){
+        [1,2,3].forEach(i=>document.getElementById('hpanel'+i).classList.remove('on'));
+        document.getElementById('hSuccess').classList.add('on');
+        updateSteps(4);
+        // after brief moment, run the actual signup
+        setTimeout(()=>{
+          closeHov();
+          if(hovCallback) hovCallback();
+        }, 1800);
+      }
+
+      // ── LOCKOUT ──
+      function startLockout(){
+        [1,2,3].forEach(i=>document.getElementById('hpanel'+i).classList.remove('on'));
+        document.getElementById('hSuccess').classList.remove('on');
+        document.getElementById('hLocked').classList.add('on');
+        let remaining = LOCK_SECONDS;
+        document.getElementById('hLockTimer').textContent = remaining;
+        lockTimer = setInterval(()=>{
+          remaining--;
+          document.getElementById('hLockTimer').textContent = remaining;
+          if(remaining<=0){
+            clearInterval(lockTimer);
+            // reset and re-show form after lockout
+            closeHov();
+            showA('sErr',
+              '⏳ Lockout expired. You may try again — <strong>please complete verification carefully.</strong>',
+              'warn');
+            setLd('sBtn',false);
+          }
+        },1000);
+      }
+
+      // ── OPEN / CLOSE ──
+      function openHov(callback){
+        hovCallback = callback;
+        hovStep     = 1;
+        stepTries   = {1:0,2:0,3:0};
+        [1,2,3].forEach(i=>document.getElementById('hpanel'+i).classList.remove('on'));
+        document.getElementById('hSuccess').classList.remove('on');
+        document.getElementById('hLocked').classList.remove('on');
+        [1,2,3].forEach(i=>document.getElementById('hErr'+i).classList.remove('on'));
+        document.getElementById('hpanel1').classList.add('on');
+        updateSteps(1);
+        genMath();
+        renderTries(1);
+        renderTries(2);
+        renderTries(3);
+        document.getElementById('hovOverlay').classList.add('on');
+        document.getElementById('hovBox').scrollTop=0;
+      }
+
+      function closeHov(){
+        const ov = document.getElementById('hovOverlay');
+        ov.style.opacity='0';
+        ov.style.transition='opacity .3s';
+        setTimeout(()=>{
+          ov.classList.remove('on');
+          ov.style.opacity='';
+          ov.style.transition='';
+        },300);
+        if(lockTimer){ clearInterval(lockTimer); lockTimer=null; }
+      }
+
+      window.openHov  = openHov;
+      window.closeHov = closeHov;
+    })();
 
     /* ═══════════════════════════════════
        CYBERSECURITY POPUP — close logic
