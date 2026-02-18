@@ -787,7 +787,6 @@
       margin-right: 6px;
     }
 
-    /* Video tag special style */
     .tag-video {
       border-color: rgba(249,115,22,0.3);
       background: rgba(249,115,22,0.06);
@@ -902,7 +901,6 @@
 
     .mode-card:hover::before { transform: scaleX(1); }
 
-    /* ── Video card special style ── */
     .mode-card.video-card {
       border-color: rgba(249,115,22,0.2);
       background: linear-gradient(135deg, rgba(249,115,22,0.04), var(--bg-card));
@@ -980,7 +978,6 @@
       color: #fb923c;
     }
 
-    /* ── Video card CTA link ── */
     .video-card-cta {
       display: inline-flex;
       align-items: center;
@@ -1222,8 +1219,36 @@
       gap: 24px;
     }
 
+    .footer-left {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
     .footer-text { font-size: 14px; color: var(--text-tertiary); }
-    .footer-links { display: flex; gap: 16px; }
+
+    /* ====== FOOTER LEGAL LINKS — clean, crawler-friendly ====== */
+    .footer-legal {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .footer-legal a {
+      color: rgba(255, 255, 255, 0.45);
+      font-size: 13px;
+      font-weight: 500;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      transition: color 0.2s ease;
+    }
+
+    .footer-legal a:hover {
+      color: #6366f1;
+    }
+
+    .footer-links { display: flex; gap: 16px; flex-wrap: wrap; }
 
     /* ====== MOBILE MENU ====== */
     .mobile-menu-btn {
@@ -1294,34 +1319,11 @@
       .container { padding: 0 20px; }
       .header-inner { height: 64px; }
       .header-actions { gap: 8px; }
-      
-      /* Hide Docs button on mobile */
-      .header-actions .btn:not(.btn-primary) { 
-        display: none; 
-      }
-      
-      /* Resize Launch T1ERA button for mobile */
-      .header-actions .btn-primary { 
-        padding: 8px 16px; 
-        font-size: 12px; 
-        gap: 6px; 
-        white-space: nowrap;
-      }
-      
+      .header-actions .btn:not(.btn-primary) { display: none; }
+      .header-actions .btn-primary { padding: 8px 16px; font-size: 12px; gap: 6px; white-space: nowrap; }
       .header-actions .btn-icon { width: 6px; height: 6px; }
-      
-      /* Compress mobile menu button */
-      .mobile-menu-btn {
-        width: 36px;
-        height: 36px;
-        gap: 4px;
-      }
-      
-      .mobile-menu-btn span {
-        width: 16px;
-        height: 2px;
-      }
-      
+      .mobile-menu-btn { width: 36px; height: 36px; gap: 4px; }
+      .mobile-menu-btn span { width: 16px; height: 2px; }
       .logo { font-size: 18px; }
       .logo-mark { width: 36px; height: 36px; font-size: 14px; }
       .hero { padding: 120px 0 80px; }
@@ -1337,34 +1339,23 @@
       .video-banner-text h3 { font-size: 15px; }
       .chat-banner { padding: 20px; }
       .chat-banner-text h3 { font-size: 15px; }
+      .footer-content { flex-direction: column; align-items: flex-start; }
+      .footer-links { flex-wrap: wrap; }
     }
 
     @media (max-width: 480px) {
       .hero h1 { font-size: 32px; }
       .hero-cta { flex-direction: column; align-items: stretch; }
       .btn { width: 100%; justify-content: center; }
-      
-      /* Further compress header on very small screens */
-      .header-actions .btn-primary { 
-        padding: 6px 12px; 
-        font-size: 11px; 
-      }
-      
-      .mobile-menu-btn {
-        width: 32px;
-        height: 32px;
-      }
-      
-      .mobile-menu-btn span {
-        width: 14px;
-      }
-      
+      .header-actions .btn-primary { padding: 6px 12px; font-size: 11px; }
+      .mobile-menu-btn { width: 32px; height: 32px; }
+      .mobile-menu-btn span { width: 14px; }
       .stats-bar { grid-template-columns: 1fr; }
       .video-banner { flex-direction: column; }
       .chat-banner { flex-direction: column; }
     }
 
-    /* ====== CANVA PRESENTATION POPUP ====== */
+    /* ====== CANVA POPUP ====== */
     .canva-overlay {
       position: fixed;
       inset: 0;
@@ -1377,13 +1368,9 @@
       padding: 16px;
       opacity: 0;
       visibility: hidden;
-      transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1),
-                  visibility 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .canva-overlay.active {
-      opacity: 1;
-      visibility: visible;
-    }
+    .canva-overlay.active { opacity: 1; visibility: visible; }
     .canva-popup {
       position: relative;
       width: 100%;
@@ -1392,17 +1379,11 @@
       border: 1px solid rgba(59, 130, 246, 0.35);
       border-radius: 20px;
       overflow: hidden;
-      box-shadow:
-        0 0 0 1px rgba(59, 130, 246, 0.1),
-        0 25px 60px rgba(0, 0, 0, 0.8),
-        0 0 80px rgba(59, 130, 246, 0.15),
-        0 0 140px rgba(139, 92, 246, 0.1);
+      box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.1), 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 80px rgba(59, 130, 246, 0.15), 0 0 140px rgba(139, 92, 246, 0.1);
       transform: scale(0.92) translateY(24px);
       transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .canva-overlay.active .canva-popup {
-      transform: scale(1) translateY(0);
-    }
+    .canva-overlay.active .canva-popup { transform: scale(1) translateY(0); }
     .canva-popup-header {
       display: flex;
       align-items: center;
@@ -1475,7 +1456,6 @@
       font-family: 'Space Grotesk', sans-serif;
       letter-spacing: 0.04em;
     }
-    /* Loading spinner shown while iframe loads on PC */
     .canva-loader {
       position: absolute;
       inset: 0;
@@ -1488,10 +1468,7 @@
       z-index: 2;
       transition: opacity 0.4s ease;
     }
-    .canva-loader.hidden {
-      opacity: 0;
-      pointer-events: none;
-    }
+    .canva-loader.hidden { opacity: 0; pointer-events: none; }
     .canva-spinner {
       width: 48px;
       height: 48px;
@@ -1501,9 +1478,7 @@
       border-right-color: var(--accent-secondary);
       animation: spinnerSpin 0.9s linear infinite;
     }
-    @keyframes spinnerSpin {
-      to { transform: rotate(360deg); }
-    }
+    @keyframes spinnerSpin { to { transform: rotate(360deg); } }
     .canva-loader-text {
       font-family: 'Space Grotesk', sans-serif;
       font-size: 13px;
@@ -1532,24 +1507,15 @@
     }
 
     @media (max-width: 768px) {
-      .canva-overlay {
-        padding: 12px;
-        align-items: center;
-      }
-      .canva-popup {
-        border-radius: 16px;
-        max-width: 100%;
-      }
+      .canva-overlay { padding: 12px; align-items: center; }
+      .canva-popup { border-radius: 16px; max-width: 100%; }
       .canva-popup-header { padding: 12px 14px; }
       .canva-popup-title { font-size: 12px; }
       .canva-close-btn { width: 32px; height: 32px; font-size: 18px; }
       .canva-popup-footer { font-size: 10px; padding: 8px 14px; }
     }
     @media (max-width: 480px) {
-      .canva-overlay {
-        padding: 10px;
-        align-items: center;
-      }
+      .canva-overlay { padding: 10px; align-items: center; }
       .canva-popup { border-radius: 14px; }
     }
 
@@ -1559,10 +1525,9 @@
       transform: translateY(30px);
       transition: all 0.8s var(--transition);
     }
-
     .fade-in.visible { opacity: 1; transform: translateY(0); }
 
-    /* ====== MODAL/POPUP ====== */
+    /* ====== MODAL ====== */
     .modal-overlay {
       position: fixed;
       inset: 0;
@@ -1575,9 +1540,7 @@
       opacity: 0;
       transition: opacity 0.3s var(--transition);
     }
-
     .modal-overlay.active { display: flex; opacity: 1; }
-
     .modal {
       background: var(--bg-card);
       border: 1px solid var(--border-primary);
@@ -1590,9 +1553,7 @@
       transition: all 0.3s var(--transition);
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 80px var(--glow-primary);
     }
-
     .modal-overlay.active .modal { transform: scale(1) translateY(0); }
-
     .modal-close {
       position: absolute;
       top: 20px;
@@ -1611,14 +1572,12 @@
       font-size: 20px;
       line-height: 1;
     }
-
     .modal-close:hover {
       background: var(--bg-tertiary);
       border-color: var(--accent-primary);
       color: var(--text-primary);
       transform: rotate(90deg);
     }
-
     .modal-icon {
       width: 80px;
       height: 80px;
@@ -1632,12 +1591,10 @@
       font-size: 40px;
       animation: modalIconPulse 2s ease-in-out infinite;
     }
-
     @keyframes modalIconPulse {
       0%, 100% { transform: scale(1); box-shadow: 0 0 20px var(--glow-primary); }
       50% { transform: scale(1.05); box-shadow: 0 0 40px var(--glow-primary), 0 0 60px var(--glow-secondary); }
     }
-
     .modal-title {
       font-size: 28px;
       font-weight: 800;
@@ -1649,7 +1606,6 @@
       background-clip: text;
       -webkit-text-fill-color: transparent;
     }
-
     .modal-subtitle {
       font-size: 16px;
       color: var(--text-secondary);
@@ -1657,11 +1613,10 @@
       margin-bottom: 24px;
       line-height: 1.6;
     }
-
     .modal-date {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
+      display: block;
+      width: fit-content;
+      margin: 0 auto 32px;
       padding: 8px 16px;
       border-radius: 8px;
       background: rgba(59, 130, 246, 0.1);
@@ -1669,12 +1624,8 @@
       font-size: 14px;
       font-weight: 700;
       color: var(--accent-primary);
-      margin: 0 auto 32px;
-      display: block;
-      width: fit-content;
       font-family: 'Space Grotesk', sans-serif;
     }
-
     .modal-content {
       background: var(--bg-secondary);
       border: 1px solid var(--border-primary);
@@ -1682,7 +1633,6 @@
       padding: 24px;
       margin-bottom: 32px;
     }
-
     .modal-content h4 {
       font-size: 16px;
       font-weight: 700;
@@ -1690,9 +1640,7 @@
       font-family: 'Space Grotesk', sans-serif;
       color: var(--text-primary);
     }
-
     .modal-features { display: flex; flex-direction: column; gap: 12px; }
-
     .modal-feature {
       display: flex;
       align-items: center;
@@ -1700,7 +1648,6 @@
       font-size: 14px;
       color: var(--text-secondary);
     }
-
     .modal-feature-icon {
       width: 8px;
       height: 8px;
@@ -1708,9 +1655,7 @@
       background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
       flex-shrink: 0;
     }
-
     .modal-actions { display: flex; gap: 12px; }
-
     .modal-btn {
       flex: 1;
       padding: 14px 24px;
@@ -1727,31 +1672,23 @@
       justify-content: center;
       gap: 8px;
     }
-
     .modal-btn-primary {
       background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
       color: var(--text-primary);
       box-shadow: 0 4px 20px var(--glow-primary);
     }
-
-    .modal-btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 30px var(--glow-primary);
-    }
-
+    .modal-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 30px var(--glow-primary); }
     .modal-btn-secondary {
       background: var(--bg-secondary);
       border: 1px solid var(--border-primary);
       color: var(--text-secondary);
     }
-
     .modal-btn-secondary:hover {
       background: var(--bg-tertiary);
       border-color: var(--accent-primary);
       color: var(--text-primary);
       transform: translateY(-2px);
     }
-
     @media (max-width: 480px) {
       .modal { padding: 32px 24px; }
       .modal-title { font-size: 24px; }
@@ -1761,7 +1698,6 @@
   </style>
 </head>
 <body>
-  <!-- Main Content -->
   <div id="mainContent" class="visible">
     <div class="bg-grid"></div>
     <div class="bg-gradient"></div>
@@ -1844,9 +1780,7 @@
                   <p>Intelligent conversations powered by advanced AI · Multi-mode support · 24/7 Available</p>
                 </div>
               </div>
-              <a class="btn btn-chat" 
-                href="ChatT1era.html" 
-                style="flex-shrink:0;">
+              <a class="btn btn-chat" href="ChatT1era.html" style="flex-shrink:0;">
                 ⚡ Try Now — Free
               </a>
             </div>
@@ -1865,10 +1799,7 @@
                   <p>Text-to-video powered by LTX-2 on Azure A10 GPU · Up to 1080p · 24fps</p>
                 </div>
               </div>
-              <a class="btn btn-video" 
-                href="https://fdcb6cb22aa4aa08b2.gradio.live" 
-                style="flex-shrink:0;" 
-                target="_blank">
+              <a class="btn btn-video" href="https://fdcb6cb22aa4aa08b2.gradio.live" style="flex-shrink:0;" target="_blank">
                 ⚡ Try Now — Free
               </a>
             </div>
@@ -1951,7 +1882,6 @@
           </div>
 
           <div class="modes-grid">
-            <!-- Video Generator card — first, most prominent -->
             <div class="mode-card video-card fade-in">
               <span class="mode-card-new-badge">✨ New</span>
               <div class="mode-icon video-icon">🎬</div>
@@ -2078,9 +2008,7 @@
                   <a class="btn btn-primary" href="ChatT1era.html" style="background: linear-gradient(135deg, var(--accent-tertiary), var(--accent-secondary));">
                     💬 Try Chat
                   </a>
-                  <a class="btn btn-video" 
-                    href="https://fdcb6cb22aa4aa08b2.gradio.live" 
-                    target="_blank">
+                  <a class="btn btn-video" href="https://fdcb6cb22aa4aa08b2.gradio.live" target="_blank">
                     🎬 Generate Video
                   </a>
                   <a class="btn" href="https://t1era-or-kode-blind.gitbook.io/t1era/documentation" target="_blank" rel="noopener">
@@ -2200,33 +2128,42 @@
         </div>
       </section>
 
-      <!-- Footer -->
+      <!-- ═══════════════════════════════════════════════════════
+           FOOTER — Privacy Policy & Terms links are plain <a>
+           tags with absolute URLs and underline so Google's
+           crawler detects them with certainty.
+      ════════════════════════════════════════════════════════ -->
       <footer>
         <div class="container">
           <div class="footer-content">
-            <div class="footer-text">
-              © <span id="year"></span> T1ERA. Professional AI Suite for Telegram.
-              <span style="display:block;margin-top:8px;">
-                <a href="privacy.html" style="color:rgba(255,255,255,.35);text-decoration:none;font-size:12px;margin-right:16px;transition:color .2s;" onmouseover="this.style.color='#6366f1'" onmouseout="this.style.color='rgba(255,255,255,.35)'">Privacy Policy</a>
-                <a href="terms.html" style="color:rgba(255,255,255,.35);text-decoration:none;font-size:12px;transition:color .2s;" onmouseover="this.style.color='#6366f1'" onmouseout="this.style.color='rgba(255,255,255,.35)'">Terms of Service</a>
-              </span>
+
+            <div class="footer-left">
+              <div class="footer-text">
+                © <span id="year"></span> T1ERA. Professional AI Suite for Telegram.
+              </div>
+              <!-- LEGAL LINKS: absolute URLs, underlined, no JS handlers -->
+              <nav class="footer-legal" aria-label="Legal">
+                <a href="https://t1era.netlify.app/privacy.html">Privacy Policy</a>
+                <a href="https://t1era.netlify.app/terms.html">Terms of Service</a>
+              </nav>
             </div>
+
             <div class="footer-links">
               <a class="btn" href="ChatT1era.html">💬 AI Chat</a>
               <a class="btn btn-video" href="generate.html">🎬 Video Generator</a>
               <a class="btn" href="https://t1era-or-kode-blind.gitbook.io/t1era/documentation" target="_blank" rel="noopener">Documentation</a>
               <a class="btn" href="https://t.me/T1ERA_SecBot" target="_blank" rel="noopener">Launch Bot</a>
             </div>
+
           </div>
         </div>
       </footer>
     </div>
   </div>
 
-  <!-- ══ CANVA PRESENTATION POPUP (auto-shows 2.5s after page load) ══ -->
+  <!-- CANVA POPUP -->
   <div class="canva-overlay" id="canvaOverlay">
     <div class="canva-popup">
-      <!-- Header bar with title + X close button -->
       <div class="canva-popup-header">
         <div class="canva-popup-title">
           <span class="canva-popup-title-dot"></span>
@@ -2234,10 +2171,7 @@
         </div>
         <button class="canva-close-btn" id="canvaCloseBtn" aria-label="Close presentation">&#x2715;</button>
       </div>
-
-      <!-- Canva embed iframe (16:9 responsive) -->
       <div class="canva-iframe-wrap">
-        <!-- Loading spinner — hides once iframe fires onload -->
         <div class="canva-loader" id="canvaLoader">
           <div class="canva-spinner"></div>
           <div class="canva-loader-text">Loading Presentation…</div>
@@ -2252,8 +2186,6 @@
           onload="document.getElementById('canvaLoader').classList.add('hidden')">
         </iframe>
       </div>
-
-      <!-- Footer hint -->
       <div class="canva-popup-footer">Use arrow keys or swipe to navigate slides &nbsp;·&nbsp; Press ESC or ✕ to close</div>
     </div>
   </div>
@@ -2277,11 +2209,11 @@
           </div>
           <div class="modal-feature">
             <span class="modal-feature-icon"></span>
-            <span>Advanced analytics & insights</span>
+            <span>Advanced analytics &amp; insights</span>
           </div>
           <div class="modal-feature">
             <span class="modal-feature-icon"></span>
-            <span>Enhanced AI tools & features</span>
+            <span>Enhanced AI tools &amp; features</span>
           </div>
           <div class="modal-feature">
             <span class="modal-feature-icon"></span>
@@ -2303,12 +2235,7 @@
   </div>
 
   <script>
-    // ══════════════════════════════════════════════════════════
-    // INTRO GATE — runs before anything else
-    // Every page load/refresh checks for the sessionStorage flag.
-    // If missing → redirect to index.html for the intro screen.
-    // If present → remove it and stay on this page normally.
-    // ══════════════════════════════════════════════════════════
+    // ══ INTRO GATE ══
     (function() {
       if (!sessionStorage.getItem('loadedIntro')) {
         window.location.replace('index.html');
@@ -2317,9 +2244,7 @@
       }
     })();
 
-    // ── CANVA PRESENTATION POPUP ──────────────────────────────
-    // Auto-shows 2.5 seconds after arriving on home.html.
-    // Close via: X button, clicking backdrop, or ESC key.
+    // ══ CANVA POPUP ══
     (function() {
       const canvaOverlay  = document.getElementById('canvaOverlay');
       const canvaCloseBtn = document.getElementById('canvaCloseBtn');
@@ -2328,40 +2253,29 @@
         canvaOverlay.classList.add('active');
         document.body.style.overflow = 'hidden';
       }
-
       function closeCanvaPopup() {
         canvaOverlay.classList.remove('active');
         document.body.style.overflow = '';
       }
 
-      // Auto-open after 2.5 s
       setTimeout(openCanvaPopup, 2500);
-
-      // X button
       canvaCloseBtn.addEventListener('click', closeCanvaPopup);
-
-      // Click on dark backdrop (outside popup box)
       canvaOverlay.addEventListener('click', function(e) {
         if (e.target === canvaOverlay) closeCanvaPopup();
       });
-
-      // ESC key
       document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && canvaOverlay.classList.contains('active')) {
-          closeCanvaPopup();
-        }
+        if (e.key === 'Escape' && canvaOverlay.classList.contains('active')) closeCanvaPopup();
       });
     })();
 
-
-    const BOT_URL = "https://t.me/T1ERA_SecBot";
-    const DOCS_URL = "https://t1era-or-kode-blind.gitbook.io/t1era/documentation";
+    const BOT_URL    = "https://t.me/T1ERA_SecBot";
+    const DOCS_URL   = "https://t1era-or-kode-blind.gitbook.io/t1era/documentation";
     const WEBAPP_URL = "#";
 
     document.getElementById('year').textContent = new Date().getFullYear();
 
     // ── TYPING ANIMATION ──
-    const typingText = document.getElementById('typingText');
+    const typingText  = document.getElementById('typingText');
     const textsToType = ['Built for Results', 'Enhancement Human Making Decision'];
     let textIndex = 0, charIndex = 0, isDeleting = false;
     const typingSpeed = 100, pauseEnd = 2000;
@@ -2386,21 +2300,19 @@
 
     // ── MOBILE MENU ──
     const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-    const mobileNav = document.getElementById('mobileNav');
+    const mobileNav     = document.getElementById('mobileNav');
 
     mobileMenuBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       mobileMenuBtn.classList.toggle('active');
       mobileNav.classList.toggle('active');
     });
-
     document.querySelectorAll('.mobile-nav a').forEach(link => {
       link.addEventListener('click', () => {
         mobileMenuBtn.classList.remove('active');
         mobileNav.classList.remove('active');
       });
     });
-
     document.addEventListener('click', (e) => {
       if (mobileNav.classList.contains('active')) {
         if (!mobileMenuBtn.contains(e.target) && !mobileNav.contains(e.target)) {
@@ -2418,10 +2330,10 @@
 
     // ── PROGRESS BAR ──
     const progressBar = document.getElementById('progressBar');
-    const milestones = document.querySelectorAll('.milestone');
+    const milestones  = document.querySelectorAll('.milestone');
     function updateProgress() {
       const roadmapSection = document.getElementById('roadmap');
-      const rect = roadmapSection.getBoundingClientRect();
+      const rect     = roadmapSection.getBoundingClientRect();
       const progress = Math.max(0, Math.min(1, (window.innerHeight - rect.top) / window.innerHeight));
       progressBar.style.width = `${progress * 100}%`;
       const activeCount = Math.floor(progress * milestones.length);
@@ -2444,10 +2356,10 @@
     });
 
     // ── WEBAPP MODAL ──
-    const webappBtn = document.getElementById('webappBtn');
-    const webappModal = document.getElementById('webappModal');
-    const modalClose = document.getElementById('modalClose');
-    const modalNotifyMe = document.getElementById('modalNotifyMe');
+    const webappBtn      = document.getElementById('webappBtn');
+    const webappModal    = document.getElementById('webappModal');
+    const modalClose     = document.getElementById('modalClose');
+    const modalNotifyMe  = document.getElementById('modalNotifyMe');
 
     if (webappBtn && WEBAPP_URL === '#') {
       webappBtn.addEventListener('click', (e) => {
@@ -2466,79 +2378,53 @@
       closeModal();
     });
 
-    // ── T1ERA VIDEO GENERATION ENGINE ──
-
-    /** 1. Polling Function: Checks the status of a job every 2.5s */
+    // ── VIDEO GENERATION ENGINE ──
     async function pollJobStatus(jobId, onUpdate, onDone, onError) {
-        const POLL_INTERVAL = 2500; 
-        const MAX_POLLS = 100; // ~4 minutes total safety
-        let polls = 0;
-
-        const interval = setInterval(async () => {
-            polls++;
-            if (polls > MAX_POLLS) {
-                clearInterval(interval);
-                onError("Generation timed out. The GPU is taking longer than expected.");
-                return;
-            }
-
-            try {
-                const res = await fetch(`/.netlify/functions/status?action=check&job_id=${jobId}`);
-                if (!res.ok) throw new Error("Status check failed");
-                const data = await res.json();
-
-                onUpdate(data);
-
-                if (data.status === "done") {
-                    clearInterval(interval);
-                    onDone(data.video_url);
-                } else if (data.status === "error") {
-                    clearInterval(interval);
-                    onError(data.error_message || "GPU encountered an error.");
-                }
-            } catch (err) {
-                console.warn("Polling error (retrying):", err.message);
-            }
-        }, POLL_INTERVAL);
+      const POLL_INTERVAL = 2500;
+      const MAX_POLLS = 100;
+      let polls = 0;
+      const interval = setInterval(async () => {
+        polls++;
+        if (polls > MAX_POLLS) {
+          clearInterval(interval);
+          onError("Generation timed out. The GPU is taking longer than expected.");
+          return;
+        }
+        try {
+          const res = await fetch(`/.netlify/functions/status?action=check&job_id=${jobId}`);
+          if (!res.ok) throw new Error("Status check failed");
+          const data = await res.json();
+          onUpdate(data);
+          if (data.status === "done") { clearInterval(interval); onDone(data.video_url); }
+          else if (data.status === "error") { clearInterval(interval); onError(data.error_message || "GPU encountered an error."); }
+        } catch (err) { console.warn("Polling error (retrying):", err.message); }
+      }, POLL_INTERVAL);
     }
 
-    /** 2. Trigger Logic: Connects your UI to the Netlify Proxy */
     async function handleGenerateVideo(payload) {
-        try {
-            console.log("Starting generation...");
-            
-            const response = await fetch('/.netlify/functions/proxy', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            const initData = await response.json();
-            if (initData.error) throw new Error(initData.message);
-
-            const jobId = initData.job_id;
-
-            pollJobStatus(
-                jobId,
-                (update) => {
-                    console.log(`Status: ${update.status} | Progress: ${update.progress_pct}%`);
-                },
-                (videoUrl) => {
-                    console.log("Video Ready:", videoUrl);
-                },
-                (errorMsg) => {
-                    alert("Error: " + errorMsg);
-                }
-            );
-
-        } catch (err) {
-            alert("Failed to start generation: " + err.message);
-        }
+      try {
+        const response = await fetch('/.netlify/functions/proxy', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const initData = await response.json();
+        if (initData.error) throw new Error(initData.message);
+        pollJobStatus(
+          initData.job_id,
+          (update) => { console.log(`Status: ${update.status} | Progress: ${update.progress_pct}%`); },
+          (videoUrl) => { console.log("Video Ready:", videoUrl); },
+          (errorMsg) => { alert("Error: " + errorMsg); }
+        );
+      } catch (err) {
+        alert("Failed to start generation: " + err.message);
+      }
     }
   </script>
-  <!-- Firebase auth state — update Launch button if already logged in -->
+
+  <!-- Firebase auth state -->
   <script type="module">
-    import { initializeApp }       from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+    import { initializeApp }            from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
     import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 
     const firebaseConfig = {
@@ -2557,14 +2443,12 @@
       const btn     = document.getElementById('launchBtn');
       const btnText = document.getElementById('launchBtnText');
       if (user) {
-        // Already logged in — go straight to Telegram bot
-        btn.href = 'https://t.me/T1ERA_SecBot';
+        btn.href   = 'https://t.me/T1ERA_SecBot';
         btn.target = '_blank';
-        btn.rel = 'noopener';
+        btn.rel    = 'noopener';
         const name = (user.displayName || user.email || '').split(' ')[0];
         btnText.textContent = `Hi ${name} · Open Bot`;
       } else {
-        // Not logged in — go to auth page
         btn.href   = 'auth.html';
         btn.target = '';
         btnText.textContent = 'Launch T1ERA';
