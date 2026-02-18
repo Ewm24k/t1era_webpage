@@ -261,7 +261,7 @@
   <div id="csPopupOverlay" role="dialog" aria-modal="true" aria-label="Cybersecurity notice">
     <div id="csPopupBox">
       <button id="csPopupClose" aria-label="Close popup" title="Close">&#x2715;</button>
-      <img id="csPopupImg" src="assets/cybersecurity1.png" alt="Cybersecurity Notice" draggable="false" />
+      <img id="csPopupImg" src="assets/cybersecurity.png" alt="Cybersecurity Notice" draggable="false" />
     </div>
   </div>
 
@@ -433,7 +433,7 @@
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
     import {
       getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
-      signOut, sendPasswordResetEmail, updateProfile,
+      signOut, sendPasswordResetEmail, updateProfile, sendEmailVerification,
       GoogleAuthProvider, signInWithPopup, onAuthStateChanged,
       fetchSignInMethodsForEmail, getAdditionalUserInfo
     } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
@@ -452,7 +452,7 @@
     window._auth = auth;
     window._gp   = gp;
     window._fb   = { createUserWithEmailAndPassword, signInWithEmailAndPassword,
-                     signOut, sendPasswordResetEmail, updateProfile,
+                     signOut, sendPasswordResetEmail, updateProfile, sendEmailVerification,
                      signInWithPopup, fetchSignInMethodsForEmail, getAdditionalUserInfo };
 
     onAuthStateChanged(auth, user => {
@@ -748,7 +748,8 @@
       try{
         const cred=await window._fb.createUserWithEmailAndPassword(window._auth, email, pass);
         await window._fb.updateProfile(cred.user,{displayName:name});
-        showA('sOk','Account created! Welcome to T1ERA 🎉','ok');
+        await window._fb.sendEmailVerification(cred.user);
+        showA('sOk','Account created! A verification email has been sent to <strong>'+email+'</strong>. Please check your inbox (and spam folder) to verify your account. 🎉','ok');
       } catch(err){
         showA('sErr', fbMsg(err.code), 'err');
         setLd('sBtn',false);
