@@ -8,6 +8,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700;800&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+
+  <!-- ═══════════════════════════════════
+       reCAPTCHA ENTERPRISE — load script
+  ═══════════════════════════════════ -->
+  <script src="https://www.google.com/recaptcha/enterprise.js?render=6LeGCHAsAAAAAJX2MQXouPsu1Rx0helciRjRitFl"></script>
+
   <style>
     :root {
       --bg:       #000000;
@@ -638,6 +644,11 @@
       fetchSignInMethodsForEmail, getAdditionalUserInfo
     } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 
+    /* ═══════════════════════════════════
+       NEW — import Firebase Functions SDK
+    ═══════════════════════════════════ */
+    import { getFunctions, httpsCallable } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js';
+
     const app  = initializeApp({
       apiKey:            "AIzaSyBnt9mbb8LdMVeguSHUmS20L6uBHIfxwAs",
       authDomain:        "t1era-v2.firebaseapp.com",
@@ -648,6 +659,14 @@
     });
     const auth = getAuth(app);
     const gp   = new GoogleAuthProvider();
+
+    /* ═══════════════════════════════════
+       NEW — expose httpsCallable globally
+       so the regular <script> block can
+       call the verifyRecaptcha Cloud Fn
+    ═══════════════════════════════════ */
+    const functions = getFunctions(app);
+    window._callFn  = (name, data) => httpsCallable(functions, name)(data);
 
     window._auth = auth;
     window._gp   = gp;
@@ -895,6 +914,42 @@
     });
 
     /* ═══════════════════════════════════
+       NEW — reCAPTCHA ENTERPRISE HELPERS
+       getRecaptchaToken  : gets a token from Google
+       verifyRecaptcha    : sends token to Firebase
+                           Cloud Function for scoring
+    ═══════════════════════════════════ */
+    const RECAPTCHA_KEY = '6LeGCHAsAAAAAJX2MQXouPsu1Rx0helciRjRitFl';
+    const RECAPTCHA_SCORE_MIN = 0.5; // scores below this = likely bot
+
+    function getRecaptchaToken(action) {
+      return new Promise((resolve, reject) => {
+        grecaptcha.enterprise.ready(async () => {
+          try {
+            const token = await grecaptcha.enterprise.execute(RECAPTCHA_KEY, { action });
+            resolve(token);
+          } catch (err) {
+            reject(err);
+          }
+        });
+      });
+    }
+
+    async function verifyRecaptcha(token, action) {
+      // _callFn is set by the Firebase module block above
+      // Falls back gracefully if Cloud Function isn't deployed yet
+      if (!window._callFn) return { passed: true, score: 1 };
+      try {
+        const result = await window._callFn('verifyRecaptcha', { token, action });
+        return result.data; // { score, passed, reasons }
+      } catch (e) {
+        // If the function isn't deployed yet, fail open with a console warning
+        console.warn('reCAPTCHA Cloud Function not available — skipping server-side check:', e.message);
+        return { passed: true, score: 1 };
+      }
+    }
+
+    /* ═══════════════════════════════════
        LOGIN
     ═══════════════════════════════════ */
     async function doLogin(){
@@ -905,6 +960,23 @@
       if(!chkEmail('lE','lESt',true)){ showA('lErr','Please enter a valid email address.','err'); return; }
       if(!pass){ showA('lErr','Please enter your password.','err'); return; }
       setLd('lBtn',true);
+
+      /* ── NEW: reCAPTCHA check before Firebase login ── */
+      try {
+        const rcToken = await getRecaptchaToken('LOGIN');
+        const rcResult = await verifyRecaptcha(rcToken, 'LOGIN');
+        if (!rcResult.passed) {
+          markFail();
+          showA('lErr', '🤖 Suspicious activity detected. Please try again or contact support.', 'err');
+          setLd('lBtn', false);
+          return;
+        }
+      } catch (rcErr) {
+        console.warn('reCAPTCHA LOGIN check failed:', rcErr);
+        // fail open — do not block legitimate users if reCAPTCHA errors
+      }
+      /* ── END reCAPTCHA check ── */
+
       try{
         await window._fb.signInWithEmailAndPassword(window._auth, email, pass);
         markOk();
@@ -936,6 +1008,22 @@
       if(!ok){ showA('sErr','Please fix the errors highlighted above.','err'); return; }
 
       setLd('sBtn',true);
+
+      /* ── NEW: reCAPTCHA check BEFORE opening HOV ── */
+      try {
+        const rcToken = await getRecaptchaToken('SIGNUP');
+        const rcResult = await verifyRecaptcha(rcToken, 'SIGNUP');
+        if (!rcResult.passed) {
+          showA('sErr', '🤖 Suspicious activity detected. Please try again.', 'err');
+          setLd('sBtn', false);
+          return;
+        }
+      } catch (rcErr) {
+        console.warn('reCAPTCHA SIGNUP check failed:', rcErr);
+        // fail open
+      }
+      /* ── END reCAPTCHA check ── */
+
       // Launch HOV Security verification before creating account
       openHov(async function(){
         await doSignupFirebase(name, email, pass);
@@ -1009,6 +1097,22 @@
       const email=sanitize(document.getElementById('rE').value);
       if(!chkEmail('rE','rESt',true)){ showA('rErr','Please enter a valid email address.','err'); return; }
       setLd('rBtn',true);
+
+      /* ── NEW: reCAPTCHA check before sending reset email ── */
+      try {
+        const rcToken = await getRecaptchaToken('RESET');
+        const rcResult = await verifyRecaptcha(rcToken, 'RESET');
+        if (!rcResult.passed) {
+          showA('rErr', '🤖 Suspicious activity detected. Please try again.', 'err');
+          setLd('rBtn', false);
+          return;
+        }
+      } catch (rcErr) {
+        console.warn('reCAPTCHA RESET check failed:', rcErr);
+        // fail open
+      }
+      /* ── END reCAPTCHA check ── */
+
       try{
         await window._fb.sendPasswordResetEmail(window._auth, email);
         showA('rOk','Reset link sent! Check your inbox (and spam folder).','ok');
