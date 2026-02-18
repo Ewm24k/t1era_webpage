@@ -1364,6 +1364,136 @@
       .chat-banner { flex-direction: column; }
     }
 
+    /* ====== CANVA PRESENTATION POPUP ====== */
+    .canva-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.92);
+      backdrop-filter: blur(12px);
+      z-index: 99999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+                  visibility 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .canva-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    .canva-popup {
+      position: relative;
+      width: 100%;
+      max-width: 960px;
+      background: #0d0d0d;
+      border: 1px solid rgba(59, 130, 246, 0.35);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow:
+        0 0 0 1px rgba(59, 130, 246, 0.1),
+        0 25px 60px rgba(0, 0, 0, 0.8),
+        0 0 80px rgba(59, 130, 246, 0.15),
+        0 0 140px rgba(139, 92, 246, 0.1);
+      transform: scale(0.92) translateY(24px);
+      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .canva-overlay.active .canva-popup {
+      transform: scale(1) translateY(0);
+    }
+    .canva-popup-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 20px;
+      background: linear-gradient(135deg, rgba(59,130,246,0.08), rgba(139,92,246,0.06));
+      border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+    }
+    .canva-popup-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.85);
+      letter-spacing: 0.03em;
+    }
+    .canva-popup-title-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-primary);
+      box-shadow: 0 0 8px var(--accent-primary);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    .canva-close-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.05);
+      color: rgba(255,255,255,0.7);
+      font-size: 20px;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.25s ease;
+      flex-shrink: 0;
+    }
+    .canva-close-btn:hover {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: rgba(239, 68, 68, 0.5);
+      color: #ef4444;
+      transform: rotate(90deg) scale(1.1);
+      box-shadow: 0 0 16px rgba(239, 68, 68, 0.3);
+    }
+    .canva-iframe-wrap {
+      position: relative;
+      width: 100%;
+      padding-top: 56.25%;
+      background: #000;
+    }
+    .canva-iframe-wrap iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+    .canva-popup-footer {
+      padding: 10px 20px;
+      text-align: center;
+      font-size: 11px;
+      color: rgba(255,255,255,0.3);
+      border-top: 1px solid rgba(255,255,255,0.05);
+      font-family: 'Space Grotesk', sans-serif;
+      letter-spacing: 0.04em;
+    }
+    @media (max-width: 768px) {
+      .canva-overlay {
+        padding: 10px;
+        align-items: flex-end;
+      }
+      .canva-popup {
+        border-radius: 16px 16px 12px 12px;
+        max-width: 100%;
+      }
+      .canva-popup-header { padding: 12px 14px; }
+      .canva-popup-title { font-size: 12px; }
+      .canva-close-btn { width: 32px; height: 32px; font-size: 18px; }
+      .canva-popup-footer { font-size: 10px; padding: 8px 14px; }
+    }
+    @media (max-width: 480px) {
+      .canva-overlay { padding: 0; align-items: flex-end; }
+      .canva-popup { border-radius: 16px 16px 0 0; }
+    }
+
     /* ====== SCROLL ANIMATIONS ====== */
     .fade-in {
       opacity: 0;
@@ -2030,6 +2160,33 @@
     </div>
   </div>
 
+  <!-- ══ CANVA PRESENTATION POPUP (auto-shows 2.5s after page load) ══ -->
+  <div class="canva-overlay" id="canvaOverlay">
+    <div class="canva-popup">
+      <!-- Header bar with title + X close button -->
+      <div class="canva-popup-header">
+        <div class="canva-popup-title">
+          <span class="canva-popup-title-dot"></span>
+          T1ERA — Platform Overview
+        </div>
+        <button class="canva-close-btn" id="canvaCloseBtn" aria-label="Close presentation">&#x2715;</button>
+      </div>
+
+      <!-- Canva embed iframe (16:9 responsive) -->
+      <div class="canva-iframe-wrap">
+        <iframe
+          loading="lazy"
+          src="https://www.canva.com/design/DAHBmhZYWbw/rVKX6YdXXXUN6Cbb-GA9oQ/view?embed"
+          allowfullscreen="allowfullscreen"
+          allow="fullscreen">
+        </iframe>
+      </div>
+
+      <!-- Footer hint -->
+      <div class="canva-popup-footer">Use arrow keys or swipe to navigate slides &nbsp;·&nbsp; Press ESC or ✕ to close</div>
+    </div>
+  </div>
+
   <!-- WebApp Coming Soon Modal -->
   <div class="modal-overlay" id="webappModal">
     <div class="modal">
@@ -2083,15 +2240,48 @@
     // ══════════════════════════════════════════════════════════
     (function() {
       if (!sessionStorage.getItem('loadedIntro')) {
-        // No flag = user hasn't come through the intro this session load
         window.location.replace('index.html');
       } else {
-        // Flag exists = came from intro. Clear it so next refresh triggers intro again.
         sessionStorage.removeItem('loadedIntro');
       }
     })();
 
-    // ── REST OF PAGE SCRIPTS ──────────────────────────────────
+    // ── CANVA PRESENTATION POPUP ──────────────────────────────
+    // Auto-shows 2.5 seconds after arriving on home.html.
+    // Close via: X button, clicking backdrop, or ESC key.
+    (function() {
+      const canvaOverlay  = document.getElementById('canvaOverlay');
+      const canvaCloseBtn = document.getElementById('canvaCloseBtn');
+
+      function openCanvaPopup() {
+        canvaOverlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeCanvaPopup() {
+        canvaOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+
+      // Auto-open after 2.5 s
+      setTimeout(openCanvaPopup, 2500);
+
+      // X button
+      canvaCloseBtn.addEventListener('click', closeCanvaPopup);
+
+      // Click on dark backdrop (outside popup box)
+      canvaOverlay.addEventListener('click', function(e) {
+        if (e.target === canvaOverlay) closeCanvaPopup();
+      });
+
+      // ESC key
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && canvaOverlay.classList.contains('active')) {
+          closeCanvaPopup();
+        }
+      });
+    })();
+
 
     const BOT_URL = "https://t.me/T1ERA_SecBot";
     const DOCS_URL = "https://t1era-or-kode-blind.gitbook.io/t1era/documentation";
