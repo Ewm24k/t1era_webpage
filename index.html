@@ -693,6 +693,8 @@
     setTimeout(() => {
       document.body.classList.add('fade-out');
       setTimeout(() => {
+        // ── SET FLAG so home.html knows intro was shown ──
+        sessionStorage.setItem('loadedIntro', 'true');
         window.location.href = 'home.html';
       }, 2000); // Match the 2s fade out animation
     }, 6000);
