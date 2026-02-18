@@ -1785,9 +1785,9 @@
 
             <div class="header-actions">
               <a class="btn" href="https://t1era-or-kode-blind.gitbook.io/t1era/documentation" target="_blank" rel="noopener">Docs</a>
-              <a class="btn btn-primary" href="https://t.me/T1ERA_SecBot" target="_blank" rel="noopener">
+              <a class="btn btn-primary" href="auth.html" id="launchBtn">
                 <span class="btn-icon"></span>
-                Launch T1ERA
+                <span id="launchBtnText">Launch T1ERA</span>
               </a>
               <button class="mobile-menu-btn" id="mobileMenuBtn">
                 <span></span>
@@ -2531,6 +2531,41 @@
             alert("Failed to start generation: " + err.message);
         }
     }
+  </script>
+  <!-- Firebase auth state — update Launch button if already logged in -->
+  <script type="module">
+    import { initializeApp }       from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+
+    const firebaseConfig = {
+      apiKey:            "AIzaSyALMqX8Cw_LvdztWX3laDcDL8tK5vrMh8Y",
+      authDomain:        "t1era-authv1.firebaseapp.com",
+      projectId:         "t1era-authv1",
+      storageBucket:     "t1era-authv1.firebasestorage.app",
+      messagingSenderId: "668617935470",
+      appId:             "1:668617935470:web:184478248a0b0ec84e347f"
+    };
+
+    const app  = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    onAuthStateChanged(auth, user => {
+      const btn     = document.getElementById('launchBtn');
+      const btnText = document.getElementById('launchBtnText');
+      if (user) {
+        // Already logged in — go straight to Telegram bot
+        btn.href = 'https://t.me/T1ERA_SecBot';
+        btn.target = '_blank';
+        btn.rel = 'noopener';
+        const name = (user.displayName || user.email || '').split(' ')[0];
+        btnText.textContent = `Hi ${name} · Open Bot`;
+      } else {
+        // Not logged in — go to auth page
+        btn.href   = 'auth.html';
+        btn.target = '';
+        btnText.textContent = 'Launch T1ERA';
+      }
+    });
   </script>
 </body>
 </html>
