@@ -1475,13 +1475,69 @@
       font-family: 'Space Grotesk', sans-serif;
       letter-spacing: 0.04em;
     }
+    /* Loading spinner shown while iframe loads on PC */
+    .canva-loader {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #0d0d0d;
+      gap: 16px;
+      z-index: 2;
+      transition: opacity 0.4s ease;
+    }
+    .canva-loader.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .canva-spinner {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 3px solid rgba(59, 130, 246, 0.15);
+      border-top-color: var(--accent-primary);
+      border-right-color: var(--accent-secondary);
+      animation: spinnerSpin 0.9s linear infinite;
+    }
+    @keyframes spinnerSpin {
+      to { transform: rotate(360deg); }
+    }
+    .canva-loader-text {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.4);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .canva-loader-bar {
+      width: 120px;
+      height: 3px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .canva-loader-bar-fill {
+      height: 100%;
+      width: 40%;
+      background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+      border-radius: 10px;
+      animation: loaderPulse 1.4s ease-in-out infinite;
+    }
+    @keyframes loaderPulse {
+      0%   { transform: translateX(-100%); }
+      100% { transform: translateX(350%); }
+    }
+
     @media (max-width: 768px) {
       .canva-overlay {
-        padding: 10px;
-        align-items: flex-end;
+        padding: 12px;
+        align-items: center;
       }
       .canva-popup {
-        border-radius: 16px 16px 12px 12px;
+        border-radius: 16px;
         max-width: 100%;
       }
       .canva-popup-header { padding: 12px 14px; }
@@ -1490,8 +1546,11 @@
       .canva-popup-footer { font-size: 10px; padding: 8px 14px; }
     }
     @media (max-width: 480px) {
-      .canva-overlay { padding: 0; align-items: flex-end; }
-      .canva-popup { border-radius: 16px 16px 0 0; }
+      .canva-overlay {
+        padding: 10px;
+        align-items: center;
+      }
+      .canva-popup { border-radius: 14px; }
     }
 
     /* ====== SCROLL ANIMATIONS ====== */
@@ -2174,11 +2233,19 @@
 
       <!-- Canva embed iframe (16:9 responsive) -->
       <div class="canva-iframe-wrap">
+        <!-- Loading spinner — hides once iframe fires onload -->
+        <div class="canva-loader" id="canvaLoader">
+          <div class="canva-spinner"></div>
+          <div class="canva-loader-text">Loading Presentation…</div>
+          <div class="canva-loader-bar"><div class="canva-loader-bar-fill"></div></div>
+        </div>
         <iframe
           loading="lazy"
           src="https://www.canva.com/design/DAHBmhZYWbw/rVKX6YdXXXUN6Cbb-GA9oQ/view?embed"
           allowfullscreen="allowfullscreen"
-          allow="fullscreen">
+          allow="fullscreen"
+          id="canvaIframe"
+          onload="document.getElementById('canvaLoader').classList.add('hidden')">
         </iframe>
       </div>
 
