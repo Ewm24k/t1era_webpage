@@ -170,12 +170,98 @@
     .foot a:hover{text-decoration:underline;}
 
     @media(max-width:480px){.card{padding:28px 18px;border-radius:20px;}.hdg h1{font-size:20px;}}
+
+    /* ═══════════════════════════════════
+       CYBERSECURITY POPUP
+    ═══════════════════════════════════ */
+    #csPopupOverlay{
+      position:fixed;inset:0;z-index:9999;
+      display:flex;align-items:center;justify-content:center;
+      padding:16px;
+      background:rgba(0,0,0,.75);
+      backdrop-filter:blur(6px);
+      -webkit-backdrop-filter:blur(6px);
+      animation:popOverIn .35s var(--ease) both;
+    }
+    @keyframes popOverIn{from{opacity:0}to{opacity:1}}
+    #csPopupOverlay.hiding{animation:popOverOut .3s var(--ease) forwards;}
+    @keyframes popOverOut{from{opacity:1}to{opacity:0}}
+
+    #csPopupBox{
+      position:relative;
+      background:var(--bgcard);
+      border:1px solid rgba(59,130,246,.3);
+      border-radius:20px;
+      box-shadow:0 0 0 1px rgba(59,130,246,.08),0 32px 80px rgba(0,0,0,.85),0 0 60px rgba(59,130,246,.12);
+      max-width:520px;
+      width:100%;
+      overflow:hidden;
+      animation:popBoxIn .4s var(--ease) .1s both;
+    }
+    @keyframes popBoxIn{from{opacity:0;transform:scale(.93) translateY(18px)}to{opacity:1;transform:none}}
+
+    /* glow border top accent */
+    #csPopupBox::before{
+      content:'';position:absolute;top:0;left:0;right:0;height:3px;
+      background:linear-gradient(90deg,var(--blue),var(--purple),var(--cyan));
+      border-radius:20px 20px 0 0;
+    }
+
+    #csPopupImg{
+      width:100%;
+      display:block;
+      max-height:60vh;
+      object-fit:contain;
+      background:#0a0a0a;
+      /* small top padding so glow border is visible */
+      padding-top:3px;
+    }
+
+    /* phone: limit height more aggressively */
+    @media(max-width:480px){
+      #csPopupImg{max-height:52vh;}
+      #csPopupBox{border-radius:16px;}
+    }
+
+    /* CLOSE BUTTON — top-right corner */
+    #csPopupClose{
+      position:absolute;
+      top:10px;right:10px;
+      width:32px;height:32px;
+      border-radius:50%;
+      border:1px solid rgba(255,255,255,.15);
+      background:rgba(0,0,0,.6);
+      color:#fff;
+      font-size:17px;
+      line-height:1;
+      cursor:pointer;
+      display:flex;align-items:center;justify-content:center;
+      transition:background .2s,border-color .2s,transform .15s;
+      z-index:10;
+      backdrop-filter:blur(4px);
+    }
+    #csPopupClose:hover{
+      background:rgba(239,68,68,.7);
+      border-color:rgba(239,68,68,.6);
+      transform:scale(1.1);
+    }
+    #csPopupClose:active{transform:scale(.95);}
   </style>
 </head>
 <body>
   <div class="bgf bggrid"></div>
   <div class="bgf bgglow"></div>
   <div class="ptw" id="pts"></div>
+
+  <!-- ═══════════════════════════════════
+       CYBERSECURITY IMAGE POPUP
+  ═══════════════════════════════════ -->
+  <div id="csPopupOverlay" role="dialog" aria-modal="true" aria-label="Cybersecurity notice">
+    <div id="csPopupBox">
+      <button id="csPopupClose" aria-label="Close popup" title="Close">&#x2715;</button>
+      <img id="csPopupImg" src="assets/cybersecurity.png" alt="Cybersecurity Notice" draggable="false" />
+    </div>
+  </div>
 
   <div class="page">
     <div class="card">
@@ -720,6 +806,39 @@
       if(document.getElementById('pSgn').classList.contains('on')) doSignup();
       if(document.getElementById('pRst').classList.contains('on')) doReset();
     });
+
+    /* ═══════════════════════════════════
+       CYBERSECURITY POPUP — close logic
+       Shows on every page load / refresh.
+       Close: X button, overlay click, or Escape key.
+    ═══════════════════════════════════ */
+    (function(){
+      const overlay = document.getElementById('csPopupOverlay');
+      const closeBtn = document.getElementById('csPopupClose');
+
+      function closePopup(){
+        overlay.classList.add('hiding');
+        overlay.addEventListener('animationend', function handler(){
+          overlay.style.display = 'none';
+          overlay.removeEventListener('animationend', handler);
+        });
+      }
+
+      // X button
+      closeBtn.addEventListener('click', closePopup);
+
+      // Click on dark overlay backdrop (outside the box)
+      overlay.addEventListener('click', function(e){
+        if(e.target === overlay) closePopup();
+      });
+
+      // Escape key
+      document.addEventListener('keydown', function(e){
+        if(e.key === 'Escape' && overlay.style.display !== 'none'){
+          closePopup();
+        }
+      });
+    })();
   </script>
 </body>
 </html>
