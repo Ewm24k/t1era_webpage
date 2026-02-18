@@ -189,38 +189,40 @@
 
     #csPopupBox{
       position:relative;
-      background:var(--bgcard);
-      border:1px solid rgba(59,130,246,.3);
-      border-radius:20px;
-      box-shadow:0 0 0 1px rgba(59,130,246,.08),0 32px 80px rgba(0,0,0,.85),0 0 60px rgba(59,130,246,.12);
-      max-width:520px;
-      width:100%;
+      /* shrink-wrap to the image's natural size */
+      display:inline-flex;
+      border:2px solid rgba(59,130,246,.4);
+      border-radius:16px;
+      box-shadow:0 0 0 1px rgba(59,130,246,.08),0 32px 80px rgba(0,0,0,.85),0 0 60px rgba(59,130,246,.15);
       overflow:hidden;
+      /* cap so it never overflows the viewport */
+      max-width:calc(100vw - 32px);
+      max-height:calc(100vh - 32px);
       animation:popBoxIn .4s var(--ease) .1s both;
     }
     @keyframes popBoxIn{from{opacity:0;transform:scale(.93) translateY(18px)}to{opacity:1;transform:none}}
 
-    /* glow border top accent */
+    /* glow border top accent line */
     #csPopupBox::before{
       content:'';position:absolute;top:0;left:0;right:0;height:3px;
       background:linear-gradient(90deg,var(--blue),var(--purple),var(--cyan));
-      border-radius:20px 20px 0 0;
+      z-index:2;
     }
 
     #csPopupImg{
-      width:100%;
+      /* render at natural size, but never exceed the viewport */
       display:block;
-      max-height:60vh;
-      object-fit:contain;
-      background:#0a0a0a;
-      /* small top padding so glow border is visible */
-      padding-top:3px;
+      max-width:calc(100vw - 32px);
+      max-height:calc(100vh - 32px);
+      width:auto;
+      height:auto;
+      /* no background, no padding — box hugs image exactly */
     }
 
-    /* phone: limit height more aggressively */
+    /* phone: tighten max slightly */
     @media(max-width:480px){
-      #csPopupImg{max-height:52vh;}
-      #csPopupBox{border-radius:16px;}
+      #csPopupBox{border-radius:12px;}
+      #csPopupImg{max-width:calc(100vw - 24px);max-height:calc(100vh - 24px);}
     }
 
     /* CLOSE BUTTON — top-right corner */
@@ -259,7 +261,7 @@
   <div id="csPopupOverlay" role="dialog" aria-modal="true" aria-label="Cybersecurity notice">
     <div id="csPopupBox">
       <button id="csPopupClose" aria-label="Close popup" title="Close">&#x2715;</button>
-      <img id="csPopupImg" src="assets/cybersecurity1.png" alt="Cybersecurity Notice" draggable="false" />
+      <img id="csPopupImg" src="assets/cybersecurity.png" alt="Cybersecurity Notice" draggable="false" />
     </div>
   </div>
 
