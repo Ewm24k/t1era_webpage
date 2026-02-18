@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>T1ERA - Loading</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #000;
+      overflow: hidden;
+      font-family: 'Orbitron', sans-serif;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    /* ========== ANIMATED BACKGROUND PARTICLES ========== */
+    .particle-container {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .particle {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: rgba(59, 130, 246, 0.6);
+      border-radius: 50%;
+      animation: particleFloat 8s infinite ease-in-out;
+      box-shadow: 0 0 10px rgba(59, 130, 246, 0.8);
+    }
+
+    @keyframes particleFloat {
+      0%, 100% { transform: translate(0, 0) scale(1); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+    }
+
+    /* ========== GRID BACKGROUND WITH PERSPECTIVE ========== */
+    .grid-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      perspective: 1000px;
+      transform-style: preserve-3d;
+    }
+
+    .grid-layer {
+      position: absolute;
+      inset: 0;
+      background-image: 
+        linear-gradient(rgba(59, 130, 246, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59, 130, 246, 0.03) 1px, transparent 1px);
+      background-size: 50px 50px;
+      animation: gridPulse 4s ease-in-out infinite;
+      transform: rotateX(60deg) translateZ(-200px);
+    }
+
+    @keyframes gridPulse {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 0.6; }
+    }
+
+    /* ========== SCAN LINE EFFECT ========== */
+    .scanline {
+      position: fixed;
+      inset: 0;
+      z-index: 2;
+      background: linear-gradient(
+        to bottom,
+        transparent 0%,
+        rgba(59, 130, 246, 0.05) 50%,
+        transparent 100%
+      );
+      height: 100%;
+      animation: scan 6s linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes scan {
+      0% { transform: translateY(-100%); }
+      100% { transform: translateY(100%); }
+    }
+
+    /* ========== MAIN CONTAINER ========== */
+    .intro-container {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      animation: containerFadeIn 0.8s ease-out;
+    }
+
+    @keyframes containerFadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    /* ========== T1ERA LOGO WITH ADVANCED EFFECTS ========== */
+    .logo-main {
+      font-size: clamp(80px, 15vw, 180px);
+      font-weight: 900;
+      letter-spacing: 0.15em;
+      margin-bottom: 20px;
+      position: relative;
+      display: inline-block;
+      background: linear-gradient(
+        135deg,
+        #3b82f6 0%,
+        #8b5cf6 25%,
+        #06b6d4 50%,
+        #8b5cf6 75%,
+        #3b82f6 100%
+      );
+      background-size: 300% 300%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: 
+        logoGradientShift 4s ease-in-out infinite,
+        logoGlow 2s ease-in-out infinite,
+        logoFloat 3s ease-in-out infinite;
+      filter: drop-shadow(0 0 30px rgba(59, 130, 246, 0.6));
+    }
+
+    @keyframes logoGradientShift {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    @keyframes logoGlow {
+      0%, 100% { 
+        filter: drop-shadow(0 0 30px rgba(59, 130, 246, 0.6))
+                drop-shadow(0 0 50px rgba(139, 92, 246, 0.4)); 
+      }
+      50% { 
+        filter: drop-shadow(0 0 50px rgba(59, 130, 246, 0.9))
+                drop-shadow(0 0 80px rgba(139, 92, 246, 0.6))
+                drop-shadow(0 0 100px rgba(6, 182, 212, 0.4)); 
+      }
+    }
+
+    @keyframes logoFloat {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+
+    /* GLITCH EFFECT ON LOGO */
+    .logo-main::before,
+    .logo-main::after {
+      content: 'T1ERA';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: inherit;
+      -webkit-background-clip: text;
+      background-clip: text;
+      opacity: 0.8;
+    }
+
+    .logo-main::before {
+      animation: glitch1 2.5s infinite;
+      clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
+    }
+
+    .logo-main::after {
+      animation: glitch2 2.5s infinite;
+      clip-path: polygon(0 55%, 100% 55%, 100% 100%, 0 100%);
+    }
+
+    @keyframes glitch1 {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-3px); }
+      40% { transform: translateX(3px); }
+      60% { transform: translateX(-2px); }
+      80% { transform: translateX(2px); }
+    }
+
+    @keyframes glitch2 {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(3px); }
+      40% { transform: translateX(-3px); }
+      60% { transform: translateX(2px); }
+      80% { transform: translateX(-2px); }
+    }
+
+    /* ========== KODE BLIND SUBTITLE ========== */
+    .subtitle {
+      font-size: clamp(18px, 3vw, 28px);
+      font-weight: 600;
+      letter-spacing: 0.3em;
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 60px;
+      position: relative;
+      animation: subtitleFadeIn 1s ease-out 0.5s both;
+      text-shadow: 
+        0 0 10px rgba(59, 130, 246, 0.5),
+        0 0 20px rgba(139, 92, 246, 0.3);
+    }
+
+    @keyframes subtitleFadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* TYPEWRITER EFFECT */
+    .subtitle::after {
+      content: '';
+      position: absolute;
+      right: -10px;
+      width: 2px;
+      height: 100%;
+      background: rgba(59, 130, 246, 0.8);
+      animation: blink 0.8s step-end infinite;
+    }
+
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
+
+    /* ========== LOADING SECTION ========== */
+    .loading-section {
+      margin-top: 40px;
+      animation: loadingFadeIn 1s ease-out 1s both;
+    }
+
+    @keyframes loadingFadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* PROGRESS BAR WITH LIQUID EFFECT */
+    .progress-container {
+      width: clamp(250px, 60vw, 400px);
+      height: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      margin: 0 auto 30px;
+      overflow: hidden;
+      position: relative;
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      box-shadow: 
+        inset 0 0 10px rgba(0, 0, 0, 0.5),
+        0 0 20px rgba(59, 130, 246, 0.1);
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        #3b82f6 0%,
+        #8b5cf6 50%,
+        #06b6d4 100%
+      );
+      background-size: 200% 100%;
+      border-radius: 10px;
+      position: relative;
+      animation: 
+        progressFill 6s ease-out forwards,
+        progressShimmer 2s linear infinite;
+      box-shadow: 
+        0 0 20px rgba(59, 130, 246, 0.6),
+        0 0 40px rgba(139, 92, 246, 0.4);
+    }
+
+    /* LIQUID WAVE EFFECT ON PROGRESS BAR */
+    .progress-bar::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: 0;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(
+        ellipse at center,
+        rgba(255, 255, 255, 0.3) 0%,
+        transparent 70%
+      );
+      animation: wave 3s linear infinite;
+    }
+
+    @keyframes progressFill {
+      from { width: 0%; }
+      to { width: 100%; }
+    }
+
+    @keyframes progressShimmer {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 200% 50%; }
+    }
+
+    @keyframes wave {
+      0% { transform: translateX(-50%) rotate(0deg); }
+      100% { transform: translateX(-50%) rotate(360deg); }
+    }
+
+    /* ========== STATUS TEXT WITH ROTATING WORDS ========== */
+    .status-text {
+      font-size: clamp(14px, 2.5vw, 18px);
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.8);
+      letter-spacing: 0.1em;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      font-family: 'Orbitron', monospace;
+    }
+
+    .status-word {
+      position: absolute;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: statusRotate 6s ease-in-out;
+      text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+    }
+
+    .status-word:nth-child(1) {
+      animation-delay: 0s;
+    }
+
+    .status-word:nth-child(2) {
+      animation-delay: 1.5s;
+    }
+
+    .status-word:nth-child(3) {
+      animation-delay: 3s;
+    }
+
+    .status-word:nth-child(4) {
+      animation-delay: 4.5s;
+    }
+
+    @keyframes statusRotate {
+      0% { 
+        opacity: 0; 
+        transform: translateY(20px) rotateX(-90deg);
+        filter: blur(10px);
+      }
+      8% { 
+        opacity: 1; 
+        transform: translateY(0) rotateX(0deg);
+        filter: blur(0px);
+      }
+      20% { 
+        opacity: 1; 
+        transform: translateY(0) rotateX(0deg);
+        filter: blur(0px);
+      }
+      28% { 
+        opacity: 0; 
+        transform: translateY(-20px) rotateX(90deg);
+        filter: blur(10px);
+      }
+      100% { 
+        opacity: 0; 
+        transform: translateY(-20px) rotateX(90deg);
+        filter: blur(10px);
+      }
+    }
+
+    /* ========== HEXAGON DECORATIONS ========== */
+    .hex-decoration {
+      position: fixed;
+      width: 100px;
+      height: 100px;
+      opacity: 0.1;
+      z-index: 1;
+      animation: hexFloat 10s ease-in-out infinite;
+    }
+
+    .hex-decoration::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+      animation: hexRotate 8s linear infinite;
+    }
+
+    .hex-decoration:nth-child(1) {
+      top: 10%;
+      left: 10%;
+      animation-delay: 0s;
+    }
+
+    .hex-decoration:nth-child(2) {
+      top: 20%;
+      right: 15%;
+      animation-delay: 2s;
+    }
+
+    .hex-decoration:nth-child(3) {
+      bottom: 15%;
+      left: 20%;
+      animation-delay: 4s;
+    }
+
+    .hex-decoration:nth-child(4) {
+      bottom: 10%;
+      right: 10%;
+      animation-delay: 6s;
+    }
+
+    @keyframes hexFloat {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      25% { transform: translate(20px, -20px) scale(1.1); }
+      50% { transform: translate(-10px, 10px) scale(0.9); }
+      75% { transform: translate(15px, 15px) scale(1.05); }
+    }
+
+    @keyframes hexRotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* ========== CORNER ACCENT LINES ========== */
+    .corner-accent {
+      position: fixed;
+      width: 100px;
+      height: 100px;
+      border: 2px solid rgba(59, 130, 246, 0.3);
+      z-index: 1;
+      animation: cornerPulse 3s ease-in-out infinite;
+    }
+
+    .corner-accent::before,
+    .corner-accent::after {
+      content: '';
+      position: absolute;
+      background: linear-gradient(135deg, #3b82f6, transparent);
+      animation: cornerGlow 2s ease-in-out infinite;
+    }
+
+    .corner-accent::before {
+      width: 50px;
+      height: 2px;
+    }
+
+    .corner-accent::after {
+      width: 2px;
+      height: 50px;
+    }
+
+    .corner-accent.top-left {
+      top: 30px;
+      left: 30px;
+      border-right: none;
+      border-bottom: none;
+    }
+
+    .corner-accent.top-left::before {
+      top: -2px;
+      left: -2px;
+    }
+
+    .corner-accent.top-left::after {
+      top: -2px;
+      left: -2px;
+    }
+
+    .corner-accent.top-right {
+      top: 30px;
+      right: 30px;
+      border-left: none;
+      border-bottom: none;
+    }
+
+    .corner-accent.top-right::before {
+      top: -2px;
+      right: -2px;
+    }
+
+    .corner-accent.top-right::after {
+      top: -2px;
+      right: -2px;
+    }
+
+    .corner-accent.bottom-left {
+      bottom: 30px;
+      left: 30px;
+      border-right: none;
+      border-top: none;
+    }
+
+    .corner-accent.bottom-left::before {
+      bottom: -2px;
+      left: -2px;
+    }
+
+    .corner-accent.bottom-left::after {
+      bottom: -2px;
+      left: -2px;
+    }
+
+    .corner-accent.bottom-right {
+      bottom: 30px;
+      right: 30px;
+      border-left: none;
+      border-top: none;
+    }
+
+    .corner-accent.bottom-right::before {
+      bottom: -2px;
+      right: -2px;
+    }
+
+    .corner-accent.bottom-right::after {
+      bottom: -2px;
+      right: -2px;
+    }
+
+    @keyframes cornerPulse {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 0.6; }
+    }
+
+    @keyframes cornerGlow {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 0.8; }
+    }
+
+    /* ========== MOBILE RESPONSIVE ========== */
+    @media (max-width: 768px) {
+      .logo-main {
+        font-size: clamp(60px, 12vw, 120px);
+        letter-spacing: 0.1em;
+      }
+
+      .subtitle {
+        font-size: clamp(14px, 2.5vw, 20px);
+        letter-spacing: 0.2em;
+      }
+
+      .progress-container {
+        width: 80%;
+      }
+
+      .corner-accent {
+        width: 60px;
+        height: 60px;
+      }
+
+      .corner-accent::before {
+        width: 30px;
+      }
+
+      .corner-accent::after {
+        height: 30px;
+      }
+
+      .corner-accent.top-left,
+      .corner-accent.top-right {
+        top: 15px;
+      }
+
+      .corner-accent.bottom-left,
+      .corner-accent.bottom-right {
+        bottom: 15px;
+      }
+
+      .corner-accent.top-left,
+      .corner-accent.bottom-left {
+        left: 15px;
+      }
+
+      .corner-accent.top-right,
+      .corner-accent.bottom-right {
+        right: 15px;
+      }
+
+      .hex-decoration {
+        width: 60px;
+        height: 60px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .logo-main {
+        margin-bottom: 15px;
+      }
+
+      .subtitle {
+        margin-bottom: 40px;
+      }
+
+      .loading-section {
+        margin-top: 30px;
+      }
+
+      .progress-container {
+        margin-bottom: 20px;
+      }
+    }
+
+    /* ========== FADE OUT ANIMATION ========== */
+    body.fade-out {
+      animation: fadeOutPage 2s ease-out forwards;
+    }
+
+    @keyframes fadeOutPage {
+      to { opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Animated Particles Background -->
+  <div class="particle-container" id="particleContainer"></div>
+
+  <!-- Grid Background with Perspective -->
+  <div class="grid-bg">
+    <div class="grid-layer"></div>
+  </div>
+
+  <!-- Scan Line Effect -->
+  <div class="scanline"></div>
+
+  <!-- Corner Accents -->
+  <div class="corner-accent top-left"></div>
+  <div class="corner-accent top-right"></div>
+  <div class="corner-accent bottom-left"></div>
+  <div class="corner-accent bottom-right"></div>
+
+  <!-- Hexagon Decorations -->
+  <div class="hex-decoration"></div>
+  <div class="hex-decoration"></div>
+  <div class="hex-decoration"></div>
+  <div class="hex-decoration"></div>
+
+  <!-- Main Content -->
+  <div class="intro-container">
+    <div class="logo-main">T1ERA</div>
+    <div class="subtitle">KODE BLIND</div>
+    
+    <div class="loading-section">
+      <div class="progress-container">
+        <div class="progress-bar"></div>
+      </div>
+      
+      <div class="status-text">
+        <span class="status-word">Initializing Neural Network...</span>
+        <span class="status-word">Loading AI Modules...</span>
+        <span class="status-word">Connecting to Cloud GPU...</span>
+        <span class="status-word">System Ready...</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Generate Animated Particles
+    const particleContainer = document.getElementById('particleContainer');
+    const particleCount = 50;
+
+    for (let i = 0; i < particleCount; i++) {
+      const particle = document.createElement('div');
+      particle.className = 'particle';
+      
+      // Random starting position
+      particle.style.left = Math.random() * 100 + '%';
+      particle.style.top = Math.random() * 100 + '%';
+      
+      // Random movement direction
+      const tx = (Math.random() - 0.5) * 400;
+      const ty = (Math.random() - 0.5) * 400;
+      particle.style.setProperty('--tx', tx + 'px');
+      particle.style.setProperty('--ty', ty + 'px');
+      
+      // Random animation delay
+      particle.style.animationDelay = Math.random() * 8 + 's';
+      
+      particleContainer.appendChild(particle);
+    }
+
+    // Auto-redirect after 6 seconds
+    setTimeout(() => {
+      document.body.classList.add('fade-out');
+      setTimeout(() => {
+        window.location.href = 'index.html';
+      }, 2000); // Match the 2s fade out animation
+    }, 6000);
+  </script>
+</body>
+</html>
