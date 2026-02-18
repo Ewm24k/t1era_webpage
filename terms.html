@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="theme-color" content="#000000"/>
+  <title>Terms of Service — T1ERA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#000;--bg2:#080810;--bgcard:#0d0d18;
+      --bdr:rgba(6,182,212,.15);
+      --txt:#e8e8f0;--txt2:rgba(232,232,240,.55);--txt3:rgba(232,232,240,.28);
+      --cyn:#06b6d4;--pur:#8b5cf6;--ind:#6366f1;--grn:#10b981;--red:#ef4444;
+      --glow:rgba(6,182,212,.18);
+      --ease:cubic-bezier(0.4,0,0.2,1);
+    }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+    html{scroll-behavior:smooth;}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);-webkit-font-smoothing:antialiased;overflow-x:hidden;line-height:1.7;}
+
+    .bgf{position:fixed;inset:0;z-index:0;pointer-events:none;}
+    .bggrid{background-image:linear-gradient(rgba(6,182,212,.012) 1px,transparent 1px),linear-gradient(90deg,rgba(6,182,212,.012) 1px,transparent 1px);background-size:72px 72px;}
+    .bgglow{background:radial-gradient(ellipse at 90% 0%,rgba(6,182,212,.08),transparent 50%),radial-gradient(ellipse at 10% 100%,rgba(99,102,241,.07),transparent 50%);}
+
+    nav{position:sticky;top:0;z-index:100;padding:0 max(24px,5vw);height:60px;display:flex;align-items:center;justify-content:space-between;background:rgba(0,0,0,.7);backdrop-filter:blur(16px);border-bottom:1px solid var(--bdr);}
+    .nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+    .nav-mark{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--cyn),var(--ind));display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-weight:900;font-size:12px;color:#fff;box-shadow:0 0 16px var(--glow);}
+    .nav-txt{font-family:'Orbitron',sans-serif;font-weight:900;font-size:16px;letter-spacing:.08em;background:linear-gradient(135deg,var(--cyn),var(--ind),var(--pur));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+    .nav-back{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:var(--txt2);text-decoration:none;transition:color .2s;}
+    .nav-back:hover{color:var(--cyn);}
+
+    .hero{position:relative;z-index:1;padding:72px max(24px,5vw) 48px;max-width:860px;margin:0 auto;}
+    .hero-badge{display:inline-flex;align-items:center;gap:7px;background:rgba(6,182,212,.1);border:1px solid rgba(6,182,212,.25);color:#67e8f9;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:5px 14px;border-radius:20px;margin-bottom:20px;}
+    .hero-badge span{width:6px;height:6px;border-radius:50%;background:var(--cyn);box-shadow:0 0 8px var(--cyn);display:inline-block;animation:pulse 2s ease infinite;}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+    .hero h1{font-family:'Syne',sans-serif;font-size:clamp(32px,5vw,52px);font-weight:800;line-height:1.1;margin-bottom:16px;background:linear-gradient(135deg,#fff 40%,#67e8f9);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+    .hero-meta{display:flex;align-items:center;gap:20px;flex-wrap:wrap;font-size:13px;color:var(--txt3);}
+    .hero-divider{height:1px;background:linear-gradient(90deg,var(--cyn),transparent);margin-top:32px;opacity:.4;}
+
+    .content{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:0 max(24px,5vw) 80px;}
+
+    .toc{background:var(--bgcard);border:1px solid var(--bdr);border-radius:16px;padding:22px 24px;margin:36px 0;position:relative;overflow:hidden;}
+    .toc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--cyn),var(--ind),var(--pur));}
+    .toc-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:14px;}
+    .toc ol{padding-left:18px;}
+    .toc li{margin-bottom:6px;}
+    .toc a{color:#67e8f9;font-size:13px;text-decoration:none;transition:color .2s;}
+    .toc a:hover{color:#fff;}
+
+    .section{margin-bottom:48px;}
+    .section-num{font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;color:var(--cyn);letter-spacing:.12em;margin-bottom:8px;}
+    .section h2{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#fff;margin-bottom:16px;scroll-margin-top:80px;}
+    .section p{color:var(--txt2);font-size:15px;margin-bottom:14px;}
+    .section ul{padding-left:0;list-style:none;margin-bottom:14px;}
+    .section ul li{display:flex;gap:10px;align-items:flex-start;color:var(--txt2);font-size:15px;margin-bottom:8px;}
+    .section ul li::before{content:'›';color:var(--cyn);font-size:18px;line-height:1.4;flex-shrink:0;}
+
+    .infobox{background:rgba(6,182,212,.07);border:1px solid rgba(6,182,212,.2);border-radius:12px;padding:16px 18px;margin-bottom:16px;display:flex;gap:12px;align-items:flex-start;}
+    .infobox-ico{font-size:18px;flex-shrink:0;margin-top:1px;}
+    .infobox p{color:#67e8f9;font-size:14px;margin:0;}
+
+    .warnbox{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.2);border-radius:12px;padding:16px 18px;margin-bottom:16px;display:flex;gap:12px;align-items:flex-start;}
+    .warnbox p{color:#fca5a5;font-size:14px;margin:0;}
+
+    .prohibited{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-bottom:16px;}
+    .prohib-item{background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.15);border-radius:10px;padding:12px 14px;display:flex;gap:10px;align-items:flex-start;font-size:13px;color:var(--txt2);}
+    .prohib-item span{font-size:16px;flex-shrink:0;}
+
+    .contact-card{background:linear-gradient(135deg,rgba(6,182,212,.1),rgba(99,102,241,.07));border:1px solid rgba(6,182,212,.25);border-radius:16px;padding:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;}
+    .contact-card h3{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;color:#fff;margin-bottom:4px;}
+    .contact-card p{font-size:13px;color:var(--txt2);}
+    .contact-btn{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;border-radius:10px;background:linear-gradient(135deg,var(--cyn),var(--ind));color:#fff;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;text-decoration:none;transition:all .25s;white-space:nowrap;}
+    .contact-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(6,182,212,.35);}
+
+    footer{position:relative;z-index:1;border-top:1px solid var(--bdr);padding:28px max(24px,5vw);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+    .foot-l{font-size:12px;color:var(--txt3);}
+    .foot-r{display:flex;gap:20px;}
+    .foot-r a{font-size:12px;color:var(--txt3);text-decoration:none;transition:color .2s;}
+    .foot-r a:hover{color:var(--cyn);}
+
+    @media(max-width:600px){
+      .prohibited{grid-template-columns:1fr;}
+      .contact-card{flex-direction:column;}
+    }
+  </style>
+</head>
+<body>
+  <div class="bgf bggrid"></div>
+  <div class="bgf bgglow"></div>
+
+  <nav>
+    <a href="home.html" class="nav-logo">
+      <div class="nav-mark">T1</div>
+      <span class="nav-txt">T1ERA</span>
+    </a>
+    <a href="auth.html" class="nav-back">← Back to Sign In</a>
+  </nav>
+
+  <div class="hero">
+    <div class="hero-badge"><span></span>Legal Document</div>
+    <h1>Terms of Service</h1>
+    <div class="hero-meta">
+      <span>📅 Effective: January 1, 2025</span>
+      <span>🔄 Last updated: February 2025</span>
+      <span>🌐 t1era.netlify.app</span>
+    </div>
+    <div class="hero-divider"></div>
+  </div>
+
+  <div class="content">
+
+    <div class="infobox">
+      <span class="infobox-ico">📋</span>
+      <p>By accessing or using T1ERA, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our platform.</p>
+    </div>
+
+    <div class="toc">
+      <div class="toc-title">Table of Contents</div>
+      <ol>
+        <li><a href="#t1">Acceptance of Terms</a></li>
+        <li><a href="#t2">Description of Service</a></li>
+        <li><a href="#t3">Account Registration</a></li>
+        <li><a href="#t4">Acceptable Use Policy</a></li>
+        <li><a href="#t5">Prohibited Activities</a></li>
+        <li><a href="#t6">Intellectual Property</a></li>
+        <li><a href="#t7">Disclaimer of Warranties</a></li>
+        <li><a href="#t8">Limitation of Liability</a></li>
+        <li><a href="#t9">Account Termination</a></li>
+        <li><a href="#t10">Governing Law</a></li>
+        <li><a href="#t11">Changes to Terms</a></li>
+        <li><a href="#t12">Contact</a></li>
+      </ol>
+    </div>
+
+    <div class="section" id="t1">
+      <div class="section-num">01 —</div>
+      <h2>Acceptance of Terms</h2>
+      <p>These Terms of Service ("Terms") govern your access to and use of T1ERA's platform, website at <strong>t1era.netlify.app</strong>, and associated Telegram bot services (collectively, the "Service").</p>
+      <p>By creating an account or using the Service, you confirm that you are at least 13 years of age, have read and understood these Terms, and agree to be legally bound by them.</p>
+    </div>
+
+    <div class="section" id="t2">
+      <div class="section-num">02 —</div>
+      <h2>Description of Service</h2>
+      <p>T1ERA is a cybersecurity intelligence and monitoring platform that provides:</p>
+      <ul>
+        <li>Security monitoring and threat intelligence tools</li>
+        <li>User authentication and account management</li>
+        <li>Telegram bot integration via T1ERA SecBot</li>
+        <li>HOV Security (Human Over Verification) anti-bot protection</li>
+        <li>Real-time security alerts and notifications</li>
+      </ul>
+      <p>The Service is provided "as is" and we reserve the right to modify, suspend, or discontinue features at any time with reasonable notice.</p>
+    </div>
+
+    <div class="section" id="t3">
+      <div class="section-num">03 —</div>
+      <h2>Account Registration</h2>
+      <p>To access T1ERA, you must register for an account. By registering, you agree to:</p>
+      <ul>
+        <li>Provide accurate, current, and complete information during registration</li>
+        <li>Maintain and update your account information to keep it accurate</li>
+        <li>Keep your password confidential and not share it with others</li>
+        <li>Accept responsibility for all activity that occurs under your account</li>
+        <li>Notify us immediately of any unauthorized use of your account</li>
+        <li>Complete email verification to unlock full platform access</li>
+      </ul>
+      <div class="infobox">
+        <span class="infobox-ico">🔐</span>
+        <p>One person may not maintain more than one active T1ERA account. Duplicate accounts may be suspended without notice.</p>
+      </div>
+    </div>
+
+    <div class="section" id="t4">
+      <div class="section-num">04 —</div>
+      <h2>Acceptable Use Policy</h2>
+      <p>You agree to use T1ERA only for lawful purposes and in a manner that does not infringe the rights of others. You must use the platform in compliance with all applicable local, national, and international laws and regulations.</p>
+      <p>You are solely responsible for all content, actions, and data associated with your use of the platform.</p>
+    </div>
+
+    <div class="section" id="t5">
+      <div class="section-num">05 —</div>
+      <h2>Prohibited Activities</h2>
+      <p>The following activities are strictly prohibited on T1ERA:</p>
+      <div class="prohibited">
+        <div class="prohib-item"><span>🚫</span>Attempting to bypass HOV Security or authentication systems</div>
+        <div class="prohib-item"><span>🚫</span>Using bots, scrapers, or automated tools to access the platform</div>
+        <div class="prohib-item"><span>🚫</span>Attempting to hack, probe, or exploit platform vulnerabilities</div>
+        <div class="prohib-item"><span>🚫</span>Creating fake or duplicate accounts</div>
+        <div class="prohib-item"><span>🚫</span>Sharing your account credentials with others</div>
+        <div class="prohib-item"><span>🚫</span>Using the platform for illegal cybercrime activities</div>
+        <div class="prohib-item"><span>🚫</span>Impersonating T1ERA staff or other users</div>
+        <div class="prohib-item"><span>🚫</span>Distributing malware or malicious code via the platform</div>
+      </div>
+      <div class="warnbox">
+        <span class="infobox-ico">⛔</span>
+        <p>Violation of these prohibitions may result in immediate account termination and may be reported to relevant authorities.</p>
+      </div>
+    </div>
+
+    <div class="section" id="t6">
+      <div class="section-num">06 —</div>
+      <h2>Intellectual Property</h2>
+      <p>All content on T1ERA — including but not limited to the platform design, HOV Security system, T1ERA logo, branding, source code, and documentation — is the exclusive intellectual property of T1ERA and protected by applicable copyright and trademark laws.</p>
+      <p>You may not copy, modify, distribute, or create derivative works from any T1ERA content without express written permission.</p>
+    </div>
+
+    <div class="section" id="t7">
+      <div class="section-num">07 —</div>
+      <h2>Disclaimer of Warranties</h2>
+      <p>T1ERA is provided on an <strong>"as is" and "as available"</strong> basis without warranties of any kind, either express or implied, including but not limited to warranties of merchantability, fitness for a particular purpose, or non-infringement.</p>
+      <p>We do not warrant that the Service will be uninterrupted, error-free, or completely secure. Cybersecurity threats evolve rapidly, and no platform can guarantee absolute security.</p>
+    </div>
+
+    <div class="section" id="t8">
+      <div class="section-num">08 —</div>
+      <h2>Limitation of Liability</h2>
+      <p>To the maximum extent permitted by applicable law, T1ERA and its operators shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of or inability to use the Service.</p>
+      <p>Our total liability for any claims arising from these Terms or your use of the Service shall not exceed the amount you have paid to T1ERA in the twelve months preceding the claim (which may be zero for free tier users).</p>
+    </div>
+
+    <div class="section" id="t9">
+      <div class="section-num">09 —</div>
+      <h2>Account Termination</h2>
+      <p>We reserve the right to suspend or terminate your account at any time for:</p>
+      <ul>
+        <li>Violation of these Terms of Service</li>
+        <li>Engaging in any prohibited activities listed in Section 5</li>
+        <li>Providing false information during registration</li>
+        <li>Extended periods of account inactivity (over 12 months)</li>
+        <li>Legal requirements or court orders</li>
+      </ul>
+      <p>You may delete your account at any time by contacting us. Upon termination, your right to use the Service immediately ceases and your data will be handled per our Privacy Policy.</p>
+    </div>
+
+    <div class="section" id="t10">
+      <div class="section-num">10 —</div>
+      <h2>Governing Law</h2>
+      <p>These Terms shall be governed by and construed in accordance with applicable laws. Any disputes arising from these Terms or your use of T1ERA shall be resolved through good-faith negotiation before pursuing any legal action.</p>
+    </div>
+
+    <div class="section" id="t11">
+      <div class="section-num">11 —</div>
+      <h2>Changes to Terms</h2>
+      <p>We may revise these Terms at any time. When we do, we will update the "Last updated" date at the top of this page. For material changes, we will notify registered users via email at least 7 days before the changes take effect.</p>
+      <p>Your continued use of T1ERA after changes are posted constitutes your acceptance of the revised Terms.</p>
+    </div>
+
+    <div class="section" id="t12">
+      <div class="section-num">12 —</div>
+      <h2>Contact</h2>
+      <p>For questions about these Terms of Service or to report a violation, please contact us:</p>
+      <div class="contact-card">
+        <div>
+          <h3>T1ERA Legal &amp; Support</h3>
+          <p>Terms questions, violations, account issues</p>
+        </div>
+        <a href="https://t.me/T1ERA_SecBot" target="_blank" rel="noopener" class="contact-btn">🚀 Contact via Telegram</a>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <div class="foot-l">© 2025 T1ERA. All rights reserved.</div>
+    <div class="foot-r">
+      <a href="privacy.html">Privacy Policy</a>
+      <a href="terms.html">Terms of Service</a>
+      <a href="auth.html">Sign In</a>
+      <a href="home.html">Home</a>
+    </div>
+  </footer>
+
+</body>
+</html>
