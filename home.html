@@ -315,7 +315,7 @@
         0 0 20px rgba(59, 130, 246, 0.3);
     }
 
-    /* ── NEW: Video Generate Button ── */
+    /* ── Video Generate Button ── */
     .btn-video {
       background: linear-gradient(145deg, #ff8534, #d96419);
       border: 1px solid rgba(249, 115, 22, 0.3);
@@ -365,7 +365,7 @@
       50% { opacity: 0.5; }
     }
 
-    /* ── NEW: AI Chat Button Style ── */
+    /* ── AI Chat Button Style ── */
     .btn-chat {
       background: linear-gradient(145deg, #0ec5e0, #0999b0);
       border: 1px solid rgba(6, 182, 212, 0.3);
@@ -422,7 +422,7 @@
       transform: translateY(1px);
     }
 
-    /* ── NEW: AI Chat Banner ── */
+    /* ── AI Chat Banner ── */
     .chat-banner {
       background: linear-gradient(135deg, rgba(6, 182, 212, 0.12), rgba(139, 92, 246, 0.08));
       border: 1px solid rgba(6, 182, 212, 0.35);
@@ -505,7 +505,7 @@
       animation: pulse 1.5s ease-in-out infinite;
     }
 
-    /* ── NEW: Hero Video Banner ── */
+    /* ── Hero Video Banner ── */
     .video-banner {
       background: linear-gradient(135deg, rgba(249,115,22,0.08), rgba(236,72,153,0.06));
       border: 1px solid rgba(249,115,22,0.25);
@@ -1641,7 +1641,7 @@
               Chat, analyze, create, and automate — all from one powerful Telegram interface.
             </p>
 
-            <!-- ★ NEW: AI Chat Banner (Above Video) -->
+            <!-- AI Chat Banner -->
             <div class="chat-banner fade-in">
               <div class="chat-banner-left">
                 <div class="chat-banner-icon">💬</div>
@@ -1662,7 +1662,7 @@
               </a>
             </div>
 
-            <!-- ★ NEW: Video Generation Banner -->
+            <!-- Video Generation Banner -->
             <div class="video-banner fade-in">
               <div class="video-banner-left">
                 <div class="video-banner-icon">🎬</div>
@@ -1723,7 +1723,6 @@
               <span class="tag"><span class="tag-icon"></span>Vision Analysis</span>
               <span class="tag"><span class="tag-icon"></span>Script Generator</span>
               <span class="tag"><span class="tag-icon"></span>Marketing Canvas</span>
-              <!-- ★ NEW: Video tag -->
               <a href="generate.html" class="tag tag-video" style="text-decoration:none;">
                 <span class="tag-icon"></span>🎬 Video Generator
               </a>
@@ -1763,7 +1762,7 @@
           </div>
 
           <div class="modes-grid">
-            <!-- ★ NEW: Video Generator card — first, most prominent -->
+            <!-- Video Generator card — first, most prominent -->
             <div class="mode-card video-card fade-in">
               <span class="mode-card-new-badge">✨ New</span>
               <div class="mode-icon video-icon">🎬</div>
@@ -1785,7 +1784,6 @@
                 and solve problems with advanced AI assistance.
               </p>
               <div class="mode-meta">Command: /chat</div>
-              <!-- ★ NEW: Add Chat CTA button -->
               <a class="btn btn-primary" href="ChatT1era.html" style="margin-top: 14px; width: 100%; justify-content: center;">
                 💬 Open Chat →
               </a>
@@ -1877,7 +1875,6 @@
                     <div class="feature-item-icon"></div>
                     <div class="feature-item-text">Secure OAuth integrations (Canva & more)</div>
                   </div>
-                  <!-- ★ NEW feature item -->
                   <div class="feature-item" style="border-color:rgba(249,115,22,0.3);">
                     <div class="feature-item-icon" style="background:linear-gradient(135deg,#f97316,#ec4899);"></div>
                     <div class="feature-item-text" style="color:#fb923c;">AI Video Generation — LTX-2 on Azure A10 GPU</div>
@@ -1889,16 +1886,14 @@
                     <span class="btn-icon"></span>
                     Get Started
                   </a>
-                  <!-- ★ NEW: Chat button in features -->
                   <a class="btn btn-primary" href="ChatT1era.html" style="background: linear-gradient(135deg, var(--accent-tertiary), var(--accent-secondary));">
                     💬 Try Chat
                   </a>
-                  <!-- ★ NEW: Video button in features -->
                   <a class="btn btn-video" 
                     href="https://fdcb6cb22aa4aa08b2.gradio.live" 
                     target="_blank">
                     🎬 Generate Video
-                    </a>
+                  </a>
                   <a class="btn" href="https://t1era-or-kode-blind.gitbook.io/t1era/documentation" target="_blank" rel="noopener">
                     Read Documentation
                   </a>
@@ -1918,7 +1913,6 @@
                     <div><span style="color: var(--accent-primary);">/account</span> — View dashboard</div>
                     <div><span style="color: var(--accent-primary);">/reset</span> — Clear session</div>
                   </div>
-                  <!-- ★ NEW: Web chat shortcut in command panel -->
                   <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border-primary);">
                     <a href="ChatT1era.html" style="display:flex;align-items:center;gap:10px;padding:12px;background:rgba(6,182,212,0.06);border:1px solid rgba(6,182,212,0.25);border-radius:10px;text-decoration:none;color:#06b6d4;font-size:13px;font-weight:600;transition:all 0.2s;margin-bottom:10px;">
                       💬 Open AI Chat Interface →
@@ -2081,6 +2075,24 @@
   </div>
 
   <script>
+    // ══════════════════════════════════════════════════════════
+    // INTRO GATE — runs before anything else
+    // Every page load/refresh checks for the sessionStorage flag.
+    // If missing → redirect to index.html for the intro screen.
+    // If present → remove it and stay on this page normally.
+    // ══════════════════════════════════════════════════════════
+    (function() {
+      if (!sessionStorage.getItem('loadedIntro')) {
+        // No flag = user hasn't come through the intro this session load
+        window.location.replace('index.html');
+      } else {
+        // Flag exists = came from intro. Clear it so next refresh triggers intro again.
+        sessionStorage.removeItem('loadedIntro');
+      }
+    })();
+
+    // ── REST OF PAGE SCRIPTS ──────────────────────────────────
+
     const BOT_URL = "https://t.me/T1ERA_SecBot";
     const DOCS_URL = "https://t1era-or-kode-blind.gitbook.io/t1era/documentation";
     const WEBAPP_URL = "#";
@@ -2232,10 +2244,8 @@
     /** 2. Trigger Logic: Connects your UI to the Netlify Proxy */
     async function handleGenerateVideo(payload) {
         try {
-            // UI Feedback: Start Loading State
             console.log("Starting generation...");
             
-            // Step 1: Send request to Proxy
             const response = await fetch('/.netlify/functions/proxy', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -2247,21 +2257,15 @@
 
             const jobId = initData.job_id;
 
-            // Step 2: Start Polling the status.js function
             pollJobStatus(
                 jobId,
                 (update) => {
-                    // Update your Progress Bar and Status Text here
                     console.log(`Status: ${update.status} | Progress: ${update.progress_pct}%`);
-                    // Example: document.getElementById('statusText').innerText = update.status;
                 },
                 (videoUrl) => {
-                    // Success! Show the video
                     console.log("Video Ready:", videoUrl);
-                    // Example: videoSource.src = videoUrl; videoPlayer.load();
                 },
                 (errorMsg) => {
-                    // Handle Error
                     alert("Error: " + errorMsg);
                 }
             );
@@ -2270,6 +2274,6 @@
             alert("Failed to start generation: " + err.message);
         }
     }
-</script>
+  </script>
 </body>
 </html>
