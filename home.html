@@ -35,7 +35,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
   <style>
     :root {
@@ -230,7 +230,8 @@
       color: var(--text-primary);
       font-weight: 700;
       font-size: 20px;
-      font-family: 'Space Grotesk', sans-serif;
+      font-family: 'Orbitron', 'Space Grotesk', sans-serif;
+      letter-spacing: 0.05em;
     }
 
     .logo-mark {
@@ -241,9 +242,42 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: 800;
+      font-weight: 900;
       font-size: 16px;
+      font-family: 'Orbitron', sans-serif;
       box-shadow: 0 0 20px var(--glow-primary);
+      position: relative;
+      overflow: hidden;
+      animation: logoGlow 3s ease-in-out infinite, logoSpin 8s linear infinite;
+    }
+
+    .logo-mark::before {
+      content: '';
+      position: absolute;
+      inset: -50%;
+      background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+      animation: logoShine 4s linear infinite;
+    }
+
+    @keyframes logoGlow {
+      0%, 100% { 
+        box-shadow: 0 0 20px var(--glow-primary), 0 0 30px var(--glow-primary);
+        transform: scale(1) rotate(var(--rotation, 0deg));
+      }
+      50% { 
+        box-shadow: 0 0 30px var(--glow-primary), 0 0 50px var(--glow-secondary), 0 0 70px var(--glow-primary);
+        transform: scale(1.05) rotate(var(--rotation, 0deg));
+      }
+    }
+
+    @keyframes logoSpin {
+      0% { --rotation: 0deg; }
+      100% { --rotation: 360deg; }
+    }
+
+    @keyframes logoShine {
+      0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+      100% { transform: translateX(200%) translateY(200%) rotate(45deg); }
     }
 
     nav {
@@ -360,6 +394,134 @@
     @keyframes pulse {
       0%, 100% { opacity: 1; }
       50% { opacity: 0.5; }
+    }
+
+    /* ── NEW: AI Chat Button Style ── */
+    .btn-chat {
+      background: linear-gradient(135deg, #06b6d4, #8b5cf6);
+      border: none;
+      box-shadow: 0 0 20px rgba(6, 182, 212, 0.4);
+      position: relative;
+      overflow: hidden;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.3s var(--transition);
+      color: var(--text-primary);
+      white-space: nowrap;
+    }
+
+    .btn-chat::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .btn-chat:hover {
+      box-shadow: 0 0 36px rgba(6, 182, 212, 0.6), var(--shadow-md);
+      transform: translateY(-2px);
+    }
+
+    .btn-chat:hover::before { opacity: 1; }
+
+    @keyframes chatSpark {
+      0%, 100% { box-shadow: 0 0 20px rgba(6, 182, 212, 0.4); }
+      50% { box-shadow: 0 0 32px rgba(6, 182, 212, 0.6), 0 0 48px rgba(139, 92, 246, 0.3); }
+    }
+
+    .btn-chat { animation: chatSpark 3s ease-in-out infinite; }
+
+    /* ── NEW: AI Chat Banner ── */
+    .chat-banner {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.12), rgba(139, 92, 246, 0.08));
+      border: 1px solid rgba(6, 182, 212, 0.35);
+      border-radius: 20px;
+      padding: 28px 32px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      flex-wrap: wrap;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .chat-banner::before {
+      content: '';
+      position: absolute;
+      top: -40%;
+      right: -10%;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(6, 182, 212, 0.15), transparent 70%);
+      pointer-events: none;
+    }
+
+    .chat-banner-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .chat-banner-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.25), rgba(139, 92, 246, 0.2));
+      border: 1px solid rgba(6, 182, 212, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      flex-shrink: 0;
+      animation: iconFloat 3s ease-in-out infinite;
+    }
+
+    .chat-banner-text h3 {
+      font-size: 17px;
+      font-weight: 700;
+      font-family: 'Space Grotesk', sans-serif;
+      margin-bottom: 4px;
+    }
+
+    .chat-banner-text p {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .chat-banner-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(6, 182, 212, 0.2);
+      border: 1px solid rgba(6, 182, 212, 0.4);
+      color: #06b6d4;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-left: 8px;
+    }
+
+    .chat-banner-pulse-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #06b6d4;
+      animation: pulse 1.5s ease-in-out infinite;
     }
 
     /* ── NEW: Hero Video Banner ── */
@@ -1134,6 +1296,8 @@
       section { padding: 60px 0; }
       .video-banner { padding: 20px; }
       .video-banner-text h3 { font-size: 15px; }
+      .chat-banner { padding: 20px; }
+      .chat-banner-text h3 { font-size: 15px; }
     }
 
     @media (max-width: 480px) {
@@ -1143,6 +1307,7 @@
       .header-actions .btn { padding: 6px 10px; font-size: 11px; }
       .stats-bar { grid-template-columns: 1fr; }
       .video-banner { flex-direction: column; }
+      .chat-banner { flex-direction: column; }
     }
 
     /* ====== SCROLL ANIMATIONS ====== */
@@ -1382,14 +1547,6 @@
             </nav>
 
             <div class="header-actions">
-              <!-- ★ NEW: AI Chat button -->
-              <a class="btn" href="ChatT1era.html">
-                💬 AI Chat
-              </a>
-              <!-- ★ NEW: Generate Video button in header -->
-              <a class="btn btn-video" href="generate.html">
-                🎬 Generate Video
-              </a>
               <a class="btn" href="https://t1era-or-kode-blind.gitbook.io/t1era/documentation" target="_blank" rel="noopener">Docs</a>
               <a class="btn btn-primary" href="https://t.me/T1ERA_SecBot" target="_blank" rel="noopener">
                 <span class="btn-icon"></span>
@@ -1436,6 +1593,27 @@
               Chat, analyze, create, and automate — all from one powerful Telegram interface.
             </p>
 
+            <!-- ★ NEW: AI Chat Banner (Above Video) -->
+            <div class="chat-banner fade-in">
+              <div class="chat-banner-left">
+                <div class="chat-banner-icon">💬</div>
+                <div class="chat-banner-text">
+                  <h3>
+                    AI Chat Assistant
+                    <span class="chat-banner-badge">
+                      <span class="chat-banner-pulse-dot"></span> LIVE
+                    </span>
+                  </h3>
+                  <p>Intelligent conversations powered by advanced AI · Multi-mode support · 24/7 Available</p>
+                </div>
+              </div>
+              <a class="btn btn-chat" 
+                href="ChatT1era.html" 
+                style="flex-shrink:0;">
+                ⚡ Try Now — Free
+              </a>
+            </div>
+
             <!-- ★ NEW: Video Generation Banner -->
             <div class="video-banner fade-in">
               <div class="video-banner-left">
@@ -1455,7 +1633,7 @@
                 style="flex-shrink:0;" 
                 target="_blank">
                 ⚡ Try Now — Free
-                </a>
+              </a>
             </div>
 
             <div class="hero-cta">
@@ -1463,16 +1641,6 @@
                 <span class="btn-icon"></span>
                 Start on Telegram
               </a>
-              <!-- ★ NEW: AI Chat button in hero -->
-              <a class="btn btn-primary" href="ChatT1era.html" style="background: linear-gradient(135deg, var(--accent-tertiary), var(--accent-secondary));">
-                💬 Try AI Chat
-              </a>
-              <!-- ★ NEW: Generate Video in main CTA row -->
-              <a class="btn btn-video" 
-                href="https://fdcb6cb22aa4aa08b2.gradio.live" 
-                target="_blank">
-                🎬 Generate Video
-                </a>
               <a class="btn btn-primary" href="#" id="webappBtn" style="background: linear-gradient(135deg, var(--accent-secondary), var(--accent-tertiary));">
                 Launch WebApp
               </a>
