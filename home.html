@@ -1997,10 +1997,10 @@
             <div class="header-actions">
               <a class="btn" href="https://t1era-or-kode-blind.gitbook.io/t1era/documentation" target="_blank" rel="noopener">Docs</a>
 
-              <!-- ══ WEB3 LOGIN / SIGNUP BUTTON (shown when signed out) ══ -->
+              <!-- ══ LOGIN BUTTON (shown when signed out) ══ -->
               <a class="btn-auth" href="auth.html" id="authBtn">
                 <i class="ph-bold ph-lock-simple-open"></i>
-                <span class="btn-auth-label">Login / Sign Up</span>
+                <span class="btn-auth-label">Login</span>
               </a>
 
               <!-- ══ USER AVATAR (shown when signed in, hidden by default) ══ -->
@@ -2031,7 +2031,7 @@
                   </a>
                   <!-- divider -->
                   <div class="dropdown-divider"></div>
-                  <!-- sign out — has real handler -->
+                  <!-- sign out — inside dropdown ONLY, never in header bar -->
                   <button class="dropdown-item signout" id="signOutBtn">
                     <i class="ph-bold ph-sign-out"></i>
                     <span>Sign Out</span>
@@ -2729,15 +2729,6 @@
     }
   </script>
 
-  <!-- ══════════════════════════════════════════════
-       FIREBASE — Auth state check on every page load
-       DEFAULT STATE (before Firebase resolves):
-         authBtn  = visible (signed-out assumed)
-         avatarBtn = hidden
-       Firebase onAuthStateChanged then flips correctly:
-         signed-in  → hide authBtn, show avatar
-         signed-out → keep authBtn, keep avatar hidden
-  ══════════════════════════════════════════════ -->
   <script type="module">
     import { initializeApp }                      from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
     import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
@@ -2762,18 +2753,15 @@
     const signOutBtn      = document.getElementById('signOutBtn');
     const userDropdown    = document.getElementById('userDropdown');
 
-    // ── Firebase resolves auth state once on load ──
     onAuthStateChanged(auth, user => {
       if (user) {
-        // ═══ SIGNED IN ═══
+        // SIGNED IN — hide Login, show avatar
         authBtn.style.display       = 'none';
         userAvatarBtn.style.display = 'block';
 
-        // Fill dropdown header
         dropdownName.textContent  = user.displayName || 'T1ERA User';
         dropdownEmail.textContent = user.email || '';
 
-        // Build avatar — Google photo OR initials fallback
         if (user.photoURL) {
           userAvatarInner.innerHTML =
             `<img class="user-avatar-img" src="${user.photoURL}" alt="avatar" referrerpolicy="no-referrer"/>`;
@@ -2784,32 +2772,30 @@
         }
 
       } else {
-        // ═══ SIGNED OUT — no user, no avatar, just login button ═══
+        // SIGNED OUT — show Login, hide avatar completely
         authBtn.style.display       = 'inline-flex';
         userAvatarBtn.style.display = 'none';
-        userDropdown.classList.remove('open'); // safety: close dropdown if open
+        userDropdown.classList.remove('open');
       }
     });
 
-    // ── Dropdown toggle on avatar click ──
+    // Dropdown toggle on avatar click
     userAvatarBtn.addEventListener('click', e => {
       e.stopPropagation();
       userDropdown.classList.toggle('open');
     });
 
-    // ── Close dropdown when clicking outside ──
+    // Close dropdown when clicking outside
     document.addEventListener('click', e => {
       if (!userAvatarBtn.contains(e.target)) {
         userDropdown.classList.remove('open');
       }
     });
 
-    // ── Sign Out ──
+    // Sign Out — only accessible from inside dropdown
     signOutBtn.addEventListener('click', async () => {
       await signOut(auth);
       userDropdown.classList.remove('open');
-      // onAuthStateChanged fires automatically after signOut
-      // and will show authBtn + hide avatar
     });
   </script>
 </body>
