@@ -2725,93 +2725,92 @@
   </script>
 
   <script type="module">
-    import { initializeApp }                      from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-    import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+  import { initializeApp }                        from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+  import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 
-    const firebaseConfig = {
-      apiKey:            "AIzaSyALMqX8Cw_LvdztWX3laDcDL8tK5vrMh8Y",
-      authDomain:        "t1era-authv1.firebaseapp.com",
-      projectId:         "t1era-authv1",
-      storageBucket:     "t1era-authv1.firebasestorage.app",
-      messagingSenderId: "668617935470",
-      appId:             "1:668617935470:web:184478248a0b0ec84e347f"
-    };
+  // ✅ FIXED: Same config as auth.html (t1era-v2)
+  const firebaseConfig = {
+    apiKey:            "AIzaSyBnt9mbb8LdMVeguSHUmS20L6uBHIfxwAs",
+    authDomain:        "t1era-v2.firebaseapp.com",
+    projectId:         "t1era-v2",
+    storageBucket:     "t1era-v2.firebasestorage.app",
+    messagingSenderId: "279266491659",
+    appId:             "1:279266491659:web:28a03c7b7300fcb152b60e"
+  };
 
-    const app  = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
 
-    const authBtn         = document.getElementById('authBtn');
-    const userAvatarBtn   = document.getElementById('userAvatarBtn');
-    const userAvatarInner = document.getElementById('userAvatarInner');
-    const dropdownName    = document.getElementById('dropdownName');
-    const dropdownEmail   = document.getElementById('dropdownEmail');
-    const signOutBtn      = document.getElementById('signOutBtn');
-    const userDropdown    = document.getElementById('userDropdown');
+  const authBtn         = document.getElementById('authBtn');
+  const userAvatarBtn   = document.getElementById('userAvatarBtn');
+  const userAvatarInner = document.getElementById('userAvatarInner');
+  const dropdownName    = document.getElementById('dropdownName');
+  const dropdownEmail   = document.getElementById('dropdownEmail');
+  const userDropdown    = document.getElementById('userDropdown');
 
-    onAuthStateChanged(auth, user => {
-      if (user) {
-        // ── SIGNED IN: show avatar, hide login ──
-        authBtn.style.display      = 'none';
-        userAvatarBtn.style.display    = 'block';
-        userAvatarBtn.style.visibility = 'visible';
+  onAuthStateChanged(auth, user => {
+    if (user) {
+      // ── SIGNED IN: show avatar, hide login ──
+      authBtn.style.display          = 'none';
+      userAvatarBtn.style.display    = 'block';
+      userAvatarBtn.style.visibility = 'visible';
 
-        dropdownName.textContent  = user.displayName || 'T1ERA User';
-        dropdownEmail.textContent = user.email || '';
+      dropdownName.textContent  = user.displayName || 'T1ERA User';
+      dropdownEmail.textContent = user.email || '';
 
-        if (user.photoURL) {
-          userAvatarInner.innerHTML =
-            `<img class="user-avatar-img" src="${user.photoURL}" alt="avatar" referrerpolicy="no-referrer"/>`;
-        } else {
-          const initial = (user.displayName || user.email || 'U')[0].toUpperCase();
-          userAvatarInner.innerHTML =
-            `<div class="user-avatar-initials">${initial}</div>`;
-        }
-
-        // Inject Sign Out into dropdown ONLY when signed in
-        if (!document.getElementById('signOutBtn')) {
-          const divider = document.createElement('div');
-          divider.className = 'dropdown-divider';
-          userDropdown.appendChild(divider);
-
-          const btn = document.createElement('button');
-          btn.className = 'dropdown-item signout';
-          btn.id = 'signOutBtn';
-          btn.innerHTML = '<i class="ph-bold ph-sign-out"></i><span>Sign Out</span>';
-          btn.addEventListener('click', async () => {
-            userDropdown.classList.remove('open');
-            await signOut(auth);
-          });
-          userDropdown.appendChild(btn);
-        }
-
+      if (user.photoURL) {
+        userAvatarInner.innerHTML =
+          `<img class="user-avatar-img" src="${user.photoURL}" alt="avatar" referrerpolicy="no-referrer"/>`;
       } else {
-        // ── SIGNED OUT: show login, fully hide avatar ──
-        authBtn.style.display          = 'inline-flex';
-        userAvatarBtn.style.display    = 'none';
-        userAvatarBtn.style.visibility = 'hidden';
-        userDropdown.classList.remove('open');
-
-        // Remove Sign Out from dropdown if present
-        const existingSignOut = document.getElementById('signOutBtn');
-        if (existingSignOut) {
-          existingSignOut.previousElementSibling?.remove(); // remove divider too
-          existingSignOut.remove();
-        }
+        const initial = (user.displayName || user.email || 'U')[0].toUpperCase();
+        userAvatarInner.innerHTML =
+          `<div class="user-avatar-initials">${initial}</div>`;
       }
-    });
 
-    // Dropdown toggle on avatar click
-    userAvatarBtn.addEventListener('click', e => {
-      e.stopPropagation();
-      userDropdown.classList.toggle('open');
-    });
+      // Inject Sign Out into dropdown ONLY once
+      if (!document.getElementById('signOutBtn')) {
+        const divider = document.createElement('div');
+        divider.className = 'dropdown-divider';
+        userDropdown.appendChild(divider);
 
-    // Close dropdown when clicking outside
-    document.addEventListener('click', e => {
-      if (!userAvatarBtn.contains(e.target)) {
-        userDropdown.classList.remove('open');
+        const btn = document.createElement('button');
+        btn.className = 'dropdown-item signout';
+        btn.id = 'signOutBtn';
+        btn.innerHTML = '<i class="ph-bold ph-sign-out"></i><span>Sign Out</span>';
+        btn.addEventListener('click', async () => {
+          userDropdown.classList.remove('open');
+          await signOut(auth);
+        });
+        userDropdown.appendChild(btn);
       }
-    });
-  </script>
+
+    } else {
+      // ── SIGNED OUT ──
+      authBtn.style.display          = 'inline-flex';
+      userAvatarBtn.style.display    = 'none';
+      userAvatarBtn.style.visibility = 'hidden';
+      userDropdown.classList.remove('open');
+
+      const existingSignOut = document.getElementById('signOutBtn');
+      if (existingSignOut) {
+        existingSignOut.previousElementSibling?.remove();
+        existingSignOut.remove();
+      }
+    }
+  });
+
+  // Dropdown toggle
+  userAvatarBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    userDropdown.classList.toggle('open');
+  });
+
+  // Close dropdown on outside click
+  document.addEventListener('click', e => {
+    if (!userAvatarBtn.contains(e.target)) {
+      userDropdown.classList.remove('open');
+    }
+  });
+</script>
 </body>
 </html>
