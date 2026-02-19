@@ -9,9 +9,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700;800&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
 
-  <!-- ═══════════════════════════════════
-       reCAPTCHA ENTERPRISE — load script
-  ═══════════════════════════════════ -->
   <style>
     :root {
       --bg:       #000000;
@@ -165,8 +162,12 @@
     .blaunch:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(59,130,246,.5);}
     .ldot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s ease-in-out infinite;}
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-    .bout{width:100%;padding:11px;border-radius:10px;border:1px solid var(--bdr);background:transparent;color:var(--txt2);font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .25s;}
+    .bout{width:100%;padding:11px;border-radius:10px;border:1px solid var(--bdr);background:transparent;color:var(--txt2);font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .25s;margin-bottom:8px;}
     .bout:hover{border-color:rgba(239,68,68,.5);color:#fca5a5;}
+
+    /* Switch Account button */
+    .bswitch{width:100%;padding:11px;border-radius:10px;border:1px solid rgba(99,102,241,.3);background:rgba(99,102,241,.07);color:rgba(255,255,255,.7);font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .25s;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:8px;}
+    .bswitch:hover{border-color:rgba(99,102,241,.6);background:rgba(99,102,241,.14);color:#fff;}
 
     /* FOOTER */
     .foot{text-align:center;font-size:11px;color:var(--txt3);margin-top:20px;line-height:1.7;}
@@ -198,20 +199,17 @@
 
     #csPopupBox{
       position:relative;
-      /* shrink-wrap to the image's natural size */
       display:inline-flex;
       border:2px solid rgba(59,130,246,.4);
       border-radius:16px;
       box-shadow:0 0 0 1px rgba(59,130,246,.08),0 32px 80px rgba(0,0,0,.85),0 0 60px rgba(59,130,246,.15);
       overflow:hidden;
-      /* cap so it never overflows the viewport */
       max-width:calc(100vw - 32px);
       max-height:calc(100vh - 32px);
       animation:popBoxIn .4s var(--ease) .1s both;
     }
     @keyframes popBoxIn{from{opacity:0;transform:scale(.93) translateY(18px)}to{opacity:1;transform:none}}
 
-    /* glow border top accent line */
     #csPopupBox::before{
       content:'';position:absolute;top:0;left:0;right:0;height:3px;
       background:linear-gradient(90deg,var(--blue),var(--purple),var(--cyan));
@@ -219,22 +217,18 @@
     }
 
     #csPopupImg{
-      /* render at natural size, but never exceed the viewport */
       display:block;
       max-width:calc(100vw - 32px);
       max-height:calc(100vh - 32px);
       width:auto;
       height:auto;
-      /* no background, no padding — box hugs image exactly */
     }
 
-    /* phone: tighten max slightly */
     @media(max-width:480px){
       #csPopupBox{border-radius:12px;}
       #csPopupImg{max-width:calc(100vw - 24px);max-height:calc(100vh - 24px);}
     }
 
-    /* CLOSE BUTTON — top-right corner */
     #csPopupClose{
       position:absolute;
       top:10px;right:10px;
@@ -257,8 +251,9 @@
       transform:scale(1.1);
     }
     #csPopupClose:active{transform:scale(.95);}
+
     /* ═══════════════════════════════════
-       HOV SECURITY — HUMAN OVER VERIFICATION
+       HOV SECURITY
     ═══════════════════════════════════ */
     #hovOverlay{
       position:fixed;inset:0;z-index:10000;
@@ -351,7 +346,7 @@
     .hov-lockicon{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#ef4444,#dc2626);display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 16px;box-shadow:0 0 40px rgba(239,68,68,.4);animation:ringPop .5s cubic-bezier(0.34,1.56,0.64,1) both;}
     .hov-ltitle{font-family:"Space Grotesk",sans-serif;font-size:20px;font-weight:800;color:#fca5a5;margin-bottom:6px;}
     .hov-lsub{font-size:13px;color:rgba(255,255,255,.45);margin-bottom:8px;line-height:1.6;}
-    .hov-timer{font-family:"Orbitron",sans-serif;font-size:28px;font-weight:700;color:#ef4444;margin:12px 0;text-shadow:0 0 20px rgba(239,68,6,.4);}
+    .hov-timer{font-family:"Orbitron",sans-serif;font-size:28px;font-weight:700;color:#ef4444;margin:12px 0;text-shadow:0 0 20px rgba(239,68,68,.4);}
     .hov-lbtn{width:100%;padding:12px;border-radius:11px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:rgba(255,255,255,.6);font-family:"Space Grotesk",sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .25s;margin-top:8px;}
     .hov-lbtn:hover{background:rgba(255,255,255,.08);color:#fff;}
     @media(max-width:480px){
@@ -360,7 +355,6 @@
       .hov-steps{padding-left:18px;padding-right:18px;}
       .hov-mathq{font-size:22px;}
     }
-
   </style>
 </head>
 <body>
@@ -368,18 +362,10 @@
   <div class="bgf bgglow"></div>
   <div class="ptw" id="pts"></div>
 
-  <!-- ═══════════════════════════════════
-       CYBERSECURITY IMAGE POPUP
-  ═══════════════════════════════════ -->
-
-  <!-- ═══════════════════════════════════
-       HOV SECURITY — HUMAN OVER VERIFICATION
-  ═══════════════════════════════════ -->
+  <!-- HOV SECURITY -->
   <div id="hovOverlay" role="dialog" aria-modal="true" aria-label="Human Verification">
     <div id="hovBox">
       <div class="hov-accent"></div>
-
-      <!-- HEADER -->
       <div class="hov-header">
         <div class="hov-brand">
           <div class="hov-shield">🛡️</div>
@@ -391,38 +377,21 @@
         <div class="hov-title">Verify You Are Human</div>
         <div class="hov-sub">Anti-bot protection powered by T1ERA HOV Security System</div>
       </div>
-
-      <!-- STEP INDICATORS -->
       <div class="hov-steps">
-        <div class="hov-step active" id="hstep1">
-          <div class="hov-snum">1</div>
-          <div class="hov-slbl">Math</div>
-        </div>
-        <div class="hov-step" id="hstep2">
-          <div class="hov-snum">2</div>
-          <div class="hov-slbl">Count</div>
-        </div>
-        <div class="hov-step" id="hstep3">
-          <div class="hov-snum">3</div>
-          <div class="hov-slbl">Colour</div>
-        </div>
+        <div class="hov-step active" id="hstep1"><div class="hov-snum">1</div><div class="hov-slbl">Math</div></div>
+        <div class="hov-step" id="hstep2"><div class="hov-snum">2</div><div class="hov-slbl">Count</div></div>
+        <div class="hov-step" id="hstep3"><div class="hov-snum">3</div><div class="hov-slbl">Colour</div></div>
       </div>
-
-      <!-- STEP 1: MATH -->
+      <!-- Step 1: Math -->
       <div class="hov-panel on" id="hpanel1">
         <div class="hov-err" id="hErr1"><span>⚠️</span><span id="hErr1Txt"></span></div>
         <div class="hov-qlbl"><span></span>Solve the equation</div>
-        <div class="hov-math">
-          <div class="hov-mathq" id="hMathQ">?</div>
-        </div>
+        <div class="hov-math"><div class="hov-mathq" id="hMathQ">?</div></div>
         <input class="hov-inp" id="hMathA" type="number" placeholder="Your answer" autocomplete="off" />
         <div class="hov-tries" id="hTries1"></div>
-        <button class="hov-btn" onclick="hovNextStep(1)" style="margin-top:14px;">
-          Continue <span>→</span>
-        </button>
+        <button class="hov-btn" onclick="hovNextStep(1)" style="margin-top:14px;">Continue <span>→</span></button>
       </div>
-
-      <!-- STEP 2: COUNT OBJECTS -->
+      <!-- Step 2: Count -->
       <div class="hov-panel" id="hpanel2">
         <div class="hov-err" id="hErr2"><span>⚠️</span><span id="hErr2Txt"></span></div>
         <div class="hov-qlbl"><span></span>How many objects do you see?</div>
@@ -435,8 +404,7 @@
         <div class="hov-tries" id="hTries2"></div>
         <button class="hov-btn" onclick="hovNextStep(2)">Continue <span>→</span></button>
       </div>
-
-      <!-- STEP 3: COLOUR -->
+      <!-- Step 3: Colour -->
       <div class="hov-panel" id="hpanel3">
         <div class="hov-err" id="hErr3"><span>⚠️</span><span id="hErr3Txt"></span></div>
         <div class="hov-qlbl"><span></span>What colour is shown below?</div>
@@ -445,15 +413,13 @@
         <div class="hov-tries" id="hTries3"></div>
         <button class="hov-btn" onclick="hovNextStep(3)">Verify &amp; Continue <span>🔓</span></button>
       </div>
-
-      <!-- SUCCESS -->
+      <!-- Success -->
       <div class="hov-success" id="hSuccess">
         <div class="hov-checkring">✓</div>
         <div class="hov-stitle">Human Verified!</div>
         <div class="hov-ssub">HOV Security clearance granted. Creating your account...</div>
       </div>
-
-      <!-- LOCKED -->
+      <!-- Locked -->
       <div class="hov-locked" id="hLocked">
         <div class="hov-lockicon">🔒</div>
         <div class="hov-ltitle">Access Temporarily Blocked</div>
@@ -463,10 +429,10 @@
         <button class="hov-lbtn" onclick="location.href='home.html'">🏠 Go to Home Page</button>
         <button class="hov-lbtn" onclick="location.href='https://t.me/T1ERA_SecBot'" style="margin-top:4px;">🚀 Open Telegram Instead</button>
       </div>
-
     </div>
   </div>
 
+  <!-- CYBERSECURITY POPUP -->
   <div id="csPopupOverlay" role="dialog" aria-modal="true" aria-label="Cybersecurity notice">
     <div id="csPopupBox">
       <button id="csPopupClose" aria-label="Close popup" title="Close">&#x2715;</button>
@@ -491,9 +457,11 @@
         <a href="https://t.me/T1ERA_SecBot" target="_blank" rel="noopener" class="blaunch" id="blaunchBtn">
           <span class="ldot"></span>Launch T1ERA on Telegram
         </a>
+        <!-- Switch Account -->
+        <button class="bswitch" id="switchAccBtn">⇄ Switch Google Account</button>
+        <!-- Sign Out -->
         <button class="bout" id="outBtn">Sign Out</button>
-
-        <!-- Redirect UI — shown only after new Google signup -->
+        <!-- Redirect UI -->
         <div id="redirectUI" style="display:none;flex-direction:column;align-items:center;gap:14px;margin-top:8px;">
           <div class="rspinner"></div>
           <span id="redirectTxt" style="font-size:13px;font-weight:600;color:rgba(255,255,255,.5);letter-spacing:.06em;animation:rtxtpulse 1.2s ease-in-out infinite;">Please Wait...</span>
@@ -517,7 +485,6 @@
           <div class="lockbar" id="lockbar"></div>
           <div class="alert err" id="lErr"></div>
           <div class="alert ok"  id="lOk"></div>
-
           <div class="field">
             <div class="flbl">Email address<span class="fst" id="lESt"></span></div>
             <div class="inpw">
@@ -527,7 +494,6 @@
               <div class="iend"><span class="ichk" id="lEChk"></span></div>
             </div>
           </div>
-
           <div class="field">
             <div class="flbl">Password</div>
             <div class="inpw">
@@ -537,19 +503,17 @@
             </div>
             <a href="#" class="forgot" id="fgLink">Forgot password?</a>
           </div>
-
           <div class="dots" id="dotRow">
             <span style="font-size:11px;color:var(--txt3)">Attempts:</span>
             <div class="dot" id="d1"></div><div class="dot" id="d2"></div>
             <div class="dot" id="d3"></div><div class="dot" id="d4"></div>
             <div class="dot" id="d5"></div>
           </div>
-
           <button class="bsub" id="lBtn" onclick="doLogin()">
             <div class="spin"></div><span class="lbl">Sign In</span>
           </button>
           <div class="dvd">or</div>
-          <button class="bgoo" id="lGBtn" onclick="doGoogle('login')">
+          <button class="bgoo" id="lGBtn" onclick="doGoogle()">
             <svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
             Sign in with Google
           </button>
@@ -559,7 +523,6 @@
         <div class="panel" id="pSgn">
           <div class="alert err" id="sErr"></div>
           <div class="alert ok"  id="sOk"></div>
-
           <div class="field">
             <div class="flbl">Full name<span class="fst" id="sNSt"></span></div>
             <div class="inpw">
@@ -569,7 +532,6 @@
               <div class="iend"><span class="ichk" id="sNChk"></span></div>
             </div>
           </div>
-
           <div class="field">
             <div class="flbl">Email address<span class="fst" id="sESt"></span></div>
             <div class="inpw">
@@ -579,7 +541,6 @@
               <div class="iend"><span class="ichk" id="sEChk"></span></div>
             </div>
           </div>
-
           <div class="field">
             <div class="flbl">Password<span class="fst" id="sPSt"></span></div>
             <div class="inpw">
@@ -588,20 +549,17 @@
                 oninput="onPwInput()" onfocus="document.getElementById('pwr').classList.add('on')"/>
               <div class="iend"><button class="eye" type="button" onclick="eye('sP',this)">👁</button></div>
             </div>
-            <!-- live checklist -->
             <div class="pwrules" id="pwr">
               <div class="rule" id="r8">   <span class="rdot"></span>At least 8 characters</div>
               <div class="rule" id="rUp">  <span class="rdot"></span>One uppercase letter (A–Z)</div>
               <div class="rule" id="rNum"> <span class="rdot"></span>One number (0–9)</div>
               <div class="rule" id="rSpc"> <span class="rdot"></span>One special character (!@#$%^&amp;*)</div>
             </div>
-            <!-- strength bar -->
             <div class="srow">
               <div class="strk"><div class="sfill" id="sfill"></div></div>
               <span class="sword" id="sword"></span>
             </div>
           </div>
-
           <button class="bsub" id="sBtn" onclick="doSignup()">
             <div class="spin"></div><span class="lbl">Create Account</span>
           </button>
@@ -643,18 +601,20 @@
     </div>
   </div>
 
-  <!-- FIREBASE MODULE -->
+  <!-- ═══════════════════════════════════
+       FIREBASE MODULE
+  ═══════════════════════════════════ -->
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
     import {
       getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
       signOut, sendPasswordResetEmail, updateProfile, sendEmailVerification,
       GoogleAuthProvider, signInWithPopup, onAuthStateChanged,
-      fetchSignInMethodsForEmail, getAdditionalUserInfo
+      fetchSignInMethodsForEmail, getAdditionalUserInfo,
+      setPersistence, browserLocalStoragePersistence
     } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 
-
-    const app  = initializeApp({
+    const app = initializeApp({
       apiKey:            "AIzaSyBnt9mbb8LdMVeguSHUmS20L6uBHIfxwAs",
       authDomain:        "t1era-v2.firebaseapp.com",
       projectId:         "t1era-v2",
@@ -662,37 +622,59 @@
       messagingSenderId: "279266491659",
       appId:             "1:279266491659:web:28a03c7b7300fcb152b60e"
     });
+
     const auth = getAuth(app);
-    const gp   = new GoogleAuthProvider();
 
+    // ── Force localStorage persistence for consistent speed on all devices ──
+    await setPersistence(auth, browserLocalStoragePersistence);
 
+    // ── Google provider with forced account picker ──
+    const gp = new GoogleAuthProvider();
+    gp.setCustomParameters({ prompt: 'select_account' });
+
+    // Expose to global scope for inline handlers
     window._auth = auth;
     window._gp   = gp;
-    window._fb   = { createUserWithEmailAndPassword, signInWithEmailAndPassword,
-                     signOut, sendPasswordResetEmail, updateProfile, sendEmailVerification,
-                     signInWithPopup, fetchSignInMethodsForEmail, getAdditionalUserInfo };
+    window._fb   = {
+      createUserWithEmailAndPassword,
+      signInWithEmailAndPassword,
+      signOut,
+      sendPasswordResetEmail,
+      updateProfile,
+      sendEmailVerification,
+      signInWithPopup,
+      fetchSignInMethodsForEmail,
+      getAdditionalUserInfo
+    };
 
+    // ── Auth state listener ──
     onAuthStateChanged(auth, user => {
       if (user) {
         document.getElementById('authF').style.display = 'none';
         const p = document.getElementById('lgdin');
         p.classList.add('on');
+
         const av = document.getElementById('av');
         av.innerHTML = user.photoURL
-          ? `<img src="${user.photoURL}" alt="av">`
-          : (user.displayName||user.email||'U')[0].toUpperCase();
+          ? `<img src="${user.photoURL}" alt="av" referrerpolicy="no-referrer">`
+          : (user.displayName || user.email || 'U')[0].toUpperCase();
+
         document.getElementById('wn').textContent = user.displayName || 'T1ERA User';
         document.getElementById('we').textContent = user.email || '';
-        const vb = document.getElementById('vb');
-        vb.textContent = user.emailVerified ? '✅ Verified Account' : '📧 Verify your email to unlock all features';
-        vb.style.color  = user.emailVerified ? '' : '#fcd34d';
 
-        // If this is a new Google signup (flagged by gSignupBtn flow), show redirect UI
+        const vb = document.getElementById('vb');
+        vb.textContent = user.emailVerified
+          ? '✅ Verified Account'
+          : '📧 Verify your email to unlock all features';
+        vb.style.color = user.emailVerified ? '' : '#fcd34d';
+
+        // New Google signup redirect
         if (window._googleNewSignup) {
           window._googleNewSignup = false;
-          document.getElementById('blaunchBtn').style.display = 'none';
-          document.getElementById('outBtn').style.display = 'none';
-          document.getElementById('redirectUI').style.display = 'flex';
+          document.getElementById('blaunchBtn').style.display  = 'none';
+          document.getElementById('switchAccBtn').style.display = 'none';
+          document.getElementById('outBtn').style.display      = 'none';
+          document.getElementById('redirectUI').style.display  = 'flex';
           let secs = 3;
           const txt = document.getElementById('redirectTxt');
           const interval = setInterval(() => {
@@ -705,17 +687,34 @@
             }
           }, 1000);
         }
+
       } else {
         document.getElementById('authF').style.display = '';
         document.getElementById('lgdin').classList.remove('on');
       }
     });
 
+    // ── Sign Out ──
     document.getElementById('outBtn').addEventListener('click', () =>
       window._fb.signOut(window._auth));
+
+    // ── Switch Account: sign out → force Google picker → sign in ──
+    document.getElementById('switchAccBtn').addEventListener('click', async () => {
+      try {
+        await window._fb.signOut(window._auth);
+        // gp already has prompt:'select_account' so picker always shows
+        await window._fb.signInWithPopup(window._auth, window._gp);
+      } catch (err) {
+        if (err.code !== 'auth/popup-closed-by-user') {
+          console.error('Switch account error:', err.message);
+        }
+      }
+    });
   </script>
 
-  <!-- UI + VALIDATION SCRIPT -->
+  <!-- ═══════════════════════════════════
+       UI + VALIDATION SCRIPT
+  ═══════════════════════════════════ -->
   <script>
     /* PARTICLES */
     const ptw = document.getElementById('pts');
@@ -731,19 +730,18 @@
 
     /* ═══════════════════════════════════
        BRUTE FORCE PROTECTION
-       5 failed attempts → 60 s lockout
     ═══════════════════════════════════ */
     const MAX=5, LOCK_S=60;
-    let fails    = +( sessionStorage.getItem('t1f') ||'0');
-    let lockTil  = +( sessionStorage.getItem('t1l') ||'0');
-    let lockTmr  = null;
+    let fails   = +(sessionStorage.getItem('t1f')||'0');
+    let lockTil = +(sessionStorage.getItem('t1l')||'0');
+    let lockTmr = null;
 
-    const locked = ()=> Date.now() < lockTil;
+    const locked = () => Date.now() < lockTil;
 
     function markFail(){
       fails++; sessionStorage.setItem('t1f', fails);
       updDots();
-      if(fails>=MAX){ lockTil=Date.now()+LOCK_S*1000; sessionStorage.setItem('t1l',lockTil); startLock(); }
+      if(fails >= MAX){ lockTil=Date.now()+LOCK_S*1000; sessionStorage.setItem('t1l',lockTil); startLock(); }
     }
     function markOk(){
       fails=0; lockTil=0;
@@ -753,7 +751,7 @@
     function updDots(){
       for(let i=1;i<=5;i++){
         const d=document.getElementById('d'+i);
-        if(!d)return;
+        if(!d) return;
         d.classList.remove('bad');
         if(i<=fails) d.classList.add('bad');
       }
@@ -782,9 +780,6 @@
 
     /* ═══════════════════════════════════
        EMAIL VALIDATION
-       - Full RFC regex
-       - Typo domain detection
-       - Specific hints per error type
     ═══════════════════════════════════ */
     const EMAIL_RE = /^(?!.*\.\.)(?!^\.)([a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*)@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/;
 
@@ -793,13 +788,12 @@
       'gamil.com':'gmail.com','gnail.com':'gmail.com','gmail.co':'gmail.com',
       'gmailc.om':'gmail.com','gmail.cm':'gmail.com','gmaill.com':'gmail.com',
       'hotmal.com':'hotmail.com','hotmial.com':'hotmail.com','hotmail.co':'hotmail.com',
-      'hotmai.com':'hotmail.com','hotmal.com':'hotmail.com',
+      'hotmai.com':'hotmail.com',
       'yahooo.com':'yahoo.com','yaho.com':'yahoo.com','yahoo.co':'yahoo.com','yhoo.com':'yahoo.com',
       'outlok.com':'outlook.com','outloo.com':'outlook.com','outllok.com':'outlook.com',
       'iclod.com':'icloud.com','icoud.com':'icloud.com','iclould.com':'icloud.com',
     };
 
-    // map input-id → check-icon-id
     const CHK = { lE:'lEChk', sE:'sEChk', rE:'rEChk' };
 
     function chkEmail(inpId, stId, blur=false){
@@ -807,17 +801,13 @@
       const st =document.getElementById(stId);
       const chk=document.getElementById(CHK[inpId]||'');
       const val=inp.value.trim();
-
       if(!val){ inp.className=''; st.textContent=''; if(chk)chk.textContent=''; return false; }
-
-      // typo check
       const dom=val.split('@')[1]?.toLowerCase();
       const fix=dom&&TYPOS[dom];
       if(fix){
         inp.className='inv'; st.className='fst err';
         st.textContent=`Did you mean @${fix}?`; if(chk)chk.textContent='⚠️'; return false;
       }
-
       if(!EMAIL_RE.test(val)){
         if(blur||val.length>7){
           inp.className='inv'; st.className='fst err';
@@ -830,7 +820,6 @@
         }
         return false;
       }
-
       inp.className='vld'; st.className='fst ok'; st.textContent='✓ Looks good';
       if(chk)chk.textContent='✅'; return true;
     }
@@ -851,9 +840,7 @@
     }
     window.chkName=chkName;
 
-    /* ═══════════════════════════════════
-       PASSWORD RULES + STRENGTH
-    ═══════════════════════════════════ */
+    /* PASSWORD */
     const RULES=[
       {id:'r8',  fn:v=>v.length>=8},
       {id:'rUp', fn:v=>/[A-Z]/.test(v)},
@@ -941,7 +928,6 @@
       if(!chkEmail('lE','lESt',true)){ showA('lErr','Please enter a valid email address.','err'); return; }
       if(!pass){ showA('lErr','Please enter your password.','err'); return; }
       setLd('lBtn',true);
-
       try{
         await window._fb.signInWithEmailAndPassword(window._auth, email, pass);
         markOk();
@@ -966,15 +952,12 @@
       const email=sanitize(document.getElementById('sE').value);
       const pass =document.getElementById('sP').value;
       let ok=true;
-      if(!chkName(true))             ok=false;
-      if(!chkEmail('sE','sESt',true))ok=false;
+      if(!chkName(true))              ok=false;
+      if(!chkEmail('sE','sESt',true)) ok=false;
       const allRules=RULES.every(r=>r.fn(pass));
       if(!allRules){ document.getElementById('sP').className='inv'; document.getElementById('pwr').classList.add('on'); ok=false; }
       if(!ok){ showA('sErr','Please fix the errors highlighted above.','err'); return; }
-
       setLd('sBtn',true);
-
-      // Launch HOV Security verification before creating account
       openHov(async function(){
         await doSignupFirebase(name, email, pass);
       });
@@ -982,7 +965,6 @@
     window.doSignup=doSignup;
 
     async function doSignupFirebase(name, email, pass){
-      // pre-check: is email already registered?
       try{
         const methods=await window._fb.fetchSignInMethodsForEmail(window._auth, email);
         if(methods.length>0){
@@ -990,7 +972,6 @@
           setLd('sBtn',false); return;
         }
       } catch(e){ /* proceed */ }
-
       try{
         const cred=await window._fb.createUserWithEmailAndPassword(window._auth, email, pass);
         await window._fb.updateProfile(cred.user,{displayName:name});
@@ -1011,15 +992,16 @@
     }
 
     /* ═══════════════════════════════════
-       GOOGLE SIGN-IN
-       Sign In tab  → normal Google popup
-       Sign Up tab  → HOV first, then Google popup after pass
+       GOOGLE SIGN-IN (Login tab)
+       — always forces account picker
+       — blocks new users, must sign up first
     ═══════════════════════════════════ */
-    // LOGIN only — signup Google button wired separately after HOV is ready
-    async function doGoogle(mode){
+    async function doGoogle(){
       clrA('lErr');
       if(locked()) return;
       try{
+        // Sign out any cached session so picker always appears
+        if(window._auth.currentUser) await window._fb.signOut(window._auth);
         const result = await window._fb.signInWithPopup(window._auth, window._gp);
         const info   = window._fb.getAdditionalUserInfo(result);
         if(info.isNewUser){
@@ -1032,7 +1014,9 @@
         }
         markOk();
       } catch(err){
-        showA('lErr', fbMsg(err.code), 'err');
+        if(err.code !== 'auth/popup-closed-by-user'){
+          showA('lErr', fbMsg(err.code), 'err');
+        }
       }
     }
     window.doGoogle=doGoogle;
@@ -1045,7 +1029,6 @@
       const email=sanitize(document.getElementById('rE').value);
       if(!chkEmail('rE','rESt',true)){ showA('rErr','Please enter a valid email address.','err'); return; }
       setLd('rBtn',true);
-
       try{
         await window._fb.sendPasswordResetEmail(window._auth, email);
         showA('rOk','Reset link sent! Check your inbox (and spam folder).','ok');
@@ -1062,28 +1045,22 @@
       if(document.getElementById('pRst').classList.contains('on')) doReset();
     });
 
-
     /* ═══════════════════════════════════
-       HOV SECURITY — HUMAN OVER VERIFICATION
-       3-step: Math → Count → Colour
-       Max 3 wrong per step → lockout
+       HOV SECURITY
     ═══════════════════════════════════ */
     (function(){
       const STEP_MAX_TRIES = 3;
       const LOCK_SECONDS   = 60;
 
-      // State
-      let hovStep       = 1;
-      let stepTries     = {1:0, 2:0, 3:0};
-      let hovData       = {};   // {mathAns, objCount, colourAnswer, selectedColour}
-      let hovCallback   = null; // called with true on success
-      let lockTimer     = null;
+      let hovStep     = 1;
+      let stepTries   = {1:0, 2:0, 3:0};
+      let hovData     = {};
+      let hovCallback = null;
+      let lockTimer   = null;
 
-      // ── EMOJI OBJECTS POOL ──
       const OBJS = ['🔴','🟠','🟡','🟢','🔵','🟣','⚫','⚪','🟤',
                     '★','◆','▲','●','■','♦','✦','❋','⬟'];
 
-      // ── COLOUR DEFINITIONS ──
       const COLOURS = [
         {name:'Red',    hex:'#ef4444', text:'#fff'},
         {name:'Blue',   hex:'#3b82f6', text:'#fff'},
@@ -1098,78 +1075,65 @@
       function rnd(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
       function pick(arr){ return arr[rnd(0,arr.length-1)]; }
 
-      // ── GENERATE CHALLENGES ──
       function genMath(){
-        const ops = ['+', '-'];
-        const op  = pick(ops);
+        const ops=['+','-'];
+        const op=pick(ops);
         let a, b;
-        if(op==='+'){
-          a = rnd(1,49); b = rnd(1,49);
-        } else {
-          a = rnd(10,99); b = rnd(1,a);
-        }
-        hovData.mathAns = op==='+' ? a+b : a-b;
-        document.getElementById('hMathQ').textContent = a + ' ' + op + ' ' + b + ' = ?';
-        document.getElementById('hMathA').value = '';
-        document.getElementById('hMathA').className = 'hov-inp';
+        if(op==='+'){ a=rnd(1,49); b=rnd(1,49); }
+        else { a=rnd(10,99); b=rnd(1,a); }
+        hovData.mathAns = op==='+'? a+b : a-b;
+        document.getElementById('hMathQ').textContent = a+' '+op+' '+b+' = ?';
+        document.getElementById('hMathA').value='';
+        document.getElementById('hMathA').className='hov-inp';
       }
 
       function genObjects(){
-        const count = rnd(3,12);
-        hovData.objCount = count;
-        const canvas = document.getElementById('hCanvas');
-        canvas.innerHTML = '';
-        document.getElementById('hCountA').value = '0';
-        document.getElementById('hCountA').className = 'hov-cval';
-        const pool = [...OBJS].sort(()=>Math.random()-.5);
+        const count=rnd(3,12);
+        hovData.objCount=count;
+        const canvas=document.getElementById('hCanvas');
+        canvas.innerHTML='';
+        document.getElementById('hCountA').value='0';
+        document.getElementById('hCountA').className='hov-cval';
+        const pool=[...OBJS].sort(()=>Math.random()-.5);
         for(let i=0;i<count;i++){
-          const el = document.createElement('div');
-          el.className = 'hov-obj';
-          el.style.animationDelay = (i*0.06)+'s';
-          el.textContent = pool[i % pool.length];
-          // random size variation
-          const sz = rnd(28,42)+'px';
-          el.style.fontSize = sz;
+          const el=document.createElement('div');
+          el.className='hov-obj';
+          el.style.animationDelay=(i*0.06)+'s';
+          el.textContent=pool[i%pool.length];
+          el.style.fontSize=rnd(28,42)+'px';
           canvas.appendChild(el);
         }
       }
 
       function genColour(){
-        // pick correct colour + 3 distractors
-        const shuffled = [...COLOURS].sort(()=>Math.random()-.5);
-        const correct  = shuffled[0];
-        const options  = shuffled.slice(0,4).sort(()=>Math.random()-.5);
-        hovData.colourAnswer = correct.name;
-        hovData.selectedColour = null;
-
-        // show big colour block
-        const cc = document.getElementById('hColCanvas');
-        cc.innerHTML = '';
-        cc.style.background = correct.hex;
-        cc.style.minHeight  = '90px';
-        // subtle shimmer overlay
-        cc.style.boxShadow  = '0 0 40px '+correct.hex+'55, inset 0 0 60px rgba(0,0,0,.3)';
-
-        // build swatches
-        const sw = document.getElementById('hSwatches');
-        sw.innerHTML = '';
+        const shuffled=[...COLOURS].sort(()=>Math.random()-.5);
+        const correct=shuffled[0];
+        const options=shuffled.slice(0,4).sort(()=>Math.random()-.5);
+        hovData.colourAnswer=correct.name;
+        hovData.selectedColour=null;
+        const cc=document.getElementById('hColCanvas');
+        cc.innerHTML='';
+        cc.style.background=correct.hex;
+        cc.style.minHeight='90px';
+        cc.style.boxShadow='0 0 40px '+correct.hex+'55, inset 0 0 60px rgba(0,0,0,.3)';
+        const sw=document.getElementById('hSwatches');
+        sw.innerHTML='';
         options.forEach(col=>{
-          const btn = document.createElement('button');
-          btn.className = 'hov-swatch';
-          btn.innerHTML = '<span class="sdot" style="background:'+col.hex+'"></span>'+col.name;
-          btn.onclick = function(){
+          const btn=document.createElement('button');
+          btn.className='hov-swatch';
+          btn.innerHTML='<span class="sdot" style="background:'+col.hex+'"></span>'+col.name;
+          btn.onclick=function(){
             document.querySelectorAll('.hov-swatch').forEach(s=>s.classList.remove('sel'));
             btn.classList.add('sel');
-            hovData.selectedColour = col.name;
+            hovData.selectedColour=col.name;
           };
           sw.appendChild(btn);
         });
       }
 
-      // ── RENDER TRY DOTS ──
       function renderTries(step){
-        const el = document.getElementById('hTries'+step);
-        el.innerHTML = '';
+        const el=document.getElementById('hTries'+step);
+        el.innerHTML='';
         for(let i=0;i<STEP_MAX_TRIES;i++){
           const d=document.createElement('div');
           d.className='hov-try'+(i<stepTries[step]?' used':'');
@@ -1177,7 +1141,6 @@
         }
       }
 
-      // ── STEP INDICATOR UPDATE ──
       function updateSteps(current){
         for(let i=1;i<=3;i++){
           const el=document.getElementById('hstep'+i);
@@ -1187,90 +1150,64 @@
         }
       }
 
-      // ── SHOW ERROR ──
       function hovErr(step, msg){
-        const el  = document.getElementById('hErr'+step);
-        const txt = document.getElementById('hErr'+step+'Txt');
-        txt.textContent = msg;
+        const el=document.getElementById('hErr'+step);
+        const txt=document.getElementById('hErr'+step+'Txt');
+        txt.textContent=msg;
         el.classList.add('on');
         setTimeout(()=>el.classList.remove('on'), 3500);
       }
 
-      // ── WRONG ANSWER HANDLER ──
       function handleWrong(step, regenerate){
         stepTries[step]++;
         renderTries(step);
-        const remaining = STEP_MAX_TRIES - stepTries[step];
-
-        if(stepTries[step] >= STEP_MAX_TRIES){
-          startLockout();
-          return;
-        }
-
-        const msgs = [
-          'Incorrect. ' + remaining + ' attempt' + (remaining===1?'':'s') + ' remaining.',
-          'Wrong answer — please try again carefully. ' + remaining + ' left.',
-          'Not quite right. ' + remaining + ' attempt' + (remaining===1?'':'s') + ' left.',
+        const remaining=STEP_MAX_TRIES-stepTries[step];
+        if(stepTries[step]>=STEP_MAX_TRIES){ startLockout(); return; }
+        const msgs=[
+          'Incorrect. '+remaining+' attempt'+(remaining===1?'':'s')+' remaining.',
+          'Wrong answer — please try again carefully. '+remaining+' left.',
+          'Not quite right. '+remaining+' attempt'+(remaining===1?'':'s')+' left.',
         ];
         hovErr(step, msgs[rnd(0,msgs.length-1)]);
-        // regenerate challenge on wrong
         if(regenerate) regenerate();
       }
 
-      // ── NEXT STEP / VALIDATE ──
       window.hovNextStep = function(step){
         if(step===1){
-          const ans = parseInt(document.getElementById('hMathA').value);
-          if(isNaN(ans)){
-            hovErr(1,'Please enter your answer first.'); return;
-          }
-          if(ans !== hovData.mathAns){
-            document.getElementById('hMathA').className='hov-inp bad';
-            handleWrong(1, genMath); return;
-          }
+          const ans=parseInt(document.getElementById('hMathA').value);
+          if(isNaN(ans)){ hovErr(1,'Please enter your answer first.'); return; }
+          if(ans!==hovData.mathAns){ document.getElementById('hMathA').className='hov-inp bad'; handleWrong(1,genMath); return; }
           document.getElementById('hMathA').className='hov-inp ok';
           goStep(2);
         } else if(step===2){
-          const ans = parseInt(document.getElementById('hCountA').value);
-          if(ans !== hovData.objCount){
-            document.getElementById('hCountA').className='hov-cval bad';
-            handleWrong(2, genObjects); return;
-          }
+          const ans=parseInt(document.getElementById('hCountA').value);
+          if(ans!==hovData.objCount){ document.getElementById('hCountA').className='hov-cval bad'; handleWrong(2,genObjects); return; }
           document.getElementById('hCountA').className='hov-cval ok';
           goStep(3);
         } else if(step===3){
-          if(!hovData.selectedColour){
-            hovErr(3,'Please select a colour.'); return;
-          }
-          if(hovData.selectedColour !== hovData.colourAnswer){
-            handleWrong(3, genColour); return;
-          }
-          // ALL PASSED
+          if(!hovData.selectedColour){ hovErr(3,'Please select a colour.'); return; }
+          if(hovData.selectedColour!==hovData.colourAnswer){ handleWrong(3,genColour); return; }
           hovSuccess();
         }
       };
 
       window.hovCount = function(delta){
-        const el = document.getElementById('hCountA');
-        let v = parseInt(el.value)||0;
-        v = Math.max(0, Math.min(30, v+delta));
-        el.value = v;
+        const el=document.getElementById('hCountA');
+        let v=parseInt(el.value)||0;
+        v=Math.max(0,Math.min(30,v+delta));
+        el.value=v;
         el.className='hov-cval';
       };
 
       function goStep(n){
-        // hide all panels
-        [1,2,3].forEach(i=>{
-          document.getElementById('hpanel'+i).classList.remove('on');
-        });
+        [1,2,3].forEach(i=>document.getElementById('hpanel'+i).classList.remove('on'));
         document.getElementById('hpanel'+n).classList.add('on');
-        hovStep = n;
+        hovStep=n;
         updateSteps(n);
-        stepTries[n] = 0;
+        stepTries[n]=0;
         renderTries(n);
         if(n===2) genObjects();
         if(n===3) genColour();
-        // scroll to top
         document.getElementById('hovBox').scrollTop=0;
       }
 
@@ -1278,40 +1215,31 @@
         [1,2,3].forEach(i=>document.getElementById('hpanel'+i).classList.remove('on'));
         document.getElementById('hSuccess').classList.add('on');
         updateSteps(4);
-        // after brief moment, run the actual signup
-        setTimeout(()=>{
-          closeHov();
-          if(hovCallback) hovCallback();
-        }, 1800);
+        setTimeout(()=>{ closeHov(); if(hovCallback) hovCallback(); }, 1800);
       }
 
-      // ── LOCKOUT ──
       function startLockout(){
         [1,2,3].forEach(i=>document.getElementById('hpanel'+i).classList.remove('on'));
         document.getElementById('hSuccess').classList.remove('on');
         document.getElementById('hLocked').classList.add('on');
-        let remaining = LOCK_SECONDS;
-        document.getElementById('hLockTimer').textContent = remaining;
-        lockTimer = setInterval(()=>{
+        let remaining=LOCK_SECONDS;
+        document.getElementById('hLockTimer').textContent=remaining;
+        lockTimer=setInterval(()=>{
           remaining--;
-          document.getElementById('hLockTimer').textContent = remaining;
+          document.getElementById('hLockTimer').textContent=remaining;
           if(remaining<=0){
             clearInterval(lockTimer);
-            // reset and re-show form after lockout
             closeHov();
-            showA('sErr',
-              '⏳ Lockout expired. You may try again — <strong>please complete verification carefully.</strong>',
-              'warn');
+            showA('sErr','⏳ Lockout expired. You may try again — <strong>please complete verification carefully.</strong>','warn');
             setLd('sBtn',false);
           }
         },1000);
       }
 
-      // ── OPEN / CLOSE ──
       function openHov(callback){
-        hovCallback = callback;
-        hovStep     = 1;
-        stepTries   = {1:0,2:0,3:0};
+        hovCallback=callback;
+        hovStep=1;
+        stepTries={1:0,2:0,3:0};
         [1,2,3].forEach(i=>document.getElementById('hpanel'+i).classList.remove('on'));
         document.getElementById('hSuccess').classList.remove('on');
         document.getElementById('hLocked').classList.remove('on');
@@ -1319,47 +1247,37 @@
         document.getElementById('hpanel1').classList.add('on');
         updateSteps(1);
         genMath();
-        renderTries(1);
-        renderTries(2);
-        renderTries(3);
+        renderTries(1); renderTries(2); renderTries(3);
         document.getElementById('hovOverlay').classList.add('on');
         document.getElementById('hovBox').scrollTop=0;
       }
 
       function closeHov(){
-        const ov = document.getElementById('hovOverlay');
+        const ov=document.getElementById('hovOverlay');
         ov.style.opacity='0';
         ov.style.transition='opacity .3s';
-        setTimeout(()=>{
-          ov.classList.remove('on');
-          ov.style.opacity='';
-          ov.style.transition='';
-        },300);
+        setTimeout(()=>{ ov.classList.remove('on'); ov.style.opacity=''; ov.style.transition=''; },300);
         if(lockTimer){ clearInterval(lockTimer); lockTimer=null; }
       }
 
       window.openHov  = openHov;
       window.closeHov = closeHov;
 
-      // ── Wire Google signup button HERE, after openHov is ready ──
-      // This guarantees HOV opens first, Google popup fires only after pass
-      const gSignupBtn = document.getElementById('gSignupBtn');
+      // Google Sign Up — HOV first, then popup
+      const gSignupBtn=document.getElementById('gSignupBtn');
       if(gSignupBtn){
-        gSignupBtn.addEventListener('click', function(){
+        gSignupBtn.addEventListener('click',function(){
           clrA('sErr');
           openHov(async function(){
-            // HOV passed — set new signup flag, then open Google popup
-            window._googleNewSignup = true;
+            window._googleNewSignup=true;
             try{
               await window._fb.signInWithPopup(window._auth, window._gp);
-              // onAuthStateChanged fires → sees _googleNewSignup → shows redirect UI
+              // onAuthStateChanged fires → sees _googleNewSignup → redirect
             } catch(err){
-              window._googleNewSignup = false;
-              const m={
-                'auth/popup-closed-by-user':'Google sign-in was cancelled.',
-                'auth/popup-blocked':'Popup blocked. Please allow popups for this site.',
-              };
-              showA('sErr', m[err.code]||'Something went wrong. Please try again.', 'err');
+              window._googleNewSignup=false;
+              if(err.code!=='auth/popup-closed-by-user'){
+                showA('sErr', fbMsg(err.code)||'Something went wrong. Please try again.','err');
+              }
             }
           });
         });
@@ -1367,35 +1285,24 @@
     })();
 
     /* ═══════════════════════════════════
-       CYBERSECURITY POPUP — close logic
-       Shows on every page load / refresh.
-       Close: X button, overlay click, or Escape key.
+       CYBERSECURITY POPUP
     ═══════════════════════════════════ */
     (function(){
-      const overlay = document.getElementById('csPopupOverlay');
+      const overlay  = document.getElementById('csPopupOverlay');
       const closeBtn = document.getElementById('csPopupClose');
 
       function closePopup(){
         overlay.classList.add('hiding');
         overlay.addEventListener('animationend', function handler(){
-          overlay.style.display = 'none';
-          overlay.removeEventListener('animationend', handler);
+          overlay.style.display='none';
+          overlay.removeEventListener('animationend',handler);
         });
       }
 
-      // X button
       closeBtn.addEventListener('click', closePopup);
-
-      // Click on dark overlay backdrop (outside the box)
-      overlay.addEventListener('click', function(e){
-        if(e.target === overlay) closePopup();
-      });
-
-      // Escape key
+      overlay.addEventListener('click', function(e){ if(e.target===overlay) closePopup(); });
       document.addEventListener('keydown', function(e){
-        if(e.key === 'Escape' && overlay.style.display !== 'none'){
-          closePopup();
-        }
+        if(e.key==='Escape'&&overlay.style.display!=='none') closePopup();
       });
     })();
   </script>
