@@ -2725,12 +2725,9 @@
   </script>
 
   <script type="module">
-  import { initializeApp }     from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-  import { 
-    getAuth, onAuthStateChanged, signOut, 
-    setPersistence, browserLocalStoragePersistence,
-    GoogleAuthProvider, signInWithPopup
-  } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+  import { initializeApp }                                      from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+  import { getAuth, onAuthStateChanged, signOut, setPersistence, browserLocalStoragePersistence }
+                                                                from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 
   const firebaseConfig = {
     apiKey:            "AIzaSyBnt9mbb8LdMVeguSHUmS20L6uBHIfxwAs",
@@ -2751,30 +2748,17 @@
   const dropdownEmail   = document.getElementById('dropdownEmail');
   const userDropdown    = document.getElementById('userDropdown');
 
-  // ── STEP 1: Force localStorage (fast on all browsers/devices) ──
+  // ── STEP 1: Force localStorage persistence (same speed on desktop as mobile) ──
   await setPersistence(auth, browserLocalStoragePersistence);
 
-  // ── STEP 2: Instant flicker prevention ──
-  if (auth.currentUser) {
+  // ── STEP 2: Instant check — currentUser is populated synchronously
+  //    from localStorage BEFORE onAuthStateChanged fires.
+  //    Use this to immediately hide the login button flicker. ──
+  const immediateUser = auth.currentUser;
+  if (immediateUser) {
     authBtn.style.display = 'none';
   }
 
-  // ── Helper: Switch Google Account ──
-  async function switchGoogleAccount() {
-    userDropdown.classList.remove('open');
-    try {
-      await signOut(auth);                          // clear current session first
-      const provider = new GoogleAuthProvider();
-      provider.setCustomParameters({ prompt: 'select_account' }); // force picker
-      await signInWithPopup(auth, provider);        // pick new account
-    } catch (err) {
-      if (err.code !== 'auth/popup-closed-by-user') {
-        console.error('Switch account error:', err);
-      }
-    }
-  }
-
-  // ── Build signed-in UI ──
   function applyUser(user) {
     if (user) {
       authBtn.style.display          = 'none';
@@ -2784,7 +2768,6 @@
       dropdownName.textContent  = user.displayName || 'T1ERA User';
       dropdownEmail.textContent = user.email || '';
 
-      // Avatar: photo or initials fallback
       if (user.photoURL) {
         userAvatarInner.innerHTML =
           `<img class="user-avatar-img" src="${user.photoURL}" alt="avatar" referrerpolicy="no-referrer"/>`;
@@ -2794,56 +2777,38 @@
           `<div class="user-avatar-initials">${initial}</div>`;
       }
 
-      // Inject dropdown actions only once
       if (!document.getElementById('signOutBtn')) {
+        const divider = document.createElement('div');
+        divider.className = 'dropdown-divider';
+        userDropdown.appendChild(divider);
 
-        // ── Switch Account ──
-        const switchDivider = document.createElement('div');
-        switchDivider.className = 'dropdown-divider';
-        userDropdown.appendChild(switchDivider);
-
-        const switchBtn = document.createElement('button');
-        switchBtn.className = 'dropdown-item';
-        switchBtn.id = 'switchAccountBtn';
-        switchBtn.innerHTML = '<i class="ph-bold ph-arrows-left-right"></i><span>Switch Account</span>';
-        switchBtn.addEventListener('click', switchGoogleAccount);
-        userDropdown.appendChild(switchBtn);
-
-        // ── Sign Out ──
-        const signOutDivider = document.createElement('div');
-        signOutDivider.className = 'dropdown-divider';
-        userDropdown.appendChild(signOutDivider);
-
-        const signOutBtn = document.createElement('button');
-        signOutBtn.className = 'dropdown-item signout';
-        signOutBtn.id = 'signOutBtn';
-        signOutBtn.innerHTML = '<i class="ph-bold ph-sign-out"></i><span>Sign Out</span>';
-        signOutBtn.addEventListener('click', async () => {
+        const btn = document.createElement('button');
+        btn.className = 'dropdown-item signout';
+        btn.id = 'signOutBtn';
+        btn.innerHTML = '<i class="ph-bold ph-sign-out"></i><span>Sign Out</span>';
+        btn.addEventListener('click', async () => {
           userDropdown.classList.remove('open');
           await signOut(auth);
         });
-        userDropdown.appendChild(signOutBtn);
+        userDropdown.appendChild(btn);
       }
 
     } else {
-      // ── Signed out: restore login button, clean up dropdown ──
       authBtn.style.display          = 'inline-flex';
       userAvatarBtn.style.display    = 'none';
       userAvatarBtn.style.visibility = 'hidden';
       userDropdown.classList.remove('open');
 
-      // Remove injected buttons + their dividers cleanly
-      ['switchAccountBtn', 'signOutBtn'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) {
-          el.previousElementSibling?.remove(); // remove its divider
-          el.remove();
-        }
-      });
+      const existingSignOut = document.getElementById('signOutBtn');
+      if (existingSignOut) {
+        existingSignOut.previousElementSibling?.remove();
+        existingSignOut.remove();
+      }
     }
   }
 
-  // ── STEP 3: Confirmed auth state (handles token refresh) ──
+  // ── STEP 3: onAuthStateChanged handles the confirmed state
+  //    (token refresh, session validation, etc.) ──
   onAuthStateChanged(auth, applyUser);
 
   // ── Dropdown toggle ──
