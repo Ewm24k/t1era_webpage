@@ -76,11 +76,11 @@
 
     /* ── SLIDES CONTAINER ── */
     .slides{overflow:hidden;}
-    .slide{display:none;animation:slideIn .35s var(--ease) both;}
-    .slide.active{display:block;}
-    .slide.sliding-out{animation:slideOut .25s var(--ease) forwards;}
-    @keyframes slideIn{from{opacity:0;transform:translateX(28px)}to{opacity:1;transform:none}}
-    @keyframes slideOut{from{opacity:1;transform:none}to{opacity:0;transform:translateX(-28px)}}
+    .slide{display:none;}
+    .slide.active{display:block;animation:slideIn .35s var(--ease) both;}
+    .slide.back-active{display:block;animation:slideInBack .35s var(--ease) both;}
+    @keyframes slideIn{from{opacity:0;transform:translateX(32px)}to{opacity:1;transform:none}}
+    @keyframes slideInBack{from{opacity:0;transform:translateX(-32px)}to{opacity:1;transform:none}}
 
     /* ── SLIDE HEADER ── */
     .slide-head{padding:28px 32px 0;}
@@ -154,8 +154,14 @@
     .btn-next::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.12),transparent);}
     .btn-next:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(99,102,241,.45);}
     .btn-next:active{transform:translateY(1px);}
+    .btn-next:disabled{opacity:.5;cursor:not-allowed;transform:none !important;}
     .btn-next.final{background:linear-gradient(135deg,var(--green),#059669);box-shadow:0 4px 20px rgba(16,185,129,.3);}
     .btn-next.final:hover{box-shadow:0 8px 28px rgba(16,185,129,.45);}
+    /* spinner inside btn */
+    .btn-spin{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;animation:spin .7s linear infinite;display:none;}
+    .btn-next.loading .btn-spin{display:block;}
+    .btn-next.loading .btn-lbl{display:none;}
+    @keyframes spin{to{transform:rotate(360deg)}}
 
     /* ── SUCCESS SCREEN ── */
     #successScreen{display:none;padding:48px 32px;text-align:center;}
@@ -170,7 +176,7 @@
     @keyframes ldpulse{0%,100%{opacity:1}50%{opacity:.3}}
 
     /* ══════════════════════════════════════════
-       RESPONSIVE — PC (1200px+) large desktop
+       RESPONSIVE — PC (1200px+)
     ══════════════════════════════════════════ */
     @media(min-width:1200px){
       .page{padding:40px 24px 64px;}
@@ -193,7 +199,7 @@
     }
 
     /* ══════════════════════════════════════════
-       RESPONSIVE — TABLET (768px to 1199px)
+       RESPONSIVE — TABLET
     ══════════════════════════════════════════ */
     @media(min-width:768px) and (max-width:1199px){
       .page{padding:32px 20px 56px;}
@@ -208,7 +214,7 @@
     }
 
     /* ══════════════════════════════════════════
-       RESPONSIVE — MOBILE (max 767px)
+       RESPONSIVE — MOBILE
     ══════════════════════════════════════════ */
     @media(max-width:767px){
       .page{padding:20px 12px 40px;}
@@ -216,8 +222,6 @@
       .logotxt{font-size:16px;}
       .logomark{width:30px;height:30px;font-size:10px;}
       .progress-wrap{margin-bottom:16px;}
-      .progress-label{font-size:11px;}
-      .progress-count{font-size:10px;}
       .stepdots{gap:6px;margin-bottom:16px;}
       .stepdot{width:7px;height:7px;}
       .card{border-radius:18px;}
@@ -244,8 +248,8 @@
       .warn-box{font-size:11px;padding:12px 13px;}
       .warn-box strong{font-size:12px;}
       .alert{font-size:11px;padding:10px 12px;}
-      .slide-footer{padding:0 16px 20px;gap:8px;}
-      .btn-back{padding:11px 14px;font-size:13px;}
+      .slide-footer{padding:0 16px 20px;gap:8px;flex-wrap:wrap;}
+      .btn-back{flex:0 0 auto;padding:11px 14px;font-size:13px;}
       .btn-next{font-size:14px;padding:12px;}
       #successScreen{padding:32px 16px;}
       .success-ring{width:64px;height:64px;font-size:28px;}
@@ -254,9 +258,6 @@
       .btn-launch{font-size:13px;padding:12px 20px;}
     }
 
-    /* ══════════════════════════════════════════
-       RESPONSIVE — SMALL MOBILE (max 380px)
-    ══════════════════════════════════════════ */
     @media(max-width:380px){
       .page{padding:14px 8px 32px;}
       .slide-head{padding:16px 14px 0;}
@@ -270,11 +271,8 @@
       .finp{font-size:12px;padding:10px 11px;}
     }
 
-    /* ══════════════════════════════════════════
-       TOUCH DEVICES — disable hover transforms
-    ══════════════════════════════════════════ */
     @media(hover:none){
-      .btn-next:hover{transform:none;box-shadow:0 4px 20px rgba(99,102,241,.3);}
+      .btn-next:hover{transform:none;}
       .btn-back:hover{background:transparent;}
       .chip:hover{transform:none;}
       .check-item:hover{background:rgba(255,255,255,.02);border-color:var(--bdr);}
@@ -379,7 +377,11 @@
             </div>
           </div>
           <div class="slide-footer">
-            <button class="btn-next" onclick="next(1)">Continue <span>→</span></button>
+            <!-- Slide 1 has no back — it's the first step -->
+            <button class="btn-next" onclick="next(1)">
+              <span class="btn-lbl">Continue →</span>
+              <div class="btn-spin"></div>
+            </button>
           </div>
         </div>
 
@@ -447,7 +449,10 @@
           </div>
           <div class="slide-footer">
             <button class="btn-back" onclick="back(2)">← Back</button>
-            <button class="btn-next" onclick="next(2)">Continue <span>→</span></button>
+            <button class="btn-next" onclick="next(2)">
+              <span class="btn-lbl">Continue →</span>
+              <div class="btn-spin"></div>
+            </button>
           </div>
         </div>
 
@@ -492,7 +497,10 @@
           </div>
           <div class="slide-footer">
             <button class="btn-back" onclick="back(3)">← Back</button>
-            <button class="btn-next" onclick="next(3)">Continue <span>→</span></button>
+            <button class="btn-next" onclick="next(3)">
+              <span class="btn-lbl">Continue →</span>
+              <div class="btn-spin"></div>
+            </button>
           </div>
         </div>
 
@@ -507,7 +515,6 @@
           </div>
           <div class="slide-body">
             <div class="alert err" id="s4Err"></div>
-
             <div class="warn-box">
               <strong>⚠️ Important — Please Read</strong>
               This section collects your real contact information. It will be used when:
@@ -515,9 +522,8 @@
               <br>• T1ERA verifies your identity for affiliate or partner status
               <br>• Processing verified withdrawal payments
               <br><br>
-              <strong>Providing false or fake information is a serious violation of T1ERA's Terms of Service.</strong> Any account found with fraudulent recovery details will be permanently suspended and any pending payments will be voided with no exception. This obligation is already part of the T1ERA Policy & Terms documentation you agreed to upon registration.
+              <strong>Providing false or fake information is a serious violation of T1ERA's Terms of Service.</strong> Any account found with fraudulent recovery details will be permanently suspended and any pending payments will be voided with no exception.
             </div>
-
             <div class="field">
               <div class="flbl">Real Phone Number</div>
               <input class="finp" id="phone" type="tel" placeholder="e.g. +60 12-345 6789 (with country code)"/>
@@ -554,7 +560,10 @@
           </div>
           <div class="slide-footer">
             <button class="btn-back" onclick="back(4)">← Back</button>
-            <button class="btn-next" onclick="next(4)">Continue <span>→</span></button>
+            <button class="btn-next" onclick="next(4)">
+              <span class="btn-lbl">Continue →</span>
+              <div class="btn-spin"></div>
+            </button>
           </div>
         </div>
 
@@ -603,13 +612,16 @@
               </select>
             </div>
             <div class="field">
-              <div class="flbl">Goals With T1ERA (Short Description)</div>
+              <div class="flbl">Goals With T1ERA <span class="fopt">Short description</span></div>
               <textarea class="finp" id="goals" placeholder="e.g. I want to automate my business workflows using AI tools and build passive income through the affiliate programme..."></textarea>
             </div>
           </div>
           <div class="slide-footer">
             <button class="btn-back" onclick="back(5)">← Back</button>
-            <button class="btn-next" onclick="next(5)">Continue <span>→</span></button>
+            <button class="btn-next" onclick="next(5)">
+              <span class="btn-lbl">Continue →</span>
+              <div class="btn-spin"></div>
+            </button>
           </div>
         </div>
 
@@ -624,6 +636,7 @@
           </div>
           <div class="slide-body">
             <div class="alert err" id="s6Err"></div>
+            <div class="alert ok" id="s6Ok"></div>
 
             <div class="terms-scroll-hint">📖 Scroll down to read all terms before ticking</div>
 
@@ -693,7 +706,10 @@
           </div>
           <div class="slide-footer">
             <button class="btn-back" onclick="back(6)">← Back</button>
-            <button class="btn-next final" onclick="next(6)">✅ Agree &amp; Complete Setup</button>
+            <button class="btn-next final" id="finalBtn" onclick="next(6)">
+              <span class="btn-lbl">✅ Agree & Complete Setup</span>
+              <div class="btn-spin"></div>
+            </button>
           </div>
         </div>
 
@@ -703,10 +719,9 @@
       <div id="successScreen">
         <div class="success-ring">🎉</div>
         <div class="success-title">You're All Set!</div>
-        <div class="success-sub">
-          Welcome to T1ERA. Your profile has been saved.<br>
-          Your account is now active and ready to use.<br><br>
-          <em style="font-size:12px;opacity:.5;">[ Placeholder — data will be saved to Firestore ]</em>
+        <div class="success-sub" id="successMsg">
+          Welcome to T1ERA. Your profile has been saved successfully.<br>
+          Your account is now active and ready to use.
         </div>
         <a href="https://t.me/T1ERA_SecBot" target="_blank" rel="noopener" class="btn-launch">
           <span class="ldot"></span> Launch T1ERA on Telegram
@@ -716,18 +731,67 @@
     </div><!-- /card -->
   </div>
 
-  <script>
-    const TOTAL = 6;
-    let current = 1;
+  <!-- ═══════════════════════════════════
+       FIREBASE SDK (Module)
+  ═══════════════════════════════════ -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+    import {
+      getFirestore,
+      doc,
+      setDoc,
+      serverTimestamp
+    } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
-    // ── CHIP SELECTIONS ──
+    const app = initializeApp({
+      apiKey:            "AIzaSyBnt9mbb8LdMVeguSHUmS20L6uBHIfxwAs",
+      authDomain:        "t1era-v2.firebaseapp.com",
+      projectId:         "t1era-v2",
+      storageBucket:     "t1era-v2.firebasestorage.app",
+      messagingSenderId: "279266491659",
+      appId:             "1:279266491659:web:28a03c7b7300fcb152b60e"
+    });
+
+    const auth = getAuth(app);
+    const db   = getFirestore(app);
+
+    // Make db & helpers available globally so the vanilla JS below can call them
+    window._db  = db;
+    window._doc = doc;
+    window._setDoc = setDoc;
+    window._serverTimestamp = serverTimestamp;
+
+    // Check auth state — redirect if not logged in
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        window._currentUser = user;
+        // Pre-fill primary email from account if blank
+        const epInp = document.getElementById('emailPrimary');
+        if(epInp && !epInp.value && user.email) epInp.value = user.email;
+      } else {
+        // Not signed in — send back to auth
+        window.location.href = 'auth.html';
+      }
+    });
+  </script>
+
+  <!-- ═══════════════════════════════════
+       UI + NAVIGATION + SUBMISSION
+  ═══════════════════════════════════ -->
+  <script>
+    const TOTAL   = 6;
+    let current   = 1;
+    let goingBack = false;  // tracks direction for animation
+
+    /* ── CHIP TOGGLE ── */
     document.querySelectorAll('.chips').forEach(group => {
       group.querySelectorAll('.chip').forEach(chip => {
         chip.addEventListener('click', () => chip.classList.toggle('sel'));
       });
     });
 
-    // ── CHECKBOX TOGGLE ──
+    /* ── CHECKBOX TOGGLE ── */
     window.toggleChk = function(boxId, wrapId){
       const box  = document.getElementById(boxId);
       const wrap = document.getElementById(wrapId);
@@ -736,119 +800,333 @@
       wrap.classList.remove('err-item');
     };
 
-    // ── STEPDOTS ──
+    /* ── STEP DOTS ── */
     function renderDots(){
       const c = document.getElementById('stepdots');
       c.innerHTML = '';
-      for(let i=1;i<=TOTAL;i++){
+      for(let i = 1; i <= TOTAL; i++){
         const d = document.createElement('div');
-        d.className = 'stepdot' + (i===current?' active':i<current?' done':'');
+        d.className = 'stepdot' + (i === current ? ' active' : i < current ? ' done' : '');
         c.appendChild(d);
       }
     }
 
-    // ── PROGRESS ──
+    /* ── PROGRESS ── */
     function updateProgress(n){
-      document.getElementById('progFill').style.width = ((n/TOTAL)*100)+'%';
+      document.getElementById('progFill').style.width = ((n / TOTAL) * 100) + '%';
       document.getElementById('progCount').textContent = `Step ${n} of ${TOTAL}`;
     }
 
-    // ── ALERT ──
+    /* ── ALERTS ── */
     function showErr(id, msg){
       const el = document.getElementById(id);
       el.innerHTML = '⚠️ ' + msg;
       el.className = 'alert err on';
-      el.scrollIntoView({behavior:'smooth',block:'center'});
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
     function clrErr(id){ document.getElementById(id).className = 'alert err'; }
 
-    // ── VALIDATE ──
+    /* ── VALIDATION ── */
     function validate(n){
-      clrErr('s'+n+'Err');
-      if(n===1){
-        if(!document.getElementById('fullName').value.trim())  return showErr('s1Err','Full legal name is required.'), false;
-        if(!document.getElementById('nickname').value.trim())  return showErr('s1Err','Nickname is required.'), false;
-        if(!document.getElementById('userStatus').value)       return showErr('s1Err','Please select your current status.'), false;
-        if(!document.getElementById('dob').value)              return showErr('s1Err','Date of birth is required.'), false;
-        if(!document.getElementById('country').value)          return showErr('s1Err','Please select your country.'), false;
+      clrErr('s' + n + 'Err');
+
+      if(n === 1){
+        if(!document.getElementById('fullName').value.trim())
+          return showErr('s1Err','Full legal name is required.'), false;
+        if(!document.getElementById('nickname').value.trim())
+          return showErr('s1Err','Nickname / Display Name is required.'), false;
+        if(!document.getElementById('userStatus').value)
+          return showErr('s1Err','Please select your current status.'), false;
+        if(!document.getElementById('dob').value)
+          return showErr('s1Err','Date of birth is required.'), false;
+        if(!document.getElementById('country').value)
+          return showErr('s1Err','Please select your country.'), false;
         return true;
       }
-      if(n===2){
+
+      if(n === 2){
         const sel = document.querySelectorAll('#purposeChips .chip.sel');
-        if(sel.length===0) return showErr('s2Err','Please select at least one purpose.'), false;
-        if(!document.getElementById('industry').value) return showErr('s2Err','Please select your industry.'), false;
-        if(!document.getElementById('aiLevel').value) return showErr('s2Err','Please select your AI experience level.'), false;
+        if(sel.length === 0)
+          return showErr('s2Err','Please select at least one purpose.'), false;
+        if(!document.getElementById('industry').value)
+          return showErr('s2Err','Please select your industry.'), false;
+        if(!document.getElementById('aiLevel').value)
+          return showErr('s2Err','Please select your AI experience level.'), false;
         return true;
       }
-      if(n===3){
+
+      if(n === 3){
         const sel = document.querySelectorAll('#sourceChips .chip.sel');
-        if(sel.length===0) return showErr('s3Err','Please select how you found T1ERA.'), false;
+        if(sel.length === 0)
+          return showErr('s3Err','Please select at least one option for how you found T1ERA.'), false;
         return true;
       }
-      if(n===4){
+
+      if(n === 4){
         const phone = document.getElementById('phone').value.trim();
         const ep    = document.getElementById('emailPrimary').value.trim();
         const eb    = document.getElementById('emailBackup').value.trim();
         const cp    = document.getElementById('contactPref').value;
-        if(!phone) return showErr('s4Err','Real phone number is required.'), false;
-        if(!/^\+?[\d\s\-().]{7,20}$/.test(phone)) return showErr('s4Err','Please enter a valid phone number with country code (e.g. +60 12-345 6789).'), false;
-        if(!ep) return showErr('s4Err','Primary email is required.'), false;
-        if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ep)) return showErr('s4Err','Primary email format is invalid.'), false;
-        if(!eb) return showErr('s4Err','Backup email is required.'), false;
-        if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(eb)) return showErr('s4Err','Backup email format is invalid.'), false;
-        if(ep.toLowerCase()===eb.toLowerCase()) return showErr('s4Err','Backup email must be different from your primary email.'), false;
-        if(!cp) return showErr('s4Err','Please select your preferred contact method.'), false;
+        if(!phone)
+          return showErr('s4Err','Real phone number is required.'), false;
+        if(!/^\+?[\d\s\-().]{7,20}$/.test(phone))
+          return showErr('s4Err','Please enter a valid phone number with country code (e.g. +60 12-345 6789).'), false;
+        if(!ep)
+          return showErr('s4Err','Primary email is required.'), false;
+        if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ep))
+          return showErr('s4Err','Primary email format is invalid.'), false;
+        if(!eb)
+          return showErr('s4Err','Backup email is required.'), false;
+        if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(eb))
+          return showErr('s4Err','Backup email format is invalid.'), false;
+        if(ep.toLowerCase() === eb.toLowerCase())
+          return showErr('s4Err','Backup email must be different from your primary email.'), false;
+        if(!cp)
+          return showErr('s4Err','Please select your preferred contact method.'), false;
         return true;
       }
-      if(n===5){
-        if(!document.getElementById('techComfort').value) return showErr('s5Err','Please select your tech comfort level.'), false;
+
+      if(n === 5){
+        if(!document.getElementById('techComfort').value)
+          return showErr('s5Err','Please select your tech comfort level.'), false;
         return true;
       }
-      if(n===6){
+
+      if(n === 6){
         const c1 = document.getElementById('chk1Wrap').classList.contains('checked');
         const c2 = document.getElementById('chk2Wrap').classList.contains('checked');
         const c3 = document.getElementById('chk3Wrap').classList.contains('checked');
-        if(!c1){ document.getElementById('chk1Wrap').classList.add('err-item'); }
-        if(!c2){ document.getElementById('chk2Wrap').classList.add('err-item'); }
-        if(!c3){ document.getElementById('chk3Wrap').classList.add('err-item'); }
-        if(!c1||!c2||!c3) return showErr('s6Err','You must tick all three checkboxes to continue.'), false;
+        if(!c1) document.getElementById('chk1Wrap').classList.add('err-item');
+        if(!c2) document.getElementById('chk2Wrap').classList.add('err-item');
+        if(!c3) document.getElementById('chk3Wrap').classList.add('err-item');
+        if(!c1 || !c2 || !c3)
+          return showErr('s6Err','You must tick all three checkboxes to continue.'), false;
         return true;
       }
+
       return true;
     }
 
-    // ── NAVIGATE ──
-    function goTo(n){
-      const from = document.getElementById('s'+current);
-      const to   = document.getElementById('s'+n);
-      from.classList.remove('active');
-      to.classList.add('active');
+    /* ── NAVIGATE ── */
+    function goTo(n, backwards){
+      const from = document.getElementById('s' + current);
+      const to   = document.getElementById('s' + n);
+
+      // Remove all active/back-active classes
+      from.classList.remove('active', 'back-active');
+
+      // Add direction-aware class
+      to.classList.remove('active', 'back-active');
+      if(backwards){
+        to.classList.add('back-active');
+      } else {
+        to.classList.add('active');
+      }
+
       current = n;
       updateProgress(n);
       renderDots();
-      window.scrollTo({top:0,behavior:'smooth'});
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    window.next = function(n){
-      if(!validate(n)) return;
-      if(n===TOTAL){
-        // Submit — placeholder for Firestore
-        document.getElementById('s'+n).style.display='none';
-        document.getElementById('successScreen').classList.add('on');
-        document.getElementById('progFill').style.width='100%';
-        document.getElementById('progCount').textContent='Complete!';
-        renderDots();
+    /* ── COLLECT ALL DATA ── */
+    function collectFormData(){
+      function chips(groupId){
+        return Array.from(document.querySelectorAll('#' + groupId + ' .chip.sel'))
+                    .map(c => c.getAttribute('data-val'));
+      }
+
+      return {
+        // Slide 1 — Personal
+        fullName:        document.getElementById('fullName').value.trim(),
+        nickname:        document.getElementById('nickname').value.trim(),
+        callsign:        document.getElementById('callsign').value.trim(),
+        userStatus:      document.getElementById('userStatus').value,
+        dob:             document.getElementById('dob').value,
+        country:         document.getElementById('country').value,
+        city:            document.getElementById('city').value.trim(),
+
+        // Slide 2 — Purpose
+        purposes:        chips('purposeChips'),
+        industry:        document.getElementById('industry').value,
+        aiLevel:         document.getElementById('aiLevel').value,
+
+        // Slide 3 — Discovery
+        discoverySources: chips('sourceChips'),
+        refCode:          document.getElementById('refCode').value.trim(),
+        discoveryNote:    document.getElementById('discovery').value.trim(),
+
+        // Slide 4 — Contact
+        phone:            document.getElementById('phone').value.trim(),
+        emailPrimary:     document.getElementById('emailPrimary').value.trim(),
+        emailBackup:      document.getElementById('emailBackup').value.trim(),
+        contactPref:      document.getElementById('contactPref').value,
+        emergencyName:    document.getElementById('emergencyName').value.trim(),
+        emergencyPhone:   document.getElementById('emergencyPhone').value.trim(),
+
+        // Slide 5 — Preferences
+        language:         document.getElementById('language').value,
+        notifications:    chips('notifChips'),
+        techComfort:      document.getElementById('techComfort').value,
+        goals:            document.getElementById('goals').value.trim(),
+
+        // Slide 6 — Agreement
+        agreedToTerms:     true,
+        agreedAllAccurate: true,
+        agreedAgeEligible: true,
+
+        // Meta
+        setupCompletedAt: window._serverTimestamp ? window._serverTimestamp() : new Date().toISOString(),
+        setupVersion:     '1.0'
+      };
+    }
+
+    /* ── SUBMIT TO FIRESTORE ── */
+    async function submitToFirestore(){
+      const btn = document.getElementById('finalBtn');
+      btn.disabled = true;
+      btn.classList.add('loading');
+      clrErr('s6Err');
+
+      // Wait for Firebase to be ready (auth state sets _currentUser)
+      let retries = 0;
+      while(!window._currentUser && retries < 20){
+        await new Promise(r => setTimeout(r, 250));
+        retries++;
+      }
+
+      if(!window._currentUser){
+        btn.disabled = false;
+        btn.classList.remove('loading');
+        showErr('s6Err', 'Session expired. Please <a href="auth.html" style="color:var(--ind)">sign in again</a>.');
         return;
       }
-      goTo(n+1);
+
+      const uid  = window._currentUser.uid;
+      const user = window._currentUser;
+      const data = collectFormData();
+
+      // ── PROFILE PICTURE ──
+      // Pull from Google if signed in via Google, otherwise empty object
+      data.profilePicture = {
+        url:      user.photoURL || '',
+        source:   user.photoURL ? 'google' : '',
+        updatedAt: ''           // populated later when user uploads custom photo
+      };
+
+      // ── PLATFORM FIELDS ──
+      // These are placeholder objects — values will be set by your other functions later.
+      // We write them here on first setup so the fields always exist in the document.
+
+      data.plan = {
+        type:      'free',      // 'free' | 'payg' | 'pro' | 'enterprise'
+        startedAt: '',
+        expiresAt: '',
+        features:  []
+      };
+
+      data.balance = {
+        amount:    0,           // pay-as-you-go credit balance
+        currency:  'MYR',
+        lastTopUp: '',
+        lastSpent: ''
+      };
+
+      data.rank = {
+        level:     1,           // numeric level e.g. 1–100
+        title:     'Recruit',   // display rank title e.g. Recruit, Agent, Commander
+        xp:        0,           // experience points accumulated
+        updatedAt: ''
+      };
+
+      data.accountStatus = {
+        type:       'standard', // 'standard' | 'partner' | 'affiliate' | 'admin'
+        verified:   false,      // true once admin manually verifies
+        verifiedAt: '',
+        badge:      ''          // badge label shown on profile e.g. 'Verified Partner'
+      };
+
+      data.points = {
+        total:     0,           // lifetime points earned
+        available: 0,           // spendable points
+        spent:     0,
+        updatedAt: ''
+      };
+
+      data.affiliate = {
+        id:          '',        // unique affiliate ID — generated when approved
+        status:      'none',    // 'none' | 'pending' | 'active' | 'suspended'
+        referredBy:  data.refCode || '',
+        totalReferred: 0,
+        totalEarned:   0,
+        pendingPayout: 0,
+        joinedAt:    ''
+      };
+
+      try {
+        // Save to Firestore: collection "users", document = uid
+        // Uses free Spark plan — no billing needed under 20 users
+        await window._setDoc(
+          window._doc(window._db, 'users', uid),
+          data,
+          { merge: true }   // merge:true = safe if doc already exists
+        );
+
+        // ✅ Success!
+        document.getElementById('s6').style.display = 'none';
+        const successScreen = document.getElementById('successScreen');
+        successScreen.classList.add('on');
+        document.getElementById('progFill').style.width = '100%';
+        document.getElementById('progCount').textContent = 'Complete ✓';
+        document.getElementById('successMsg').innerHTML =
+          'Welcome to T1ERA, <strong>' + (data.nickname || data.fullName) + '</strong>!<br>' +
+          'Your profile has been saved to our system.<br>' +
+          'Your account is now active and ready to use.';
+        renderDots();
+
+      } catch(err) {
+        console.error('Firestore error:', err);
+        btn.disabled = false;
+        btn.classList.remove('loading');
+
+        // Friendly error messages
+        if(err.code === 'permission-denied'){
+          showErr('s6Err',
+            '⛔ Permission denied. Please make sure your email is verified, then try again. ' +
+            '<a href="auth.html" style="color:var(--ind)">Go to sign-in →</a>');
+        } else if(err.code === 'unavailable' || err.message.includes('network')){
+          showErr('s6Err', '📶 Network error. Check your internet connection and try again.');
+        } else {
+          showErr('s6Err', 'Something went wrong (' + (err.code || err.message) + '). Please try again.');
+        }
+      }
+    }
+
+    /* ── NEXT & BACK ── */
+    window.next = function(n){
+      if(!validate(n)) return;
+
+      if(n === TOTAL){
+        // Last slide — submit to Firestore
+        submitToFirestore();
+        return;
+      }
+      goTo(n + 1, false);
     };
 
     window.back = function(n){
-      if(n<=1) return;
-      goTo(n-1);
+      if(n <= 1) return;
+      goTo(n - 1, true);
     };
 
-    // ── INIT ──
+    /* ── ENTER KEY SUPPORT ── */
+    document.addEventListener('keydown', e => {
+      if(e.key !== 'Enter') return;
+      if(e.target.tagName === 'TEXTAREA') return; // allow newlines in textarea
+      next(current);
+    });
+
+    /* ── INIT ── */
     renderDots();
     updateProgress(1);
   </script>
