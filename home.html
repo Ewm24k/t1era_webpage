@@ -505,7 +505,8 @@
        hidden by default; Firebase reveals it
     ══════════════════════════════════════ */
     #userAvatarBtn {
-      display: none; /* Firebase shows this when signed in */
+      display: none;
+      visibility: hidden;
       position: relative;
       cursor: pointer;
       background: none;
@@ -2029,13 +2030,7 @@
                     <span>Settings</span>
                     <span class="dropdown-item-soon">Soon</span>
                   </a>
-                  <!-- divider -->
-                  <div class="dropdown-divider"></div>
-                  <!-- sign out — inside dropdown ONLY, never in header bar -->
-                  <button class="dropdown-item signout" id="signOutBtn">
-                    <i class="ph-bold ph-sign-out"></i>
-                    <span>Sign Out</span>
-                  </button>
+                  <!-- sign out injected by Firebase ONLY when signed in -->
                 </div>
               </button>
 
@@ -2755,9 +2750,10 @@
 
     onAuthStateChanged(auth, user => {
       if (user) {
-        // SIGNED IN — hide Login, show avatar
-        authBtn.style.display       = 'none';
-        userAvatarBtn.style.display = 'block';
+        // ── SIGNED IN: show avatar, hide login ──
+        authBtn.style.display      = 'none';
+        userAvatarBtn.style.display    = 'block';
+        userAvatarBtn.style.visibility = 'visible';
 
         dropdownName.textContent  = user.displayName || 'T1ERA User';
         dropdownEmail.textContent = user.email || '';
@@ -2771,11 +2767,36 @@
             `<div class="user-avatar-initials">${initial}</div>`;
         }
 
+        // Inject Sign Out into dropdown ONLY when signed in
+        if (!document.getElementById('signOutBtn')) {
+          const divider = document.createElement('div');
+          divider.className = 'dropdown-divider';
+          userDropdown.appendChild(divider);
+
+          const btn = document.createElement('button');
+          btn.className = 'dropdown-item signout';
+          btn.id = 'signOutBtn';
+          btn.innerHTML = '<i class="ph-bold ph-sign-out"></i><span>Sign Out</span>';
+          btn.addEventListener('click', async () => {
+            userDropdown.classList.remove('open');
+            await signOut(auth);
+          });
+          userDropdown.appendChild(btn);
+        }
+
       } else {
-        // SIGNED OUT — show Login, hide avatar completely
-        authBtn.style.display       = 'inline-flex';
-        userAvatarBtn.style.display = 'none';
+        // ── SIGNED OUT: show login, fully hide avatar ──
+        authBtn.style.display          = 'inline-flex';
+        userAvatarBtn.style.display    = 'none';
+        userAvatarBtn.style.visibility = 'hidden';
         userDropdown.classList.remove('open');
+
+        // Remove Sign Out from dropdown if present
+        const existingSignOut = document.getElementById('signOutBtn');
+        if (existingSignOut) {
+          existingSignOut.previousElementSibling?.remove(); // remove divider too
+          existingSignOut.remove();
+        }
       }
     });
 
@@ -2790,12 +2811,6 @@
       if (!userAvatarBtn.contains(e.target)) {
         userDropdown.classList.remove('open');
       }
-    });
-
-    // Sign Out — only accessible from inside dropdown
-    signOutBtn.addEventListener('click', async () => {
-      await signOut(auth);
-      userDropdown.classList.remove('open');
     });
   </script>
 </body>
