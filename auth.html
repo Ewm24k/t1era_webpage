@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700;800&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
 
   <!-- ═══════════════════════════════════
-       reCAPTCHA ENTERPRISE — load script
+       STYLES
   ═══════════════════════════════════ -->
   <style>
     :root {
@@ -167,6 +167,7 @@
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
     .bout{width:100%;padding:11px;border-radius:10px;border:1px solid var(--bdr);background:transparent;color:var(--txt2);font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .25s;}
     .bout:hover{border-color:rgba(239,68,68,.5);color:#fca5a5;}
+    .bout:disabled{opacity:0.6;cursor:not-allowed;}
 
     /* FOOTER */
     .foot{text-align:center;font-size:11px;color:var(--txt3);margin-top:20px;line-height:1.7;}
@@ -487,9 +488,10 @@
         <div class="avt" id="av"></div>
         <div class="wname" id="wn"></div>
         <div class="wemail" id="we"></div>
-        <div class="vbadge" id="vb">✅ Verified Account</div>
-        <a href="https://t.me/T1ERA_SecBot" target="_blank" rel="noopener" class="blaunch" id="blaunchBtn">
-          <span class="ldot"></span>Launch T1ERA on Telegram
+        <div class="vbadge" id="vb">✅ Success</div>
+        <!-- UPDATED BUTTON -->
+        <a href="https://t1era.netlify.app" class="blaunch" id="blaunchBtn">
+          <span class="ldot"></span>Continue to T1ERA
         </a>
         <button class="bout" id="outBtn">Sign Out</button>
 
@@ -644,9 +646,6 @@
   </div>
 
   <!-- ═══════════════════════════════════
-       FIREBASE MODULE (UPDATED v2)
-  ═══════════════════════════════════ -->
-  <!-- ═══════════════════════════════════
        FIREBASE MODULE (FINAL PRO VERSION)
   ═══════════════════════════════════ -->
   <script type="module">
@@ -684,6 +683,9 @@
       signInWithPopup, fetchSignInMethodsForEmail, getAdditionalUserInfo 
     };
 
+    // Flag to track sign-out state for UI feedback
+    let isLoggingOut = false;
+
     onAuthStateChanged(auth, user => {
       if (user) {
         document.getElementById('authF').style.display = 'none';
@@ -691,7 +693,7 @@
         p.classList.add('on');
         const av = document.getElementById('av');
         
-        // Render Avatar with Referrer Fix (Prevents broken Google images)
+        // Render Avatar with Referrer Fix
         av.innerHTML = user.photoURL
           ? `<img src="${user.photoURL}" alt="av" referrerpolicy="no-referrer">`
           : (user.displayName||user.email||'U')[0].toUpperCase();
@@ -699,31 +701,26 @@
         document.getElementById('wn').textContent = user.displayName || 'T1ERA User';
         document.getElementById('we').textContent = user.email || '';
         
-        // ALWAYS VERIFIED (Verification logic removed as requested)
+        // UPDATED BADGE: "Success"
         const vb = document.getElementById('vb');
-        vb.textContent = '✅ Verified Account';
+        vb.textContent = '✅ Success';
         vb.style.color  = '';
 
         // ══════════════════════════════════════════════
-        // UNIFIED REDIRECT LOGIC (Email OR Google)
+        // UNIFIED REDIRECT LOGIC
         // ══════════════════════════════════════════════
         if (window._isNewSignup) {
-          window._isNewSignup = false; // Reset flag
-          
-          // Hide standard dashboard buttons
+          window._isNewSignup = false;
           document.getElementById('blaunchBtn').style.display = 'none';
           document.getElementById('outBtn').style.display = 'none';
-          
-          // Show the "Please Wait" spinner
           document.getElementById('redirectUI').style.display = 'flex';
           
-          let secs = 2; // Fast redirect
+          let secs = 2;
           const txt = document.getElementById('redirectTxt');
           const interval = setInterval(() => {
             secs--;
             if (secs <= 0) {
               clearInterval(interval);
-              // DESTINATION: Account Setup
               window.location.href = 'account-setup.html';
             } else {
               txt.textContent = 'Initializing Profile...';
@@ -736,14 +733,45 @@
             document.getElementById('outBtn').style.display = 'block';
         }
       } else {
-        // Not logged in
+        // NOT LOGGED IN
         document.getElementById('authF').style.display = '';
         document.getElementById('lgdin').classList.remove('on');
+        
+        // If we just logged out, show the success message
+        if (isLoggingOut) {
+          // We need a small timeout to let the UI switch
+          setTimeout(() => {
+            const ok = document.getElementById('lOk');
+            ok.innerHTML = '<span class="aico">✅</span><span>Securely signed out.</span>';
+            ok.className = 'alert ok on';
+            isLoggingOut = false;
+          }, 50);
+        }
       }
     });
 
-    document.getElementById('outBtn').addEventListener('click', () =>
-      window._fb.signOut(window._auth));
+    // ══════════════════════════════════════════════
+    // SIGN OUT LOGIC (Improved)
+    // ══════════════════════════════════════════════
+    document.getElementById('outBtn').addEventListener('click', async () => {
+      const btn = document.getElementById('outBtn');
+      btn.disabled = true;
+      btn.textContent = 'Disconnecting...';
+      
+      // Set flag so onAuthStateChanged knows to show the alert
+      isLoggingOut = true;
+      
+      try {
+        await window._fb.signOut(window._auth);
+        // onAuthStateChanged handles the rest
+      } catch (e) {
+        console.error("Sign out failed", e);
+        isLoggingOut = false; // reset on error
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Sign Out';
+      }
+    });
   </script>
 
   <!-- ═══════════════════════════════════
