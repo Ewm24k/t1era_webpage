@@ -645,8 +645,8 @@
     </div>
   </div>
 
-  <!-- ═══════════════════════════════════
-       FIREBASE MODULE (FINAL PRO VERSION)
+ <!-- ═══════════════════════════════════
+       FIREBASE MODULE (FINAL PRO VERSION + AUTO REDIRECT)
   ═══════════════════════════════════ -->
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
@@ -672,7 +672,6 @@
     // CAPTAIN'S FIX: GOOGLE PROVIDER CONFIGURATION
     // ══════════════════════════════════════════════
     const gp = new GoogleAuthProvider();
-    // Force 'select_account' to prevent browser security blocks
     gp.setCustomParameters({ prompt: 'select_account' });
 
     window._auth = auth;
@@ -693,7 +692,7 @@
         p.classList.add('on');
         const av = document.getElementById('av');
         
-        // Render Avatar with Referrer Fix
+        // Render Avatar
         av.innerHTML = user.photoURL
           ? `<img src="${user.photoURL}" alt="av" referrerpolicy="no-referrer">`
           : (user.displayName||user.email||'U')[0].toUpperCase();
@@ -701,7 +700,7 @@
         document.getElementById('wn').textContent = user.displayName || 'T1ERA User';
         document.getElementById('we').textContent = user.email || '';
         
-        // UPDATED BADGE: "Success"
+        // Badge
         const vb = document.getElementById('vb');
         vb.textContent = '✅ Success';
         vb.style.color  = '';
@@ -709,37 +708,45 @@
         // ══════════════════════════════════════════════
         // UNIFIED REDIRECT LOGIC
         // ══════════════════════════════════════════════
+        
+        // Show the spinner, hide the manual buttons (Auto-Pilot Mode)
+        document.getElementById('blaunchBtn').style.display = 'none';
+        document.getElementById('outBtn').style.display = 'none';
+        document.getElementById('redirectUI').style.display = 'flex';
+        
+        const txt = document.getElementById('redirectTxt');
+
         if (window._isNewSignup) {
+          // --- SCENARIO A: NEW USER -> SETUP ---
           window._isNewSignup = false;
-          document.getElementById('blaunchBtn').style.display = 'none';
-          document.getElementById('outBtn').style.display = 'none';
-          document.getElementById('redirectUI').style.display = 'flex';
-          
+          txt.textContent = 'Initializing Profile...';
           let secs = 2;
-          const txt = document.getElementById('redirectTxt');
           const interval = setInterval(() => {
             secs--;
             if (secs <= 0) {
               clearInterval(interval);
               window.location.href = 'account-setup.html';
-            } else {
-              txt.textContent = 'Initializing Profile...';
             }
           }, 1000);
+
         } else {
-            // Normal Login State
-            document.getElementById('redirectUI').style.display = 'none';
-            document.getElementById('blaunchBtn').style.display = 'flex';
-            document.getElementById('outBtn').style.display = 'block';
+          // --- SCENARIO B: RETURNING USER -> HOME ---
+          // Auto-redirect to home.html if they visit this page while logged in
+          txt.textContent = 'Redirecting to Home...';
+          setTimeout(() => {
+            window.location.href = 'home.html';
+          }, 1500); // 1.5s delay so they see the "Success" badge briefly
         }
+
       } else {
+        // ══════════════════════════════════════════════
         // NOT LOGGED IN
+        // ══════════════════════════════════════════════
         document.getElementById('authF').style.display = '';
         document.getElementById('lgdin').classList.remove('on');
         
         // If we just logged out, show the success message
         if (isLoggingOut) {
-          // We need a small timeout to let the UI switch
           setTimeout(() => {
             const ok = document.getElementById('lOk');
             ok.innerHTML = '<span class="aico">✅</span><span>Securely signed out.</span>';
@@ -751,22 +758,20 @@
     });
 
     // ══════════════════════════════════════════════
-    // SIGN OUT LOGIC (Improved)
+    // SIGN OUT LOGIC
     // ══════════════════════════════════════════════
+    // (Note: Since we auto-redirect, this button is rarely seen on this page,
+    // but logic is kept for robustness in case redirection lags)
     document.getElementById('outBtn').addEventListener('click', async () => {
       const btn = document.getElementById('outBtn');
       btn.disabled = true;
       btn.textContent = 'Disconnecting...';
-      
-      // Set flag so onAuthStateChanged knows to show the alert
       isLoggingOut = true;
-      
       try {
         await window._fb.signOut(window._auth);
-        // onAuthStateChanged handles the rest
       } catch (e) {
         console.error("Sign out failed", e);
-        isLoggingOut = false; // reset on error
+        isLoggingOut = false;
       } finally {
         btn.disabled = false;
         btn.textContent = 'Sign Out';
