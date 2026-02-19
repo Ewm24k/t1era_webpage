@@ -426,81 +426,72 @@
     }
 
     /* ══════════════════════════════════════
-       WEB3 AUTH BUTTON — Login / Signup
-       Replaces the old "Launch T1ERA" btn
+       WEB3 AUTH BUTTON — clean flat style
+       No emboss. Transparent bg + border glow.
+       Shown by default (signed-out state).
+       Firebase hides it when signed in.
     ══════════════════════════════════════ */
     .btn-auth {
       position: relative;
-      display: inline-flex;
+      display: inline-flex;         /* visible by default = signed-out state */
       align-items: center;
       justify-content: center;
-      gap: 9px;
-      padding: 10px 22px;
-      border-radius: 12px;
-      font-weight: 700;
-      font-size: 13.5px;
+      gap: 8px;
+      padding: 9px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 13px;
       font-family: 'Space Grotesk', sans-serif;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.03em;
       text-decoration: none;
       cursor: pointer;
-      border: none;
-      outline: none;
-      color: #fff;
+      color: #e0e7ff;
       white-space: nowrap;
-      /* multi-layer glowing border trick */
-      background: linear-gradient(135deg, #3b82f6 0%, #6366f1 50%, #8b5cf6 100%);
-      box-shadow:
-        0 0 0 1px rgba(99,102,241,0.6),
-        0 0 16px rgba(99,102,241,0.4),
-        0 0 32px rgba(59,130,246,0.2),
-        inset 0 1px 0 rgba(255,255,255,0.22),
-        inset 0 -1px 0 rgba(0,0,0,0.25);
-      transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+      background: transparent;
+      border: 1px solid rgba(99,102,241,0.55);
+      outline: none;
       overflow: hidden;
-      background-size: 200% 200%;
-      animation: authBtnShift 4s ease infinite;
+      transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
     }
 
-    @keyframes authBtnShift {
-      0%,100% { background-position: 0% 50%; }
-      50%      { background-position: 100% 50%; }
-    }
-
+    /* subtle static glow layer behind the text */
     .btn-auth::before {
       content: '';
       position: absolute;
       inset: 0;
-      background: linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 55%);
-      pointer-events: none;
+      background: rgba(99,102,241,0.06);
       border-radius: inherit;
+      transition: background 0.2s ease;
+      pointer-events: none;
     }
 
-    /* shimmer sweep */
+    /* shimmer sweep on hover */
     .btn-auth::after {
       content: '';
       position: absolute;
-      top: 0; left: -75%;
-      width: 50%; height: 100%;
-      background: linear-gradient(120deg, transparent, rgba(255,255,255,0.22), transparent);
-      transform: skewX(-20deg);
-      transition: left 0.6s ease;
+      top: 0; left: -100%;
+      width: 60%; height: 100%;
+      background: linear-gradient(105deg, transparent, rgba(255,255,255,0.08), transparent);
+      transition: left 0.5s ease;
       pointer-events: none;
     }
 
     .btn-auth:hover {
-      transform: translateY(-3px);
-      box-shadow:
-        0 0 0 1px rgba(139,92,246,0.8),
-        0 0 24px rgba(99,102,241,0.6),
-        0 0 48px rgba(59,130,246,0.3),
-        inset 0 1px 0 rgba(255,255,255,0.28),
-        inset 0 -1px 0 rgba(0,0,0,0.3);
+      color: #fff;
+      border-color: rgba(139,92,246,0.85);
+      background: transparent;
     }
-    .btn-auth:hover::after { left: 125%; }
-    .btn-auth:active { transform: translateY(1px); }
+    .btn-auth:hover::before {
+      background: rgba(99,102,241,0.14);
+    }
+    .btn-auth:hover::after { left: 130%; }
+    .btn-auth:active {
+      background: rgba(99,102,241,0.2);
+    }
 
     .btn-auth i {
-      font-size: 16px;
+      font-size: 15px;
+      opacity: 0.85;
       position: relative;
       z-index: 1;
     }
@@ -511,9 +502,10 @@
 
     /* ══════════════════════════════════════
        USER AVATAR — shown when signed in
+       hidden by default; Firebase reveals it
     ══════════════════════════════════════ */
     #userAvatarBtn {
-      display: none; /* hidden until auth confirms signed-in */
+      display: none; /* Firebase shows this when signed in */
       position: relative;
       cursor: pointer;
       background: none;
@@ -673,11 +665,32 @@
       flex-shrink: 0;
     }
 
+    .dropdown-item span:first-of-type {
+      flex: 1;
+    }
+
+    .dropdown-item-soon {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(99,102,241,0.6);
+      background: rgba(99,102,241,0.1);
+      border: 1px solid rgba(99,102,241,0.2);
+      padding: 2px 6px;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    .dropdown-divider {
+      height: 1px;
+      background: rgba(255,255,255,0.07);
+      margin: 6px 8px;
+    }
+
     .dropdown-item.signout {
-      color: rgba(239,68,68,0.8);
-      margin-top: 4px;
-      border-top: 1px solid rgba(255,255,255,0.06);
-      padding-top: 12px;
+      color: rgba(239,68,68,0.75);
+      margin-top: 2px;
     }
 
     .dropdown-item.signout:hover {
@@ -685,7 +698,7 @@
       color: #ef4444;
     }
 
-    .dropdown-item.signout i { color: rgba(239,68,68,0.7); }
+    .dropdown-item.signout i { color: rgba(239,68,68,0.65); }
 
     /* ── AI Chat Banner ── */
     .chat-banner {
@@ -1584,7 +1597,6 @@
       .header-actions { gap: 8px; }
       .header-actions .btn:not(.btn-auth) { display: none; }
       .header-actions .btn-auth { padding: 8px 14px; font-size: 12px; gap: 6px; }
-      .header-actions .btn-auth i { font-size: 14px; }
       .mobile-menu-btn { width: 36px; height: 36px; gap: 4px; }
       .mobile-menu-btn span { width: 16px; height: 2px; }
       .logo { font-size: 18px; }
@@ -1991,29 +2003,38 @@
                 <span class="btn-auth-label">Login / Sign Up</span>
               </a>
 
-              <!-- ══ USER AVATAR (shown when signed in) ══ -->
+              <!-- ══ USER AVATAR (shown when signed in, hidden by default) ══ -->
               <button id="userAvatarBtn" aria-label="Account menu">
                 <div class="user-avatar-wrap">
                   <div class="user-avatar-ring"></div>
                   <div id="userAvatarInner">
-                    <!-- filled by JS: either <img> or initials div -->
+                    <!-- filled by Firebase auth handler -->
                   </div>
                   <span class="user-avatar-dot"></span>
                 </div>
-                <!-- dropdown -->
+                <!-- dropdown — only visible when .open class applied by JS -->
                 <div class="user-dropdown" id="userDropdown">
                   <div class="dropdown-header">
                     <div class="dropdown-name" id="dropdownName">—</div>
                     <div class="dropdown-email" id="dropdownEmail">—</div>
                   </div>
-                  <a href="auth.html" class="dropdown-item">
-                    <i class="ph-bold ph-user-circle"></i> My Account
+                  <!-- placeholder items -->
+                  <a href="#" class="dropdown-item" onclick="return false;">
+                    <i class="ph-bold ph-user-circle"></i>
+                    <span>Profile</span>
+                    <span class="dropdown-item-soon">Soon</span>
                   </a>
-                  <a href="https://t.me/T1ERA_SecBot" target="_blank" rel="noopener" class="dropdown-item">
-                    <i class="ph-bold ph-paper-plane-tilt"></i> Open Telegram Bot
+                  <a href="#" class="dropdown-item" onclick="return false;">
+                    <i class="ph-bold ph-gear-six"></i>
+                    <span>Settings</span>
+                    <span class="dropdown-item-soon">Soon</span>
                   </a>
+                  <!-- divider -->
+                  <div class="dropdown-divider"></div>
+                  <!-- sign out — has real handler -->
                   <button class="dropdown-item signout" id="signOutBtn">
-                    <i class="ph-bold ph-sign-out"></i> Sign Out
+                    <i class="ph-bold ph-sign-out"></i>
+                    <span>Sign Out</span>
                   </button>
                 </div>
               </button>
@@ -2664,21 +2685,6 @@
       closeModal();
     });
 
-    // ══ USER AVATAR DROPDOWN TOGGLE ══
-    const userAvatarBtn = document.getElementById('userAvatarBtn');
-    const userDropdown  = document.getElementById('userDropdown');
-
-    userAvatarBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      userDropdown.classList.toggle('open');
-    });
-
-    document.addEventListener('click', (e) => {
-      if (!userAvatarBtn.contains(e.target)) {
-        userDropdown.classList.remove('open');
-      }
-    });
-
     // ── VIDEO GENERATION ENGINE ──
     async function pollJobStatus(jobId, onUpdate, onDone, onError) {
       const POLL_INTERVAL = 2500;
@@ -2724,10 +2730,16 @@
   </script>
 
   <!-- ══════════════════════════════════════════════
-       FIREBASE — Auth state → show avatar or login btn
+       FIREBASE — Auth state check on every page load
+       DEFAULT STATE (before Firebase resolves):
+         authBtn  = visible (signed-out assumed)
+         avatarBtn = hidden
+       Firebase onAuthStateChanged then flips correctly:
+         signed-in  → hide authBtn, show avatar
+         signed-out → keep authBtn, keep avatar hidden
   ══════════════════════════════════════════════ -->
   <script type="module">
-    import { initializeApp }               from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+    import { initializeApp }                      from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
     import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 
     const firebaseConfig = {
@@ -2742,42 +2754,62 @@
     const app  = initializeApp(firebaseConfig);
     const auth = getAuth(app);
 
-    const authBtn       = document.getElementById('authBtn');
-    const userAvatarBtn = document.getElementById('userAvatarBtn');
+    const authBtn         = document.getElementById('authBtn');
+    const userAvatarBtn   = document.getElementById('userAvatarBtn');
     const userAvatarInner = document.getElementById('userAvatarInner');
-    const dropdownName  = document.getElementById('dropdownName');
-    const dropdownEmail = document.getElementById('dropdownEmail');
-    const signOutBtn    = document.getElementById('signOutBtn');
+    const dropdownName    = document.getElementById('dropdownName');
+    const dropdownEmail   = document.getElementById('dropdownEmail');
+    const signOutBtn      = document.getElementById('signOutBtn');
+    const userDropdown    = document.getElementById('userDropdown');
 
+    // ── Firebase resolves auth state once on load ──
     onAuthStateChanged(auth, user => {
       if (user) {
-        // ── SIGNED IN — hide login btn, show avatar ──
+        // ═══ SIGNED IN ═══
         authBtn.style.display       = 'none';
         userAvatarBtn.style.display = 'block';
 
-        // Fill dropdown info
+        // Fill dropdown header
         dropdownName.textContent  = user.displayName || 'T1ERA User';
         dropdownEmail.textContent = user.email || '';
 
-        // Build avatar inner — photo from Google or initials fallback
+        // Build avatar — Google photo OR initials fallback
         if (user.photoURL) {
-          userAvatarInner.innerHTML = `<img class="user-avatar-img" src="${user.photoURL}" alt="avatar" referrerpolicy="no-referrer"/>`;
+          userAvatarInner.innerHTML =
+            `<img class="user-avatar-img" src="${user.photoURL}" alt="avatar" referrerpolicy="no-referrer"/>`;
         } else {
           const initial = (user.displayName || user.email || 'U')[0].toUpperCase();
-          userAvatarInner.innerHTML = `<div class="user-avatar-initials">${initial}</div>`;
+          userAvatarInner.innerHTML =
+            `<div class="user-avatar-initials">${initial}</div>`;
         }
 
       } else {
-        // ── SIGNED OUT — show login btn, hide avatar ──
+        // ═══ SIGNED OUT — no user, no avatar, just login button ═══
         authBtn.style.display       = 'inline-flex';
         userAvatarBtn.style.display = 'none';
+        userDropdown.classList.remove('open'); // safety: close dropdown if open
       }
     });
 
-    // Sign out handler
+    // ── Dropdown toggle on avatar click ──
+    userAvatarBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      userDropdown.classList.toggle('open');
+    });
+
+    // ── Close dropdown when clicking outside ──
+    document.addEventListener('click', e => {
+      if (!userAvatarBtn.contains(e.target)) {
+        userDropdown.classList.remove('open');
+      }
+    });
+
+    // ── Sign Out ──
     signOutBtn.addEventListener('click', async () => {
       await signOut(auth);
-      document.getElementById('userDropdown').classList.remove('open');
+      userDropdown.classList.remove('open');
+      // onAuthStateChanged fires automatically after signOut
+      // and will show authBtn + hide avatar
     });
   </script>
 </body>
