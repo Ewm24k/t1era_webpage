@@ -177,6 +177,11 @@
 
     @media(max-width:480px){.card{padding:28px 18px;border-radius:20px;}.hdg h1{font-size:20px;}}
 
+    /* REDIRECT SPINNER */
+    .rspinner{width:36px;height:36px;border-radius:50%;border:3px solid rgba(59,130,246,.15);border-top-color:var(--blue);border-right-color:var(--purple);animation:rspin 1s linear infinite;}
+    @keyframes rspin{to{transform:rotate(360deg)}}
+    @keyframes rtxtpulse{0%,100%{opacity:.4}50%{opacity:1}}
+
     /* ═══════════════════════════════════
        CYBERSECURITY POPUP
     ═══════════════════════════════════ */
@@ -485,10 +490,16 @@
         <div class="wname" id="wn"></div>
         <div class="wemail" id="we"></div>
         <div class="vbadge" id="vb">✅ Verified Account</div>
-        <a href="https://t.me/T1ERA_SecBot" target="_blank" rel="noopener" class="blaunch">
+        <a href="https://t.me/T1ERA_SecBot" target="_blank" rel="noopener" class="blaunch" id="blaunchBtn">
           <span class="ldot"></span>Launch T1ERA on Telegram
         </a>
         <button class="bout" id="outBtn">Sign Out</button>
+
+        <!-- Redirect UI — shown only after new Google signup -->
+        <div id="redirectUI" style="display:none;flex-direction:column;align-items:center;gap:14px;margin-top:8px;">
+          <div class="rspinner"></div>
+          <span id="redirectTxt" style="font-size:13px;font-weight:600;color:rgba(255,255,255,.5);letter-spacing:.06em;animation:rtxtpulse 1.2s ease-in-out infinite;">Please Wait...</span>
+        </div>
       </div>
 
       <!-- AUTH FORMS -->
@@ -688,6 +699,25 @@
         const vb = document.getElementById('vb');
         vb.textContent = user.emailVerified ? '✅ Verified Account' : '📧 Verify your email to unlock all features';
         vb.style.color  = user.emailVerified ? '' : '#fcd34d';
+
+        // If this is a new Google signup (flagged by gSignupBtn flow), show redirect UI
+        if (window._googleNewSignup) {
+          window._googleNewSignup = false;
+          document.getElementById('blaunchBtn').style.display = 'none';
+          document.getElementById('outBtn').style.display = 'none';
+          document.getElementById('redirectUI').style.display = 'flex';
+          let secs = 3;
+          const txt = document.getElementById('redirectTxt');
+          const interval = setInterval(() => {
+            secs--;
+            if (secs <= 0) {
+              clearInterval(interval);
+              window.location.href = 'account-setup.html';
+            } else {
+              txt.textContent = 'Please Wait...';
+            }
+          }, 1000);
+        }
       } else {
         document.getElementById('authF').style.display = '';
         document.getElementById('lgdin').classList.remove('on');
@@ -1413,11 +1443,13 @@
         gSignupBtn.addEventListener('click', function(){
           clrA('sErr');
           openHov(async function(){
-            // HOV passed — now open Google popup
+            // HOV passed — set new signup flag, then open Google popup
+            window._googleNewSignup = true;
             try{
               await window._fb.signInWithPopup(window._auth, window._gp);
-              // onAuthStateChanged handles profile UI
+              // onAuthStateChanged fires → sees _googleNewSignup → shows redirect UI
             } catch(err){
+              window._googleNewSignup = false;
               const m={
                 'auth/popup-closed-by-user':'Google sign-in was cancelled.',
                 'auth/popup-blocked':'Popup blocked. Please allow popups for this site.',
