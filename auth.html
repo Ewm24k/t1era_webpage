@@ -675,6 +675,8 @@
                      signInWithPopup, fetchSignInMethodsForEmail, getAdditionalUserInfo };
 
     onAuthStateChanged(auth, user => {
+      // Block UI update if HOV is pending (Google signup flow)
+      if (window._hovPending) return;
       if (user) {
         document.getElementById('authF').style.display = 'none';
         const p = document.getElementById('lgdin');
@@ -1070,16 +1072,18 @@
       clrA('lErr'); clrA('sErr');
       if(mode==='login'&&locked()) return;
 
-      // ── SIGNUP: show HOV BEFORE opening Google popup ──
+      // ── SIGNUP: set HOV pending flag, sign out any session, then show HOV ──
       if(mode==='signup'){
+        window._hovPending = true;
+        try{ await window._fb.signOut(window._auth); } catch(e){}
         openHov(async function(){
-          // HOV passed — now open Google popup
+          // HOV passed — clear flag, then open Google popup
+          window._hovPending = false;
           try{
-            const result=await window._fb.signInWithPopup(window._auth, window._gp);
-            const info  =window._fb.getAdditionalUserInfo(result);
-            // If existing account just log them in silently — HOV still ran
-            // onAuthStateChanged handles UI for both cases
+            await window._fb.signInWithPopup(window._auth, window._gp);
+            // onAuthStateChanged now fires normally → shows profile UI
           } catch(err){
+            window._hovPending = false;
             showA('sErr', fbMsg(err.code), 'err');
           }
         });
