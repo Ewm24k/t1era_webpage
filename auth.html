@@ -646,11 +646,14 @@
   <!-- ═══════════════════════════════════
        FIREBASE MODULE (UPDATED v2)
   ═══════════════════════════════════ -->
+  <!-- ═══════════════════════════════════
+       FIREBASE MODULE (FINAL PRO VERSION)
+  ═══════════════════════════════════ -->
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
     import {
       getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
-      signOut, sendPasswordResetEmail, updateProfile, sendEmailVerification,
+      signOut, sendPasswordResetEmail, updateProfile,
       GoogleAuthProvider, signInWithPopup, onAuthStateChanged,
       fetchSignInMethodsForEmail, getAdditionalUserInfo
     } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
@@ -670,19 +673,14 @@
     // CAPTAIN'S FIX: GOOGLE PROVIDER CONFIGURATION
     // ══════════════════════════════════════════════
     const gp = new GoogleAuthProvider();
-    
-    // Force 'select_account'. This adds a user interaction step which
-    // prevents the browser from aggressively blocking the popup communication
-    // (The "Cross-Origin-Opener-Policy" error).
-    gp.setCustomParameters({
-      prompt: 'select_account'
-    });
+    // Force 'select_account' to prevent browser security blocks
+    gp.setCustomParameters({ prompt: 'select_account' });
 
     window._auth = auth;
     window._gp   = gp;
     window._fb   = { 
       createUserWithEmailAndPassword, signInWithEmailAndPassword,
-      signOut, sendPasswordResetEmail, updateProfile, sendEmailVerification,
+      signOut, sendPasswordResetEmail, updateProfile,
       signInWithPopup, fetchSignInMethodsForEmail, getAdditionalUserInfo 
     };
 
@@ -693,36 +691,52 @@
         p.classList.add('on');
         const av = document.getElementById('av');
         
-        // FIX: Add referrerpolicy to prevent 403 errors on Google profile images
+        // Render Avatar with Referrer Fix (Prevents broken Google images)
         av.innerHTML = user.photoURL
           ? `<img src="${user.photoURL}" alt="av" referrerpolicy="no-referrer">`
           : (user.displayName||user.email||'U')[0].toUpperCase();
           
         document.getElementById('wn').textContent = user.displayName || 'T1ERA User';
         document.getElementById('we').textContent = user.email || '';
+        
+        // ALWAYS VERIFIED (Verification logic removed as requested)
         const vb = document.getElementById('vb');
-        vb.textContent = user.emailVerified ? '✅ Verified Account' : '📧 Verify your email to unlock all features';
-        vb.style.color  = user.emailVerified ? '' : '#fcd34d';
+        vb.textContent = '✅ Verified Account';
+        vb.style.color  = '';
 
-        // If this is a new Google signup (flagged by gSignupBtn flow), show redirect UI
-        if (window._googleNewSignup) {
-          window._googleNewSignup = false;
+        // ══════════════════════════════════════════════
+        // UNIFIED REDIRECT LOGIC (Email OR Google)
+        // ══════════════════════════════════════════════
+        if (window._isNewSignup) {
+          window._isNewSignup = false; // Reset flag
+          
+          // Hide standard dashboard buttons
           document.getElementById('blaunchBtn').style.display = 'none';
           document.getElementById('outBtn').style.display = 'none';
+          
+          // Show the "Please Wait" spinner
           document.getElementById('redirectUI').style.display = 'flex';
-          let secs = 3;
+          
+          let secs = 2; // Fast redirect
           const txt = document.getElementById('redirectTxt');
           const interval = setInterval(() => {
             secs--;
             if (secs <= 0) {
               clearInterval(interval);
+              // DESTINATION: Account Setup
               window.location.href = 'account-setup.html';
             } else {
-              txt.textContent = 'Please Wait...';
+              txt.textContent = 'Initializing Profile...';
             }
           }, 1000);
+        } else {
+            // Normal Login State
+            document.getElementById('redirectUI').style.display = 'none';
+            document.getElementById('blaunchBtn').style.display = 'flex';
+            document.getElementById('outBtn').style.display = 'block';
         }
       } else {
+        // Not logged in
         document.getElementById('authF').style.display = '';
         document.getElementById('lgdin').classList.remove('on');
       }
@@ -733,7 +747,7 @@
   </script>
 
   <!-- ═══════════════════════════════════
-       UI + VALIDATION SCRIPT (UPDATED v2)
+       UI + VALIDATION SCRIPT (FINAL VERSION)
   ═══════════════════════════════════ -->
   <script>
     /* PARTICLES */
@@ -750,7 +764,6 @@
 
     /* ═══════════════════════════════════
        BRUTE FORCE PROTECTION
-       5 failed attempts → 60 s lockout
     ═══════════════════════════════════ */
     const MAX=5, LOCK_S=60;
     let fails    = +( sessionStorage.getItem('t1f') ||'0');
@@ -803,7 +816,6 @@
        EMAIL VALIDATION
     ═══════════════════════════════════ */
     const EMAIL_RE = /^(?!.*\.\.)(?!^\.)([a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*)@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/;
-
     const TYPOS = {
       'gmai.com':'gmail.com','gmial.com':'gmail.com','gmal.com':'gmail.com',
       'gamil.com':'gmail.com','gnail.com':'gmail.com','gmail.co':'gmail.com',
@@ -814,8 +826,6 @@
       'outlok.com':'outlook.com','outloo.com':'outlook.com','outllok.com':'outlook.com',
       'iclod.com':'icloud.com','icoud.com':'icloud.com','iclould.com':'icloud.com',
     };
-
-    // map input-id → check-icon-id
     const CHK = { lE:'lEChk', sE:'sEChk', rE:'rEChk' };
 
     function chkEmail(inpId, stId, blur=false){
@@ -826,27 +836,20 @@
 
       if(!val){ inp.className=''; st.textContent=''; if(chk)chk.textContent=''; return false; }
 
-      // typo check
       const dom=val.split('@')[1]?.toLowerCase();
       const fix=dom&&TYPOS[dom];
       if(fix){
         inp.className='inv'; st.className='fst err';
         st.textContent=`Did you mean @${fix}?`; if(chk)chk.textContent='⚠️'; return false;
       }
-
       if(!EMAIL_RE.test(val)){
         if(blur||val.length>7){
           inp.className='inv'; st.className='fst err';
-          if(!val.includes('@'))                 st.textContent='Missing @ symbol';
-          else if(val.endsWith('@'))             st.textContent='Missing domain (e.g. gmail.com)';
-          else if(!val.includes('.'))            st.textContent='Missing . in domain';
-          else if(!/\.[a-zA-Z]{2,}$/.test(val)) st.textContent='Invalid domain (e.g. .com / .my)';
-          else                                   st.textContent='Invalid email format';
+          st.textContent='Invalid email format';
           if(chk)chk.textContent='❌';
         }
         return false;
       }
-
       inp.className='vld'; st.className='fst ok'; st.textContent='✓ Looks good';
       if(chk)chk.textContent='✅'; return true;
     }
@@ -914,19 +917,16 @@
 
     function fbMsg(code){
       const m={
-        'auth/user-not-found':'No account found with this email. Please sign up first.',
-        'auth/wrong-password':'Incorrect password. Please check and try again.',
+        'auth/user-not-found':'No account found. Please sign up first.',
+        'auth/wrong-password':'Incorrect password.',
         'auth/invalid-credential':'Email or password is incorrect.',
-        'auth/email-already-in-use':'This email is already registered. Sign in instead.',
-        'auth/weak-password':'Password does not meet the requirements.',
-        'auth/invalid-email':'The email address is not valid.',
-        'auth/too-many-requests':'Account temporarily locked. Please reset your password or wait.',
-        'auth/network-request-failed':'Network error. Check your internet connection.',
-        'auth/popup-closed-by-user':'Google sign-in was cancelled.',
-        'auth/popup-blocked':'Popup blocked. Please allow popups for this site.',
-        'auth/account-exists-with-different-credential':'An account already exists with this email using a different sign-in method.',
+        'auth/email-already-in-use':'Email already registered. Sign in instead.',
+        'auth/weak-password':'Password too weak.',
+        'auth/invalid-email':'Invalid email address.',
+        'auth/too-many-requests':'Account temporarily locked.',
+        'auth/network-request-failed':'Network error. Check connection.',
       };
-      return m[code]||'Something went wrong. Please try again.';
+      return m[code]||'Authentication failed. Please try again.';
     }
 
     /* TAB SWITCH */
@@ -947,34 +947,33 @@
     });
 
     /* ═══════════════════════════════════
-       LOGIN
+       LOGIN (EMAIL/PASS)
     ═══════════════════════════════════ */
     async function doLogin(){
       clrA('lErr'); clrA('lOk');
       if(locked()) return;
       const email=sanitize(document.getElementById('lE').value);
       const pass =document.getElementById('lP').value;
-      if(!chkEmail('lE','lESt',true)){ showA('lErr','Please enter a valid email address.','err'); return; }
-      if(!pass){ showA('lErr','Please enter your password.','err'); return; }
+      if(!chkEmail('lE','lESt',true)){ showA('lErr','Valid email required.','err'); return; }
+      if(!pass){ showA('lErr','Password required.','err'); return; }
       setLd('lBtn',true);
 
       try{
+        // NO VERIFICATION CHECK — just sign in
         await window._fb.signInWithEmailAndPassword(window._auth, email, pass);
         markOk();
-        showA('lOk','Signed in successfully!','ok');
+        showA('lOk','Welcome back!','ok');
+        // onAuthStateChanged handles the rest
       } catch(err){
         markFail();
-        const rem=MAX-fails;
-        let msg=fbMsg(err.code);
-        if(rem>0&&rem<MAX) msg+=` (${rem} attempt${rem===1?'':'s'} left before lockout)`;
-        showA('lErr', msg, 'err');
+        showA('lErr', fbMsg(err.code), 'err');
         setLd('lBtn',false);
       }
     }
     window.doLogin=doLogin;
 
     /* ═══════════════════════════════════
-       SIGNUP
+       SIGNUP (EMAIL/PASS)
     ═══════════════════════════════════ */
     async function doSignup(){
       clrA('sErr'); clrA('sOk');
@@ -986,11 +985,11 @@
       if(!chkEmail('sE','sESt',true))ok=false;
       const allRules=RULES.every(r=>r.fn(pass));
       if(!allRules){ document.getElementById('sP').className='inv'; document.getElementById('pwr').classList.add('on'); ok=false; }
-      if(!ok){ showA('sErr','Please fix the errors highlighted above.','err'); return; }
+      if(!ok){ showA('sErr','Please fix the errors above.','err'); return; }
 
       setLd('sBtn',true);
 
-      // Launch HOV Security verification before creating account
+      // Launch HOV -> Then Create Account
       openHov(async function(){
         await doSignupFirebase(name, email, pass);
       });
@@ -998,28 +997,26 @@
     window.doSignup=doSignup;
 
     async function doSignupFirebase(name, email, pass){
-      // pre-check: is email already registered?
+      // Pre-check for existing account to avoid HOV if possible
       try{
         const methods=await window._fb.fetchSignInMethodsForEmail(window._auth, email);
         if(methods.length>0){
-          showA('sErr','This email already has an account. <a href="#" onclick="sw(\'login\');return false;" style="color:var(--blue);text-decoration:underline">Sign in instead →</a>','err');
+          showA('sErr','Email already registered. <a href="#" onclick="sw(\'login\');return false;" style="color:var(--blue)">Sign in →</a>','err');
           setLd('sBtn',false); return;
         }
-      } catch(e){ /* proceed */ }
+      } catch(e){}
 
       try{
-        const cred=await window._fb.createUserWithEmailAndPassword(window._auth, email, pass);
-        await window._fb.updateProfile(cred.user,{displayName:name});
-        await window._fb.sendEmailVerification(cred.user);
-        showA('sOk',
-          '🎉 Account created! A verification email has been sent to <strong>'+email+'</strong>.<br><br>' +
-          '⏳ <strong>Email may take 10–30 minutes</strong> to arrive. Check your inbox and spam folder.<br><br>' +
-          'While waiting you can:<br>' +
-          '<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">' +
-            '<a href="https://t.me/T1ERA_SecBot" target="_blank" rel="noopener" style="flex:1;min-width:120px;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 14px;border-radius:9px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;font-family:Space Grotesk,sans-serif;font-size:13px;font-weight:700;text-decoration:none;">🚀 Open Telegram</a>' +
-            '<a href="home.html" style="flex:1;min-width:120px;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 14px;border-radius:9px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);color:#fff;font-family:Space Grotesk,sans-serif;font-size:13px;font-weight:700;text-decoration:none;">🏠 Go to Home</a>' +
-          '</div>',
-          'ok');
+        // 1. Create User
+        const cred = await window._fb.createUserWithEmailAndPassword(window._auth, email, pass);
+        
+        // 2. Update Name
+        await window._fb.updateProfile(cred.user, {displayName: name});
+        
+        // 3. Set Flag for Redirect (No verification email sent)
+        window._isNewSignup = true;
+
+        // The onAuthStateChanged listener will see the flag and trigger the redirect UI
       } catch(err){
         showA('sErr', fbMsg(err.code), 'err');
         setLd('sBtn',false);
@@ -1027,53 +1024,45 @@
     }
 
     /* ═══════════════════════════════════
-       GOOGLE SIGN-IN (UPDATED FIX)
-       Handles COOP Errors & Popup Blockers
+       GOOGLE AUTH (Unified & Fixed)
     ═══════════════════════════════════ */
-    // LOGIN only — signup Google button wired separately after HOV is ready
     async function doGoogle(mode){
       clrA('lErr');
       if(locked()) return;
 
-      // UX: Dim the button slightly to show activity
       const btnId = mode === 'login' ? 'lGBtn' : 'gSignupBtn';
       const btn = document.getElementById(btnId);
-      if(btn) {
-        btn.style.opacity = '0.6';
-        btn.style.pointerEvents = 'none';
-      }
+      if(btn) { btn.style.opacity = '0.6'; btn.style.pointerEvents = 'none'; }
 
       try{
         const result = await window._fb.signInWithPopup(window._auth, window._gp);
         const info   = window._fb.getAdditionalUserInfo(result);
         
-        // CHECK IF LOGIN ATTEMPT BUT USER IS NEW
+        // LOGIN MODE CHECK
         if(mode === 'login' && info.isNewUser){
           await window._fb.signOut(window._auth);
           markFail();
-          showA('lErr',
-            'No T1ERA account found for this Google address. <a href="#" onclick="sw(\'signup\');return false;" style="color:var(--blue);text-decoration:underline">Create an account first →</a>',
-            'err');
+          showA('lErr', 'No account found. <a href="#" onclick="sw(\'signup\');" style="color:var(--blue)">Sign up first →</a>', 'err');
           return;
         }
+        
+        // SIGNUP MODE CHECK
+        if(mode === 'signup' && info.isNewUser){
+          // Set flag so onAuthStateChanged knows to show the Setup Spinner
+          window._isNewSignup = true;
+        }
+
         markOk();
       } catch(err){
-        console.error("Google Auth Error:", err);
-        
-        // Handle specific COOP/Network errors
-        if (err.code === 'auth/popup-closed-by-user' || err.message?.includes('closed before a response')) {
-          showA('lErr', 'Sign-in cancelled or blocked by browser. Please try again.', 'warn');
-        } else if (err.code === 'auth/network-request-failed') {
-          showA('lErr', 'Network error. Check your connection or firewall.', 'err');
+        console.error("Google Auth Crash Handler:", err);
+        // Error Handling for blocked popups
+        if (err.message && (err.message.includes('closed') || err.message.includes('blocked') || err.message.includes('Assertion'))) {
+          showA(mode==='login'?'lErr':'sErr', 'Browser blocked the popup. Please try again.', 'warn');
         } else {
-          showA('lErr', fbMsg(err.code), 'err');
+          showA(mode==='login'?'lErr':'sErr', fbMsg(err.code), 'err');
         }
       } finally {
-        // Reset button state
-        if(btn) {
-          btn.style.opacity = '';
-          btn.style.pointerEvents = '';
-        }
+        if(btn) { btn.style.opacity = ''; btn.style.pointerEvents = ''; }
       }
     }
     window.doGoogle=doGoogle;
@@ -1084,12 +1073,12 @@
     async function doReset(){
       clrA('rErr'); clrA('rOk');
       const email=sanitize(document.getElementById('rE').value);
-      if(!chkEmail('rE','rESt',true)){ showA('rErr','Please enter a valid email address.','err'); return; }
+      if(!chkEmail('rE','rESt',true)){ showA('rErr','Valid email required.','err'); return; }
       setLd('rBtn',true);
 
       try{
-        await window._fb.sendPasswordResetEmail(window._auth, email, pass); // Note: pass var isn't needed here but standard API is just email
-        showA('rOk','Reset link sent! Check your inbox (and spam folder).','ok');
+        await window._fb.sendPasswordResetEmail(window._auth, email);
+        showA('rOk','Reset link sent to your email.','ok');
       } catch(err){ showA('rErr', fbMsg(err.code), 'err'); }
       setLd('rBtn',false);
     }
@@ -1103,350 +1092,153 @@
       if(document.getElementById('pRst').classList.contains('on')) doReset();
     });
 
-
     /* ═══════════════════════════════════
-       HOV SECURITY — HUMAN OVER VERIFICATION
-       3-step: Math → Count → Colour
-       Max 3 wrong per step → lockout
+       HOV SECURITY SYSTEM
     ═══════════════════════════════════ */
     (function(){
-      const STEP_MAX_TRIES = 3;
-      const LOCK_SECONDS   = 60;
-
-      // State
-      let hovStep       = 1;
-      let stepTries     = {1:0, 2:0, 3:0};
-      let hovData       = {};   // {mathAns, objCount, colourAnswer, selectedColour}
-      let hovCallback   = null; // called with true on success
-      let lockTimer     = null;
-
-      // ── EMOJI OBJECTS POOL ──
-      const OBJS = ['🔴','🟠','🟡','🟢','🔵','🟣','⚫','⚪','🟤',
-                    '★','◆','▲','●','■','♦','✦','❋','⬟'];
-
-      // ── COLOUR DEFINITIONS ──
+      const STEP_MAX_TRIES = 3, LOCK_SECONDS = 60;
+      let hovStep=1, stepTries={1:0,2:0,3:0}, hovData={}, hovCallback=null, lockTimer=null;
+      const OBJS = ['🔴','🟠','🟡','🟢','🔵','🟣','⚫','⚪','🟤','★','◆','▲','●','■','♦','✦','❋','⬟'];
       const COLOURS = [
-        {name:'Red',    hex:'#ef4444', text:'#fff'},
-        {name:'Blue',   hex:'#3b82f6', text:'#fff'},
-        {name:'Green',  hex:'#10b981', text:'#fff'},
-        {name:'Yellow', hex:'#eab308', text:'#000'},
-        {name:'Purple', hex:'#8b5cf6', text:'#fff'},
-        {name:'Orange', hex:'#f97316', text:'#fff'},
-        {name:'Cyan',   hex:'#06b6d4', text:'#000'},
-        {name:'Pink',   hex:'#ec4899', text:'#fff'},
+        {name:'Red',hex:'#ef4444'},{name:'Blue',hex:'#3b82f6'},{name:'Green',hex:'#10b981'},
+        {name:'Yellow',hex:'#eab308'},{name:'Purple',hex:'#8b5cf6'},{name:'Orange',hex:'#f97316'},
+        {name:'Cyan',hex:'#06b6d4'},{name:'Pink',hex:'#ec4899'}
       ];
-
       function rnd(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
-      function pick(arr){ return arr[rnd(0,arr.length-1)]; }
-
-      // ── GENERATE CHALLENGES ──
+      
+      // Generators
       function genMath(){
-        const ops = ['+', '-'];
-        const op  = pick(ops);
-        let a, b;
-        if(op==='+'){
-          a = rnd(1,49); b = rnd(1,49);
-        } else {
-          a = rnd(10,99); b = rnd(1,a);
-        }
-        hovData.mathAns = op==='+' ? a+b : a-b;
-        document.getElementById('hMathQ').textContent = a + ' ' + op + ' ' + b + ' = ?';
-        document.getElementById('hMathA').value = '';
-        document.getElementById('hMathA').className = 'hov-inp';
+        const op=['+','-'][rnd(0,1)];
+        let a,b;
+        if(op==='+'){ a=rnd(1,49); b=rnd(1,49); } else { a=rnd(10,99); b=rnd(1,a); }
+        hovData.mathAns=op==='+'?a+b:a-b;
+        document.getElementById('hMathQ').textContent=`${a} ${op} ${b} = ?`;
+        document.getElementById('hMathA').value=''; document.getElementById('hMathA').className='hov-inp';
       }
-
       function genObjects(){
-        const count = rnd(3,12);
-        hovData.objCount = count;
-        const canvas = document.getElementById('hCanvas');
-        canvas.innerHTML = '';
-        document.getElementById('hCountA').value = '0';
-        document.getElementById('hCountA').className = 'hov-cval';
-        const pool = [...OBJS].sort(()=>Math.random()-.5);
+        const count=rnd(3,12); hovData.objCount=count;
+        const c=document.getElementById('hCanvas'); c.innerHTML='';
+        document.getElementById('hCountA').value='0'; document.getElementById('hCountA').className='hov-cval';
         for(let i=0;i<count;i++){
-          const el = document.createElement('div');
-          el.className = 'hov-obj';
-          el.style.animationDelay = (i*0.06)+'s';
-          el.textContent = pool[i % pool.length];
-          // random size variation
-          const sz = rnd(28,42)+'px';
-          el.style.fontSize = sz;
-          canvas.appendChild(el);
+          const el=document.createElement('div'); el.className='hov-obj';
+          el.textContent=OBJS[rnd(0,OBJS.length-1)]; el.style.fontSize=rnd(28,42)+'px';
+          el.style.animationDelay=(i*0.06)+'s'; c.appendChild(el);
         }
       }
-
       function genColour(){
-        // pick correct colour + 3 distractors
-        const shuffled = [...COLOURS].sort(()=>Math.random()-.5);
-        const correct  = shuffled[0];
-        const options  = shuffled.slice(0,4).sort(()=>Math.random()-.5);
-        hovData.colourAnswer = correct.name;
-        hovData.selectedColour = null;
-
-        // show big colour block
-        const cc = document.getElementById('hColCanvas');
-        cc.innerHTML = '';
-        cc.style.background = correct.hex;
-        cc.style.minHeight  = '90px';
-        // subtle shimmer overlay
-        cc.style.boxShadow  = '0 0 40px '+correct.hex+'55, inset 0 0 60px rgba(0,0,0,.3)';
-
-        // build swatches
-        const sw = document.getElementById('hSwatches');
-        sw.innerHTML = '';
-        options.forEach(col=>{
-          const btn = document.createElement('button');
-          btn.className = 'hov-swatch';
-          btn.innerHTML = '<span class="sdot" style="background:'+col.hex+'"></span>'+col.name;
-          btn.onclick = function(){
+        const opts=[...COLOURS].sort(()=>Math.random()-.5);
+        const cor=opts[0]; hovData.colourAnswer=cor.name; hovData.selectedColour=null;
+        const cc=document.getElementById('hColCanvas'); cc.innerHTML=''; cc.style.background=cor.hex;
+        const sw=document.getElementById('hSwatches'); sw.innerHTML='';
+        opts.slice(0,4).sort(()=>Math.random()-.5).forEach(c=>{
+          const b=document.createElement('button'); b.className='hov-swatch';
+          b.innerHTML=`<span class="sdot" style="background:${c.hex}"></span>${c.name}`;
+          b.onclick=()=>{
             document.querySelectorAll('.hov-swatch').forEach(s=>s.classList.remove('sel'));
-            btn.classList.add('sel');
-            hovData.selectedColour = col.name;
+            b.classList.add('sel'); hovData.selectedColour=c.name;
           };
-          sw.appendChild(btn);
+          sw.appendChild(b);
         });
       }
 
-      // ── RENDER TRY DOTS ──
-      function renderTries(step){
-        const el = document.getElementById('hTries'+step);
-        el.innerHTML = '';
-        for(let i=0;i<STEP_MAX_TRIES;i++){
-          const d=document.createElement('div');
-          d.className='hov-try'+(i<stepTries[step]?' used':'');
-          el.appendChild(d);
-        }
+      function hovErr(s,msg){
+        const e=document.getElementById('hErr'+s), t=document.getElementById('hErr'+s+'Txt');
+        t.textContent=msg; e.classList.add('on'); setTimeout(()=>e.classList.remove('on'),3500);
       }
-
-      // ── STEP INDICATOR UPDATE ──
-      function updateSteps(current){
+      function handleWrong(s,regen){
+        stepTries[s]++; renderTries(s);
+        if(stepTries[s]>=STEP_MAX_TRIES){ startLockout(); return; }
+        hovErr(s,`Incorrect. ${STEP_MAX_TRIES-stepTries[s]} attempts left.`);
+        if(regen) regen();
+      }
+      function renderTries(s){
+        const el=document.getElementById('hTries'+s); el.innerHTML='';
+        for(let i=0;i<STEP_MAX_TRIES;i++) el.innerHTML+=`<div class="hov-try${i<stepTries[s]?' used':''}"></div>`;
+      }
+      function updateSteps(c){
         for(let i=1;i<=3;i++){
-          const el=document.getElementById('hstep'+i);
-          el.classList.remove('active','done');
-          if(i<current) el.classList.add('done');
-          else if(i===current) el.classList.add('active');
+          const e=document.getElementById('hstep'+i); e.classList.remove('active','done');
+          if(i<c)e.classList.add('done'); else if(i===c)e.classList.add('active');
         }
       }
 
-      // ── SHOW ERROR ──
-      function hovErr(step, msg){
-        const el  = document.getElementById('hErr'+step);
-        const txt = document.getElementById('hErr'+step+'Txt');
-        txt.textContent = msg;
-        el.classList.add('on');
-        setTimeout(()=>el.classList.remove('on'), 3500);
-      }
-
-      // ── WRONG ANSWER HANDLER ──
-      function handleWrong(step, regenerate){
-        stepTries[step]++;
-        renderTries(step);
-        const remaining = STEP_MAX_TRIES - stepTries[step];
-
-        if(stepTries[step] >= STEP_MAX_TRIES){
-          startLockout();
-          return;
-        }
-
-        const msgs = [
-          'Incorrect. ' + remaining + ' attempt' + (remaining===1?'':'s') + ' remaining.',
-          'Wrong answer — please try again carefully. ' + remaining + ' left.',
-          'Not quite right. ' + remaining + ' attempt' + (remaining===1?'':'s') + ' left.',
-        ];
-        hovErr(step, msgs[rnd(0,msgs.length-1)]);
-        // regenerate challenge on wrong
-        if(regenerate) regenerate();
-      }
-
-      // ── NEXT STEP / VALIDATE ──
-      window.hovNextStep = function(step){
-        if(step===1){
-          const ans = parseInt(document.getElementById('hMathA').value);
-          if(isNaN(ans)){
-            hovErr(1,'Please enter your answer first.'); return;
+      window.hovNextStep=function(s){
+        if(s===1){
+          const a=parseInt(document.getElementById('hMathA').value);
+          if(isNaN(a)||a!==hovData.mathAns){
+            document.getElementById('hMathA').className='hov-inp bad'; handleWrong(1,genMath); return;
           }
-          if(ans !== hovData.mathAns){
-            document.getElementById('hMathA').className='hov-inp bad';
-            handleWrong(1, genMath); return;
+          document.getElementById('hMathA').className='hov-inp ok'; goStep(2);
+        } else if(s===2){
+          const a=parseInt(document.getElementById('hCountA').value);
+          if(a!==hovData.objCount){
+            document.getElementById('hCountA').className='hov-cval bad'; handleWrong(2,genObjects); return;
           }
-          document.getElementById('hMathA').className='hov-inp ok';
-          goStep(2);
-        } else if(step===2){
-          const ans = parseInt(document.getElementById('hCountA').value);
-          if(ans !== hovData.objCount){
-            document.getElementById('hCountA').className='hov-cval bad';
-            handleWrong(2, genObjects); return;
-          }
-          document.getElementById('hCountA').className='hov-cval ok';
-          goStep(3);
-        } else if(step===3){
-          if(!hovData.selectedColour){
-            hovErr(3,'Please select a colour.'); return;
-          }
-          if(hovData.selectedColour !== hovData.colourAnswer){
-            handleWrong(3, genColour); return;
-          }
-          // ALL PASSED
+          document.getElementById('hCountA').className='hov-cval ok'; goStep(3);
+        } else if(s===3){
+          if(!hovData.selectedColour||hovData.selectedColour!==hovData.colourAnswer){ handleWrong(3,genColour); return; }
           hovSuccess();
         }
       };
-
-      window.hovCount = function(delta){
-        const el = document.getElementById('hCountA');
-        let v = parseInt(el.value)||0;
-        v = Math.max(0, Math.min(30, v+delta));
-        el.value = v;
-        el.className='hov-cval';
+      window.hovCount=function(d){
+        const e=document.getElementById('hCountA'); let v=(parseInt(e.value)||0)+d;
+        e.value=Math.max(0,Math.min(30,v)); e.className='hov-cval';
       };
 
       function goStep(n){
-        // hide all panels
-        [1,2,3].forEach(i=>{
-          document.getElementById('hpanel'+i).classList.remove('on');
-        });
+        [1,2,3].forEach(i=>document.getElementById('hpanel'+i).classList.remove('on'));
         document.getElementById('hpanel'+n).classList.add('on');
-        hovStep = n;
-        updateSteps(n);
-        stepTries[n] = 0;
-        renderTries(n);
-        if(n===2) genObjects();
-        if(n===3) genColour();
-        // scroll to top
+        hovStep=n; updateSteps(n); stepTries[n]=0; renderTries(n);
+        if(n===2)genObjects(); if(n===3)genColour();
         document.getElementById('hovBox').scrollTop=0;
       }
-
       function hovSuccess(){
         [1,2,3].forEach(i=>document.getElementById('hpanel'+i).classList.remove('on'));
-        document.getElementById('hSuccess').classList.add('on');
-        updateSteps(4);
-        // after brief moment, run the actual signup
-        setTimeout(()=>{
-          closeHov();
-          if(hovCallback) hovCallback();
-        }, 1800);
+        document.getElementById('hSuccess').classList.add('on'); updateSteps(4);
+        setTimeout(()=>{ closeHov(); if(hovCallback)hovCallback(); },1800);
       }
-
-      // ── LOCKOUT ──
       function startLockout(){
-        [1,2,3].forEach(i=>document.getElementById('hpanel'+i).classList.remove('on'));
-        document.getElementById('hSuccess').classList.remove('on');
+        [1,2,3,'Success'].forEach(id=>document.getElementById('hpanel'+id)?.classList.remove('on'));
         document.getElementById('hLocked').classList.add('on');
-        let remaining = LOCK_SECONDS;
-        document.getElementById('hLockTimer').textContent = remaining;
-        lockTimer = setInterval(()=>{
-          remaining--;
-          document.getElementById('hLockTimer').textContent = remaining;
-          if(remaining<=0){
-            clearInterval(lockTimer);
-            // reset and re-show form after lockout
-            closeHov();
-            showA('sErr',
-              '⏳ Lockout expired. You may try again — <strong>please complete verification carefully.</strong>',
-              'warn');
-            setLd('sBtn',false);
-          }
+        let rem=LOCK_SECONDS;
+        lockTimer=setInterval(()=>{
+          rem--; document.getElementById('hLockTimer').textContent=rem;
+          if(rem<=0){ clearInterval(lockTimer); closeHov(); showA('sErr','Lockout expired. Try again.','warn'); setLd('sBtn',false); }
         },1000);
       }
 
-      // ── OPEN / CLOSE ──
-      function openHov(callback){
-        hovCallback = callback;
-        hovStep     = 1;
-        stepTries   = {1:0,2:0,3:0};
-        [1,2,3].forEach(i=>document.getElementById('hpanel'+i).classList.remove('on'));
-        document.getElementById('hSuccess').classList.remove('on');
-        document.getElementById('hLocked').classList.remove('on');
-        [1,2,3].forEach(i=>document.getElementById('hErr'+i).classList.remove('on'));
-        document.getElementById('hpanel1').classList.add('on');
-        updateSteps(1);
-        genMath();
-        renderTries(1);
-        renderTries(2);
-        renderTries(3);
+      window.openHov=function(cb){
+        hovCallback=cb; hovStep=1; stepTries={1:0,2:0,3:0};
+        ['hpanel2','hpanel3','hSuccess','hLocked','hErr1','hErr2','hErr3'].forEach(id=>document.getElementById(id).classList.remove('on'));
+        document.getElementById('hpanel1').classList.add('on'); updateSteps(1); genMath();
+        [1,2,3].forEach(renderTries);
         document.getElementById('hovOverlay').classList.add('on');
-        document.getElementById('hovBox').scrollTop=0;
-      }
+      };
+      window.closeHov=function(){
+        const ov=document.getElementById('hovOverlay');
+        ov.style.opacity='0'; setTimeout(()=>{ov.classList.remove('on');ov.style.opacity='';},300);
+        if(lockTimer)clearInterval(lockTimer);
+      };
 
-      function closeHov(){
-        const ov = document.getElementById('hovOverlay');
-        ov.style.opacity='0';
-        ov.style.transition='opacity .3s';
-        setTimeout(()=>{
-          ov.classList.remove('on');
-          ov.style.opacity='';
-          ov.style.transition='';
-        },300);
-        if(lockTimer){ clearInterval(lockTimer); lockTimer=null; }
-      }
-
-      window.openHov  = openHov;
-      window.closeHov = closeHov;
-
-      // ── Wire Google signup button HERE, after openHov is ready ──
-      // This guarantees HOV opens first, Google popup fires only after pass
-      const gSignupBtn = document.getElementById('gSignupBtn');
-      if(gSignupBtn){
-        gSignupBtn.addEventListener('click', function(){
-          clrA('sErr');
-          openHov(async function(){
-            // HOV passed — set new signup flag, then open Google popup
-            window._googleNewSignup = true;
-            try{
-              // Uses the global gp (updated with prompt='select_account')
-              await window._fb.signInWithPopup(window._auth, window._gp);
-              // onAuthStateChanged fires → sees _googleNewSignup → shows redirect UI
-            } catch(err){
-              window._googleNewSignup = false;
-              // Specific handling here too just in case
-              const m={
-                'auth/popup-closed-by-user':'Google sign-in was cancelled.',
-                'auth/popup-blocked':'Popup blocked. Please allow popups for this site.',
-              };
-              if (err.message && err.message.includes('closed before a response')) {
-                 showA('sErr', 'Browser blocked the popup. Please try again.', 'warn');
-              } else {
-                 showA('sErr', m[err.code]||'Something went wrong. Please try again.', 'err');
-              }
-            }
-          });
+      // Wire Google Signup Button
+      const gsb=document.getElementById('gSignupBtn');
+      if(gsb) gsb.addEventListener('click', ()=>{
+        clrA('sErr');
+        openHov(async()=>{
+          await doGoogle('signup');
         });
-      }
+      });
     })();
 
-    /* ═══════════════════════════════════
-       CYBERSECURITY POPUP — close logic
-        if(e.key === 'Escape' && overlay.style.display !== 'none'){
-          closePopup();
-        }
-       Shows on every page load / refresh.
-       Close: X button, overlay click, or Escape key.
-    ═══════════════════════════════════ */
+    /* POPUP CLOSE */
     (function(){
-      const overlay = document.getElementById('csPopupOverlay');
-      const closeBtn = document.getElementById('csPopupClose');
-
-      function closePopup(){
-        overlay.classList.add('hiding');
-        overlay.addEventListener('animationend', function handler(){
-          overlay.style.display = 'none';
-          overlay.removeEventListener('animationend', handler);
-        });
+      const o=document.getElementById('csPopupOverlay');
+      if(o){
+        const c=()=> { o.classList.add('hiding'); setTimeout(()=>o.style.display='none',300); };
+        document.getElementById('csPopupClose').onclick=c;
+        o.onclick=e=>e.target===o&&c();
+        document.onkeydown=e=>e.key==='Escape'&&o.style.display!=='none'&&c();
       }
-
-      // X button
-      closeBtn.addEventListener('click', closePopup);
-
-      // Click on dark overlay backdrop (outside the box)
-      overlay.addEventListener('click', function(e){
-        if(e.target === overlay) closePopup();
-      });
-
-      // Escape key
-      document.addEventListener('keydown', function(e){
-        if(e.key === 'Escape' && overlay && overlay.style.display !== 'none'){
-          closePopup();
-        }
-      });
     })();
   </script>
 </body>
