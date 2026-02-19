@@ -1368,6 +1368,9 @@
 
     /* ═══════════════════════════════════
        CYBERSECURITY POPUP — close logic
+        if(e.key === 'Escape' && overlay.style.display !== 'none'){
+          closePopup();
+        }
        Shows on every page load / refresh.
        Close: X button, overlay click, or Escape key.
     ═══════════════════════════════════ */
@@ -1393,9 +1396,6 @@
 
       // Escape key
       document.addEventListener('keydown', function(e){
-        if(e.key === 'Escape' && overlay.style.display !== 'none'){
-          closePopup();
-        }
       });
     })();
   </script>
