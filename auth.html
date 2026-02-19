@@ -675,8 +675,6 @@
                      signInWithPopup, fetchSignInMethodsForEmail, getAdditionalUserInfo };
 
     onAuthStateChanged(auth, user => {
-      // Block UI update if HOV is pending (Google signup flow)
-      if (window._hovPending) return;
       if (user) {
         document.getElementById('authF').style.display = 'none';
         const p = document.getElementById('lgdin');
@@ -1064,39 +1062,31 @@
 
     /* ═══════════════════════════════════
        GOOGLE SIGN-IN
-       Sign In tab  → reject if brand new user (not registered)
-       Sign Up tab  → run HOV FIRST (before Google popup),
-                      then open Google popup only after HOV passes
+       Sign In tab  → normal Google popup
+       Sign Up tab  → HOV first, then Google popup after pass
     ═══════════════════════════════════ */
     async function doGoogle(mode){
       clrA('lErr'); clrA('sErr');
       if(mode==='login'&&locked()) return;
 
-      // ── SIGNUP: set HOV pending flag, sign out any session, then show HOV ──
       if(mode==='signup'){
-        window._hovPending = true;
-        try{ await window._fb.signOut(window._auth); } catch(e){}
+        // Show HOV immediately — Google popup only opens AFTER HOV passes
         openHov(async function(){
-          // HOV passed — clear flag, then open Google popup
-          window._hovPending = false;
           try{
-            await window._fb.signInWithPopup(window._auth, window._gp);
-            // onAuthStateChanged now fires normally → shows profile UI
+            const result = await window._fb.signInWithPopup(window._auth, window._gp);
+            // onAuthStateChanged handles UI
           } catch(err){
-            window._hovPending = false;
             showA('sErr', fbMsg(err.code), 'err');
           }
         });
         return;
       }
 
-      // ── LOGIN: normal flow ──
+      // LOGIN: normal Google popup
       try{
-        const result=await window._fb.signInWithPopup(window._auth, window._gp);
-        const info  =window._fb.getAdditionalUserInfo(result);
-
+        const result = await window._fb.signInWithPopup(window._auth, window._gp);
+        const info   = window._fb.getAdditionalUserInfo(result);
         if(info.isNewUser){
-          // New account created via Google on Sign In tab — not allowed
           await window._fb.signOut(window._auth);
           markFail();
           showA('lErr',
@@ -1104,10 +1094,7 @@
             'err');
           return;
         }
-
         markOk();
-        // onAuthStateChanged handles UI
-
       } catch(err){
         showA('lErr', fbMsg(err.code), 'err');
       }
