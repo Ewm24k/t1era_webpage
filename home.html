@@ -2725,10 +2725,10 @@
   </script>
 
   <script type="module">
-  import { initializeApp }                                      from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-  import { getAuth, onAuthStateChanged, signOut, setPersistence, browserLocalStoragePersistence }
-                                                                from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+  import { initializeApp }                        from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+  import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 
+  // ✅ FIXED: Same config as auth.html (t1era-v2)
   const firebaseConfig = {
     apiKey:            "AIzaSyBnt9mbb8LdMVeguSHUmS20L6uBHIfxwAs",
     authDomain:        "t1era-v2.firebaseapp.com",
@@ -2748,19 +2748,9 @@
   const dropdownEmail   = document.getElementById('dropdownEmail');
   const userDropdown    = document.getElementById('userDropdown');
 
-  // ── STEP 1: Force localStorage persistence (same speed on desktop as mobile) ──
-  await setPersistence(auth, browserLocalStoragePersistence);
-
-  // ── STEP 2: Instant check — currentUser is populated synchronously
-  //    from localStorage BEFORE onAuthStateChanged fires.
-  //    Use this to immediately hide the login button flicker. ──
-  const immediateUser = auth.currentUser;
-  if (immediateUser) {
-    authBtn.style.display = 'none';
-  }
-
-  function applyUser(user) {
+  onAuthStateChanged(auth, user => {
     if (user) {
+      // ── SIGNED IN: show avatar, hide login ──
       authBtn.style.display          = 'none';
       userAvatarBtn.style.display    = 'block';
       userAvatarBtn.style.visibility = 'visible';
@@ -2777,6 +2767,7 @@
           `<div class="user-avatar-initials">${initial}</div>`;
       }
 
+      // Inject Sign Out into dropdown ONLY once
       if (!document.getElementById('signOutBtn')) {
         const divider = document.createElement('div');
         divider.className = 'dropdown-divider';
@@ -2794,6 +2785,7 @@
       }
 
     } else {
+      // ── SIGNED OUT ──
       authBtn.style.display          = 'inline-flex';
       userAvatarBtn.style.display    = 'none';
       userAvatarBtn.style.visibility = 'hidden';
@@ -2805,18 +2797,15 @@
         existingSignOut.remove();
       }
     }
-  }
+  });
 
-  // ── STEP 3: onAuthStateChanged handles the confirmed state
-  //    (token refresh, session validation, etc.) ──
-  onAuthStateChanged(auth, applyUser);
-
-  // ── Dropdown toggle ──
+  // Dropdown toggle
   userAvatarBtn.addEventListener('click', e => {
     e.stopPropagation();
     userDropdown.classList.toggle('open');
   });
 
+  // Close dropdown on outside click
   document.addEventListener('click', e => {
     if (!userAvatarBtn.contains(e.target)) {
       userDropdown.classList.remove('open');
