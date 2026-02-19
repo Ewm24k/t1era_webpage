@@ -48,6 +48,247 @@
     }
     .bg-noise{opacity:.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:200px;}
 
+    /* ══════════════════════════════════════════
+       GATE SCREEN — Canva dark pink × purple × white
+    ══════════════════════════════════════════ */
+    #gateScreen{
+      position:fixed;inset:0;z-index:9999;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      gap:20px;
+      /* rich dark background with Canva-style deep purple-pink mesh */
+      background:
+        radial-gradient(ellipse at 25% 20%, rgba(168,42,120,.55) 0%, transparent 50%),
+        radial-gradient(ellipse at 75% 80%, rgba(109,40,217,.60) 0%, transparent 50%),
+        radial-gradient(ellipse at 60% 10%, rgba(219,39,119,.30) 0%, transparent 40%),
+        radial-gradient(ellipse at 10% 90%, rgba(88,28,135,.70) 0%, transparent 45%),
+        linear-gradient(135deg,#12041e 0%,#1e0533 40%,#2d0a1e 70%,#180330 100%);
+      overflow:hidden;
+    }
+    /* subtle animated noise grain overlay on gate */
+    #gateScreen::before{
+      content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.07'/%3E%3C/svg%3E");
+      background-size:180px;
+    }
+    /* floating glow orbs */
+    #gateScreen::after{
+      content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(236,72,153,.08) 0%, transparent 60%);
+      animation:gateOrbPulse 3s ease-in-out infinite;
+    }
+    @keyframes gateOrbPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.15);opacity:.6}}
+
+    #gateScreen.hidden{display:none;}
+
+    /* everything inside gate screen sits above the pseudo overlays */
+    #gateScreen > *{position:relative;z-index:1;}
+
+    /* ── CANVA-STYLE TRIPLE-RING SPINNER ── */
+    .gate-spinner{
+      position:relative;
+      width:56px;height:56px;
+    }
+    .gate-spinner::before,
+    .gate-spinner::after,
+    .gate-spinner span{
+      content:'';
+      position:absolute;
+      border-radius:50%;
+      border-style:solid;
+      border-color:transparent;
+    }
+    /* outer ring — hot pink */
+    .gate-spinner::before{
+      inset:0;
+      border-width:3px;
+      border-top-color:#ec4899;
+      border-right-color:rgba(236,72,153,.3);
+      animation:gspin 1.1s linear infinite;
+    }
+    /* middle ring — soft purple */
+    .gate-spinner::after{
+      inset:9px;
+      border-width:3px;
+      border-top-color:#c084fc;
+      border-left-color:rgba(192,132,252,.25);
+      animation:gspin .8s linear infinite reverse;
+    }
+    /* inner dot — white glowing core */
+    .gate-spinner span{
+      inset:20px;
+      background:radial-gradient(circle,#fff 0%,rgba(255,255,255,.4) 50%,transparent 100%);
+      border:none;
+      animation:gateCorePulse 1.4s ease-in-out infinite;
+    }
+    @keyframes gspin{to{transform:rotate(360deg)}}
+    @keyframes gateCorePulse{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.3);opacity:.4}}
+
+    /* ── STATUS TEXT ── */
+    .gate-txt{
+      font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;
+      letter-spacing:.18em;text-transform:uppercase;
+      /* white fading to soft pink */
+      background:linear-gradient(90deg,rgba(255,255,255,.9),rgba(249,168,212,.7),rgba(255,255,255,.9));
+      background-size:200% 100%;
+      -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+      animation:gateTxtShimmer 2.2s ease-in-out infinite, gtxtpulse 1.6s ease-in-out infinite;
+    }
+    @keyframes gateTxtShimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
+    @keyframes gtxtpulse{0%,100%{opacity:.55}50%{opacity:1}}
+
+    /* ── LOGO ROW ── */
+    .gate-logo{
+      display:flex;align-items:center;gap:11px;margin-bottom:4px;
+    }
+    .gate-logomark{
+      width:40px;height:40px;border-radius:11px;
+      /* Canva-style pink-to-purple gradient */
+      background:linear-gradient(135deg,#ec4899 0%,#a855f7 50%,#7c3aed 100%);
+      display:flex;align-items:center;justify-content:center;
+      font-family:'Orbitron',sans-serif;font-weight:900;font-size:13px;color:#fff;
+      box-shadow:0 0 28px rgba(236,72,153,.5), 0 0 56px rgba(168,85,247,.25);
+      animation:gateMarkGlow 2.5s ease-in-out infinite;
+    }
+    @keyframes gateMarkGlow{
+      0%,100%{box-shadow:0 0 28px rgba(236,72,153,.5),0 0 56px rgba(168,85,247,.25);}
+      50%{box-shadow:0 0 40px rgba(236,72,153,.8),0 0 80px rgba(168,85,247,.45);}
+    }
+    .gate-logotxt{
+      font-family:'Orbitron',sans-serif;font-weight:900;font-size:20px;letter-spacing:.1em;
+      /* pink → purple → white shimmer */
+      background:linear-gradient(135deg,#f9a8d4 0%,#e879f9 30%,#c084fc 60%,#ffffff 100%);
+      background-size:200% 100%;
+      -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+      animation:gateLogoShimmer 3s ease-in-out infinite;
+    }
+    @keyframes gateLogoShimmer{0%,100%{background-position:0% 0}50%{background-position:100% 0}}
+
+    /* ── DECORATIVE PILLS below spinner ── */
+    .gate-pills{
+      display:flex;gap:8px;align-items:center;margin-top:2px;
+    }
+    .gate-pill{
+      width:6px;height:6px;border-radius:50%;
+      animation:gatePillPop 1.4s ease-in-out infinite;
+    }
+    .gate-pill:nth-child(1){background:#ec4899;animation-delay:0s;}
+    .gate-pill:nth-child(2){background:#c084fc;animation-delay:.18s;}
+    .gate-pill:nth-child(3){background:#ffffff;animation-delay:.36s;}
+    .gate-pill:nth-child(4){background:#c084fc;animation-delay:.54s;}
+    .gate-pill:nth-child(5){background:#ec4899;animation-delay:.72s;}
+    @keyframes gatePillPop{0%,100%{transform:scaleY(1);opacity:.5}50%{transform:scaleY(1.9);opacity:1}}
+
+    /* ══════════════════════════════════════════
+       SAVING SCREEN — reuses gate background + pill styles
+       unique spinner, step tracker, and fade-in/out
+    ══════════════════════════════════════════ */
+    #savingScreen{
+      position:fixed;inset:0;z-index:9998;
+      display:none; /* shown via JS */
+      flex-direction:column;align-items:center;justify-content:center;
+      gap:20px;
+      background:
+        radial-gradient(ellipse at 30% 25%,  rgba(219,39,119,.50) 0%, transparent 50%),
+        radial-gradient(ellipse at 70% 75%,  rgba(109,40,217,.58) 0%, transparent 50%),
+        radial-gradient(ellipse at 65% 15%,  rgba(168,42,120,.28) 0%, transparent 42%),
+        radial-gradient(ellipse at 15% 85%,  rgba(88,28,135,.68)  0%, transparent 44%),
+        linear-gradient(135deg,#12041e 0%,#1e0533 40%,#2d0a1e 70%,#180330 100%);
+      overflow:hidden;
+    }
+    #savingScreen::before{
+      content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.07'/%3E%3C/svg%3E");
+      background-size:180px;
+    }
+    #savingScreen::after{
+      content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
+      background:radial-gradient(circle at 50% 45%,rgba(192,132,252,.09) 0%,transparent 60%);
+      animation:gateOrbPulse 3.2s ease-in-out infinite;
+    }
+    #savingScreen.on{
+      display:flex;
+      animation:savingFadeIn .35s cubic-bezier(0.4,0,0.2,1) both;
+    }
+    #savingScreen.off{
+      animation:savingFadeOut .4s cubic-bezier(0.4,0,0.2,1) forwards;
+    }
+    @keyframes savingFadeIn{from{opacity:0}to{opacity:1}}
+    @keyframes savingFadeOut{from{opacity:1}to{opacity:0;pointer-events:none}}
+    #savingScreen > *{position:relative;z-index:1;}
+
+    /* ── SAVING SPINNER — SVG ring + pulsing core ── */
+    .saving-spinner{
+      position:relative;
+      width:64px;height:64px;
+      display:flex;align-items:center;justify-content:center;
+    }
+    .saving-spinner span{
+      position:absolute;
+      width:20px;height:20px;
+      border-radius:50%;
+      background:radial-gradient(circle,#fff 0%,rgba(249,168,212,.6) 45%,transparent 100%);
+      animation:gateCorePulse 1.5s ease-in-out infinite;
+      z-index:2;
+    }
+    .saving-ring{
+      position:absolute;inset:0;
+      width:64px;height:64px;
+    }
+    .saving-arc{
+      transform-origin:28px 28px;
+      animation:savingArcSpin 1.2s linear infinite;
+    }
+    @keyframes savingArcSpin{to{transform:rotate(360deg)}}
+
+    /* ── SAVING STATUS TEXT ── */
+    .saving-txt{
+      font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;
+      letter-spacing:.18em;text-transform:uppercase;
+      background:linear-gradient(90deg,rgba(255,255,255,.9),rgba(249,168,212,.7),rgba(255,255,255,.9));
+      background-size:200% 100%;
+      -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+      animation:gateTxtShimmer 2.2s ease-in-out infinite, gtxtpulse 1.6s ease-in-out infinite;
+    }
+
+    /* ── STEP TRACKER ── */
+    .saving-steps{
+      display:flex;flex-direction:column;gap:10px;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(236,72,153,.18);
+      border-radius:16px;
+      padding:16px 22px;
+      min-width:220px;
+    }
+    .saving-step{
+      display:flex;align-items:center;gap:10px;
+      font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;
+      color:rgba(255,255,255,.25);
+      transition:color .4s ease, transform .3s ease;
+    }
+    .saving-step.on{
+      color:rgba(255,255,255,.9);
+      transform:translateX(4px);
+    }
+    .saving-step.done{
+      color:rgba(192,132,252,.6);
+    }
+    .saving-step.done .sstep-dot{
+      background:#c084fc;
+      box-shadow:0 0 8px rgba(192,132,252,.6);
+    }
+    .sstep-dot{
+      width:7px;height:7px;border-radius:50%;flex-shrink:0;
+      background:rgba(255,255,255,.15);
+      transition:background .4s, box-shadow .4s;
+    }
+    .saving-step.on .sstep-dot{
+      background:#ec4899;
+      box-shadow:0 0 10px rgba(236,72,153,.8);
+      animation:sstepPulse .8s ease-in-out infinite;
+    }
+    @keyframes sstepPulse{0%,100%{box-shadow:0 0 10px rgba(236,72,153,.8)}50%{box-shadow:0 0 18px rgba(236,72,153,1)}}
+
     /* ── LAYOUT ── */
     .page{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:32px 16px 48px;}
 
@@ -288,6 +529,64 @@
   <div class="bg-layer bg-glow"></div>
   <div class="bg-layer bg-noise"></div>
 
+  <!-- ══════════════════════════════════════════
+       GATE SCREEN — covers page while auth resolves
+       Hides once we confirm user is eligible to be here
+  ══════════════════════════════════════════ -->
+  <div id="gateScreen">
+    <div class="gate-logo">
+      <div class="gate-logomark">T1</div>
+      <span class="gate-logotxt">T1ERA</span>
+    </div>
+    <div class="gate-spinner"><span></span></div>
+    <div class="gate-txt" id="gateTxt">VERIFYING SESSION...</div>
+    <div class="gate-pills">
+      <div class="gate-pill"></div>
+      <div class="gate-pill"></div>
+      <div class="gate-pill"></div>
+      <div class="gate-pill"></div>
+      <div class="gate-pill"></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SAVING SCREEN — Canva pink/purple overlay
+       shown while Firestore is writing the profile
+  ══════════════════════════════════════════ -->
+  <div id="savingScreen">
+    <div class="gate-logo">
+      <div class="gate-logomark">T1</div>
+      <span class="gate-logotxt">T1ERA</span>
+    </div>
+    <div class="saving-spinner">
+      <span></span>
+      <svg class="saving-ring" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="28" cy="28" r="24" fill="none" stroke="rgba(236,72,153,.15)" stroke-width="3"/>
+        <circle class="saving-arc" cx="28" cy="28" r="24" fill="none" stroke="url(#savingGrad)" stroke-width="3" stroke-linecap="round" stroke-dasharray="150.8" stroke-dashoffset="113"/>
+        <defs>
+          <linearGradient id="savingGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#ec4899"/>
+            <stop offset="100%" stop-color="#c084fc"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+    <div class="saving-txt" id="savingTxt">SAVING YOUR PROFILE...</div>
+    <div class="saving-steps" id="savingSteps">
+      <div class="saving-step" id="sstep1"><span class="sstep-dot"></span>Encrypting your data</div>
+      <div class="saving-step" id="sstep2"><span class="sstep-dot"></span>Connecting to servers</div>
+      <div class="saving-step" id="sstep3"><span class="sstep-dot"></span>Writing to database</div>
+      <div class="saving-step" id="sstep4"><span class="sstep-dot"></span>Finalising profile</div>
+    </div>
+    <div class="gate-pills">
+      <div class="gate-pill"></div>
+      <div class="gate-pill"></div>
+      <div class="gate-pill"></div>
+      <div class="gate-pill"></div>
+      <div class="gate-pill"></div>
+    </div>
+  </div>
+
   <div class="page">
     <a href="home.html" class="logo">
       <div class="logomark">T1</div>
@@ -381,7 +680,6 @@
             </div>
           </div>
           <div class="slide-footer">
-            <!-- Slide 1 has no back — it's the first step -->
             <button class="btn-next" onclick="next(1)">
               <span class="btn-lbl">Continue <i class="ph-bold ph-arrow-right" style="vertical-align:-2px;"></i></span>
               <div class="btn-spin"></div>
@@ -739,11 +1037,12 @@
        FIREBASE SDK (Module)
   ═══════════════════════════════════ -->
   <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+    import { initializeApp }        from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
     import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
     import {
       getFirestore,
       doc,
+      getDoc,
       setDoc,
       serverTimestamp
     } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
@@ -761,22 +1060,56 @@
     const db   = getFirestore(app);
 
     // Make db & helpers available globally so the vanilla JS below can call them
-    window._db  = db;
-    window._doc = doc;
-    window._setDoc = setDoc;
+    window._db             = db;
+    window._doc            = doc;
+    window._setDoc         = setDoc;
     window._serverTimestamp = serverTimestamp;
 
-    // Check auth state — redirect if not logged in
-    onAuthStateChanged(auth, user => {
-      if (user) {
-        window._currentUser = user;
-        // Pre-fill primary email from account if blank
-        const epInp = document.getElementById('emailPrimary');
-        if(epInp && !epInp.value && user.email) epInp.value = user.email;
-      } else {
-        // Not signed in — send back to auth
-        window.location.href = 'auth.html';
+    // ══════════════════════════════════════════════════
+    // GATEKEEPER — mirrors the logic in auth.html
+    //
+    // CASE 1: Not logged in  →  redirect to auth.html
+    // CASE 2: Logged in + setup already done  →  redirect to home.html
+    // CASE 3: Logged in + setup NOT done  →  stay here, reveal page
+    // ══════════════════════════════════════════════════
+    const gateScreen = document.getElementById('gateScreen');
+    const gateTxt    = document.getElementById('gateTxt');
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        // ── CASE 1: Not authenticated ──
+        gateTxt.textContent = 'REDIRECTING TO SIGN IN...';
+        setTimeout(() => { window.location.href = 'auth.html'; }, 800);
+        return;
       }
+
+      // User is authenticated — check if setup is already completed
+      try {
+        const snap = await getDoc(doc(db, 'users', user.uid));
+
+        if (snap.exists() && snap.data().setupCompletedAt) {
+          // ── CASE 2: Setup already done — send to home ──
+          gateTxt.textContent = 'SETUP COMPLETE — REDIRECTING...';
+          setTimeout(() => { window.location.href = 'home.html'; }, 800);
+          return;
+        }
+      } catch (err) {
+        // Firestore read failed (network, permissions, etc.)
+        // Don't block the user — let them proceed with setup
+        console.warn('Gatekeeper Firestore check failed:', err);
+      }
+
+      // ── CASE 3: Authenticated, setup incomplete — reveal the page ──
+      window._currentUser = user;
+
+      // Pre-fill primary email from Google account if blank
+      const epInp = document.getElementById('emailPrimary');
+      if (epInp && !epInp.value && user.email) epInp.value = user.email;
+
+      // Dismiss the gate screen with a smooth fade
+      gateScreen.style.transition = 'opacity 0.4s ease';
+      gateScreen.style.opacity    = '0';
+      setTimeout(() => gateScreen.classList.add('hidden'), 420);
     });
   </script>
 
@@ -786,7 +1119,7 @@
   <script>
     const TOTAL   = 6;
     let current   = 1;
-    let goingBack = false;  // tracks direction for animation
+    let goingBack = false;
 
     /* ── CHIP TOGGLE ── */
     document.querySelectorAll('.chips').forEach(group => {
@@ -916,10 +1249,7 @@
       const from = document.getElementById('s' + current);
       const to   = document.getElementById('s' + n);
 
-      // Remove all active/back-active classes
       from.classList.remove('active', 'back-active');
-
-      // Add direction-aware class
       to.classList.remove('active', 'back-active');
       if(backwards){
         to.classList.add('back-active');
@@ -985,12 +1315,51 @@
       };
     }
 
+    /* ── SAVING SCREEN HELPERS ── */
+    function showSavingScreen(){
+      const s = document.getElementById('savingScreen');
+      // reset all steps
+      ['sstep1','sstep2','sstep3','sstep4'].forEach(id => {
+        const el = document.getElementById(id);
+        el.classList.remove('on','done');
+      });
+      document.getElementById('savingTxt').textContent = 'SAVING YOUR PROFILE...';
+      s.classList.remove('off');
+      s.classList.add('on');
+
+      // animate steps sequentially — purely cosmetic, gives a feeling of work being done
+      const steps = ['sstep1','sstep2','sstep3','sstep4'];
+      const delays = [0, 600, 1200, 1900];
+      steps.forEach((id, i) => {
+        setTimeout(() => {
+          // mark previous as done
+          if(i > 0) {
+            document.getElementById(steps[i-1]).classList.remove('on');
+            document.getElementById(steps[i-1]).classList.add('done');
+          }
+          document.getElementById(id).classList.add('on');
+        }, delays[i]);
+      });
+    }
+
+    function hideSavingScreen(cb){
+      const s = document.getElementById('savingScreen');
+      s.classList.add('off');
+      setTimeout(() => {
+        s.classList.remove('on','off');
+        if(cb) cb();
+      }, 420);
+    }
+
     /* ── SUBMIT TO FIRESTORE ── */
     async function submitToFirestore(){
       const btn = document.getElementById('finalBtn');
       btn.disabled = true;
       btn.classList.add('loading');
       clrErr('s6Err');
+
+      // ✨ Show the Canva-style saving overlay immediately
+      showSavingScreen();
 
       // Wait for Firebase to be ready (auth state sets _currentUser)
       let retries = 0;
@@ -1000,9 +1369,11 @@
       }
 
       if(!window._currentUser){
-        btn.disabled = false;
-        btn.classList.remove('loading');
-        showErr('s6Err', 'Session expired. Please <a href="auth.html" style="color:var(--ind)">sign in again</a>.');
+        hideSavingScreen(() => {
+          btn.disabled = false;
+          btn.classList.remove('loading');
+          showErr('s6Err', 'Session expired. Please <a href="auth.html" style="color:var(--ind)">sign in again</a>.');
+        });
         return;
       }
 
@@ -1011,55 +1382,51 @@
       const data = collectFormData();
 
       // ── PROFILE PICTURE ──
-      // Pull from Google if signed in via Google, otherwise empty object
       data.profilePicture = {
         url:      user.photoURL || '',
         source:   user.photoURL ? 'google' : '',
-        updatedAt: ''           // populated later when user uploads custom photo
+        updatedAt: ''
       };
 
       // ── PLATFORM FIELDS ──
-      // These are placeholder objects — values will be set by your other functions later.
-      // We write them here on first setup so the fields always exist in the document.
-
       data.plan = {
-        type:      'free',      // 'free' | 'payg' | 'pro' | 'enterprise'
+        type:      'free',
         startedAt: '',
         expiresAt: '',
         features:  []
       };
 
       data.balance = {
-        amount:    0,           // pay-as-you-go credit balance
+        amount:    0,
         currency:  'MYR',
         lastTopUp: '',
         lastSpent: ''
       };
 
       data.rank = {
-        level:     1,           // numeric level e.g. 1–100
-        title:     'Recruit',   // display rank title e.g. Recruit, Agent, Commander
-        xp:        0,           // experience points accumulated
+        level:     1,
+        title:     'Recruit',
+        xp:        0,
         updatedAt: ''
       };
 
       data.accountStatus = {
-        type:       'standard', // 'standard' | 'partner' | 'affiliate' | 'admin'
-        verified:   false,      // true once admin manually verifies
+        type:       'standard',
+        verified:   false,
         verifiedAt: '',
-        badge:      ''          // badge label shown on profile e.g. 'Verified Partner'
+        badge:      ''
       };
 
       data.points = {
-        total:     0,           // lifetime points earned
-        available: 0,           // spendable points
+        total:     0,
+        available: 0,
         spent:     0,
         updatedAt: ''
       };
 
       data.affiliate = {
-        id:          '',        // unique affiliate ID — generated when approved
-        status:      'none',    // 'none' | 'pending' | 'active' | 'suspended'
+        id:          '',
+        status:      'none',
         referredBy:  data.refCode || '',
         totalReferred: 0,
         totalEarned:   0,
@@ -1067,42 +1434,65 @@
         joinedAt:    ''
       };
 
+      // Ensure the saving screen has been visible for at least 2.4s
+      // so the step animation finishes gracefully before we dismiss
+      const saveStart = Date.now();
+
       try {
-        // Save to Firestore: collection "users", document = uid
-        // Uses free Spark plan — no billing needed under 20 users
         await window._setDoc(
           window._doc(window._db, 'users', uid),
           data,
-          { merge: true }   // merge:true = safe if doc already exists
+          { merge: true }
         );
 
-        // ✅ Success!
-        document.getElementById('s6').style.display = 'none';
-        const successScreen = document.getElementById('successScreen');
-        successScreen.classList.add('on');
-        document.getElementById('progFill').style.width = '100%';
-        document.getElementById('progCount').textContent = 'Complete ✓';
-        document.getElementById('successMsg').innerHTML =
-          'Welcome to T1ERA, <strong>' + (data.nickname || data.fullName) + '</strong>!<br>' +
-          'Your profile has been saved to our system.<br>' +
-          'Your account is now active and ready to use.';
-        renderDots();
+        // ✅ Mark last step done, update text, then fade out
+        const elapsed   = Date.now() - saveStart;
+        const remaining = Math.max(0, 2600 - elapsed);
+
+        setTimeout(() => {
+          // Mark all steps done
+          ['sstep1','sstep2','sstep3','sstep4'].forEach(id => {
+            const el = document.getElementById(id);
+            el.classList.remove('on');
+            el.classList.add('done');
+          });
+          document.getElementById('savingTxt').textContent = 'PROFILE SAVED!';
+
+          // Brief pause so user sees "PROFILE SAVED!" then fade out
+          setTimeout(() => {
+            hideSavingScreen(() => {
+              // Reveal success screen
+              document.getElementById('s6').style.display = 'none';
+              const successScreen = document.getElementById('successScreen');
+              successScreen.classList.add('on');
+              document.getElementById('progFill').style.width = '100%';
+              document.getElementById('progCount').textContent = 'Complete ✓';
+              document.getElementById('successMsg').innerHTML =
+                'Welcome to T1ERA, <strong>' + (data.nickname || data.fullName) + '</strong>!<br>' +
+                'Your profile has been saved to our system.<br>' +
+                'Your account is now active and ready to use.';
+              renderDots();
+            });
+          }, 700);
+        }, remaining);
 
       } catch(err) {
         console.error('Firestore error:', err);
-        btn.disabled = false;
-        btn.classList.remove('loading');
 
-        // Friendly error messages
-        if(err.code === 'permission-denied'){
-          showErr('s6Err',
-            'Permission denied. Please make sure your email is verified, then try again. ' +
-            '<a href="auth.html" style="color:var(--ind)">Go to sign-in →</a>');
-        } else if(err.code === 'unavailable' || err.message.includes('network')){
-          showErr('s6Err', 'Network error. Check your internet connection and try again.');
-        } else {
-          showErr('s6Err', 'Something went wrong (' + (err.code || err.message) + '). Please try again.');
-        }
+        hideSavingScreen(() => {
+          btn.disabled = false;
+          btn.classList.remove('loading');
+
+          if(err.code === 'permission-denied'){
+            showErr('s6Err',
+              'Permission denied. Please make sure your email is verified, then try again. ' +
+              '<a href="auth.html" style="color:var(--ind)">Go to sign-in →</a>');
+          } else if(err.code === 'unavailable' || err.message.includes('network')){
+            showErr('s6Err', 'Network error. Check your internet connection and try again.');
+          } else {
+            showErr('s6Err', 'Something went wrong (' + (err.code || err.message) + '). Please try again.');
+          }
+        });
       }
     }
 
@@ -1111,7 +1501,6 @@
       if(!validate(n)) return;
 
       if(n === TOTAL){
-        // Last slide — submit to Firestore
         submitToFirestore();
         return;
       }
@@ -1126,7 +1515,7 @@
     /* ── ENTER KEY SUPPORT ── */
     document.addEventListener('keydown', e => {
       if(e.key !== 'Enter') return;
-      if(e.target.tagName === 'TEXTAREA') return; // allow newlines in textarea
+      if(e.target.tagName === 'TEXTAREA') return;
       next(current);
     });
 
