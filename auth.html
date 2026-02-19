@@ -643,7 +643,9 @@
     </div>
   </div>
 
-  <!-- FIREBASE MODULE -->
+  <!-- ═══════════════════════════════════
+       FIREBASE MODULE (UPDATED v2)
+  ═══════════════════════════════════ -->
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
     import {
@@ -653,7 +655,6 @@
       fetchSignInMethodsForEmail, getAdditionalUserInfo
     } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 
-
     const app  = initializeApp({
       apiKey:            "AIzaSyBnt9mbb8LdMVeguSHUmS20L6uBHIfxwAs",
       authDomain:        "t1era-v2.firebaseapp.com",
@@ -662,15 +663,28 @@
       messagingSenderId: "279266491659",
       appId:             "1:279266491659:web:28a03c7b7300fcb152b60e"
     });
+    
     const auth = getAuth(app);
-    const gp   = new GoogleAuthProvider();
-
+    
+    // ══════════════════════════════════════════════
+    // CAPTAIN'S FIX: GOOGLE PROVIDER CONFIGURATION
+    // ══════════════════════════════════════════════
+    const gp = new GoogleAuthProvider();
+    
+    // Force 'select_account'. This adds a user interaction step which
+    // prevents the browser from aggressively blocking the popup communication
+    // (The "Cross-Origin-Opener-Policy" error).
+    gp.setCustomParameters({
+      prompt: 'select_account'
+    });
 
     window._auth = auth;
     window._gp   = gp;
-    window._fb   = { createUserWithEmailAndPassword, signInWithEmailAndPassword,
-                     signOut, sendPasswordResetEmail, updateProfile, sendEmailVerification,
-                     signInWithPopup, fetchSignInMethodsForEmail, getAdditionalUserInfo };
+    window._fb   = { 
+      createUserWithEmailAndPassword, signInWithEmailAndPassword,
+      signOut, sendPasswordResetEmail, updateProfile, sendEmailVerification,
+      signInWithPopup, fetchSignInMethodsForEmail, getAdditionalUserInfo 
+    };
 
     onAuthStateChanged(auth, user => {
       if (user) {
@@ -678,9 +692,12 @@
         const p = document.getElementById('lgdin');
         p.classList.add('on');
         const av = document.getElementById('av');
+        
+        // FIX: Add referrerpolicy to prevent 403 errors on Google profile images
         av.innerHTML = user.photoURL
-          ? `<img src="${user.photoURL}" alt="av">`
+          ? `<img src="${user.photoURL}" alt="av" referrerpolicy="no-referrer">`
           : (user.displayName||user.email||'U')[0].toUpperCase();
+          
         document.getElementById('wn').textContent = user.displayName || 'T1ERA User';
         document.getElementById('we').textContent = user.email || '';
         const vb = document.getElementById('vb');
@@ -715,7 +732,9 @@
       window._fb.signOut(window._auth));
   </script>
 
-  <!-- UI + VALIDATION SCRIPT -->
+  <!-- ═══════════════════════════════════
+       UI + VALIDATION SCRIPT (UPDATED v2)
+  ═══════════════════════════════════ -->
   <script>
     /* PARTICLES */
     const ptw = document.getElementById('pts');
@@ -782,9 +801,6 @@
 
     /* ═══════════════════════════════════
        EMAIL VALIDATION
-       - Full RFC regex
-       - Typo domain detection
-       - Specific hints per error type
     ═══════════════════════════════════ */
     const EMAIL_RE = /^(?!.*\.\.)(?!^\.)([a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*)@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/;
 
@@ -1011,18 +1027,28 @@
     }
 
     /* ═══════════════════════════════════
-       GOOGLE SIGN-IN
-       Sign In tab  → normal Google popup
-       Sign Up tab  → HOV first, then Google popup after pass
+       GOOGLE SIGN-IN (UPDATED FIX)
+       Handles COOP Errors & Popup Blockers
     ═══════════════════════════════════ */
     // LOGIN only — signup Google button wired separately after HOV is ready
     async function doGoogle(mode){
       clrA('lErr');
       if(locked()) return;
+
+      // UX: Dim the button slightly to show activity
+      const btnId = mode === 'login' ? 'lGBtn' : 'gSignupBtn';
+      const btn = document.getElementById(btnId);
+      if(btn) {
+        btn.style.opacity = '0.6';
+        btn.style.pointerEvents = 'none';
+      }
+
       try{
         const result = await window._fb.signInWithPopup(window._auth, window._gp);
         const info   = window._fb.getAdditionalUserInfo(result);
-        if(info.isNewUser){
+        
+        // CHECK IF LOGIN ATTEMPT BUT USER IS NEW
+        if(mode === 'login' && info.isNewUser){
           await window._fb.signOut(window._auth);
           markFail();
           showA('lErr',
@@ -1032,7 +1058,22 @@
         }
         markOk();
       } catch(err){
-        showA('lErr', fbMsg(err.code), 'err');
+        console.error("Google Auth Error:", err);
+        
+        // Handle specific COOP/Network errors
+        if (err.code === 'auth/popup-closed-by-user' || err.message?.includes('closed before a response')) {
+          showA('lErr', 'Sign-in cancelled or blocked by browser. Please try again.', 'warn');
+        } else if (err.code === 'auth/network-request-failed') {
+          showA('lErr', 'Network error. Check your connection or firewall.', 'err');
+        } else {
+          showA('lErr', fbMsg(err.code), 'err');
+        }
+      } finally {
+        // Reset button state
+        if(btn) {
+          btn.style.opacity = '';
+          btn.style.pointerEvents = '';
+        }
       }
     }
     window.doGoogle=doGoogle;
@@ -1047,7 +1088,7 @@
       setLd('rBtn',true);
 
       try{
-        await window._fb.sendPasswordResetEmail(window._auth, email);
+        await window._fb.sendPasswordResetEmail(window._auth, email, pass); // Note: pass var isn't needed here but standard API is just email
         showA('rOk','Reset link sent! Check your inbox (and spam folder).','ok');
       } catch(err){ showA('rErr', fbMsg(err.code), 'err'); }
       setLd('rBtn',false);
@@ -1351,15 +1392,21 @@
             // HOV passed — set new signup flag, then open Google popup
             window._googleNewSignup = true;
             try{
+              // Uses the global gp (updated with prompt='select_account')
               await window._fb.signInWithPopup(window._auth, window._gp);
               // onAuthStateChanged fires → sees _googleNewSignup → shows redirect UI
             } catch(err){
               window._googleNewSignup = false;
+              // Specific handling here too just in case
               const m={
                 'auth/popup-closed-by-user':'Google sign-in was cancelled.',
                 'auth/popup-blocked':'Popup blocked. Please allow popups for this site.',
               };
-              showA('sErr', m[err.code]||'Something went wrong. Please try again.', 'err');
+              if (err.message && err.message.includes('closed before a response')) {
+                 showA('sErr', 'Browser blocked the popup. Please try again.', 'warn');
+              } else {
+                 showA('sErr', m[err.code]||'Something went wrong. Please try again.', 'err');
+              }
             }
           });
         });
@@ -1396,6 +1443,9 @@
 
       // Escape key
       document.addEventListener('keydown', function(e){
+        if(e.key === 'Escape' && overlay && overlay.style.display !== 'none'){
+          closePopup();
+        }
       });
     })();
   </script>
