@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web@2.1.1/src/index.js"></script>
   <style>
     :root{
       --bg:#050508;
@@ -86,6 +87,7 @@
     .slide-head{padding:28px 32px 0;}
     .slide-icon{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:14px;position:relative;overflow:hidden;}
     .slide-icon::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(99,102,241,.25),rgba(139,92,246,.15));border:1px solid rgba(99,102,241,.3);}
+    .slide-icon i{position:relative;z-index:1;font-size:22px;color:rgba(255,255,255,.85);}
     .slide-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--txt);margin-bottom:5px;line-height:1.2;}
     .slide-sub{font-size:13px;color:var(--txt2);line-height:1.6;margin-bottom:24px;}
 
@@ -123,7 +125,8 @@
     .chip{padding:8px 14px;border-radius:20px;border:1.5px solid var(--bdr);background:rgba(255,255,255,.02);color:var(--txt2);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;user-select:none;display:flex;align-items:center;gap:6px;}
     .chip:hover{border-color:rgba(99,102,241,.4);color:var(--txt);}
     .chip.sel{border-color:var(--ind);background:rgba(99,102,241,.12);color:var(--txt);box-shadow:0 0 12px rgba(99,102,241,.2);}
-    .chip-icon{font-size:14px;}
+    .chip-icon{font-size:15px;display:flex;align-items:center;line-height:1;}
+    .chip-icon i{font-size:15px;}
 
     /* ── TERMS SCROLL BOX ── */
     .terms-box{height:280px;overflow-y:auto;background:rgba(0,0,0,.3);border:1px solid var(--bdr);border-radius:12px;padding:18px 20px;font-size:12px;color:var(--txt2);line-height:1.8;margin-bottom:16px;scroll-behavior:smooth;}
@@ -150,6 +153,7 @@
     .slide-footer{padding:0 32px 28px;display:flex;align-items:center;gap:12px;}
     .btn-back{flex:0 0 auto;padding:12px 20px;border-radius:11px;border:1.5px solid var(--bdr);background:transparent;color:var(--txt2);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .25s;display:flex;align-items:center;gap:6px;}
     .btn-back:hover{border-color:rgba(255,255,255,.2);color:var(--txt);}
+    .btn-back i{font-size:16px;}
     .btn-next{flex:1;padding:13px;border-radius:11px;border:none;background:linear-gradient(135deg,var(--ind),var(--ind2));color:#fff;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all .3s var(--ease);box-shadow:0 4px 20px rgba(99,102,241,.3);display:flex;align-items:center;justify-content:center;gap:8px;position:relative;overflow:hidden;}
     .btn-next::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.12),transparent);}
     .btn-next:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(99,102,241,.45);}
@@ -312,7 +316,7 @@
         ══════════════════════════ -->
         <div class="slide active" id="s1">
           <div class="slide-head">
-            <div class="slide-icon">👤</div>
+            <div class="slide-icon"><i class="ph-bold ph-user-circle"></i></div>
             <div class="slide-title">Tell Us About Yourself</div>
             <div class="slide-sub">This helps us personalise your T1ERA experience and verify your identity when needed.</div>
           </div>
@@ -337,15 +341,15 @@
                 <div class="flbl">Current Status</div>
                 <select class="finp" id="userStatus">
                   <option value="">— Select your status —</option>
-                  <option value="student">🎓 Student</option>
-                  <option value="worker">💼 Full-time Worker</option>
-                  <option value="freelancer">💻 Freelancer</option>
-                  <option value="entrepreneur">🚀 Entrepreneur / Business Owner</option>
-                  <option value="military">🪖 Military / Defence</option>
-                  <option value="government">🏛️ Government Officer</option>
-                  <option value="retired">🌅 Retired</option>
-                  <option value="unemployed">🔍 Currently Seeking Work</option>
-                  <option value="other">⚡ Other</option>
+                  <option value="student">Student</option>
+                  <option value="worker">Full-time Worker</option>
+                  <option value="freelancer">Freelancer</option>
+                  <option value="entrepreneur">Entrepreneur / Business Owner</option>
+                  <option value="military">Military / Defence</option>
+                  <option value="government">Government Officer</option>
+                  <option value="retired">Retired</option>
+                  <option value="unemployed">Currently Seeking Work</option>
+                  <option value="other">Other</option>
                 </select>
               </div>
             </div>
@@ -357,18 +361,18 @@
               <div class="flbl">Country / Region</div>
               <select class="finp" id="country">
                 <option value="">— Select country —</option>
-                <option value="MY">🇲🇾 Malaysia</option>
-                <option value="SG">🇸🇬 Singapore</option>
-                <option value="ID">🇮🇩 Indonesia</option>
-                <option value="TH">🇹🇭 Thailand</option>
-                <option value="PH">🇵🇭 Philippines</option>
-                <option value="VN">🇻🇳 Vietnam</option>
-                <option value="AU">🇦🇺 Australia</option>
-                <option value="GB">🇬🇧 United Kingdom</option>
-                <option value="US">🇺🇸 United States</option>
-                <option value="AE">🇦🇪 UAE</option>
-                <option value="SA">🇸🇦 Saudi Arabia</option>
-                <option value="other">🌍 Other</option>
+                <option value="MY">Malaysia</option>
+                <option value="SG">Singapore</option>
+                <option value="ID">Indonesia</option>
+                <option value="TH">Thailand</option>
+                <option value="PH">Philippines</option>
+                <option value="VN">Vietnam</option>
+                <option value="AU">Australia</option>
+                <option value="GB">United Kingdom</option>
+                <option value="US">United States</option>
+                <option value="AE">UAE</option>
+                <option value="SA">Saudi Arabia</option>
+                <option value="other">Other</option>
               </select>
             </div>
             <div class="field">
@@ -379,7 +383,7 @@
           <div class="slide-footer">
             <!-- Slide 1 has no back — it's the first step -->
             <button class="btn-next" onclick="next(1)">
-              <span class="btn-lbl">Continue →</span>
+              <span class="btn-lbl">Continue <i class="ph-bold ph-arrow-right" style="vertical-align:-2px;"></i></span>
               <div class="btn-spin"></div>
             </button>
           </div>
@@ -390,7 +394,7 @@
         ══════════════════════════ -->
         <div class="slide" id="s2">
           <div class="slide-head">
-            <div class="slide-icon">🎯</div>
+            <div class="slide-icon"><i class="ph-bold ph-crosshair-simple"></i></div>
             <div class="slide-title">Why Are You Here?</div>
             <div class="slide-sub">Select all that apply. This helps us tailor features, tools and content relevant to you.</div>
           </div>
@@ -399,58 +403,58 @@
             <div class="field">
               <div class="flbl">Primary Purpose <span class="fopt">Choose all that apply</span></div>
               <div class="chips" id="purposeChips">
-                <div class="chip" data-val="hobby"><span class="chip-icon">🎮</span>Hobby & Gaming</div>
-                <div class="chip" data-val="work"><span class="chip-icon">💼</span>Professional Work</div>
-                <div class="chip" data-val="business"><span class="chip-icon">📈</span>Business & Trade</div>
-                <div class="chip" data-val="study"><span class="chip-icon">📚</span>Learning & Study</div>
-                <div class="chip" data-val="ai_tools"><span class="chip-icon">🤖</span>AI Tools & Automation</div>
-                <div class="chip" data-val="investment"><span class="chip-icon">💰</span>Investment & Finance</div>
-                <div class="chip" data-val="content"><span class="chip-icon">🎬</span>Content Creation</div>
-                <div class="chip" data-val="community"><span class="chip-icon">🌐</span>Community & Network</div>
-                <div class="chip" data-val="research"><span class="chip-icon">🔬</span>Research & Development</div>
-                <div class="chip" data-val="affiliate"><span class="chip-icon">🤝</span>Affiliate & Referral</div>
-                <div class="chip" data-val="payaround"><span class="chip-icon">🎲</span>Explore & Play Around</div>
-                <div class="chip" data-val="crypto"><span class="chip-icon">🔗</span>Crypto & Web3</div>
-                <div class="chip" data-val="security"><span class="chip-icon">🛡️</span>Cybersecurity</div>
-                <div class="chip" data-val="other_purpose"><span class="chip-icon">⚡</span>Other</div>
+                <div class="chip" data-val="hobby"><span class="chip-icon"><i class="ph-bold ph-game-controller"></i></span>Hobby & Gaming</div>
+                <div class="chip" data-val="work"><span class="chip-icon"><i class="ph-bold ph-briefcase"></i></span>Professional Work</div>
+                <div class="chip" data-val="business"><span class="chip-icon"><i class="ph-bold ph-trend-up"></i></span>Business & Trade</div>
+                <div class="chip" data-val="study"><span class="chip-icon"><i class="ph-bold ph-book-open"></i></span>Learning & Study</div>
+                <div class="chip" data-val="ai_tools"><span class="chip-icon"><i class="ph-bold ph-robot"></i></span>AI Tools & Automation</div>
+                <div class="chip" data-val="investment"><span class="chip-icon"><i class="ph-bold ph-currency-circle-dollar"></i></span>Investment & Finance</div>
+                <div class="chip" data-val="content"><span class="chip-icon"><i class="ph-bold ph-video-camera"></i></span>Content Creation</div>
+                <div class="chip" data-val="community"><span class="chip-icon"><i class="ph-bold ph-globe-hemisphere-west"></i></span>Community & Network</div>
+                <div class="chip" data-val="research"><span class="chip-icon"><i class="ph-bold ph-flask"></i></span>Research & Development</div>
+                <div class="chip" data-val="affiliate"><span class="chip-icon"><i class="ph-bold ph-handshake"></i></span>Affiliate & Referral</div>
+                <div class="chip" data-val="payaround"><span class="chip-icon"><i class="ph-bold ph-compass"></i></span>Explore & Play Around</div>
+                <div class="chip" data-val="crypto"><span class="chip-icon"><i class="ph-bold ph-circles-three-plus"></i></span>Crypto & Web3</div>
+                <div class="chip" data-val="security"><span class="chip-icon"><i class="ph-bold ph-shield-check"></i></span>Cybersecurity</div>
+                <div class="chip" data-val="other_purpose"><span class="chip-icon"><i class="ph-bold ph-lightning"></i></span>Other</div>
               </div>
             </div>
             <div class="field" style="margin-top:20px;">
               <div class="flbl">Industry / Field</div>
               <select class="finp" id="industry">
                 <option value="">— Select your industry —</option>
-                <option value="tech">💻 Technology & Software</option>
-                <option value="finance">💳 Finance & Banking</option>
-                <option value="education">🎓 Education</option>
-                <option value="healthcare">🏥 Healthcare & Medical</option>
-                <option value="military_def">🪖 Military & Defence</option>
-                <option value="ecommerce">🛒 E-commerce & Retail</option>
-                <option value="media">📺 Media & Entertainment</option>
-                <option value="logistics">📦 Logistics & Supply Chain</option>
-                <option value="construction">🏗️ Construction & Engineering</option>
-                <option value="agriculture">🌾 Agriculture</option>
-                <option value="creative">🎨 Creative & Design</option>
-                <option value="law">⚖️ Legal & Compliance</option>
-                <option value="student_field">📖 Student (No Industry Yet)</option>
-                <option value="other_ind">🌍 Other</option>
+                <option value="tech">Technology & Software</option>
+                <option value="finance">Finance & Banking</option>
+                <option value="education">Education</option>
+                <option value="healthcare">Healthcare & Medical</option>
+                <option value="military_def">Military & Defence</option>
+                <option value="ecommerce">E-commerce & Retail</option>
+                <option value="media">Media & Entertainment</option>
+                <option value="logistics">Logistics & Supply Chain</option>
+                <option value="construction">Construction & Engineering</option>
+                <option value="agriculture">Agriculture</option>
+                <option value="creative">Creative & Design</option>
+                <option value="law">Legal & Compliance</option>
+                <option value="student_field">Student (No Industry Yet)</option>
+                <option value="other_ind">Other</option>
               </select>
             </div>
             <div class="field">
               <div class="flbl">Experience Level with AI Tools</div>
               <select class="finp" id="aiLevel">
                 <option value="">— Select level —</option>
-                <option value="none">🌱 None — completely new to AI</option>
-                <option value="beginner">📖 Beginner — heard about it, tried a little</option>
-                <option value="intermediate">⚙️ Intermediate — use AI tools regularly</option>
-                <option value="advanced">🚀 Advanced — build or integrate AI systems</option>
-                <option value="expert">🧠 Expert — develop or research AI</option>
+                <option value="none">None — completely new to AI</option>
+                <option value="beginner">Beginner — heard about it, tried a little</option>
+                <option value="intermediate">Intermediate — use AI tools regularly</option>
+                <option value="advanced">Advanced — build or integrate AI systems</option>
+                <option value="expert">Expert — develop or research AI</option>
               </select>
             </div>
           </div>
           <div class="slide-footer">
-            <button class="btn-back" onclick="back(2)">← Back</button>
+            <button class="btn-back" onclick="back(2)"><i class="ph-bold ph-arrow-left"></i> Back</button>
             <button class="btn-next" onclick="next(2)">
-              <span class="btn-lbl">Continue →</span>
+              <span class="btn-lbl">Continue <i class="ph-bold ph-arrow-right" style="vertical-align:-2px;"></i></span>
               <div class="btn-spin"></div>
             </button>
           </div>
@@ -461,7 +465,7 @@
         ══════════════════════════ -->
         <div class="slide" id="s3">
           <div class="slide-head">
-            <div class="slide-icon">📡</div>
+            <div class="slide-icon"><i class="ph-bold ph-broadcast"></i></div>
             <div class="slide-title">How Did You Find T1ERA?</div>
             <div class="slide-sub">Understanding how you discovered us helps us grow and reach more people like you.</div>
           </div>
@@ -470,20 +474,20 @@
             <div class="field">
               <div class="flbl">Discovery Source <span class="fopt">Choose all that apply</span></div>
               <div class="chips" id="sourceChips">
-                <div class="chip" data-val="friend"><span class="chip-icon">👥</span>Friend / Family</div>
-                <div class="chip" data-val="telegram"><span class="chip-icon">✈️</span>Telegram Group</div>
-                <div class="chip" data-val="whatsapp"><span class="chip-icon">💬</span>WhatsApp / Chat</div>
-                <div class="chip" data-val="tiktok"><span class="chip-icon">🎵</span>TikTok</div>
-                <div class="chip" data-val="instagram"><span class="chip-icon">📸</span>Instagram</div>
-                <div class="chip" data-val="youtube"><span class="chip-icon">▶️</span>YouTube</div>
-                <div class="chip" data-val="twitter"><span class="chip-icon">🐦</span>X / Twitter</div>
-                <div class="chip" data-val="facebook"><span class="chip-icon">📘</span>Facebook</div>
-                <div class="chip" data-val="google_search"><span class="chip-icon">🔍</span>Google Search</div>
-                <div class="chip" data-val="reddit"><span class="chip-icon">🤖</span>Reddit / Forum</div>
-                <div class="chip" data-val="news"><span class="chip-icon">📰</span>News / Blog Article</div>
-                <div class="chip" data-val="event"><span class="chip-icon">🎪</span>Event / Conference</div>
-                <div class="chip" data-val="affiliate_ref"><span class="chip-icon">🔗</span>Affiliate / Referral Link</div>
-                <div class="chip" data-val="other_src"><span class="chip-icon">⚡</span>Other</div>
+                <div class="chip" data-val="friend"><span class="chip-icon"><i class="ph-bold ph-users"></i></span>Friend / Family</div>
+                <div class="chip" data-val="telegram"><span class="chip-icon"><i class="ph-bold ph-paper-plane-tilt"></i></span>Telegram Group</div>
+                <div class="chip" data-val="whatsapp"><span class="chip-icon"><i class="ph-bold ph-chats"></i></span>WhatsApp / Chat</div>
+                <div class="chip" data-val="tiktok"><span class="chip-icon"><i class="ph-bold ph-music-notes"></i></span>TikTok</div>
+                <div class="chip" data-val="instagram"><span class="chip-icon"><i class="ph-bold ph-instagram-logo"></i></span>Instagram</div>
+                <div class="chip" data-val="youtube"><span class="chip-icon"><i class="ph-bold ph-youtube-logo"></i></span>YouTube</div>
+                <div class="chip" data-val="twitter"><span class="chip-icon"><i class="ph-bold ph-twitter-logo"></i></span>X / Twitter</div>
+                <div class="chip" data-val="facebook"><span class="chip-icon"><i class="ph-bold ph-facebook-logo"></i></span>Facebook</div>
+                <div class="chip" data-val="google_search"><span class="chip-icon"><i class="ph-bold ph-magnifying-glass"></i></span>Google Search</div>
+                <div class="chip" data-val="reddit"><span class="chip-icon"><i class="ph-bold ph-reddit-logo"></i></span>Reddit / Forum</div>
+                <div class="chip" data-val="news"><span class="chip-icon"><i class="ph-bold ph-newspaper"></i></span>News / Blog Article</div>
+                <div class="chip" data-val="event"><span class="chip-icon"><i class="ph-bold ph-calendar-star"></i></span>Event / Conference</div>
+                <div class="chip" data-val="affiliate_ref"><span class="chip-icon"><i class="ph-bold ph-link-simple"></i></span>Affiliate / Referral Link</div>
+                <div class="chip" data-val="other_src"><span class="chip-icon"><i class="ph-bold ph-lightning"></i></span>Other</div>
               </div>
             </div>
             <div class="field" style="margin-top:20px;">
@@ -496,9 +500,9 @@
             </div>
           </div>
           <div class="slide-footer">
-            <button class="btn-back" onclick="back(3)">← Back</button>
+            <button class="btn-back" onclick="back(3)"><i class="ph-bold ph-arrow-left"></i> Back</button>
             <button class="btn-next" onclick="next(3)">
-              <span class="btn-lbl">Continue →</span>
+              <span class="btn-lbl">Continue <i class="ph-bold ph-arrow-right" style="vertical-align:-2px;"></i></span>
               <div class="btn-spin"></div>
             </button>
           </div>
@@ -509,14 +513,14 @@
         ══════════════════════════ -->
         <div class="slide" id="s4">
           <div class="slide-head">
-            <div class="slide-icon">🔐</div>
+            <div class="slide-icon"><i class="ph-bold ph-lock-key"></i></div>
             <div class="slide-title">Recovery & Verification Info</div>
             <div class="slide-sub">This information is used <strong>only</strong> for account recovery, identity verification, and affiliate payment processing. Keep it accurate.</div>
           </div>
           <div class="slide-body">
             <div class="alert err" id="s4Err"></div>
             <div class="warn-box">
-              <strong>⚠️ Important — Please Read</strong>
+              <strong><i class="ph-bold ph-warning" style="vertical-align:-2px;margin-right:5px;"></i>Important — Please Read</strong>
               This section collects your real contact information. It will be used when:
               <br>• You lose access to your account and need manual verification
               <br>• T1ERA verifies your identity for affiliate or partner status
@@ -542,11 +546,11 @@
               <div class="flbl">Preferred Contact Method</div>
               <select class="finp" id="contactPref">
                 <option value="">— Select preference —</option>
-                <option value="telegram">✈️ Telegram</option>
-                <option value="whatsapp">💬 WhatsApp</option>
-                <option value="email">📧 Email</option>
-                <option value="phone">📞 Phone Call</option>
-                <option value="sms">📱 SMS</option>
+                <option value="telegram">Telegram</option>
+                <option value="whatsapp">WhatsApp</option>
+                <option value="email">Email</option>
+                <option value="phone">Phone Call</option>
+                <option value="sms">SMS</option>
               </select>
             </div>
             <div class="field">
@@ -559,9 +563,9 @@
             </div>
           </div>
           <div class="slide-footer">
-            <button class="btn-back" onclick="back(4)">← Back</button>
+            <button class="btn-back" onclick="back(4)"><i class="ph-bold ph-arrow-left"></i> Back</button>
             <button class="btn-next" onclick="next(4)">
-              <span class="btn-lbl">Continue →</span>
+              <span class="btn-lbl">Continue <i class="ph-bold ph-arrow-right" style="vertical-align:-2px;"></i></span>
               <div class="btn-spin"></div>
             </button>
           </div>
@@ -572,7 +576,7 @@
         ══════════════════════════ -->
         <div class="slide" id="s5">
           <div class="slide-head">
-            <div class="slide-icon">⚙️</div>
+            <div class="slide-icon"><i class="ph-bold ph-sliders-horizontal"></i></div>
             <div class="slide-title">Your Preferences</div>
             <div class="slide-sub">Customise your T1ERA experience. You can change these anytime from your profile settings.</div>
           </div>
@@ -581,34 +585,34 @@
             <div class="field">
               <div class="flbl">Preferred Language</div>
               <select class="finp" id="language">
-                <option value="en">🌐 English</option>
-                <option value="my">🇲🇾 Bahasa Malaysia</option>
-                <option value="id">🇮🇩 Bahasa Indonesia</option>
-                <option value="zh">🇨🇳 Chinese (Simplified)</option>
-                <option value="ar">🇸🇦 Arabic</option>
-                <option value="th">🇹🇭 Thai</option>
+                <option value="en">English</option>
+                <option value="my">Bahasa Malaysia</option>
+                <option value="id">Bahasa Indonesia</option>
+                <option value="zh">Chinese (Simplified)</option>
+                <option value="ar">Arabic</option>
+                <option value="th">Thai</option>
                 <option value="other_lang">Other</option>
               </select>
             </div>
             <div class="field">
               <div class="flbl">Notification Preferences <span class="fopt">Choose all that apply</span></div>
               <div class="chips" id="notifChips">
-                <div class="chip" data-val="n_updates"><span class="chip-icon">📢</span>Platform Updates</div>
-                <div class="chip" data-val="n_security"><span class="chip-icon">🔒</span>Security Alerts</div>
-                <div class="chip" data-val="n_news"><span class="chip-icon">📰</span>T1ERA News</div>
-                <div class="chip" data-val="n_affiliate"><span class="chip-icon">💰</span>Affiliate Earnings</div>
-                <div class="chip" data-val="n_ai"><span class="chip-icon">🤖</span>New AI Features</div>
-                <div class="chip" data-val="n_events"><span class="chip-icon">🎪</span>Events & Webinars</div>
+                <div class="chip" data-val="n_updates"><span class="chip-icon"><i class="ph-bold ph-megaphone"></i></span>Platform Updates</div>
+                <div class="chip" data-val="n_security"><span class="chip-icon"><i class="ph-bold ph-shield-warning"></i></span>Security Alerts</div>
+                <div class="chip" data-val="n_news"><span class="chip-icon"><i class="ph-bold ph-newspaper"></i></span>T1ERA News</div>
+                <div class="chip" data-val="n_affiliate"><span class="chip-icon"><i class="ph-bold ph-wallet"></i></span>Affiliate Earnings</div>
+                <div class="chip" data-val="n_ai"><span class="chip-icon"><i class="ph-bold ph-cpu"></i></span>New AI Features</div>
+                <div class="chip" data-val="n_events"><span class="chip-icon"><i class="ph-bold ph-star"></i></span>Events & Webinars</div>
               </div>
             </div>
             <div class="field" style="margin-top:20px;">
               <div class="flbl">How Would You Rate Your Tech Comfort?</div>
               <select class="finp" id="techComfort">
                 <option value="">— Select level —</option>
-                <option value="basic">📱 Basic — I mainly use apps on my phone</option>
-                <option value="moderate">💻 Moderate — Comfortable with computers</option>
-                <option value="advanced">⚙️ Advanced — I can set up systems & tools</option>
-                <option value="developer">🛠️ Developer — I write code</option>
+                <option value="basic">Basic — I mainly use apps on my phone</option>
+                <option value="moderate">Moderate — Comfortable with computers</option>
+                <option value="advanced">Advanced — I can set up systems & tools</option>
+                <option value="developer">Developer — I write code</option>
               </select>
             </div>
             <div class="field">
@@ -617,9 +621,9 @@
             </div>
           </div>
           <div class="slide-footer">
-            <button class="btn-back" onclick="back(5)">← Back</button>
+            <button class="btn-back" onclick="back(5)"><i class="ph-bold ph-arrow-left"></i> Back</button>
             <button class="btn-next" onclick="next(5)">
-              <span class="btn-lbl">Continue →</span>
+              <span class="btn-lbl">Continue <i class="ph-bold ph-arrow-right" style="vertical-align:-2px;"></i></span>
               <div class="btn-spin"></div>
             </button>
           </div>
@@ -630,7 +634,7 @@
         ══════════════════════════ -->
         <div class="slide" id="s6">
           <div class="slide-head">
-            <div class="slide-icon">📜</div>
+            <div class="slide-icon"><i class="ph-bold ph-files"></i></div>
             <div class="slide-title">Terms & Conditions</div>
             <div class="slide-sub">Please read and scroll through the full terms below, then tick all three checkboxes to proceed.</div>
           </div>
@@ -638,7 +642,7 @@
             <div class="alert err" id="s6Err"></div>
             <div class="alert ok" id="s6Ok"></div>
 
-            <div class="terms-scroll-hint">📖 Scroll down to read all terms before ticking</div>
+            <div class="terms-scroll-hint"><i class="ph-bold ph-book-open-text" style="font-size:13px;"></i> Scroll down to read all terms before ticking</div>
 
             <div class="terms-box" id="termsBox">
               <h3>1. Acceptance of Terms</h3>
@@ -705,9 +709,9 @@
             </div>
           </div>
           <div class="slide-footer">
-            <button class="btn-back" onclick="back(6)">← Back</button>
+            <button class="btn-back" onclick="back(6)"><i class="ph-bold ph-arrow-left"></i> Back</button>
             <button class="btn-next final" id="finalBtn" onclick="next(6)">
-              <span class="btn-lbl">✅ Agree & Complete Setup</span>
+              <span class="btn-lbl"><i class="ph-bold ph-check-circle" style="font-size:16px;vertical-align:-2px;margin-right:4px;"></i>Agree & Complete Setup</span>
               <div class="btn-spin"></div>
             </button>
           </div>
@@ -717,7 +721,7 @@
 
       <!-- SUCCESS SCREEN -->
       <div id="successScreen">
-        <div class="success-ring">🎉</div>
+        <div class="success-ring"><i class="ph-bold ph-confetti"></i></div>
         <div class="success-title">You're All Set!</div>
         <div class="success-sub" id="successMsg">
           Welcome to T1ERA. Your profile has been saved successfully.<br>
@@ -820,7 +824,7 @@
     /* ── ALERTS ── */
     function showErr(id, msg){
       const el = document.getElementById(id);
-      el.innerHTML = '⚠️ ' + msg;
+      el.innerHTML = '<i class="ph-bold ph-warning" style="vertical-align:-2px;margin-right:5px;"></i>' + msg;
       el.className = 'alert err on';
       el.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
@@ -1092,10 +1096,10 @@
         // Friendly error messages
         if(err.code === 'permission-denied'){
           showErr('s6Err',
-            '⛔ Permission denied. Please make sure your email is verified, then try again. ' +
+            'Permission denied. Please make sure your email is verified, then try again. ' +
             '<a href="auth.html" style="color:var(--ind)">Go to sign-in →</a>');
         } else if(err.code === 'unavailable' || err.message.includes('network')){
-          showErr('s6Err', '📶 Network error. Check your internet connection and try again.');
+          showErr('s6Err', 'Network error. Check your internet connection and try again.');
         } else {
           showErr('s6Err', 'Something went wrong (' + (err.code || err.message) + '). Please try again.');
         }
