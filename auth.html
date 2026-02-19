@@ -9,9 +9,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700;800&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
 
-  <!-- ═══════════════════════════════════
-       STYLES
-  ═══════════════════════════════════ -->
   <style>
     :root {
       --bg:       #000000;
@@ -67,7 +64,7 @@
 
     /* TABS */
     .tabs{display:flex;background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:4px;margin-bottom:24px;gap:4px;}
-    .tab{flex:1;padding:10px;border-radius:9px;border:none;background:transparent;color:var(--txt2);font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .25s var(--ease);}
+    .tab{flex:1;padding:10px;border-radius:9px;border:none;background:transparent;color:var(--txt2);font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .25s var(--ease);-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
     .tab.on{background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;box-shadow:0 4px 16px var(--glow);}
 
     /* PANELS */
@@ -108,7 +105,7 @@
     input.vld{border-color:var(--bdrok);box-shadow:0 0 0 3px rgba(16,185,129,.08);}
     input.inv{border-color:var(--bdrerr);box-shadow:0 0 0 3px rgba(239,68,68,.08);}
     .iend{position:absolute;right:10px;top:50%;transform:translateY(-50%);display:flex;align-items:center;gap:4px;}
-    .eye{background:none;border:none;cursor:pointer;font-size:15px;padding:4px;color:var(--txt3);transition:color .2s;}
+    .eye{background:none;border:none;cursor:pointer;font-size:15px;padding:4px;color:var(--txt3);transition:color .2s;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
     .eye:hover{color:var(--txt);}
     .ichk{font-size:15px;}
 
@@ -127,7 +124,7 @@
     .sword{font-size:11px;font-weight:700;min-width:44px;text-align:right;}
 
     /* SUBMIT BTN */
-    .bsub{width:100%;padding:14px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all .3s var(--ease);box-shadow:0 4px 20px var(--glow);display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;position:relative;overflow:hidden;}
+    .bsub{width:100%;padding:14px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all .3s var(--ease);box-shadow:0 4px 20px var(--glow);display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;position:relative;overflow:hidden;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
     .bsub::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.15),transparent);}
     .bsub:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 28px rgba(59,130,246,.42);}
     .bsub:active:not(:disabled){transform:translateY(1px);}
@@ -142,15 +139,15 @@
     .dvd::before,.dvd::after{content:'';flex:1;height:1px;background:var(--bdr);}
 
     /* GOOGLE BTN */
-    .bgoo{width:100%;padding:12px;border-radius:12px;border:1px solid var(--bdr);background:var(--bg2);color:var(--txt);font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .3s var(--ease);}
+    .bgoo{width:100%;padding:12px;border-radius:12px;border:1px solid var(--bdr);background:var(--bg2);color:var(--txt);font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .3s var(--ease);-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
     .bgoo:hover{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.18);transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.4);}
     .bgoo:disabled{opacity:.5;cursor:not-allowed;}
     .bgoo svg{width:19px;height:19px;flex-shrink:0;}
 
     /* FORGOT / BACK */
-    .forgot{display:block;text-align:right;font-size:12px;color:var(--blue);text-decoration:none;margin-top:5px;transition:opacity .2s;}
+    .forgot{display:block;text-align:right;font-size:12px;color:var(--blue);text-decoration:none;margin-top:5px;transition:opacity .2s;-webkit-tap-highlight-color:transparent;}
     .forgot:hover{opacity:.7;}
-    .backbtn{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--blue);background:none;border:none;cursor:pointer;padding:0;margin-bottom:16px;font-family:'Inter',sans-serif;transition:opacity .2s;}
+    .backbtn{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--blue);background:none;border:none;cursor:pointer;padding:0;margin-bottom:16px;font-family:'Inter',sans-serif;transition:opacity .2s;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
     .backbtn:hover{opacity:.7;}
 
     /* LOGGED IN */
@@ -165,7 +162,7 @@
     .blaunch:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(59,130,246,.5);}
     .ldot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s ease-in-out infinite;}
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-    .bout{width:100%;padding:11px;border-radius:10px;border:1px solid var(--bdr);background:transparent;color:var(--txt2);font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .25s;}
+    .bout{width:100%;padding:11px;border-radius:10px;border:1px solid var(--bdr);background:transparent;color:var(--txt2);font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .25s;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
     .bout:hover{border-color:rgba(239,68,68,.5);color:#fca5a5;}
     .bout:disabled{opacity:0.6;cursor:not-allowed;}
 
@@ -181,93 +178,31 @@
     @keyframes rspin{to{transform:rotate(360deg)}}
     @keyframes rtxtpulse{0%,100%{opacity:.4}50%{opacity:1}}
 
-    /* ═══════════════════════════════════
-       CYBERSECURITY POPUP
-    ═══════════════════════════════════ */
-    #csPopupOverlay{
-      position:fixed;inset:0;z-index:9999;
-      display:flex;align-items:center;justify-content:center;
-      padding:16px;
-      background:rgba(0,0,0,.75);
-      backdrop-filter:blur(6px);
-      -webkit-backdrop-filter:blur(6px);
-      animation:popOverIn .35s var(--ease) both;
-    }
+    /* CYBERSECURITY POPUP */
+    #csPopupOverlay{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);animation:popOverIn .35s var(--ease) both;}
     @keyframes popOverIn{from{opacity:0}to{opacity:1}}
     #csPopupOverlay.hiding{animation:popOverOut .3s var(--ease) forwards;}
     @keyframes popOverOut{from{opacity:1}to{opacity:0}}
-
-    #csPopupBox{
-      position:relative;
-      /* shrink-wrap to the image's natural size */
-      display:inline-flex;
-      border:2px solid rgba(59,130,246,.4);
-      border-radius:16px;
-      box-shadow:0 0 0 1px rgba(59,130,246,.08),0 32px 80px rgba(0,0,0,.85),0 0 60px rgba(59,130,246,.15);
-      overflow:hidden;
-      /* cap so it never overflows the viewport */
-      max-width:calc(100vw - 32px);
-      max-height:calc(100vh - 32px);
-      animation:popBoxIn .4s var(--ease) .1s both;
-    }
+    #csPopupBox{position:relative;display:inline-flex;border:2px solid rgba(59,130,246,.4);border-radius:16px;box-shadow:0 0 0 1px rgba(59,130,246,.08),0 32px 80px rgba(0,0,0,.85),0 0 60px rgba(59,130,246,.15);overflow:hidden;max-width:calc(100vw - 32px);max-height:calc(100vh - 32px);animation:popBoxIn .4s var(--ease) .1s both;}
     @keyframes popBoxIn{from{opacity:0;transform:scale(.93) translateY(18px)}to{opacity:1;transform:none}}
-
-    /* glow border top accent line */
-    #csPopupBox::before{
-      content:'';position:absolute;top:0;left:0;right:0;height:3px;
-      background:linear-gradient(90deg,var(--blue),var(--purple),var(--cyan));
-      z-index:2;
-    }
-
-    #csPopupImg{
-      /* render at natural size, but never exceed the viewport */
-      display:block;
-      max-width:calc(100vw - 32px);
-      max-height:calc(100vh - 32px);
-      width:auto;
-      height:auto;
-      /* no background, no padding — box hugs image exactly */
-    }
-
-    /* phone: tighten max slightly */
-    @media(max-width:480px){
-      #csPopupBox{border-radius:12px;}
-      #csPopupImg{max-width:calc(100vw - 24px);max-height:calc(100vh - 24px);}
-    }
-
-    /* CLOSE BUTTON — top-right corner */
-    #csPopupClose{
-      position:absolute;
-      top:10px;right:10px;
-      width:32px;height:32px;
-      border-radius:50%;
-      border:1px solid rgba(255,255,255,.15);
-      background:rgba(0,0,0,.6);
-      color:#fff;
-      font-size:17px;
-      line-height:1;
-      cursor:pointer;
-      display:flex;align-items:center;justify-content:center;
-      transition:background .2s,border-color .2s,transform .15s;
-      z-index:10;
-      backdrop-filter:blur(4px);
-    }
-    #csPopupClose:hover{
-      background:rgba(239,68,68,.7);
-      border-color:rgba(239,68,68,.6);
-      transform:scale(1.1);
-    }
+    #csPopupBox::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--blue),var(--purple),var(--cyan));z-index:2;}
+    #csPopupImg{display:block;max-width:calc(100vw - 32px);max-height:calc(100vh - 32px);width:auto;height:auto;}
+    @media(max-width:480px){#csPopupBox{border-radius:12px;}#csPopupImg{max-width:calc(100vw - 24px);max-height:calc(100vh - 24px);}}
+    #csPopupClose{position:absolute;top:10px;right:10px;width:32px;height:32px;border-radius:50%;border:1px solid rgba(255,255,255,.15);background:rgba(0,0,0,.6);color:#fff;font-size:17px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s,border-color .2s,transform .15s;z-index:10;backdrop-filter:blur(4px);-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+    #csPopupClose:hover{background:rgba(239,68,68,.7);border-color:rgba(239,68,68,.6);transform:scale(1.1);}
     #csPopupClose:active{transform:scale(.95);}
+
     /* ═══════════════════════════════════
-       HOV SECURITY — HUMAN OVER VERIFICATION
+       HOV SECURITY
     ═══════════════════════════════════ */
     #hovOverlay{
       position:fixed;inset:0;z-index:10000;
       display:none;align-items:center;justify-content:center;
       padding:16px;
       background:rgba(0,0,0,.92);
-      backdrop-filter:blur(12px);
+      /* ✅ FIX: removed backdrop-filter — causes tap/scroll issues on Android WebView */
       -webkit-backdrop-filter:blur(12px);
+      backdrop-filter:blur(12px);
     }
     #hovOverlay.on{display:flex;animation:hovFadeIn .4s cubic-bezier(0.4,0,0.2,1) both;}
     @keyframes hovFadeIn{from{opacity:0}to{opacity:1}}
@@ -279,7 +214,11 @@
       overflow:hidden;
       box-shadow:0 0 0 1px rgba(99,102,241,.1),0 40px 100px rgba(0,0,0,.9),0 0 80px rgba(99,102,241,.15);
       animation:hovBoxIn .45s cubic-bezier(0.4,0,0.2,1) .05s both;
-      max-height:92vh;overflow-y:auto;
+      max-height:92vh;
+      overflow-y:auto;
+      /* ✅ FIX: prevent scroll fighting on mobile */
+      -webkit-overflow-scrolling:touch;
+      overscroll-behavior:contain;
     }
     @keyframes hovBoxIn{from{opacity:0;transform:scale(.94) translateY(20px)}to{opacity:1;transform:none}}
     #hovBox::-webkit-scrollbar{width:4px;}
@@ -311,57 +250,152 @@
     .hov-qlbl span{display:inline-block;width:6px;height:6px;border-radius:50%;background:#6366f1;box-shadow:0 0 8px #6366f1;animation:pulse 1.5s ease infinite;}
     .hov-math{background:rgba(99,102,241,.07);border:1px solid rgba(99,102,241,.2);border-radius:14px;padding:20px;text-align:center;margin-bottom:16px;}
     .hov-mathq{font-family:"Orbitron",sans-serif;font-size:28px;font-weight:700;color:#fff;letter-spacing:.05em;text-shadow:0 0 20px rgba(99,102,241,.5);}
-    .hov-inp{width:100%;padding:13px 16px;background:rgba(255,255,255,.04);border:1.5px solid rgba(99,102,241,.25);border-radius:11px;color:#fff;font-family:"Space Grotesk",sans-serif;font-size:16px;font-weight:700;text-align:center;outline:none;transition:border-color .2s,box-shadow .2s;}
+
+    /* ✅ FIX: HOV inputs — unified styling, works on mobile */
+    .hov-inp{
+      width:100%;
+      padding:14px 16px;
+      background:rgba(255,255,255,.04);
+      border:1.5px solid rgba(99,102,241,.25);
+      border-radius:11px;
+      color:#fff;
+      font-family:"Space Grotesk",sans-serif;
+      font-size:20px;
+      font-weight:700;
+      text-align:center;
+      outline:none;
+      transition:border-color .2s,box-shadow .2s;
+      /* ✅ CRITICAL mobile fixes */
+      -webkit-appearance:none;
+      appearance:none;
+      -webkit-tap-highlight-color:transparent;
+      touch-action:manipulation;
+      /* larger touch target */
+      min-height:52px;
+    }
     .hov-inp:focus{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.15);}
     .hov-inp.ok{border-color:#10b981;box-shadow:0 0 0 3px rgba(16,185,129,.1);}
     .hov-inp.bad{border-color:#ef4444;box-shadow:0 0 0 3px rgba(239,68,68,.1);}
+    /* remove mobile number spinners */
+    .hov-inp::-webkit-inner-spin-button,
+    .hov-inp::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
+    .hov-inp[type=number]{-moz-appearance:textfield;}
+
+    /* ✅ FIX: remove number spinners — they cause issues on mobile */
+    .hov-inp::-webkit-inner-spin-button,
+    .hov-inp::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
+    .hov-inp[type=number]{-moz-appearance:textfield;}
+
     .hov-canvas{background:linear-gradient(135deg,rgba(99,102,241,.06),rgba(139,92,246,.04));border:1px solid rgba(99,102,241,.2);border-radius:14px;padding:18px 14px;min-height:120px;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:12px;margin-bottom:14px;position:relative;overflow:hidden;}
     .hov-canvas::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 30% 50%,rgba(99,102,241,.06),transparent 60%),radial-gradient(ellipse at 70% 50%,rgba(139,92,246,.05),transparent 60%);pointer-events:none;}
     .hov-obj{border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:26px;animation:objPop .4s cubic-bezier(0.34,1.56,0.64,1) both;filter:drop-shadow(0 4px 12px rgba(0,0,0,.5));flex-shrink:0;}
     @keyframes objPop{from{opacity:0;transform:scale(0) rotate(-15deg)}to{opacity:1;transform:scale(1) rotate(0)}}
+
     .hov-swatches{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
-    .hov-swatch{flex:1;min-width:68px;padding:9px 6px;border-radius:10px;border:2px solid transparent;background:rgba(255,255,255,.04);color:#fff;font-family:"Space Grotesk",sans-serif;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .2s;}
+    .hov-swatch{
+      flex:1;min-width:68px;padding:11px 6px;
+      border-radius:10px;border:2px solid transparent;
+      background:rgba(255,255,255,.04);color:#fff;
+      font-family:"Space Grotesk",sans-serif;font-size:12px;font-weight:700;
+      cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;
+      transition:all .2s;
+      /* ✅ mobile fixes */
+      -webkit-tap-highlight-color:transparent;
+      touch-action:manipulation;
+      min-height:44px; /* comfortable touch target */
+    }
     .hov-swatch:hover{background:rgba(255,255,255,.08);transform:translateY(-2px);}
     .hov-swatch.sel{border-color:#6366f1;background:rgba(99,102,241,.15);box-shadow:0 0 12px rgba(99,102,241,.2);}
     .hov-swatch .sdot{width:11px;height:11px;border-radius:50%;flex-shrink:0;}
+
+    /* ✅ FIX: counter row — bigger tap targets, no readonly on input */
     .hov-counter{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
-    .hov-cbtn{width:42px;height:42px;border-radius:10px;border:1.5px solid rgba(99,102,241,.3);background:rgba(99,102,241,.08);color:#fff;font-size:22px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;}
+    .hov-cbtn{
+      /* ✅ FIX: enlarged for comfortable mobile tap — was 42px */
+      width:52px;height:52px;
+      border-radius:12px;
+      border:1.5px solid rgba(99,102,241,.3);
+      background:rgba(99,102,241,.08);
+      color:#fff;font-size:26px;font-weight:700;
+      cursor:pointer;
+      display:flex;align-items:center;justify-content:center;
+      transition:all .2s;flex-shrink:0;
+      /* ✅ mobile fixes */
+      -webkit-tap-highlight-color:transparent;
+      touch-action:manipulation;
+      user-select:none;
+      -webkit-user-select:none;
+    }
     .hov-cbtn:hover{background:rgba(99,102,241,.2);border-color:#6366f1;}
-    .hov-cval{flex:1;padding:10px;background:rgba(255,255,255,.04);border:1.5px solid rgba(99,102,241,.25);border-radius:10px;color:#fff;font-family:"Orbitron",sans-serif;font-size:22px;font-weight:700;text-align:center;outline:none;transition:border-color .2s;}
-    .hov-cval:focus{border-color:#6366f1;}
+    .hov-cbtn:active{transform:scale(.93);background:rgba(99,102,241,.3);}
+
+    /* ✅ FIX: counter value display — NOT an input to avoid keyboard issues */
+    .hov-cval{
+      flex:1;padding:12px;
+      background:rgba(255,255,255,.04);
+      border:1.5px solid rgba(99,102,241,.25);
+      border-radius:10px;
+      color:#fff;
+      font-family:"Orbitron",sans-serif;font-size:22px;font-weight:700;
+      text-align:center;
+      /* display-only, not editable — keyboard triggered by +/- only */
+      pointer-events:none;
+      min-height:52px;
+      display:flex;align-items:center;justify-content:center;
+    }
     .hov-cval.ok{border-color:#10b981;}
     .hov-cval.bad{border-color:#ef4444;}
-    .hov-btn{width:100%;padding:13px;border-radius:12px;border:none;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-family:"Space Grotesk",sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all .3s;box-shadow:0 4px 20px rgba(99,102,241,.3);display:flex;align-items:center;justify-content:center;gap:8px;position:relative;overflow:hidden;margin-top:4px;}
+
+    .hov-btn{
+      width:100%;padding:14px;
+      border-radius:12px;border:none;
+      background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;
+      font-family:"Space Grotesk",sans-serif;font-size:15px;font-weight:700;
+      cursor:pointer;transition:all .3s;
+      box-shadow:0 4px 20px rgba(99,102,241,.3);
+      display:flex;align-items:center;justify-content:center;gap:8px;
+      position:relative;overflow:hidden;margin-top:4px;
+      /* ✅ mobile fixes */
+      -webkit-tap-highlight-color:transparent;
+      touch-action:manipulation;
+      min-height:50px;
+    }
     .hov-btn::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.12),transparent);}
     .hov-btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(99,102,241,.45);}
     .hov-btn:active{transform:translateY(1px);}
     .hov-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+
     .hov-err{display:none;align-items:center;gap:8px;padding:10px 13px;border-radius:10px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#fca5a5;font-size:12px;font-weight:600;margin-bottom:12px;}
     .hov-err.on{display:flex;animation:hovFadeIn .25s ease both;}
     .hov-tries{display:flex;align-items:center;justify-content:center;gap:5px;margin-top:10px;}
     .hov-try{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.1);transition:background .3s;}
     .hov-try.used{background:#ef4444;box-shadow:0 0 6px #ef4444;}
+
     .hov-success{display:none;padding:32px 28px;text-align:center;}
     .hov-success.on{display:block;animation:hovFadeIn .4s ease both;}
     .hov-checkring{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#10b981,#059669);display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 16px;box-shadow:0 0 40px rgba(16,185,129,.4);animation:ringPop .5s cubic-bezier(0.34,1.56,0.64,1) both;}
     @keyframes ringPop{from{transform:scale(0)}to{transform:scale(1)}}
     .hov-stitle{font-family:"Space Grotesk",sans-serif;font-size:20px;font-weight:800;color:#fff;margin-bottom:6px;}
     .hov-ssub{font-size:13px;color:rgba(255,255,255,.5);margin-bottom:24px;}
+
     .hov-locked{display:none;padding:32px 28px;text-align:center;}
     .hov-locked.on{display:block;animation:hovFadeIn .4s ease both;}
     .hov-lockicon{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#ef4444,#dc2626);display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 16px;box-shadow:0 0 40px rgba(239,68,68,.4);animation:ringPop .5s cubic-bezier(0.34,1.56,0.64,1) both;}
     .hov-ltitle{font-family:"Space Grotesk",sans-serif;font-size:20px;font-weight:800;color:#fca5a5;margin-bottom:6px;}
     .hov-lsub{font-size:13px;color:rgba(255,255,255,.45);margin-bottom:8px;line-height:1.6;}
-    .hov-timer{font-family:"Orbitron",sans-serif;font-size:28px;font-weight:700;color:#ef4444;margin:12px 0;text-shadow:0 0 20px rgba(239,68,6,.4);}
-    .hov-lbtn{width:100%;padding:12px;border-radius:11px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:rgba(255,255,255,.6);font-family:"Space Grotesk",sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .25s;margin-top:8px;}
+    .hov-timer{font-family:"Orbitron",sans-serif;font-size:28px;font-weight:700;color:#ef4444;margin:12px 0;text-shadow:0 0 20px rgba(239,68,68,.4);}
+    .hov-lbtn{width:100%;padding:12px;border-radius:11px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:rgba(255,255,255,.6);font-family:"Space Grotesk",sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .25s;margin-top:8px;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
     .hov-lbtn:hover{background:rgba(255,255,255,.08);color:#fff;}
+
     @media(max-width:480px){
       #hovBox{border-radius:20px;}
       .hov-header,.hov-panel,.hov-success,.hov-locked{padding-left:18px;padding-right:18px;}
       .hov-steps{padding-left:18px;padding-right:18px;}
       .hov-mathq{font-size:22px;}
+      /* ✅ even bigger tap targets on small screens */
+      .hov-cbtn{width:56px;height:56px;font-size:28px;}
+      .hov-btn{padding:16px;font-size:16px;}
     }
-
   </style>
 </head>
 <body>
@@ -380,7 +414,6 @@
     <div id="hovBox">
       <div class="hov-accent"></div>
 
-      <!-- HEADER -->
       <div class="hov-header">
         <div class="hov-brand">
           <div class="hov-shield">🛡️</div>
@@ -393,20 +426,10 @@
         <div class="hov-sub">Anti-bot protection powered by T1ERA HOV Security System</div>
       </div>
 
-      <!-- STEP INDICATORS -->
       <div class="hov-steps">
-        <div class="hov-step active" id="hstep1">
-          <div class="hov-snum">1</div>
-          <div class="hov-slbl">Math</div>
-        </div>
-        <div class="hov-step" id="hstep2">
-          <div class="hov-snum">2</div>
-          <div class="hov-slbl">Count</div>
-        </div>
-        <div class="hov-step" id="hstep3">
-          <div class="hov-snum">3</div>
-          <div class="hov-slbl">Colour</div>
-        </div>
+        <div class="hov-step active" id="hstep1"><div class="hov-snum">1</div><div class="hov-slbl">Math</div></div>
+        <div class="hov-step" id="hstep2"><div class="hov-snum">2</div><div class="hov-slbl">Count</div></div>
+        <div class="hov-step" id="hstep3"><div class="hov-snum">3</div><div class="hov-slbl">Colour</div></div>
       </div>
 
       <!-- STEP 1: MATH -->
@@ -416,10 +439,30 @@
         <div class="hov-math">
           <div class="hov-mathq" id="hMathQ">?</div>
         </div>
-        <input class="hov-inp" id="hMathA" type="number" placeholder="Your answer" autocomplete="off" />
+        <!--
+          ✅ KEY FIXES for mobile:
+          - type="text" instead of "number" (number type has mobile bugs)
+          - inputmode="numeric" → shows numeric keypad on mobile
+          - pattern="[0-9]*" → triggers numeric keyboard on iOS
+          - autocomplete="off" → prevents autofill popups blocking input
+          - enterkeyhint="done" → shows "Done" on mobile keyboard
+        -->
+        <input
+          class="hov-inp"
+          id="hMathA"
+          type="text"
+          inputmode="numeric"
+          pattern="[0-9]*"
+          placeholder="Type your answer"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+          spellcheck="false"
+          enterkeyhint="done"
+        />
         <div class="hov-tries" id="hTries1"></div>
-        <button class="hov-btn" onclick="hovNextStep(1)" style="margin-top:14px;">
-          Continue <span>→</span>
+        <button class="hov-btn" id="hMathBtn" style="margin-top:14px;">
+          Continue →
         </button>
       </div>
 
@@ -428,13 +471,18 @@
         <div class="hov-err" id="hErr2"><span>⚠️</span><span id="hErr2Txt"></span></div>
         <div class="hov-qlbl"><span></span>How many objects do you see?</div>
         <div class="hov-canvas" id="hCanvas"></div>
+        <!--
+          ✅ KEY FIX: counter uses +/- buttons only.
+          The display is a div (not input) so no keyboard pops up on mobile.
+          This avoids the readonly-input-blocking-touch issue entirely.
+        -->
         <div class="hov-counter">
-          <button class="hov-cbtn" onclick="hovCount(-1)">−</button>
-          <input class="hov-cval" id="hCountA" type="number" min="0" max="30" value="0" readonly />
-          <button class="hov-cbtn" onclick="hovCount(1)">+</button>
+          <button class="hov-cbtn" id="hCountMinus" aria-label="Decrease">−</button>
+          <div class="hov-cval" id="hCountVal" role="status" aria-live="polite">0</div>
+          <button class="hov-cbtn" id="hCountPlus" aria-label="Increase">+</button>
         </div>
         <div class="hov-tries" id="hTries2"></div>
-        <button class="hov-btn" onclick="hovNextStep(2)">Continue <span>→</span></button>
+        <button class="hov-btn" id="hCountBtn">Continue →</button>
       </div>
 
       <!-- STEP 3: COLOUR -->
@@ -444,7 +492,7 @@
         <div class="hov-canvas" id="hColCanvas" style="min-height:90px;"></div>
         <div class="hov-swatches" id="hSwatches"></div>
         <div class="hov-tries" id="hTries3"></div>
-        <button class="hov-btn" onclick="hovNextStep(3)">Verify &amp; Continue <span>🔓</span></button>
+        <button class="hov-btn" id="hColBtn">Verify &amp; Continue 🔓</button>
       </div>
 
       <!-- SUCCESS -->
@@ -464,7 +512,6 @@
         <button class="hov-lbtn" onclick="location.href='home.html'">🏠 Go to Home Page</button>
         <button class="hov-lbtn" onclick="location.href='https://t.me/T1ERA_SecBot'" style="margin-top:4px;">🚀 Open Telegram Instead</button>
       </div>
-
     </div>
   </div>
 
@@ -477,7 +524,6 @@
 
   <div class="page">
     <div class="card">
-
       <a href="home.html" class="logorow">
         <div class="logomark">T1</div>
         <span class="logotxt">T1ERA</span>
@@ -489,13 +535,10 @@
         <div class="wname" id="wn"></div>
         <div class="wemail" id="we"></div>
         <div class="vbadge" id="vb">✅ Success</div>
-        <!-- UPDATED BUTTON -->
         <a href="https://t1era.netlify.app" class="blaunch" id="blaunchBtn">
           <span class="ldot"></span>Continue to T1ERA
         </a>
         <button class="bout" id="outBtn">Sign Out</button>
-
-        <!-- Redirect UI — shown only after new Google signup -->
         <div id="redirectUI" style="display:none;flex-direction:column;align-items:center;gap:14px;margin-top:8px;">
           <div class="rspinner"></div>
           <span id="redirectTxt" style="font-size:13px;font-weight:600;color:rgba(255,255,255,.5);letter-spacing:.06em;animation:rtxtpulse 1.2s ease-in-out infinite;">Please Wait...</span>
@@ -508,28 +551,24 @@
           <h1>Welcome to T1ERA</h1>
           <p>Sign in or create your account to get started</p>
         </div>
-
         <div class="tabs">
           <button class="tab on" id="tLgn" onclick="sw('login')">Sign In</button>
-          <button class="tab"    id="tSgn" onclick="sw('signup')">Create Account</button>
+          <button class="tab" id="tSgn" onclick="sw('signup')">Create Account</button>
         </div>
 
         <!-- LOGIN PANEL -->
         <div class="panel on" id="pLgn">
           <div class="lockbar" id="lockbar"></div>
           <div class="alert err" id="lErr"></div>
-          <div class="alert ok"  id="lOk"></div>
-
+          <div class="alert ok" id="lOk"></div>
           <div class="field">
             <div class="flbl">Email address<span class="fst" id="lESt"></span></div>
             <div class="inpw">
               <span class="iico">✉️</span>
-              <input type="email" id="lE" placeholder="you@gmail.com" autocomplete="email"
-                oninput="chkEmail('lE','lESt')" onblur="chkEmail('lE','lESt',true)"/>
+              <input type="email" id="lE" placeholder="you@gmail.com" autocomplete="email" oninput="chkEmail('lE','lESt')" onblur="chkEmail('lE','lESt',true)"/>
               <div class="iend"><span class="ichk" id="lEChk"></span></div>
             </div>
           </div>
-
           <div class="field">
             <div class="flbl">Password</div>
             <div class="inpw">
@@ -539,17 +578,13 @@
             </div>
             <a href="#" class="forgot" id="fgLink">Forgot password?</a>
           </div>
-
           <div class="dots" id="dotRow">
             <span style="font-size:11px;color:var(--txt3)">Attempts:</span>
             <div class="dot" id="d1"></div><div class="dot" id="d2"></div>
             <div class="dot" id="d3"></div><div class="dot" id="d4"></div>
             <div class="dot" id="d5"></div>
           </div>
-
-          <button class="bsub" id="lBtn" onclick="doLogin()">
-            <div class="spin"></div><span class="lbl">Sign In</span>
-          </button>
+          <button class="bsub" id="lBtn" onclick="doLogin()"><div class="spin"></div><span class="lbl">Sign In</span></button>
           <div class="dvd">or</div>
           <button class="bgoo" id="lGBtn" onclick="doGoogle('login')">
             <svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
@@ -560,53 +595,42 @@
         <!-- SIGNUP PANEL -->
         <div class="panel" id="pSgn">
           <div class="alert err" id="sErr"></div>
-          <div class="alert ok"  id="sOk"></div>
-
+          <div class="alert ok" id="sOk"></div>
           <div class="field">
             <div class="flbl">Full name<span class="fst" id="sNSt"></span></div>
             <div class="inpw">
               <span class="iico">👤</span>
-              <input type="text" id="sN" placeholder="Your full name" autocomplete="name"
-                oninput="chkName()" onblur="chkName(true)"/>
+              <input type="text" id="sN" placeholder="Your full name" autocomplete="name" oninput="chkName()" onblur="chkName(true)"/>
               <div class="iend"><span class="ichk" id="sNChk"></span></div>
             </div>
           </div>
-
           <div class="field">
             <div class="flbl">Email address<span class="fst" id="sESt"></span></div>
             <div class="inpw">
               <span class="iico">✉️</span>
-              <input type="email" id="sE" placeholder="you@gmail.com" autocomplete="email"
-                oninput="chkEmail('sE','sESt')" onblur="chkEmail('sE','sESt',true)"/>
+              <input type="email" id="sE" placeholder="you@gmail.com" autocomplete="email" oninput="chkEmail('sE','sESt')" onblur="chkEmail('sE','sESt',true)"/>
               <div class="iend"><span class="ichk" id="sEChk"></span></div>
             </div>
           </div>
-
           <div class="field">
             <div class="flbl">Password<span class="fst" id="sPSt"></span></div>
             <div class="inpw">
               <span class="iico">🔒</span>
-              <input type="password" id="sP" placeholder="Create a strong password" autocomplete="new-password"
-                oninput="onPwInput()" onfocus="document.getElementById('pwr').classList.add('on')"/>
+              <input type="password" id="sP" placeholder="Create a strong password" autocomplete="new-password" oninput="onPwInput()" onfocus="document.getElementById('pwr').classList.add('on')"/>
               <div class="iend"><button class="eye" type="button" onclick="eye('sP',this)">👁</button></div>
             </div>
-            <!-- live checklist -->
             <div class="pwrules" id="pwr">
-              <div class="rule" id="r8">   <span class="rdot"></span>At least 8 characters</div>
-              <div class="rule" id="rUp">  <span class="rdot"></span>One uppercase letter (A–Z)</div>
-              <div class="rule" id="rNum"> <span class="rdot"></span>One number (0–9)</div>
-              <div class="rule" id="rSpc"> <span class="rdot"></span>One special character (!@#$%^&amp;*)</div>
+              <div class="rule" id="r8"><span class="rdot"></span>At least 8 characters</div>
+              <div class="rule" id="rUp"><span class="rdot"></span>One uppercase letter (A–Z)</div>
+              <div class="rule" id="rNum"><span class="rdot"></span>One number (0–9)</div>
+              <div class="rule" id="rSpc"><span class="rdot"></span>One special character (!@#$%^&amp;*)</div>
             </div>
-            <!-- strength bar -->
             <div class="srow">
               <div class="strk"><div class="sfill" id="sfill"></div></div>
               <span class="sword" id="sword"></span>
             </div>
           </div>
-
-          <button class="bsub" id="sBtn" onclick="doSignup()">
-            <div class="spin"></div><span class="lbl">Create Account</span>
-          </button>
+          <button class="bsub" id="sBtn" onclick="doSignup()"><div class="spin"></div><span class="lbl">Create Account</span></button>
           <div class="dvd">or</div>
           <button class="bgoo" id="gSignupBtn">
             <svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
@@ -617,27 +641,20 @@
         <!-- RESET PANEL -->
         <div class="panel" id="pRst">
           <button class="backbtn" onclick="sw('login')">← Back to Sign In</button>
-          <div class="hdg" style="margin-bottom:16px;">
-            <h1>Reset Password</h1>
-            <p>We'll send a reset link to your email</p>
-          </div>
+          <div class="hdg" style="margin-bottom:16px;"><h1>Reset Password</h1><p>We'll send a reset link to your email</p></div>
           <div class="alert err" id="rErr"></div>
-          <div class="alert ok"  id="rOk"></div>
+          <div class="alert ok" id="rOk"></div>
           <div class="field">
             <div class="flbl">Email address<span class="fst" id="rESt"></span></div>
             <div class="inpw">
               <span class="iico">✉️</span>
-              <input type="email" id="rE" placeholder="you@gmail.com"
-                oninput="chkEmail('rE','rESt')" onblur="chkEmail('rE','rESt',true)"/>
+              <input type="email" id="rE" placeholder="you@gmail.com" oninput="chkEmail('rE','rESt')" onblur="chkEmail('rE','rESt',true)"/>
               <div class="iend"><span class="ichk" id="rEChk"></span></div>
             </div>
           </div>
-          <button class="bsub" id="rBtn" onclick="doReset()">
-            <div class="spin"></div><span class="lbl">Send Reset Link</span>
-          </button>
+          <button class="bsub" id="rBtn" onclick="doReset()"><div class="spin"></div><span class="lbl">Send Reset Link</span></button>
         </div>
-
-      </div><!-- /authF -->
+      </div>
 
       <div class="foot">
         By continuing you agree to T1ERA's <a href="terms.html">Terms of Service</a> and <a href="privacy.html">Privacy Policy</a>.
@@ -645,7 +662,7 @@
     </div>
   </div>
 
- <!-- ═══════════════════════════════════
+  <!-- ═══════════════════════════════════
        FIREBASE MODULE (FINAL PRO VERSION + AUTO REDIRECT)
   ═══════════════════════════════════ -->
   <script type="module">
@@ -657,7 +674,7 @@
       fetchSignInMethodsForEmail, getAdditionalUserInfo
     } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 
-    const app  = initializeApp({
+    const app = initializeApp({
       apiKey:            "AIzaSyBnt9mbb8LdMVeguSHUmS20L6uBHIfxwAs",
       authDomain:        "t1era-v2.firebaseapp.com",
       projectId:         "t1era-v2",
@@ -665,9 +682,8 @@
       messagingSenderId: "279266491659",
       appId:             "1:279266491659:web:28a03c7b7300fcb152b60e"
     });
-    
+
     const auth = getAuth(app);
-    
     // ══════════════════════════════════════════════
     // CAPTAIN'S FIX: GOOGLE PROVIDER CONFIGURATION
     // ══════════════════════════════════════════════
@@ -676,13 +692,12 @@
 
     window._auth = auth;
     window._gp   = gp;
-    window._fb   = { 
+    window._fb   = {
       createUserWithEmailAndPassword, signInWithEmailAndPassword,
       signOut, sendPasswordResetEmail, updateProfile,
-      signInWithPopup, fetchSignInMethodsForEmail, getAdditionalUserInfo 
+      signInWithPopup, fetchSignInMethodsForEmail, getAdditionalUserInfo
     };
 
-    // Flag to track sign-out state for UI feedback
     let isLoggingOut = false;
 
     onAuthStateChanged(auth, user => {
@@ -691,29 +706,18 @@
         const p = document.getElementById('lgdin');
         p.classList.add('on');
         const av = document.getElementById('av');
-        
-        // Render Avatar
         av.innerHTML = user.photoURL
           ? `<img src="${user.photoURL}" alt="av" referrerpolicy="no-referrer">`
           : (user.displayName||user.email||'U')[0].toUpperCase();
-          
         document.getElementById('wn').textContent = user.displayName || 'T1ERA User';
         document.getElementById('we').textContent = user.email || '';
-        
-        // Badge
         const vb = document.getElementById('vb');
         vb.textContent = '✅ Success';
-        vb.style.color  = '';
+        vb.style.color = '';
 
-        // ══════════════════════════════════════════════
-        // UNIFIED REDIRECT LOGIC
-        // ══════════════════════════════════════════════
-        
-        // Show the spinner, hide the manual buttons (Auto-Pilot Mode)
         document.getElementById('blaunchBtn').style.display = 'none';
         document.getElementById('outBtn').style.display = 'none';
         document.getElementById('redirectUI').style.display = 'flex';
-        
         const txt = document.getElementById('redirectTxt');
 
         if (window._isNewSignup) {
@@ -723,29 +727,16 @@
           let secs = 2;
           const interval = setInterval(() => {
             secs--;
-            if (secs <= 0) {
-              clearInterval(interval);
-              window.location.href = 'account-setup.html';
-            }
+            if (secs <= 0) { clearInterval(interval); window.location.href = 'account-setup.html'; }
           }, 1000);
-
         } else {
           // --- SCENARIO B: RETURNING USER -> HOME ---
-          // Auto-redirect to home.html if they visit this page while logged in
           txt.textContent = 'Redirecting to Home...';
-          setTimeout(() => {
-            window.location.href = 'home.html';
-          }, 1500); // 1.5s delay so they see the "Success" badge briefly
+          setTimeout(() => { window.location.href = 'home.html'; }, 1500);
         }
-
       } else {
-        // ══════════════════════════════════════════════
-        // NOT LOGGED IN
-        // ══════════════════════════════════════════════
         document.getElementById('authF').style.display = '';
         document.getElementById('lgdin').classList.remove('on');
-        
-        // If we just logged out, show the success message
         if (isLoggingOut) {
           setTimeout(() => {
             const ok = document.getElementById('lOk');
@@ -757,25 +748,14 @@
       }
     });
 
-    // ══════════════════════════════════════════════
-    // SIGN OUT LOGIC
-    // ══════════════════════════════════════════════
-    // (Note: Since we auto-redirect, this button is rarely seen on this page,
-    // but logic is kept for robustness in case redirection lags)
     document.getElementById('outBtn').addEventListener('click', async () => {
       const btn = document.getElementById('outBtn');
       btn.disabled = true;
       btn.textContent = 'Disconnecting...';
       isLoggingOut = true;
-      try {
-        await window._fb.signOut(window._auth);
-      } catch (e) {
-        console.error("Sign out failed", e);
-        isLoggingOut = false;
-      } finally {
-        btn.disabled = false;
-        btn.textContent = 'Sign Out';
-      }
+      try { await window._fb.signOut(window._auth); }
+      catch (e) { console.error("Sign out failed", e); isLoggingOut = false; }
+      finally { btn.disabled = false; btn.textContent = 'Sign Out'; }
     });
   </script>
 
@@ -795,369 +775,115 @@
       ptw.appendChild(p);
     }
 
-    /* ═══════════════════════════════════
-       BRUTE FORCE PROTECTION
-    ═══════════════════════════════════ */
+    /* BRUTE FORCE PROTECTION */
     const MAX=5, LOCK_S=60;
-    let fails    = +( sessionStorage.getItem('t1f') ||'0');
-    let lockTil  = +( sessionStorage.getItem('t1l') ||'0');
-    let lockTmr  = null;
-
-    const locked = ()=> Date.now() < lockTil;
-
-    function markFail(){
-      fails++; sessionStorage.setItem('t1f', fails);
-      updDots();
-      if(fails>=MAX){ lockTil=Date.now()+LOCK_S*1000; sessionStorage.setItem('t1l',lockTil); startLock(); }
-    }
-    function markOk(){
-      fails=0; lockTil=0;
-      sessionStorage.removeItem('t1f'); sessionStorage.removeItem('t1l');
-      updDots();
-    }
-    function updDots(){
-      for(let i=1;i<=5;i++){
-        const d=document.getElementById('d'+i);
-        if(!d)return;
-        d.classList.remove('bad');
-        if(i<=fails) d.classList.add('bad');
-      }
-      document.getElementById('dotRow').style.display=(fails>0&&!locked())?'flex':'none';
-    }
-    function startLock(){
-      clearInterval(lockTmr);
-      const bar=document.getElementById('lockbar');
-      const lb=document.getElementById('lBtn');
-      const gb=document.getElementById('lGBtn');
-      lockTmr=setInterval(()=>{
-        const rem=Math.ceil((lockTil-Date.now())/1000);
-        if(rem<=0){
-          clearInterval(lockTmr); bar.classList.remove('on');
-          lb.disabled=gb.disabled=false;
-          fails=0; sessionStorage.removeItem('t1f'); sessionStorage.removeItem('t1l');
-          updDots();
-        } else {
-          bar.textContent=`🔒 Too many failed attempts. Please wait ${rem}s before trying again.`;
-          bar.classList.add('on'); lb.disabled=gb.disabled=true;
-        }
-      },500);
-    }
-    if(locked()) startLock();
+    let fails=+(sessionStorage.getItem('t1f')||'0');
+    let lockTil=+(sessionStorage.getItem('t1l')||'0');
+    let lockTmr=null;
+    const locked=()=>Date.now()<lockTil;
+    function markFail(){fails++;sessionStorage.setItem('t1f',fails);updDots();if(fails>=MAX){lockTil=Date.now()+LOCK_S*1000;sessionStorage.setItem('t1l',lockTil);startLock();}}
+    function markOk(){fails=0;lockTil=0;sessionStorage.removeItem('t1f');sessionStorage.removeItem('t1l');updDots();}
+    function updDots(){for(let i=1;i<=5;i++){const d=document.getElementById('d'+i);if(!d)return;d.classList.remove('bad');if(i<=fails)d.classList.add('bad');}document.getElementById('dotRow').style.display=(fails>0&&!locked())?'flex':'none';}
+    function startLock(){clearInterval(lockTmr);const bar=document.getElementById('lockbar');const lb=document.getElementById('lBtn');const gb=document.getElementById('lGBtn');lockTmr=setInterval(()=>{const rem=Math.ceil((lockTil-Date.now())/1000);if(rem<=0){clearInterval(lockTmr);bar.classList.remove('on');lb.disabled=gb.disabled=false;fails=0;sessionStorage.removeItem('t1f');sessionStorage.removeItem('t1l');updDots();}else{bar.textContent=`🔒 Too many failed attempts. Please wait ${rem}s before trying again.`;bar.classList.add('on');lb.disabled=gb.disabled=true;}},500);}
+    if(locked())startLock();
     updDots();
 
-    /* ═══════════════════════════════════
-       EMAIL VALIDATION
-    ═══════════════════════════════════ */
-    const EMAIL_RE = /^(?!.*\.\.)(?!^\.)([a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*)@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/;
-    const TYPOS = {
-      'gmai.com':'gmail.com','gmial.com':'gmail.com','gmal.com':'gmail.com',
-      'gamil.com':'gmail.com','gnail.com':'gmail.com','gmail.co':'gmail.com',
-      'gmailc.om':'gmail.com','gmail.cm':'gmail.com','gmaill.com':'gmail.com',
-      'hotmal.com':'hotmail.com','hotmial.com':'hotmail.com','hotmail.co':'hotmail.com',
-      'hotmai.com':'hotmail.com','hotmal.com':'hotmail.com',
-      'yahooo.com':'yahoo.com','yaho.com':'yahoo.com','yahoo.co':'yahoo.com','yhoo.com':'yahoo.com',
-      'outlok.com':'outlook.com','outloo.com':'outlook.com','outllok.com':'outlook.com',
-      'iclod.com':'icloud.com','icoud.com':'icloud.com','iclould.com':'icloud.com',
-    };
-    const CHK = { lE:'lEChk', sE:'sEChk', rE:'rEChk' };
-
-    function chkEmail(inpId, stId, blur=false){
-      const inp=document.getElementById(inpId);
-      const st =document.getElementById(stId);
-      const chk=document.getElementById(CHK[inpId]||'');
-      const val=inp.value.trim();
-
-      if(!val){ inp.className=''; st.textContent=''; if(chk)chk.textContent=''; return false; }
-
-      const dom=val.split('@')[1]?.toLowerCase();
-      const fix=dom&&TYPOS[dom];
-      if(fix){
-        inp.className='inv'; st.className='fst err';
-        st.textContent=`Did you mean @${fix}?`; if(chk)chk.textContent='⚠️'; return false;
-      }
-      if(!EMAIL_RE.test(val)){
-        if(blur||val.length>7){
-          inp.className='inv'; st.className='fst err';
-          st.textContent='Invalid email format';
-          if(chk)chk.textContent='❌';
-        }
-        return false;
-      }
-      inp.className='vld'; st.className='fst ok'; st.textContent='✓ Looks good';
-      if(chk)chk.textContent='✅'; return true;
-    }
+    /* EMAIL VALIDATION */
+    const EMAIL_RE=/^(?!.*\.\.)(?!^\.)([a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*)@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/;
+    const TYPOS={'gmai.com':'gmail.com','gmial.com':'gmail.com','gmal.com':'gmail.com','gamil.com':'gmail.com','gnail.com':'gmail.com','gmail.co':'gmail.com','gmailc.om':'gmail.com','gmail.cm':'gmail.com','gmaill.com':'gmail.com','hotmal.com':'hotmail.com','hotmial.com':'hotmail.com','hotmail.co':'hotmail.com','hotmai.com':'hotmail.com','yahooo.com':'yahoo.com','yaho.com':'yahoo.com','yahoo.co':'yahoo.com','yhoo.com':'yahoo.com','outlok.com':'outlook.com','outloo.com':'outlook.com','outllok.com':'outlook.com','iclod.com':'icloud.com','icoud.com':'icloud.com','iclould.com':'icloud.com'};
+    const CHK={lE:'lEChk',sE:'sEChk',rE:'rEChk'};
+    function chkEmail(inpId,stId,blur=false){const inp=document.getElementById(inpId);const st=document.getElementById(stId);const chk=document.getElementById(CHK[inpId]||'');const val=inp.value.trim();if(!val){inp.className='';st.textContent='';if(chk)chk.textContent='';return false;}const dom=val.split('@')[1]?.toLowerCase();const fix=dom&&TYPOS[dom];if(fix){inp.className='inv';st.className='fst err';st.textContent=`Did you mean @${fix}?`;if(chk)chk.textContent='⚠️';return false;}if(!EMAIL_RE.test(val)){if(blur||val.length>7){inp.className='inv';st.className='fst err';st.textContent='Invalid email format';if(chk)chk.textContent='❌';}return false;}inp.className='vld';st.className='fst ok';st.textContent='✓ Looks good';if(chk)chk.textContent='✅';return true;}
     window.chkEmail=chkEmail;
 
     /* NAME */
-    function chkName(blur=false){
-      const inp=document.getElementById('sN');
-      const st =document.getElementById('sNSt');
-      const chk=document.getElementById('sNChk');
-      const val=inp.value.trim();
-      if(!val){ inp.className=''; st.textContent=''; chk.textContent=''; return false; }
-      if(/<[^>]*>/.test(val)||/[<>;"'`]/.test(val)){
-        inp.className='inv'; st.className='fst err'; st.textContent='Invalid characters'; chk.textContent='❌'; return false;
-      }
-      if(val.length<2){ if(blur){inp.className='inv';st.className='fst err';st.textContent='Too short';chk.textContent='❌';} return false; }
-      inp.className='vld'; st.className='fst ok'; st.textContent='✓'; chk.textContent='✅'; return true;
-    }
+    function chkName(blur=false){const inp=document.getElementById('sN');const st=document.getElementById('sNSt');const chk=document.getElementById('sNChk');const val=inp.value.trim();if(!val){inp.className='';st.textContent='';chk.textContent='';return false;}if(/<[^>]*>/.test(val)||/[<>;"'`]/.test(val)){inp.className='inv';st.className='fst err';st.textContent='Invalid characters';chk.textContent='❌';return false;}if(val.length<2){if(blur){inp.className='inv';st.className='fst err';st.textContent='Too short';chk.textContent='❌';}return false;}inp.className='vld';st.className='fst ok';st.textContent='✓';chk.textContent='✅';return true;}
     window.chkName=chkName;
 
-    /* ═══════════════════════════════════
-       PASSWORD RULES + STRENGTH
-    ═══════════════════════════════════ */
-    const RULES=[
-      {id:'r8',  fn:v=>v.length>=8},
-      {id:'rUp', fn:v=>/[A-Z]/.test(v)},
-      {id:'rNum',fn:v=>/[0-9]/.test(v)},
-      {id:'rSpc',fn:v=>/[!@#$%^&*()\-_=+\[\]{};:'"\\|,.<>/?`~]/.test(v)},
-    ];
-    const STR=[
-      {w:'0%',  bg:'transparent', lbl:'',       c:'var(--txt3)'},
-      {w:'25%', bg:'#ef4444',     lbl:'Weak',   c:'#ef4444'},
-      {w:'50%', bg:'#f97316',     lbl:'Fair',   c:'#f97316'},
-      {w:'75%', bg:'#eab308',     lbl:'Good',   c:'#eab308'},
-      {w:'100%',bg:'#10b981',     lbl:'Strong', c:'#10b981'},
-    ];
-    function onPwInput(){
-      const val=document.getElementById('sP').value;
-      let met=0;
-      RULES.forEach(r=>{
-        const ok=r.fn(val); if(ok)met++;
-        const el=document.getElementById(r.id);
-        el.className='rule '+(ok?'met':'');
-      });
-      const s=STR[met];
-      document.getElementById('sfill').style.width=s.w;
-      document.getElementById('sfill').style.background=s.bg;
-      document.getElementById('sword').textContent=s.lbl;
-      document.getElementById('sword').style.color=s.c;
-      const inp=document.getElementById('sP');
-      const st =document.getElementById('sPSt');
-      inp.className=val.length===0?'':(met===4?'vld':'inv');
-      if(val.length>0){ st.className='fst '+(met===4?'ok':'err'); st.textContent=met===4?'✓ Strong':`${met}/4 rules`; }
-      else st.textContent='';
-    }
+    /* PASSWORD RULES */
+    const RULES=[{id:'r8',fn:v=>v.length>=8},{id:'rUp',fn:v=>/[A-Z]/.test(v)},{id:'rNum',fn:v=>/[0-9]/.test(v)},{id:'rSpc',fn:v=>/[!@#$%^&*()\-_=+\[\]{};:'"\\|,.<>/?`~]/.test(v)}];
+    const STR=[{w:'0%',bg:'transparent',lbl:'',c:'var(--txt3)'},{w:'25%',bg:'#ef4444',lbl:'Weak',c:'#ef4444'},{w:'50%',bg:'#f97316',lbl:'Fair',c:'#f97316'},{w:'75%',bg:'#eab308',lbl:'Good',c:'#eab308'},{w:'100%',bg:'#10b981',lbl:'Strong',c:'#10b981'}];
+    function onPwInput(){const val=document.getElementById('sP').value;let met=0;RULES.forEach(r=>{const ok=r.fn(val);if(ok)met++;const el=document.getElementById(r.id);el.className='rule '+(ok?'met':'');});const s=STR[met];document.getElementById('sfill').style.width=s.w;document.getElementById('sfill').style.background=s.bg;document.getElementById('sword').textContent=s.lbl;document.getElementById('sword').style.color=s.c;const inp=document.getElementById('sP');const st=document.getElementById('sPSt');inp.className=val.length===0?'':(met===4?'vld':'inv');if(val.length>0){st.className='fst '+(met===4?'ok':'err');st.textContent=met===4?'✓ Strong':`${met}/4 rules`;}else st.textContent='';}
     window.onPwInput=onPwInput;
 
     /* HELPERS */
-    function setLd(id,on){ const b=document.getElementById(id); b.disabled=on; b.classList.toggle('ld',on); }
-    function showA(id,msg,type){ const e=document.getElementById(id); const ico=type==='err'?'⚠️':type==='ok'?'✅':'ℹ️'; e.innerHTML=`<span class="aico">${ico}</span><span>${msg}</span>`; e.className=`alert ${type} on`; }
-    function clrA(id){ document.getElementById(id).className='alert'; }
-    function eye(id,btn){ const i=document.getElementById(id); i.type=i.type==='password'?'text':'password'; btn.textContent=i.type==='password'?'👁':'🙈'; }
+    function setLd(id,on){const b=document.getElementById(id);b.disabled=on;b.classList.toggle('ld',on);}
+    function showA(id,msg,type){const e=document.getElementById(id);const ico=type==='err'?'⚠️':type==='ok'?'✅':'ℹ️';e.innerHTML=`<span class="aico">${ico}</span><span>${msg}</span>`;e.className=`alert ${type} on`;}
+    function clrA(id){document.getElementById(id).className='alert';}
+    function eye(id,btn){const i=document.getElementById(id);i.type=i.type==='password'?'text':'password';btn.textContent=i.type==='password'?'👁':'🙈';}
     window.eye=eye;
-    function sanitize(v){ return v.replace(/<[^>]*>/g,'').replace(/[<>;"'`]/g,'').trim(); }
-
-    function fbMsg(code){
-      const m={
-        'auth/user-not-found':'No account found. Please sign up first.',
-        'auth/wrong-password':'Incorrect password.',
-        'auth/invalid-credential':'Email or password is incorrect.',
-        'auth/email-already-in-use':'Email already registered. Sign in instead.',
-        'auth/weak-password':'Password too weak.',
-        'auth/invalid-email':'Invalid email address.',
-        'auth/too-many-requests':'Account temporarily locked.',
-        'auth/network-request-failed':'Network error. Check connection.',
-      };
-      return m[code]||'Authentication failed. Please try again.';
-    }
+    function sanitize(v){return v.replace(/<[^>]*>/g,'').replace(/[<>;"'`]/g,'').trim();}
+    function fbMsg(code){const m={'auth/user-not-found':'No account found. Please sign up first.','auth/wrong-password':'Incorrect password.','auth/invalid-credential':'Email or password is incorrect.','auth/email-already-in-use':'Email already registered. Sign in instead.','auth/weak-password':'Password too weak.','auth/invalid-email':'Invalid email address.','auth/too-many-requests':'Account temporarily locked.','auth/network-request-failed':'Network error. Check connection.'};return m[code]||'Authentication failed. Please try again.';}
 
     /* TAB SWITCH */
-    function sw(tab){
-      ['tLgn','tSgn'].forEach(t=>document.getElementById(t)?.classList.remove('on'));
-      ['pLgn','pSgn','pRst'].forEach(p=>document.getElementById(p)?.classList.remove('on'));
-      if(tab==='login') { document.getElementById('tLgn').classList.add('on'); document.getElementById('pLgn').classList.add('on'); }
-      if(tab==='signup'){ document.getElementById('tSgn').classList.add('on'); document.getElementById('pSgn').classList.add('on'); }
-      if(tab==='reset') { document.getElementById('pRst').classList.add('on'); }
-    }
+    function sw(tab){['tLgn','tSgn'].forEach(t=>document.getElementById(t)?.classList.remove('on'));['pLgn','pSgn','pRst'].forEach(p=>document.getElementById(p)?.classList.remove('on'));if(tab==='login'){document.getElementById('tLgn').classList.add('on');document.getElementById('pLgn').classList.add('on');}if(tab==='signup'){document.getElementById('tSgn').classList.add('on');document.getElementById('pSgn').classList.add('on');}if(tab==='reset'){document.getElementById('pRst').classList.add('on');}}
     window.sw=sw;
+    document.getElementById('fgLink').addEventListener('click',e=>{e.preventDefault();const v=document.getElementById('lE').value.trim();if(v)document.getElementById('rE').value=v;sw('reset');});
 
-    document.getElementById('fgLink').addEventListener('click',e=>{
-      e.preventDefault();
-      const v=document.getElementById('lE').value.trim();
-      if(v) document.getElementById('rE').value=v;
-      sw('reset');
-    });
-
-    /* ═══════════════════════════════════
-       LOGIN (EMAIL/PASS)
-    ═══════════════════════════════════ */
-    async function doLogin(){
-      clrA('lErr'); clrA('lOk');
-      if(locked()) return;
-      const email=sanitize(document.getElementById('lE').value);
-      const pass =document.getElementById('lP').value;
-      if(!chkEmail('lE','lESt',true)){ showA('lErr','Valid email required.','err'); return; }
-      if(!pass){ showA('lErr','Password required.','err'); return; }
-      setLd('lBtn',true);
-
-      try{
+    /* LOGIN */
+    async function doLogin(){clrA('lErr');clrA('lOk');if(locked())return;const email=sanitize(document.getElementById('lE').value);const pass=document.getElementById('lP').value;if(!chkEmail('lE','lESt',true)){showA('lErr','Valid email required.','err');return;}if(!pass){showA('lErr','Password required.','err');return;}setLd('lBtn',true);try{
         // NO VERIFICATION CHECK — just sign in
-        await window._fb.signInWithEmailAndPassword(window._auth, email, pass);
-        markOk();
-        showA('lOk','Welcome back!','ok');
-        // onAuthStateChanged handles the rest
-      } catch(err){
-        markFail();
-        showA('lErr', fbMsg(err.code), 'err');
-        setLd('lBtn',false);
-      }
-    }
+        await window._fb.signInWithEmailAndPassword(window._auth,email,pass);markOk();showA('lOk','Welcome back!','ok');}catch(err){markFail();showA('lErr',fbMsg(err.code),'err');setLd('lBtn',false);}}
     window.doLogin=doLogin;
 
-    /* ═══════════════════════════════════
-       SIGNUP (EMAIL/PASS)
-    ═══════════════════════════════════ */
-    async function doSignup(){
-      clrA('sErr'); clrA('sOk');
-      const name =sanitize(document.getElementById('sN').value);
-      const email=sanitize(document.getElementById('sE').value);
-      const pass =document.getElementById('sP').value;
-      let ok=true;
-      if(!chkName(true))             ok=false;
-      if(!chkEmail('sE','sESt',true))ok=false;
-      const allRules=RULES.every(r=>r.fn(pass));
-      if(!allRules){ document.getElementById('sP').className='inv'; document.getElementById('pwr').classList.add('on'); ok=false; }
-      if(!ok){ showA('sErr','Please fix the errors above.','err'); return; }
-
-      setLd('sBtn',true);
-
-      // Launch HOV -> Then Create Account
-      openHov(async function(){
-        await doSignupFirebase(name, email, pass);
-      });
-    }
+    /* SIGNUP */
+    async function doSignup(){clrA('sErr');clrA('sOk');const name=sanitize(document.getElementById('sN').value);const email=sanitize(document.getElementById('sE').value);const pass=document.getElementById('sP').value;let ok=true;if(!chkName(true))ok=false;if(!chkEmail('sE','sESt',true))ok=false;const allRules=RULES.every(r=>r.fn(pass));if(!allRules){document.getElementById('sP').className='inv';document.getElementById('pwr').classList.add('on');ok=false;}if(!ok){showA('sErr','Please fix the errors above.','err');return;}setLd('sBtn',true);openHov(async function(){await doSignupFirebase(name,email,pass);});}
     window.doSignup=doSignup;
 
-    async function doSignupFirebase(name, email, pass){
-      // Pre-check for existing account to avoid HOV if possible
-      try{
-        const methods=await window._fb.fetchSignInMethodsForEmail(window._auth, email);
-        if(methods.length>0){
-          showA('sErr','Email already registered. <a href="#" onclick="sw(\'login\');return false;" style="color:var(--blue)">Sign in →</a>','err');
-          setLd('sBtn',false); return;
-        }
-      } catch(e){}
+    async function doSignupFirebase(name,email,pass){try{const methods=await window._fb.fetchSignInMethodsForEmail(window._auth,email);if(methods.length>0){showA('sErr','Email already registered. <a href="#" onclick="sw(\'login\');return false;" style="color:var(--blue)">Sign in →</a>','err');setLd('sBtn',false);return;}}catch(e){}try{const cred=await window._fb.createUserWithEmailAndPassword(window._auth,email,pass);await window._fb.updateProfile(cred.user,{displayName:name});window._isNewSignup=true;}catch(err){showA('sErr',fbMsg(err.code),'err');setLd('sBtn',false);}}
 
-      try{
-        // 1. Create User
-        const cred = await window._fb.createUserWithEmailAndPassword(window._auth, email, pass);
-        
-        // 2. Update Name
-        await window._fb.updateProfile(cred.user, {displayName: name});
-        
-        // 3. Set Flag for Redirect (No verification email sent)
-        window._isNewSignup = true;
-
-        // The onAuthStateChanged listener will see the flag and trigger the redirect UI
-      } catch(err){
-        showA('sErr', fbMsg(err.code), 'err');
-        setLd('sBtn',false);
-      }
-    }
-
-    /* ═══════════════════════════════════
-       GOOGLE AUTH (Unified & Fixed)
-    ═══════════════════════════════════ */
-    async function doGoogle(mode){
-      clrA('lErr');
-      if(locked()) return;
-
-      const btnId = mode === 'login' ? 'lGBtn' : 'gSignupBtn';
-      const btn = document.getElementById(btnId);
-      if(btn) { btn.style.opacity = '0.6'; btn.style.pointerEvents = 'none'; }
-
-      try{
-        const result = await window._fb.signInWithPopup(window._auth, window._gp);
-        const info   = window._fb.getAdditionalUserInfo(result);
-        
-        // LOGIN MODE CHECK
-        if(mode === 'login' && info.isNewUser){
-          await window._fb.signOut(window._auth);
-          markFail();
-          showA('lErr', 'No account found. <a href="#" onclick="sw(\'signup\');" style="color:var(--blue)">Sign up first →</a>', 'err');
-          return;
-        }
-        
-        // SIGNUP MODE CHECK
-        if(mode === 'signup' && info.isNewUser){
-          // Set flag so onAuthStateChanged knows to show the Setup Spinner
-          window._isNewSignup = true;
-        }
-
-        markOk();
-      } catch(err){
-        console.error("Google Auth Crash Handler:", err);
-        // Error Handling for blocked popups
-        if (err.message && (err.message.includes('closed') || err.message.includes('blocked') || err.message.includes('Assertion'))) {
-          showA(mode==='login'?'lErr':'sErr', 'Browser blocked the popup. Please try again.', 'warn');
-        } else {
-          showA(mode==='login'?'lErr':'sErr', fbMsg(err.code), 'err');
-        }
-      } finally {
-        if(btn) { btn.style.opacity = ''; btn.style.pointerEvents = ''; }
-      }
-    }
+    /* GOOGLE AUTH */
+    async function doGoogle(mode){clrA('lErr');if(locked())return;const btnId=mode==='login'?'lGBtn':'gSignupBtn';const btn=document.getElementById(btnId);if(btn){btn.style.opacity='0.6';btn.style.pointerEvents='none';}try{const result=await window._fb.signInWithPopup(window._auth,window._gp);const info=window._fb.getAdditionalUserInfo(result);if(mode==='login'&&info.isNewUser){await window._fb.signOut(window._auth);markFail();showA('lErr','No account found. <a href="#" onclick="sw(\'signup\');" style="color:var(--blue)">Sign up first →</a>','err');return;}if(mode==='signup'&&info.isNewUser){window._isNewSignup=true;}markOk();}catch(err){console.error("Google Auth Crash Handler:",err);if(err.message&&(err.message.includes('closed')||err.message.includes('blocked')||err.message.includes('Assertion'))){showA(mode==='login'?'lErr':'sErr','Browser blocked the popup. Please try again.','warn');}else{showA(mode==='login'?'lErr':'sErr',fbMsg(err.code),'err');}}finally{if(btn){btn.style.opacity='';btn.style.pointerEvents='';}}}
     window.doGoogle=doGoogle;
 
-    /* ═══════════════════════════════════
-       RESET PASSWORD
-    ═══════════════════════════════════ */
-    async function doReset(){
-      clrA('rErr'); clrA('rOk');
-      const email=sanitize(document.getElementById('rE').value);
-      if(!chkEmail('rE','rESt',true)){ showA('rErr','Valid email required.','err'); return; }
-      setLd('rBtn',true);
-
-      try{
-        await window._fb.sendPasswordResetEmail(window._auth, email);
-        showA('rOk','Reset link sent to your email.','ok');
-      } catch(err){ showA('rErr', fbMsg(err.code), 'err'); }
-      setLd('rBtn',false);
-    }
+    /* RESET */
+    async function doReset(){clrA('rErr');clrA('rOk');const email=sanitize(document.getElementById('rE').value);if(!chkEmail('rE','rESt',true)){showA('rErr','Valid email required.','err');return;}setLd('rBtn',true);try{await window._fb.sendPasswordResetEmail(window._auth,email);showA('rOk','Reset link sent to your email.','ok');}catch(err){showA('rErr',fbMsg(err.code),'err');}setLd('rBtn',false);}
     window.doReset=doReset;
 
     /* ENTER KEY */
-    document.addEventListener('keydown',e=>{
-      if(e.key!=='Enter') return;
-      if(document.getElementById('pLgn').classList.contains('on')) doLogin();
-      if(document.getElementById('pSgn').classList.contains('on')) doSignup();
-      if(document.getElementById('pRst').classList.contains('on')) doReset();
-    });
+    document.addEventListener('keydown',e=>{if(e.key!=='Enter')return;if(document.getElementById('pLgn').classList.contains('on'))doLogin();if(document.getElementById('pSgn').classList.contains('on'))doSignup();if(document.getElementById('pRst').classList.contains('on'))doReset();});
 
     /* ═══════════════════════════════════
-       HOV SECURITY SYSTEM
+       HOV SECURITY SYSTEM — MOBILE FIXED
     ═══════════════════════════════════ */
     (function(){
-      const STEP_MAX_TRIES = 3, LOCK_SECONDS = 60;
+      const STEP_MAX_TRIES=3, LOCK_SECONDS=60;
       let hovStep=1, stepTries={1:0,2:0,3:0}, hovData={}, hovCallback=null, lockTimer=null;
-      const OBJS = ['🔴','🟠','🟡','🟢','🔵','🟣','⚫','⚪','🟤','★','◆','▲','●','■','♦','✦','❋','⬟'];
-      const COLOURS = [
+      // ✅ counter value stored in JS, not in a readonly input
+      let countVal = 0;
+
+      const OBJS=['🔴','🟠','🟡','🟢','🔵','🟣','⚫','⚪','🟤','★','◆','▲','●','■','♦','✦','❋','⬟'];
+      const COLOURS=[
         {name:'Red',hex:'#ef4444'},{name:'Blue',hex:'#3b82f6'},{name:'Green',hex:'#10b981'},
         {name:'Yellow',hex:'#eab308'},{name:'Purple',hex:'#8b5cf6'},{name:'Orange',hex:'#f97316'},
         {name:'Cyan',hex:'#06b6d4'},{name:'Pink',hex:'#ec4899'}
       ];
-      function rnd(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
-      
-      // Generators
+      function rnd(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
+
       function genMath(){
         const op=['+','-'][rnd(0,1)];
         let a,b;
-        if(op==='+'){ a=rnd(1,49); b=rnd(1,49); } else { a=rnd(10,99); b=rnd(1,a); }
+        if(op==='+'){a=rnd(1,49);b=rnd(1,49);}else{a=rnd(10,99);b=rnd(1,a);}
         hovData.mathAns=op==='+'?a+b:a-b;
         document.getElementById('hMathQ').textContent=`${a} ${op} ${b} = ?`;
-        document.getElementById('hMathA').value=''; document.getElementById('hMathA').className='hov-inp';
+        const inp=document.getElementById('hMathA');
+        inp.value='';
+        inp.className='hov-inp';
+        inp.removeAttribute('disabled');
       }
+
       function genObjects(){
         const count=rnd(3,12); hovData.objCount=count;
         const c=document.getElementById('hCanvas'); c.innerHTML='';
-        document.getElementById('hCountA').value='0'; document.getElementById('hCountA').className='hov-cval';
+        // ✅ reset counter display
+        countVal=0;
+        updateCountDisplay('hov-cval');
         for(let i=0;i<count;i++){
           const el=document.createElement('div'); el.className='hov-obj';
           el.textContent=OBJS[rnd(0,OBJS.length-1)]; el.style.fontSize=rnd(28,42)+'px';
           el.style.animationDelay=(i*0.06)+'s'; c.appendChild(el);
         }
       }
+
       function genColour(){
         const opts=[...COLOURS].sort(()=>Math.random()-.5);
         const cor=opts[0]; hovData.colourAnswer=cor.name; hovData.selectedColour=null;
@@ -1166,28 +892,83 @@
         opts.slice(0,4).sort(()=>Math.random()-.5).forEach(c=>{
           const b=document.createElement('button'); b.className='hov-swatch';
           b.innerHTML=`<span class="sdot" style="background:${c.hex}"></span>${c.name}`;
-          b.onclick=()=>{
-            document.querySelectorAll('.hov-swatch').forEach(s=>s.classList.remove('sel'));
-            b.classList.add('sel'); hovData.selectedColour=c.name;
-          };
+          // ✅ use addEventListener instead of onclick for better mobile support
+          b.addEventListener('touchstart',function(e){e.preventDefault();selectSwatch(b,c.name);},{passive:false});
+          b.addEventListener('click',function(){selectSwatch(b,c.name);});
           sw.appendChild(b);
         });
       }
 
+      function selectSwatch(btn, name){
+        document.querySelectorAll('.hov-swatch').forEach(s=>s.classList.remove('sel'));
+        btn.classList.add('sel');
+        hovData.selectedColour=name;
+      }
+
+      // ✅ counter display updater — writes to div, not input
+      function updateCountDisplay(cls){
+        const el=document.getElementById('hCountVal');
+        if(el) el.textContent=countVal;
+        // visual feedback on the div
+        el.classList.remove('ok','bad');
+      }
+
+      // ✅ counter buttons wired with both touch and click
+      function wireCountBtn(id, delta){
+        const btn=document.getElementById(id);
+        if(!btn)return;
+        btn.addEventListener('touchstart',function(e){
+          e.preventDefault(); // prevent ghost click
+          countVal=Math.max(0,Math.min(30,countVal+delta));
+          updateCountDisplay();
+          btn.classList.add('hov-cbtn-pressed');
+        },{passive:false});
+        btn.addEventListener('touchend',function(){
+          btn.classList.remove('hov-cbtn-pressed');
+        },{passive:true});
+        btn.addEventListener('click',function(){
+          countVal=Math.max(0,Math.min(30,countVal+delta));
+          updateCountDisplay();
+        });
+      }
+      wireCountBtn('hCountMinus',-1);
+      wireCountBtn('hCountPlus',1);
+
+      // ✅ HOV step buttons — addEventListener instead of inline onclick
+      document.getElementById('hMathBtn').addEventListener('click', ()=>hovNextStep(1));
+      document.getElementById('hCountBtn').addEventListener('click', ()=>hovNextStep(2));
+      document.getElementById('hColBtn').addEventListener('click',  ()=>hovNextStep(3));
+
+      // ✅ math input — Enter key support on mobile keyboard
+      document.getElementById('hMathA').addEventListener('keydown',function(e){
+        if(e.key==='Enter'||e.keyCode===13){
+          e.preventDefault();
+          hovNextStep(1);
+        }
+      });
+
+      // ✅ strip non-numeric characters as user types (safety for type="text")
+      document.getElementById('hMathA').addEventListener('input',function(){
+        this.value=this.value.replace(/[^0-9\-]/g,'');
+      });
+
       function hovErr(s,msg){
-        const e=document.getElementById('hErr'+s), t=document.getElementById('hErr'+s+'Txt');
+        const e=document.getElementById('hErr'+s),t=document.getElementById('hErr'+s+'Txt');
         t.textContent=msg; e.classList.add('on'); setTimeout(()=>e.classList.remove('on'),3500);
       }
+
       function handleWrong(s,regen){
         stepTries[s]++; renderTries(s);
-        if(stepTries[s]>=STEP_MAX_TRIES){ startLockout(); return; }
+        if(stepTries[s]>=STEP_MAX_TRIES){startLockout();return;}
         hovErr(s,`Incorrect. ${STEP_MAX_TRIES-stepTries[s]} attempts left.`);
-        if(regen) regen();
+        if(regen)regen();
       }
+
       function renderTries(s){
         const el=document.getElementById('hTries'+s); el.innerHTML='';
         for(let i=0;i<STEP_MAX_TRIES;i++) el.innerHTML+=`<div class="hov-try${i<stepTries[s]?' used':''}"></div>`;
       }
+
       function updateSteps(c){
         for(let i=1;i<=3;i++){
           const e=document.getElementById('hstep'+i); e.classList.remove('active','done');
@@ -1197,69 +978,87 @@
 
       window.hovNextStep=function(s){
         if(s===1){
-          const a=parseInt(document.getElementById('hMathA').value);
+          // ✅ parseInt works on type="text" value too
+          const raw=document.getElementById('hMathA').value.trim();
+          const a=parseInt(raw,10);
           if(isNaN(a)||a!==hovData.mathAns){
-            document.getElementById('hMathA').className='hov-inp bad'; handleWrong(1,genMath); return;
+            document.getElementById('hMathA').className='hov-inp bad';
+            handleWrong(1,genMath); return;
           }
           document.getElementById('hMathA').className='hov-inp ok'; goStep(2);
         } else if(s===2){
-          const a=parseInt(document.getElementById('hCountA').value);
-          if(a!==hovData.objCount){
-            document.getElementById('hCountA').className='hov-cval bad'; handleWrong(2,genObjects); return;
+          // ✅ read from JS variable, not from input value
+          if(countVal!==hovData.objCount){
+            document.getElementById('hCountVal').classList.add('bad');
+            handleWrong(2,genObjects); return;
           }
-          document.getElementById('hCountA').className='hov-cval ok'; goStep(3);
+          document.getElementById('hCountVal').classList.add('ok'); goStep(3);
         } else if(s===3){
-          if(!hovData.selectedColour||hovData.selectedColour!==hovData.colourAnswer){ handleWrong(3,genColour); return; }
+          if(!hovData.selectedColour||hovData.selectedColour!==hovData.colourAnswer){
+            handleWrong(3,genColour); return;
+          }
           hovSuccess();
         }
-      };
-      window.hovCount=function(d){
-        const e=document.getElementById('hCountA'); let v=(parseInt(e.value)||0)+d;
-        e.value=Math.max(0,Math.min(30,v)); e.className='hov-cval';
       };
 
       function goStep(n){
         [1,2,3].forEach(i=>document.getElementById('hpanel'+i).classList.remove('on'));
         document.getElementById('hpanel'+n).classList.add('on');
         hovStep=n; updateSteps(n); stepTries[n]=0; renderTries(n);
-        if(n===2)genObjects(); if(n===3)genColour();
+        if(n===2)genObjects();
+        if(n===3)genColour();
         document.getElementById('hovBox').scrollTop=0;
+
+        // ✅ auto-focus math input on step 1 (helps mobile show keyboard)
+        if(n===1){
+          setTimeout(()=>{
+            const inp=document.getElementById('hMathA');
+            if(inp) inp.focus();
+          },350); // delay after animation
+        }
       }
+
       function hovSuccess(){
         [1,2,3].forEach(i=>document.getElementById('hpanel'+i).classList.remove('on'));
         document.getElementById('hSuccess').classList.add('on'); updateSteps(4);
-        setTimeout(()=>{ closeHov(); if(hovCallback)hovCallback(); },1800);
+        setTimeout(()=>{closeHov(); if(hovCallback)hovCallback();},1800);
       }
+
       function startLockout(){
         [1,2,3,'Success'].forEach(id=>document.getElementById('hpanel'+id)?.classList.remove('on'));
         document.getElementById('hLocked').classList.add('on');
         let rem=LOCK_SECONDS;
         lockTimer=setInterval(()=>{
           rem--; document.getElementById('hLockTimer').textContent=rem;
-          if(rem<=0){ clearInterval(lockTimer); closeHov(); showA('sErr','Lockout expired. Try again.','warn'); setLd('sBtn',false); }
+          if(rem<=0){clearInterval(lockTimer);closeHov();showA('sErr','Lockout expired. Try again.','warn');setLd('sBtn',false);}
         },1000);
       }
 
       window.openHov=function(cb){
-        hovCallback=cb; hovStep=1; stepTries={1:0,2:0,3:0};
+        hovCallback=cb; hovStep=1; stepTries={1:0,2:0,3:0}; countVal=0;
         ['hpanel2','hpanel3','hSuccess','hLocked','hErr1','hErr2','hErr3'].forEach(id=>document.getElementById(id).classList.remove('on'));
         document.getElementById('hpanel1').classList.add('on'); updateSteps(1); genMath();
         [1,2,3].forEach(renderTries);
         document.getElementById('hovOverlay').classList.add('on');
+        // ✅ focus math input shortly after overlay opens (mobile keyboard trigger)
+        setTimeout(()=>{
+          const inp=document.getElementById('hMathA');
+          if(inp) inp.focus();
+        },500);
       };
+
       window.closeHov=function(){
         const ov=document.getElementById('hovOverlay');
-        ov.style.opacity='0'; setTimeout(()=>{ov.classList.remove('on');ov.style.opacity='';},300);
+        ov.style.opacity='0';
+        setTimeout(()=>{ov.classList.remove('on');ov.style.opacity='';},300);
         if(lockTimer)clearInterval(lockTimer);
       };
 
       // Wire Google Signup Button
       const gsb=document.getElementById('gSignupBtn');
-      if(gsb) gsb.addEventListener('click', ()=>{
+      if(gsb) gsb.addEventListener('click',()=>{
         clrA('sErr');
-        openHov(async()=>{
-          await doGoogle('signup');
-        });
+        openHov(async()=>{ await doGoogle('signup'); });
       });
     })();
 
@@ -1267,10 +1066,11 @@
     (function(){
       const o=document.getElementById('csPopupOverlay');
       if(o){
-        const c=()=> { o.classList.add('hiding'); setTimeout(()=>o.style.display='none',300); };
-        document.getElementById('csPopupClose').onclick=c;
-        o.onclick=e=>e.target===o&&c();
-        document.onkeydown=e=>e.key==='Escape'&&o.style.display!=='none'&&c();
+        const c=()=>{o.classList.add('hiding');setTimeout(()=>o.style.display='none',300);};
+        document.getElementById('csPopupClose').addEventListener('click',c);
+        document.getElementById('csPopupClose').addEventListener('touchend',function(e){e.preventDefault();c();},{passive:false});
+        o.addEventListener('click',e=>e.target===o&&c());
+        document.addEventListener('keydown',e=>e.key==='Escape'&&o.style.display!=='none'&&c());
       }
     })();
   </script>
