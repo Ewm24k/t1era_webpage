@@ -37,6 +37,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
+  <!-- Phosphor Icons — modern stroke icon set -->
+  <script src="https://unpkg.com/@phosphor-icons/web@2.1.1/src/index.js"></script>
+
   <style>
     :root {
       --bg-primary: #000000;
@@ -421,6 +424,268 @@
         0 0 20px rgba(6, 182, 212, 0.4);
       transform: translateY(1px);
     }
+
+    /* ══════════════════════════════════════
+       WEB3 AUTH BUTTON — Login / Signup
+       Replaces the old "Launch T1ERA" btn
+    ══════════════════════════════════════ */
+    .btn-auth {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      padding: 10px 22px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 13.5px;
+      font-family: 'Space Grotesk', sans-serif;
+      letter-spacing: 0.04em;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      outline: none;
+      color: #fff;
+      white-space: nowrap;
+      /* multi-layer glowing border trick */
+      background: linear-gradient(135deg, #3b82f6 0%, #6366f1 50%, #8b5cf6 100%);
+      box-shadow:
+        0 0 0 1px rgba(99,102,241,0.6),
+        0 0 16px rgba(99,102,241,0.4),
+        0 0 32px rgba(59,130,246,0.2),
+        inset 0 1px 0 rgba(255,255,255,0.22),
+        inset 0 -1px 0 rgba(0,0,0,0.25);
+      transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+      overflow: hidden;
+      background-size: 200% 200%;
+      animation: authBtnShift 4s ease infinite;
+    }
+
+    @keyframes authBtnShift {
+      0%,100% { background-position: 0% 50%; }
+      50%      { background-position: 100% 50%; }
+    }
+
+    .btn-auth::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 55%);
+      pointer-events: none;
+      border-radius: inherit;
+    }
+
+    /* shimmer sweep */
+    .btn-auth::after {
+      content: '';
+      position: absolute;
+      top: 0; left: -75%;
+      width: 50%; height: 100%;
+      background: linear-gradient(120deg, transparent, rgba(255,255,255,0.22), transparent);
+      transform: skewX(-20deg);
+      transition: left 0.6s ease;
+      pointer-events: none;
+    }
+
+    .btn-auth:hover {
+      transform: translateY(-3px);
+      box-shadow:
+        0 0 0 1px rgba(139,92,246,0.8),
+        0 0 24px rgba(99,102,241,0.6),
+        0 0 48px rgba(59,130,246,0.3),
+        inset 0 1px 0 rgba(255,255,255,0.28),
+        inset 0 -1px 0 rgba(0,0,0,0.3);
+    }
+    .btn-auth:hover::after { left: 125%; }
+    .btn-auth:active { transform: translateY(1px); }
+
+    .btn-auth i {
+      font-size: 16px;
+      position: relative;
+      z-index: 1;
+    }
+    .btn-auth-label {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ══════════════════════════════════════
+       USER AVATAR — shown when signed in
+    ══════════════════════════════════════ */
+    #userAvatarBtn {
+      display: none; /* hidden until auth confirms signed-in */
+      position: relative;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 0;
+      outline: none;
+    }
+
+    .user-avatar-wrap {
+      position: relative;
+      width: 40px;
+      height: 40px;
+    }
+
+    .user-avatar-ring {
+      position: absolute;
+      inset: -3px;
+      border-radius: 50%;
+      background: conic-gradient(
+        #3b82f6 0deg,
+        #6366f1 90deg,
+        #8b5cf6 180deg,
+        #06b6d4 270deg,
+        #3b82f6 360deg
+      );
+      animation: avatarRingSpin 3s linear infinite;
+      z-index: 0;
+    }
+
+    @keyframes avatarRingSpin {
+      to { transform: rotate(360deg); }
+    }
+
+    .user-avatar-img {
+      position: relative;
+      z-index: 1;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2.5px solid #000;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* fallback initials avatar if no photo */
+    .user-avatar-initials {
+      position: relative;
+      z-index: 1;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2.5px solid #000;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      font-weight: 800;
+      font-family: 'Space Grotesk', sans-serif;
+      color: #fff;
+      letter-spacing: 0.02em;
+    }
+
+    /* online pulse dot */
+    .user-avatar-dot {
+      position: absolute;
+      bottom: 1px;
+      right: 1px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #10b981;
+      border: 2px solid #000;
+      box-shadow: 0 0 8px #10b981;
+      animation: pulse 2s ease-in-out infinite;
+      z-index: 2;
+    }
+
+    /* ── Profile Dropdown ── */
+    .user-dropdown {
+      display: none;
+      position: absolute;
+      top: calc(100% + 14px);
+      right: 0;
+      min-width: 220px;
+      background: rgba(10,10,15,0.97);
+      border: 1px solid rgba(99,102,241,0.3);
+      border-radius: 16px;
+      padding: 8px;
+      box-shadow:
+        0 0 0 1px rgba(99,102,241,0.1),
+        0 20px 60px rgba(0,0,0,0.8),
+        0 0 40px rgba(99,102,241,0.12);
+      backdrop-filter: blur(20px);
+      z-index: 9999;
+      animation: dropIn 0.2s cubic-bezier(0.4,0,0.2,1) both;
+    }
+
+    @keyframes dropIn {
+      from { opacity:0; transform:translateY(-8px) scale(0.97); }
+      to   { opacity:1; transform:none; }
+    }
+
+    .user-dropdown.open { display: block; }
+
+    .dropdown-header {
+      padding: 12px 14px 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      margin-bottom: 6px;
+    }
+
+    .dropdown-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .dropdown-email {
+      font-size: 11px;
+      color: rgba(255,255,255,0.4);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.7);
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+    }
+
+    .dropdown-item:hover {
+      background: rgba(99,102,241,0.12);
+      color: #fff;
+    }
+
+    .dropdown-item i {
+      font-size: 16px;
+      color: rgba(99,102,241,0.8);
+      flex-shrink: 0;
+    }
+
+    .dropdown-item.signout {
+      color: rgba(239,68,68,0.8);
+      margin-top: 4px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      padding-top: 12px;
+    }
+
+    .dropdown-item.signout:hover {
+      background: rgba(239,68,68,0.1);
+      color: #ef4444;
+    }
+
+    .dropdown-item.signout i { color: rgba(239,68,68,0.7); }
 
     /* ── AI Chat Banner ── */
     .chat-banner {
@@ -1227,7 +1492,7 @@
 
     .footer-text { font-size: 14px; color: var(--text-tertiary); }
 
-    /* ====== FOOTER LEGAL LINKS — clean, crawler-friendly ====== */
+    /* ====== FOOTER LEGAL LINKS ====== */
     .footer-legal {
       display: flex;
       gap: 20px;
@@ -1244,9 +1509,7 @@
       transition: color 0.2s ease;
     }
 
-    .footer-legal a:hover {
-      color: #6366f1;
-    }
+    .footer-legal a:hover { color: #6366f1; }
 
     .footer-links { display: flex; gap: 16px; flex-wrap: wrap; }
 
@@ -1319,9 +1582,9 @@
       .container { padding: 0 20px; }
       .header-inner { height: 64px; }
       .header-actions { gap: 8px; }
-      .header-actions .btn:not(.btn-primary) { display: none; }
-      .header-actions .btn-primary { padding: 8px 16px; font-size: 12px; gap: 6px; white-space: nowrap; }
-      .header-actions .btn-icon { width: 6px; height: 6px; }
+      .header-actions .btn:not(.btn-auth) { display: none; }
+      .header-actions .btn-auth { padding: 8px 14px; font-size: 12px; gap: 6px; }
+      .header-actions .btn-auth i { font-size: 14px; }
       .mobile-menu-btn { width: 36px; height: 36px; gap: 4px; }
       .mobile-menu-btn span { width: 16px; height: 2px; }
       .logo { font-size: 18px; }
@@ -1347,7 +1610,7 @@
       .hero h1 { font-size: 32px; }
       .hero-cta { flex-direction: column; align-items: stretch; }
       .btn { width: 100%; justify-content: center; }
-      .header-actions .btn-primary { padding: 6px 12px; font-size: 11px; }
+      .header-actions .btn-auth { padding: 7px 12px; font-size: 11px; }
       .mobile-menu-btn { width: 32px; height: 32px; }
       .mobile-menu-btn span { width: 14px; }
       .stats-bar { grid-template-columns: 1fr; }
@@ -1721,10 +1984,40 @@
 
             <div class="header-actions">
               <a class="btn" href="https://t1era-or-kode-blind.gitbook.io/t1era/documentation" target="_blank" rel="noopener">Docs</a>
-              <a class="btn btn-primary" href="auth.html" id="launchBtn">
-                <span class="btn-icon"></span>
-                <span id="launchBtnText">Launch T1ERA</span>
+
+              <!-- ══ WEB3 LOGIN / SIGNUP BUTTON (shown when signed out) ══ -->
+              <a class="btn-auth" href="auth.html" id="authBtn">
+                <i class="ph-bold ph-lock-simple-open"></i>
+                <span class="btn-auth-label">Login / Sign Up</span>
               </a>
+
+              <!-- ══ USER AVATAR (shown when signed in) ══ -->
+              <button id="userAvatarBtn" aria-label="Account menu">
+                <div class="user-avatar-wrap">
+                  <div class="user-avatar-ring"></div>
+                  <div id="userAvatarInner">
+                    <!-- filled by JS: either <img> or initials div -->
+                  </div>
+                  <span class="user-avatar-dot"></span>
+                </div>
+                <!-- dropdown -->
+                <div class="user-dropdown" id="userDropdown">
+                  <div class="dropdown-header">
+                    <div class="dropdown-name" id="dropdownName">—</div>
+                    <div class="dropdown-email" id="dropdownEmail">—</div>
+                  </div>
+                  <a href="auth.html" class="dropdown-item">
+                    <i class="ph-bold ph-user-circle"></i> My Account
+                  </a>
+                  <a href="https://t.me/T1ERA_SecBot" target="_blank" rel="noopener" class="dropdown-item">
+                    <i class="ph-bold ph-paper-plane-tilt"></i> Open Telegram Bot
+                  </a>
+                  <button class="dropdown-item signout" id="signOutBtn">
+                    <i class="ph-bold ph-sign-out"></i> Sign Out
+                  </button>
+                </div>
+              </button>
+
               <button class="mobile-menu-btn" id="mobileMenuBtn">
                 <span></span>
                 <span></span>
@@ -2128,20 +2421,14 @@
         </div>
       </section>
 
-      <!-- ═══════════════════════════════════════════════════════
-           FOOTER — Privacy Policy & Terms links are plain <a>
-           tags with absolute URLs and underline so Google's
-           crawler detects them with certainty.
-      ════════════════════════════════════════════════════════ -->
+      <!-- FOOTER -->
       <footer>
         <div class="container">
           <div class="footer-content">
-
             <div class="footer-left">
               <div class="footer-text">
                 © <span id="year"></span> T1ERA. Professional AI Suite for Telegram.
               </div>
-              <!-- LEGAL LINKS: absolute URLs, underlined, no JS handlers -->
               <nav class="footer-legal" aria-label="Legal">
                 <a href="https://t1era.netlify.app/privacy.html">Privacy Policy</a>
                 <a href="https://t1era.netlify.app/terms.html">Terms of Service</a>
@@ -2154,7 +2441,6 @@
               <a class="btn" href="https://t1era-or-kode-blind.gitbook.io/t1era/documentation" target="_blank" rel="noopener">Documentation</a>
               <a class="btn" href="https://t.me/T1ERA_SecBot" target="_blank" rel="noopener">Launch Bot</a>
             </div>
-
           </div>
         </div>
       </footer>
@@ -2378,6 +2664,21 @@
       closeModal();
     });
 
+    // ══ USER AVATAR DROPDOWN TOGGLE ══
+    const userAvatarBtn = document.getElementById('userAvatarBtn');
+    const userDropdown  = document.getElementById('userDropdown');
+
+    userAvatarBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      userDropdown.classList.toggle('open');
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!userAvatarBtn.contains(e.target)) {
+        userDropdown.classList.remove('open');
+      }
+    });
+
     // ── VIDEO GENERATION ENGINE ──
     async function pollJobStatus(jobId, onUpdate, onDone, onError) {
       const POLL_INTERVAL = 2500;
@@ -2422,10 +2723,12 @@
     }
   </script>
 
-  <!-- Firebase auth state -->
+  <!-- ══════════════════════════════════════════════
+       FIREBASE — Auth state → show avatar or login btn
+  ══════════════════════════════════════════════ -->
   <script type="module">
-    import { initializeApp }            from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+    import { initializeApp }               from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+    import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 
     const firebaseConfig = {
       apiKey:            "AIzaSyALMqX8Cw_LvdztWX3laDcDL8tK5vrMh8Y",
@@ -2439,20 +2742,42 @@
     const app  = initializeApp(firebaseConfig);
     const auth = getAuth(app);
 
+    const authBtn       = document.getElementById('authBtn');
+    const userAvatarBtn = document.getElementById('userAvatarBtn');
+    const userAvatarInner = document.getElementById('userAvatarInner');
+    const dropdownName  = document.getElementById('dropdownName');
+    const dropdownEmail = document.getElementById('dropdownEmail');
+    const signOutBtn    = document.getElementById('signOutBtn');
+
     onAuthStateChanged(auth, user => {
-      const btn     = document.getElementById('launchBtn');
-      const btnText = document.getElementById('launchBtnText');
       if (user) {
-        btn.href   = 'https://t.me/T1ERA_SecBot';
-        btn.target = '_blank';
-        btn.rel    = 'noopener';
-        const name = (user.displayName || user.email || '').split(' ')[0];
-        btnText.textContent = `Hi ${name} · Open Bot`;
+        // ── SIGNED IN — hide login btn, show avatar ──
+        authBtn.style.display       = 'none';
+        userAvatarBtn.style.display = 'block';
+
+        // Fill dropdown info
+        dropdownName.textContent  = user.displayName || 'T1ERA User';
+        dropdownEmail.textContent = user.email || '';
+
+        // Build avatar inner — photo from Google or initials fallback
+        if (user.photoURL) {
+          userAvatarInner.innerHTML = `<img class="user-avatar-img" src="${user.photoURL}" alt="avatar" referrerpolicy="no-referrer"/>`;
+        } else {
+          const initial = (user.displayName || user.email || 'U')[0].toUpperCase();
+          userAvatarInner.innerHTML = `<div class="user-avatar-initials">${initial}</div>`;
+        }
+
       } else {
-        btn.href   = 'auth.html';
-        btn.target = '';
-        btnText.textContent = 'Launch T1ERA';
+        // ── SIGNED OUT — show login btn, hide avatar ──
+        authBtn.style.display       = 'inline-flex';
+        userAvatarBtn.style.display = 'none';
       }
+    });
+
+    // Sign out handler
+    signOutBtn.addEventListener('click', async () => {
+      await signOut(auth);
+      document.getElementById('userDropdown').classList.remove('open');
     });
   </script>
 </body>
