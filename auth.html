@@ -1063,17 +1063,35 @@
     /* ═══════════════════════════════════
        GOOGLE SIGN-IN
        Sign In tab  → reject if brand new user (not registered)
-       Sign Up tab  → NEW: run HOV first for new users,
-                      then complete Google signup on pass
+       Sign Up tab  → run HOV FIRST (before Google popup),
+                      then open Google popup only after HOV passes
     ═══════════════════════════════════ */
     async function doGoogle(mode){
       clrA('lErr'); clrA('sErr');
       if(mode==='login'&&locked()) return;
+
+      // ── SIGNUP: show HOV BEFORE opening Google popup ──
+      if(mode==='signup'){
+        openHov(async function(){
+          // HOV passed — now open Google popup
+          try{
+            const result=await window._fb.signInWithPopup(window._auth, window._gp);
+            const info  =window._fb.getAdditionalUserInfo(result);
+            // If existing account just log them in silently — HOV still ran
+            // onAuthStateChanged handles UI for both cases
+          } catch(err){
+            showA('sErr', fbMsg(err.code), 'err');
+          }
+        });
+        return;
+      }
+
+      // ── LOGIN: normal flow ──
       try{
         const result=await window._fb.signInWithPopup(window._auth, window._gp);
         const info  =window._fb.getAdditionalUserInfo(result);
 
-        if(mode==='login'&&info.isNewUser){
+        if(info.isNewUser){
           // New account created via Google on Sign In tab — not allowed
           await window._fb.signOut(window._auth);
           markFail();
@@ -1083,29 +1101,11 @@
           return;
         }
 
-        if(mode==='login') markOk();
-
-        // ── NEW: signup via Google + new user → run HOV before success ──
-        if(mode==='signup' && info.isNewUser){
-          // Temporarily sign out — only keep session after HOV passes
-          await window._fb.signOut(window._auth);
-          openHov(async function(){
-            // HOV passed — re-trigger Google sign-in to restore session
-            try{
-              await window._fb.signInWithPopup(window._auth, window._gp);
-              // onAuthStateChanged fires → shows logged-in state automatically
-            } catch(reErr){
-              showA('sErr', fbMsg(reErr.code), 'err');
-            }
-          });
-          return;
-        }
-
-        // signup mode but existing user → just let them in
+        markOk();
         // onAuthStateChanged handles UI
 
       } catch(err){
-        showA(mode==='login'?'lErr':'sErr', fbMsg(err.code), 'err');
+        showA('lErr', fbMsg(err.code), 'err');
       }
     }
     window.doGoogle=doGoogle;
