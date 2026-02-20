@@ -789,7 +789,7 @@
                   </div>
                 </div>
                 <div class="ucheck-hint" id="hintEmailBackup"></div>
-                <!-- Anti-fraud alert for backup email (hidden by default, retained structure) -->
+                <!-- Anti-fraud alert for backup email remains in DOM but not triggered -->
                 <div class="fraud-alert" id="fraudAlertBackup">
                   <div class="fraud-alert-header">
                     <div class="fraud-alert-icon"><i class="ph-bold ph-shield-warning"></i></div>
@@ -1481,8 +1481,8 @@
         const uid = window._currentUser ? window._currentUser.uid : null;
         const = await Promise.all();
         let taken = false;
-        snap1.forEach(d=>{ if(d.data().uid !== uid) taken = true; });
-        snap2.forEach(d=>{ if(d.data().uid !== uid) taken = true; });
+        snapPrimary.forEach(d=>{ if(d.data().uid !== uid) taken = true; });
+        snapBackup.forEach(d=>{ if(d.data().uid !== uid) taken = true; });
 
         if(!taken){ 
           st.status='ok';  
@@ -1511,7 +1511,7 @@
         const inp    = document.getElementById('emailBackup');
         const isBlur = e && e.type === 'blur';
         clearTimeout(st.timer);
-        hideFraudAlert('fraudAlertBackup'); // Clear any left-over alert just in case
+        hideFraudAlert('fraudAlertBackup');
         
         if(!raw.trim() || val.length < 5 || !/^+@+\.+$/.test(val)){
           st.status='idle'; _setIco('icoEmailBackup','idle'); _setHint('hintEmailBackup','',''); inp.classList.remove('ok','err'); return;
