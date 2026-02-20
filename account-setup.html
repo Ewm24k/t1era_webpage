@@ -379,6 +379,57 @@
     .terms-box p{margin-bottom:10px;}
     .terms-scroll-hint{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--txt3);margin-bottom:14px;}
 
+
+    /* ── UNIQUENESS CHECKER ── */
+    .ucheck-wrap{position:relative;}
+    .ucheck-wrap .finp{padding-right:44px;}
+    .ucheck-ico{
+      position:absolute;right:12px;top:50%;transform:translateY(-50%);
+      width:22px;height:22px;display:flex;align-items:center;justify-content:center;
+      pointer-events:none;
+    }
+    /* spinner */
+    .ucheck-spin{
+      width:16px;height:16px;border-radius:50%;
+      border:2px solid rgba(255,255,255,.12);
+      border-top-color:var(--ind);
+      animation:spin .7s linear infinite;
+      display:none;
+    }
+    .ucheck-ico.checking .ucheck-spin{display:block;}
+    .ucheck-ico.checking .ucheck-ok,
+    .ucheck-ico.checking .ucheck-err{display:none;}
+    /* ok tick */
+    .ucheck-ok{
+      display:none;width:20px;height:20px;border-radius:50%;
+      background:var(--green);align-items:center;justify-content:center;
+      font-size:11px;font-weight:900;color:#fff;
+      box-shadow:0 0 8px rgba(16,185,129,.5);
+      animation:uchkPop .3s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+    .ucheck-ico.ok .ucheck-ok{display:flex;}
+    .ucheck-ico.ok .ucheck-spin,
+    .ucheck-ico.ok .ucheck-err{display:none;}
+    /* err cross */
+    .ucheck-err{
+      display:none;width:20px;height:20px;border-radius:50%;
+      background:var(--red);align-items:center;justify-content:center;
+      font-size:11px;font-weight:900;color:#fff;
+      box-shadow:0 0 8px rgba(239,68,68,.5);
+      animation:uchkPop .3s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+    .ucheck-ico.err .ucheck-err{display:flex;}
+    .ucheck-ico.err .ucheck-spin,
+    .ucheck-ico.err .ucheck-ok{display:none;}
+    @keyframes uchkPop{from{transform:scale(0)}to{transform:scale(1)}}
+    /* hint text below field */
+    .ucheck-hint{
+      font-size:11px;font-weight:600;margin-top:5px;min-height:16px;
+      transition:opacity .2s;
+    }
+    .ucheck-hint.ok{color:var(--green);}
+    .ucheck-hint.err{color:var(--red);}
+    .ucheck-hint.checking{color:var(--txt3);}
     /* ── WARNING BOX ── */
     .warn-box{background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.25);border-radius:12px;padding:14px 16px;font-size:12px;color:#fcd34d;line-height:1.7;margin-bottom:16px;}
     .warn-box strong{display:block;font-size:13px;font-weight:700;margin-bottom:4px;color:#fbbf24;}
@@ -628,7 +679,15 @@
               </div>
               <div class="field">
                 <div class="flbl">Nickname / Display Name</div>
-                <input class="finp" id="nickname" type="text" placeholder="e.g. ZulAhmad, AZ99"/>
+                <div class="ucheck-wrap">
+                  <input class="finp" id="nickname" type="text" placeholder="e.g. ZulAhmad, AZ99" autocomplete="off"/>
+                  <div class="ucheck-ico" id="icoNickname">
+                    <div class="ucheck-spin"></div>
+                    <div class="ucheck-ok">✓</div>
+                    <div class="ucheck-err">✗</div>
+                  </div>
+                </div>
+                <div class="ucheck-hint" id="hintNickname"></div>
               </div>
             </div>
             <div class="field-row">
@@ -828,7 +887,15 @@
             </div>
             <div class="field">
               <div class="flbl">Real Phone Number</div>
-              <input class="finp" id="phone" type="tel" placeholder="e.g. +60 12-345 6789 (with country code)"/>
+              <div class="ucheck-wrap">
+                <input class="finp" id="phone" type="tel" placeholder="e.g. +60 12-345 6789 (with country code)" autocomplete="off"/>
+                <div class="ucheck-ico" id="icoPhone">
+                  <div class="ucheck-spin"></div>
+                  <div class="ucheck-ok">✓</div>
+                  <div class="ucheck-err">✗</div>
+                </div>
+              </div>
+              <div class="ucheck-hint" id="hintPhone"></div>
             </div>
             <div class="field-row">
               <div class="field">
@@ -837,7 +904,15 @@
               </div>
               <div class="field">
                 <div class="flbl">Backup Email</div>
-                <input class="finp" id="emailBackup" type="email" placeholder="Different from primary"/>
+                <div class="ucheck-wrap">
+                  <input class="finp" id="emailBackup" type="email" placeholder="Different from primary" autocomplete="off"/>
+                  <div class="ucheck-ico" id="icoEmailBackup">
+                    <div class="ucheck-spin"></div>
+                    <div class="ucheck-ok">✓</div>
+                    <div class="ucheck-err">✗</div>
+                  </div>
+                </div>
+                <div class="ucheck-hint" id="hintEmailBackup"></div>
               </div>
             </div>
             <div class="field">
@@ -1044,7 +1119,11 @@
       doc,
       getDoc,
       setDoc,
-      serverTimestamp
+      serverTimestamp,
+      collection,
+      query,
+      where,
+      getDocs
     } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
     const app = initializeApp({
@@ -1060,10 +1139,14 @@
     const db   = getFirestore(app);
 
     // Make db & helpers available globally so the vanilla JS below can call them
-    window._db             = db;
-    window._doc            = doc;
-    window._setDoc         = setDoc;
+    window._db              = db;
+    window._doc             = doc;
+    window._setDoc          = setDoc;
     window._serverTimestamp = serverTimestamp;
+    window._collection      = collection;
+    window._query           = query;
+    window._where           = where;
+    window._getDocs         = getDocs;
 
     // ══════════════════════════════════════════════════
     // GATEKEEPER — mirrors the logic in auth.html
@@ -1439,11 +1522,35 @@
       const saveStart = Date.now();
 
       try {
+        // ── Write main user document ──
         await window._setDoc(
           window._doc(window._db, 'users', uid),
           data,
           { merge: true }
         );
+
+        // ── Write uniqueness index documents ──
+        // These act as a registry so no other account can claim the same
+        // nickname, phone number, or backup email.
+        const ts = window._serverTimestamp ? window._serverTimestamp() : new Date().toISOString();
+        const normNick  = data.nickname.trim().toLowerCase().replace(/\s+/g,'_');
+        const normPhone = data.phone.trim().replace(/[\s\-().]/g,'');
+        const normEmail = data.emailBackup.trim().toLowerCase();
+
+        await Promise.all([
+          window._setDoc(
+            window._doc(window._db, 'usernames', normNick),
+            { uid, nickname: data.nickname, createdAt: ts }
+          ),
+          window._setDoc(
+            window._doc(window._db, 'phones', normPhone),
+            { uid, phone: data.phone, createdAt: ts }
+          ),
+          window._setDoc(
+            window._doc(window._db, 'backupEmails', normEmail),
+            { uid, email: data.emailBackup, createdAt: ts }
+          ),
+        ]);
 
         // ✅ Mark last step done, update text, then fade out
         const elapsed   = Date.now() - saveStart;
@@ -1510,6 +1617,217 @@
     window.back = function(n){
       if(n <= 1) return;
       goTo(n - 1, true);
+    };
+
+
+    /* ═══════════════════════════════════════════════════════════
+       REAL-TIME UNIQUENESS CHECKER
+       Checks nickname, phone, backup email against Firestore.
+       Collections used:
+         usernames/{nickname_lowercase}   → {uid, createdAt}
+         phones/{e164_normalized}         → {uid, createdAt}
+         backupEmails/{email_lowercase}   → {uid, createdAt}
+    ═══════════════════════════════════════════════════════════ */
+    const _ucheckState = {
+      nickname:    { status: 'idle', timer: null },
+      phone:       { status: 'idle', timer: null },
+      emailBackup: { status: 'idle', timer: null },
+    };
+
+    // Normalize helpers
+    function _normNickname(v){ return v.trim().toLowerCase().replace(/\s+/g,'_'); }
+    function _normPhone(v){    return v.trim().replace(/[\s\-().]/g,''); }
+    function _normEmail(v){    return v.trim().toLowerCase(); }
+
+    // Set icon state: 'idle' | 'checking' | 'ok' | 'err'
+    function _setIco(icoId, state){
+      const el = document.getElementById(icoId);
+      if(!el) return;
+      el.className = 'ucheck-ico' + (state !== 'idle' ? ' ' + state : '');
+    }
+    function _setHint(hintId, msg, state){
+      const el = document.getElementById(hintId);
+      if(!el) return;
+      el.textContent = msg;
+      el.className   = 'ucheck-hint' + (state ? ' ' + state : '');
+    }
+
+    // Core Firestore check — query by field value across all users
+    async function _checkUnique(collection, field, value, currentUid){
+      if(!window._db || !window._collection || !window._query || !window._where || !window._getDocs)
+        throw new Error('Firestore not ready');
+      const q = window._query(
+        window._collection(window._db, collection),
+        window._where(field, '==', value)
+      );
+      const snap = await window._getDocs(q);
+      // If doc exists but belongs to THIS user, still treat as available
+      // (they may be re-filling the form)
+      if(snap.empty) return true; // available
+      let takenByOther = false;
+      snap.forEach(d => { if(d.data().uid !== currentUid) takenByOther = true; });
+      return !takenByOther;
+    }
+
+    // Generic debounced checker factory
+    function _makeChecker(fieldId, icoId, hintId, collectionName, fieldName, normFn, minLen, formatCheck){
+      const state = _ucheckState[fieldId];
+
+      return async function(){
+        const raw = document.getElementById(fieldId).value;
+        const val = normFn(raw);
+        const inp = document.getElementById(fieldId);
+
+        // Clear previous timer
+        clearTimeout(state.timer);
+
+        // Reset if empty
+        if(!raw.trim() || val.length < minLen){
+          state.status = 'idle';
+          _setIco(icoId, 'idle');
+          _setHint(hintId, '', '');
+          inp.classList.remove('ok','err');
+          return;
+        }
+
+        // Format check (basic regex)
+        if(formatCheck && !formatCheck(val)){
+          state.status = 'err';
+          _setIco(icoId, 'idle');
+          _setHint(hintId, '', '');
+          inp.classList.remove('ok','err');
+          return;
+        }
+
+        // Show checking state immediately
+        state.status = 'checking';
+        _setIco(icoId, 'checking');
+        _setHint(hintId, 'Checking availability...', 'checking');
+        inp.classList.remove('ok','err');
+
+        // Debounce — wait 600ms after user stops typing
+        state.timer = setTimeout(async () => {
+          try {
+            const uid = window._currentUser ? window._currentUser.uid : null;
+            const available = await _checkUnique(collectionName, fieldName, val, uid);
+
+            if(available){
+              state.status = 'ok';
+              _setIco(icoId, 'ok');
+              _setHint(hintId, '✓ Available', 'ok');
+              inp.classList.add('ok'); inp.classList.remove('err');
+            } else {
+              state.status = 'err';
+              _setIco(icoId, 'err');
+              const msgs = {
+                nickname:    'This nickname is already taken. Please choose another.',
+                phone:       'This phone number is already registered to another account.',
+                emailBackup: 'This backup email is already linked to another account.',
+              };
+              _setHint(hintId, msgs[fieldId] || 'Already in use.', 'err');
+              inp.classList.add('err'); inp.classList.remove('ok');
+            }
+          } catch(e) {
+            // Firestore error — don't block the user, just clear state
+            console.warn('Uniqueness check failed:', e);
+            state.status = 'idle';
+            _setIco(icoId, 'idle');
+            _setHint(hintId, '', '');
+            inp.classList.remove('ok','err');
+          }
+        }, 600);
+      };
+    }
+
+    // Wire up the three fields
+    const _onNicknameInput = _makeChecker(
+      'nickname', 'icoNickname', 'hintNickname',
+      'usernames', 'nickname',
+      _normNickname, 3,
+      v => /^[a-z0-9_]{3,24}$/.test(v)  // only alphanumeric + underscore
+    );
+
+    const _onPhoneInput = _makeChecker(
+      'phone', 'icoPhone', 'hintPhone',
+      'phones', 'phone',
+      _normPhone, 7,
+      v => /^\+?[\d]{7,15}$/.test(v)
+    );
+
+    const _onEmailBackupInput = _makeChecker(
+      'emailBackup', 'icoEmailBackup', 'hintEmailBackup',
+      'backupEmails', 'email',
+      _normEmail, 5,
+      v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
+    );
+
+    document.getElementById('nickname').addEventListener('input',    _onNicknameInput);
+    document.getElementById('phone').addEventListener('input',       _onPhoneInput);
+    document.getElementById('emailBackup').addEventListener('input', _onEmailBackupInput);
+
+    // Also trigger on blur so paste events are caught
+    document.getElementById('nickname').addEventListener('blur',    _onNicknameInput);
+    document.getElementById('phone').addEventListener('blur',       _onPhoneInput);
+    document.getElementById('emailBackup').addEventListener('blur', _onEmailBackupInput);
+
+    // ── Guard: block next() if check is pending or failed ──
+    // This wraps the existing validate() function.
+    // Slides 1 and 4 each have uniqueness checks.
+    const _origValidate = validate;
+    validate = function(n){
+      if(!_origValidate(n)) return false;
+
+      if(n === 1){
+        const s = _ucheckState.nickname.status;
+        if(s === 'checking'){
+          showErr('s1Err', 'Still checking nickname availability — please wait a moment.');
+          return false;
+        }
+        if(s === 'err'){
+          showErr('s1Err', 'Nickname is already taken. Please choose a different one.');
+          document.getElementById('nickname').classList.add('err');
+          return false;
+        }
+        if(s === 'idle' && document.getElementById('nickname').value.trim().length >= 3){
+          // User typed something valid length but check hasn't run yet — run it now
+          showErr('s1Err', 'Please wait — verifying nickname uniqueness...');
+          _onNicknameInput();
+          return false;
+        }
+      }
+
+      if(n === 4){
+        const sp = _ucheckState.phone.status;
+        const se = _ucheckState.emailBackup.status;
+
+        if(sp === 'checking' || se === 'checking'){
+          showErr('s4Err', 'Still verifying your details — please wait a moment.');
+          return false;
+        }
+        if(sp === 'err'){
+          showErr('s4Err', 'Phone number is already registered to another account.');
+          document.getElementById('phone').classList.add('err');
+          return false;
+        }
+        if(se === 'err'){
+          showErr('s4Err', 'Backup email is already linked to another account.');
+          document.getElementById('emailBackup').classList.add('err');
+          return false;
+        }
+        // Force-run checks if idle with valid input
+        const phoneVal = _normPhone(document.getElementById('phone').value);
+        const emailVal = _normEmail(document.getElementById('emailBackup').value);
+        if(sp === 'idle' && /^\+?[\d]{7,15}$/.test(phoneVal)){
+          showErr('s4Err', 'Please wait — verifying phone number...');
+          _onPhoneInput(); return false;
+        }
+        if(se === 'idle' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)){
+          showErr('s4Err', 'Please wait — verifying backup email...');
+          _onEmailBackupInput(); return false;
+        }
+      }
+
+      return true;
     };
 
     /* ── ENTER KEY SUPPORT ── */
