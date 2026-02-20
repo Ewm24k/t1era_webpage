@@ -1,0 +1,2323 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>T1ERA — Profile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Orbitron:wght@400;500;600;700;800;900&family=Fira+Code:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@phosphor-icons/web@2.1.1/src/index.js"></script>
+<style>
+/* ═══════════════════════════════════════════
+   ROOT VARIABLES — T1ERA palette
+═══════════════════════════════════════════ */
+:root {
+  --bg:           #000000;
+  --bg-2:         #090909;
+  --bg-3:         #111111;
+  --bg-4:         #181818;
+  --bg-card:      #141414;
+
+  --border:       rgba(255,255,255,0.08);
+  --border-2:     rgba(255,255,255,0.12);
+
+  --text:         #ffffff;
+  --text-2:       rgba(255,255,255,0.65);
+  --text-3:       rgba(255,255,255,0.38);
+
+  --pink:         #c2185b;   /* dark pink primary */
+  --pink-2:       #e91e8c;   /* hot pink secondary */
+  --pink-glow:    rgba(194,24,91,0.25);
+  --purple:       #8b5cf6;
+  --purple-glow:  rgba(139,92,246,0.2);
+  --green:        #10b981;
+  --orange:       #f97316;
+  --gold:         #f59e0b;
+
+  --radius-sm:    8px;
+  --radius:       14px;
+  --radius-lg:    20px;
+
+  --font-display: 'Orbitron', sans-serif;
+  --font-body:    'DM Sans', sans-serif;
+  --font-mono:    'Fira Code', monospace;
+
+  --transition:   cubic-bezier(0.4,0,0.2,1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ── GLOBAL SCROLLBAR ── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(194,24,91,0.3); border-radius: 4px; }
+
+/* ═══════════════════════════════════════════
+   TOP NAV BAR
+═══════════════════════════════════════════ */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  background: rgba(0,0,0,0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+
+.topbar-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  text-decoration: none;
+  letter-spacing: 0.06em;
+}
+
+.topbar-logo-mark {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  background: linear-gradient(135deg, var(--pink), var(--purple));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 900;
+  box-shadow: 0 0 12px var(--pink-glow);
+}
+
+.topbar-back {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-2);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+.topbar-back:hover { color: var(--text); }
+.topbar-back i { font-size: 16px; }
+
+/* ═══════════════════════════════════════════
+   PROFILE WRAPPER
+═══════════════════════════════════════════ */
+.profile-wrap {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 0 80px;
+}
+
+/* ═══════════════════════════════════════════
+   BANNER HEADER
+═══════════════════════════════════════════ */
+.profile-banner {
+  position: relative;
+  height: 200px;
+  background:
+    linear-gradient(135deg,
+      rgba(194,24,91,0.18) 0%,
+      rgba(139,92,246,0.12) 50%,
+      rgba(0,0,0,0.6) 100%),
+    repeating-linear-gradient(
+      60deg,
+      transparent,
+      transparent 40px,
+      rgba(255,255,255,0.012) 40px,
+      rgba(255,255,255,0.012) 41px
+    );
+  background-color: #0d0009;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+/* animated mesh shimmer */
+.profile-banner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 20% 50%, rgba(194,24,91,0.22) 0%, transparent 60%),
+              radial-gradient(ellipse at 80% 30%, rgba(139,92,246,0.18) 0%, transparent 55%);
+  animation: bannerPulse 6s ease-in-out infinite;
+}
+
+@keyframes bannerPulse {
+  0%,100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.banner-edit-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.25s;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.85);
+  pointer-events: none;
+}
+.banner-edit-overlay i { font-size: 18px; }
+.edit-mode .profile-banner:hover .banner-edit-overlay { opacity: 1; pointer-events: auto; }
+.edit-mode .profile-banner { cursor: pointer; }
+
+/* ── RANK BADGE (top-left of banner) ── */
+.rank-badge {
+  position: absolute;
+  top: 16px;
+  left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.rank-level-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px 4px 8px;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(245,158,11,0.35);
+  border-radius: 100px;
+}
+
+.rank-shield {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.rank-level-num {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--gold);
+  letter-spacing: 0.04em;
+}
+
+.rank-title-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 100px;
+}
+
+.rank-title-text {
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.75);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.callsign-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  background: rgba(194,24,91,0.2);
+  border: 1px solid rgba(194,24,91,0.3);
+  border-radius: 100px;
+}
+
+.callsign-text {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 500;
+  color: var(--pink-2);
+  letter-spacing: 0.06em;
+}
+
+/* ── XP BAR inside banner ── */
+.xp-bar-wrap {
+  position: absolute;
+  bottom: 14px;
+  left: 20px;
+  right: 60px;
+}
+
+.xp-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 4px;
+  letter-spacing: 0.08em;
+}
+
+.xp-track {
+  height: 3px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 100px;
+  overflow: hidden;
+}
+
+.xp-fill {
+  height: 100%;
+  width: 12%; /* xp=0, level 1, so near 0 */
+  background: linear-gradient(90deg, var(--pink), var(--purple));
+  border-radius: 100px;
+  box-shadow: 0 0 8px rgba(194,24,91,0.6);
+  animation: xpGlow 2s ease-in-out infinite;
+}
+
+@keyframes xpGlow {
+  0%,100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* ── THREE-DOT MENU (top-right of banner) ── */
+.banner-actions {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dots-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.8);
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  position: relative;
+}
+.dots-btn:hover {
+  background: rgba(194,24,91,0.2);
+  border-color: rgba(194,24,91,0.4);
+  color: #fff;
+}
+
+/* ── dots dropdown ── */
+.dots-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 170px;
+  background: rgba(10,6,14,0.97);
+  border: 1px solid rgba(194,24,91,0.2);
+  border-radius: 12px;
+  padding: 5px;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.85), 0 0 24px rgba(194,24,91,0.08);
+  backdrop-filter: blur(20px);
+  display: none;
+  animation: dropIn 0.2s cubic-bezier(0.34,1.4,0.64,1) both;
+  z-index: 100;
+}
+.dots-menu.open { display: block; }
+
+@keyframes dropIn {
+  from { opacity:0; transform:translateY(-6px) scale(0.95); }
+  to { opacity:1; transform:none; }
+}
+
+.dots-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 11px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: var(--font-body);
+  color: rgba(255,255,255,0.6);
+  cursor: pointer;
+  transition: all 0.15s;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+.dots-menu-item i { font-size: 15px; color: rgba(194,24,91,0.7); }
+.dots-menu-item:hover { background: rgba(194,24,91,0.1); color: #fff; }
+.dots-menu-item:hover i { color: var(--pink-2); }
+
+/* ═══════════════════════════════════════════
+   IDENTITY ROW (avatar + info)
+═══════════════════════════════════════════ */
+.profile-identity {
+  position: relative;
+  padding: 0 20px 0;
+  margin-top: -48px;
+}
+
+/* avatar */
+.avatar-wrap {
+  position: relative;
+  width: 90px;
+  height: 90px;
+  margin-bottom: 12px;
+}
+
+.avatar-ring {
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  background: conic-gradient(
+    var(--pink) 0deg,
+    var(--purple) 90deg,
+    var(--pink-2) 180deg,
+    var(--pink) 360deg
+  );
+  animation: ringRotate 4s linear infinite;
+  z-index: 0;
+}
+
+@keyframes ringRotate { to { transform: rotate(360deg); } }
+
+.avatar-img {
+  position: relative;
+  z-index: 1;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--bg);
+  display: block;
+}
+
+.avatar-fallback {
+  position: relative;
+  z-index: 1;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  border: 3px solid var(--bg);
+  background: linear-gradient(135deg, var(--pink), var(--purple));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 800;
+  color: #fff;
+}
+
+/* edit avatar btn — only in edit mode */
+.avatar-edit-btn {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  z-index: 3;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--pink);
+  border: 2px solid var(--bg);
+  color: #fff;
+  font-size: 12px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.edit-mode .avatar-edit-btn { display: flex; }
+.avatar-edit-btn:hover { background: var(--pink-2); }
+
+/* online dot */
+.avatar-online {
+  position: absolute;
+  bottom: 4px;
+  left: 4px;
+  z-index: 3;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--green);
+  border: 2.5px solid var(--bg);
+  box-shadow: 0 0 8px var(--green);
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%,100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* ── name + details ── */
+.identity-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.identity-name-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.identity-fullname {
+  font-family: var(--font-body);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+.identity-nickname {
+  font-size: 14px;
+  color: var(--text-3);
+  font-weight: 400;
+}
+
+/* account type badge */
+.acct-type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 100px;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-family: var(--font-mono);
+}
+
+.acct-type-badge.free {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.45);
+}
+
+.acct-type-badge.pro {
+  background: rgba(245,158,11,0.12);
+  border: 1px solid rgba(245,158,11,0.3);
+  color: var(--gold);
+}
+
+.acct-type-badge.standard {
+  background: rgba(139,92,246,0.1);
+  border: 1px solid rgba(139,92,246,0.25);
+  color: var(--purple);
+}
+
+/* verified / unverified */
+.verified-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px;
+  border-radius: 100px;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: default;
+  font-family: var(--font-mono);
+}
+
+.verified-tag.verified {
+  background: rgba(16,185,129,0.12);
+  border: 1px solid rgba(16,185,129,0.3);
+  color: var(--green);
+}
+
+.verified-tag.unverified {
+  background: rgba(239,68,68,0.08);
+  border: 1px solid rgba(239,68,68,0.2);
+  color: rgba(239,68,68,0.7);
+  position: relative;
+}
+
+/* ⓘ tooltip trigger */
+.info-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: rgba(239,68,68,0.2);
+  font-size: 8px;
+  font-weight: 800;
+  color: rgba(239,68,68,0.8);
+  cursor: pointer;
+  font-style: normal;
+  position: relative;
+}
+
+.tooltip-bubble {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(10,6,14,0.97);
+  border: 1px solid rgba(239,68,68,0.25);
+  border-radius: 10px;
+  padding: 8px 12px;
+  white-space: nowrap;
+  font-size: 10px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.7);
+  font-family: var(--font-body);
+  text-transform: none;
+  letter-spacing: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+  z-index: 50;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.7);
+  min-width: 180px;
+  text-align: center;
+}
+
+.tooltip-bubble::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: rgba(239,68,68,0.25);
+}
+
+.info-trigger:hover .tooltip-bubble { opacity: 1; }
+
+/* email row */
+.identity-email {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-3);
+  font-family: var(--font-mono);
+  margin-top: 1px;
+}
+.identity-email i { font-size: 13px; color: rgba(194,24,91,0.5); }
+
+/* ── STATUS UPDATE ── */
+.status-wrap {
+  margin-top: 12px;
+  position: relative;
+}
+
+.status-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-2);
+  font-style: italic;
+  min-height: 32px;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px dashed transparent;
+  transition: border-color 0.2s;
+  cursor: text;
+  width: 100%;
+}
+
+.status-display:hover,
+.status-display:focus {
+  border-color: rgba(194,24,91,0.3);
+  background: rgba(194,24,91,0.04);
+  outline: none;
+}
+
+.status-emoji {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.status-text-input {
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--text-2);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-style: italic;
+  flex: 1;
+  cursor: text;
+}
+
+.status-text-input::placeholder { color: var(--text-3); }
+
+.status-save-btn {
+  padding: 3px 10px;
+  border-radius: 6px;
+  background: var(--pink);
+  border: none;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s;
+  font-family: var(--font-body);
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+}
+.status-wrap:focus-within .status-save-btn { opacity: 1; }
+
+/* ═══════════════════════════════════════════
+   SOCIAL STATS ROW
+═══════════════════════════════════════════ */
+.stats-row {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 16px 20px;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  margin-top: 16px;
+}
+
+.stat-block {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  cursor: pointer;
+  padding: 8px 4px;
+  border-radius: 10px;
+  transition: background 0.18s;
+  position: relative;
+}
+
+.stat-block:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 20%;
+  height: 60%;
+  width: 1px;
+  background: var(--border);
+}
+
+.stat-block:hover { background: rgba(194,24,91,0.06); }
+
+.stat-num {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+
+.stat-label {
+  font-size: 10px;
+  color: var(--text-3);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-family: var(--font-mono);
+}
+
+/* ═══════════════════════════════════════════
+   INFO CHIPS ROW
+═══════════════════════════════════════════ */
+.chips-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  padding: 14px 20px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 100px;
+  font-size: 10.5px;
+  font-weight: 500;
+  color: var(--text-2);
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  font-family: var(--font-body);
+  white-space: nowrap;
+}
+
+.chip i { font-size: 12px; color: var(--text-3); }
+.chip.highlight { border-color: rgba(194,24,91,0.25); color: rgba(194,24,91,0.85); background: rgba(194,24,91,0.06); }
+.chip.highlight i { color: rgba(194,24,91,0.5); }
+.chip.gold-chip { border-color: rgba(245,158,11,0.25); color: rgba(245,158,11,0.8); background: rgba(245,158,11,0.05); }
+.chip.gold-chip i { color: rgba(245,158,11,0.5); }
+
+/* ═══════════════════════════════════════════
+   TABS
+═══════════════════════════════════════════ */
+.tabs-wrap {
+  padding: 0 20px;
+  margin-top: 8px;
+}
+
+.tabs-header {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  gap: 0;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 11px 8px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-3);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: var(--font-body);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  position: relative;
+  bottom: -1px;
+}
+
+.tab-btn.active {
+  color: var(--text);
+  border-bottom-color: var(--pink);
+}
+
+.tab-btn:hover:not(.active) { color: var(--text-2); }
+
+.tab-panel {
+  display: none;
+  padding-top: 20px;
+}
+
+.tab-panel.active { display: block; }
+
+/* ── TAB 1: SPARKS (posts) ── */
+.sparks-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.spark-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  transition: border-color 0.2s;
+}
+
+.spark-card:hover { border-color: rgba(194,24,91,0.2); }
+
+.spark-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.spark-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid rgba(194,24,91,0.25);
+}
+
+.spark-avatar-fallback {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--pink), var(--purple));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  font-family: var(--font-display);
+  border: 1.5px solid rgba(194,24,91,0.25);
+  flex-shrink: 0;
+}
+
+.spark-meta { flex: 1; }
+
+.spark-name {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.spark-time {
+  font-size: 10px;
+  color: var(--text-3);
+  font-family: var(--font-mono);
+}
+
+.spark-rank-chip {
+  font-family: var(--font-display);
+  font-size: 8px;
+  color: rgba(245,158,11,0.7);
+  background: rgba(245,158,11,0.07);
+  border: 1px solid rgba(245,158,11,0.15);
+  padding: 2px 6px;
+  border-radius: 100px;
+  letter-spacing: 0.06em;
+}
+
+.spark-body {
+  font-size: 13.5px;
+  color: var(--text-2);
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+
+.spark-tag {
+  display: inline-flex;
+  align-items: center;
+  color: var(--pink-2);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.spark-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.spark-action {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  color: var(--text-3);
+  cursor: pointer;
+  transition: color 0.2s;
+  background: none;
+  border: none;
+  font-family: var(--font-body);
+}
+.spark-action i { font-size: 15px; }
+.spark-action:hover { color: var(--pink-2); }
+
+/* empty state */
+.tab-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 52px 20px;
+  gap: 10px;
+  text-align: center;
+}
+
+.tab-empty-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  margin-bottom: 4px;
+}
+
+.tab-empty-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+.tab-empty-sub {
+  font-size: 12px;
+  color: var(--text-3);
+  max-width: 240px;
+  line-height: 1.5;
+}
+
+/* ── TAB 2: ACTIVITY ── */
+.activity-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.activity-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+
+.activity-item:last-child { border-bottom: none; }
+
+.activity-line {
+  position: absolute;
+  left: 15px;
+  top: 36px;
+  bottom: -12px;
+  width: 1px;
+  background: var(--border);
+}
+.activity-item:last-child .activity-line { display: none; }
+
+.activity-icon-wrap {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 14px;
+  z-index: 1;
+}
+
+.activity-icon-wrap.pink-bg {
+  background: rgba(194,24,91,0.12);
+  border-color: rgba(194,24,91,0.2);
+}
+
+.activity-icon-wrap.purple-bg {
+  background: rgba(139,92,246,0.12);
+  border-color: rgba(139,92,246,0.2);
+}
+
+.activity-icon-wrap.green-bg {
+  background: rgba(16,185,129,0.1);
+  border-color: rgba(16,185,129,0.2);
+}
+
+.activity-body {
+  flex: 1;
+  padding-top: 3px;
+}
+
+.activity-text {
+  font-size: 12.5px;
+  color: var(--text-2);
+  line-height: 1.5;
+}
+
+.activity-text strong { color: var(--text); font-weight: 600; }
+
+.activity-time {
+  font-size: 10px;
+  color: var(--text-3);
+  font-family: var(--font-mono);
+  margin-top: 3px;
+}
+
+/* ── TAB 3: INTEL ── */
+.intel-section { margin-bottom: 24px; }
+
+.intel-section-title {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-3);
+  font-family: var(--font-mono);
+  margin-bottom: 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* rank progress card */
+.rank-progress-card {
+  background: var(--bg-card);
+  border: 1px solid rgba(245,158,11,0.15);
+  border-radius: var(--radius);
+  padding: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.rank-progress-card::before {
+  content: '';
+  position: absolute;
+  top: -30px;
+  right: -30px;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(245,158,11,0.08), transparent 70%);
+  pointer-events: none;
+}
+
+.rank-progress-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.rank-progress-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.rank-big-shield {
+  width: 42px;
+  height: 42px;
+}
+
+.rank-info-stack { display: flex; flex-direction: column; gap: 2px; }
+
+.rank-current-title {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 0.04em;
+}
+
+.rank-level-label {
+  font-size: 10.5px;
+  color: var(--text-3);
+  font-family: var(--font-mono);
+}
+
+.rank-callsign-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--pink-2);
+  opacity: 0.8;
+}
+
+.rank-xp-section { }
+
+.rank-xp-nums {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.xp-current {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--gold);
+}
+
+.xp-next {
+  font-size: 10px;
+  color: var(--text-3);
+  font-family: var(--font-mono);
+}
+
+.rank-xp-bar {
+  height: 5px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 100px;
+  overflow: hidden;
+}
+
+.rank-xp-fill {
+  height: 100%;
+  width: 2%;
+  background: linear-gradient(90deg, var(--gold), var(--orange));
+  border-radius: 100px;
+  box-shadow: 0 0 8px rgba(245,158,11,0.5);
+}
+
+/* badges */
+.badges-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px;
+}
+
+.badge-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+  transition: border-color 0.2s;
+}
+
+.badge-card:hover { border-color: rgba(194,24,91,0.25); }
+
+.badge-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.badge-name {
+  font-size: 9.5px;
+  font-weight: 600;
+  color: var(--text-2);
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
+}
+
+.badge-card.locked {
+  opacity: 0.4;
+  filter: grayscale(1);
+}
+
+/* points breakdown */
+.points-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.points-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12.5px;
+}
+
+.points-row-label {
+  color: var(--text-3);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+}
+
+.points-row-val {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.points-row-val.available { color: var(--green); }
+.points-row-val.spent { color: rgba(239,68,68,0.7); }
+.points-divider { height: 1px; background: var(--border); }
+
+/* balance card */
+.balance-card {
+  background: linear-gradient(135deg, rgba(194,24,91,0.08), rgba(139,92,246,0.06));
+  border: 1px solid rgba(194,24,91,0.15);
+  border-radius: var(--radius);
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.balance-left {}
+.balance-amount {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+.balance-currency {
+  font-size: 10px;
+  color: var(--text-3);
+  font-family: var(--font-mono);
+  margin-top: 2px;
+}
+
+.topup-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: var(--pink);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-family: var(--font-body);
+  letter-spacing: 0.03em;
+}
+.topup-btn:hover { background: var(--pink-2); }
+.topup-btn i { font-size: 13px; }
+
+/* ═══════════════════════════════════════════
+   FOLLOWING / FOLLOWERS MODAL
+═══════════════════════════════════════════ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.8);
+  backdrop-filter: blur(8px);
+  z-index: 500;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s, visibility 0.25s;
+}
+
+.modal-overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-sheet {
+  width: 100%;
+  max-width: 500px;
+  background: rgba(10,6,14,0.98);
+  border: 1px solid rgba(194,24,91,0.15);
+  border-radius: 24px 24px 0 0;
+  padding: 0 0 40px;
+  max-height: 75vh;
+  overflow-y: auto;
+  transform: translateY(30px);
+  transition: transform 0.3s cubic-bezier(0.34,1.2,0.64,1);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(194,24,91,0.2) transparent;
+}
+
+.modal-overlay.open .modal-sheet {
+  transform: translateY(0);
+}
+
+.modal-handle {
+  width: 36px;
+  height: 4px;
+  border-radius: 100px;
+  background: rgba(255,255,255,0.12);
+  margin: 12px auto 0;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  font-family: var(--font-body);
+}
+
+.modal-close-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  color: var(--text-3);
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.18s;
+}
+.modal-close-btn:hover { background: rgba(194,24,91,0.15); color: #fff; }
+
+.user-list { padding: 6px 12px; }
+
+.user-list-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 6px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.user-list-item:hover { background: rgba(255,255,255,0.04); }
+
+.user-list-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--border-2);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: var(--font-display);
+  color: #fff;
+}
+
+.user-list-info { flex: 1; }
+
+.user-list-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.user-list-meta {
+  font-size: 10px;
+  color: var(--text-3);
+  font-family: var(--font-mono);
+  margin-top: 1px;
+}
+
+.user-list-badge {
+  font-family: var(--font-display);
+  font-size: 8px;
+  color: rgba(245,158,11,0.7);
+  background: rgba(245,158,11,0.07);
+  border: 1px solid rgba(245,158,11,0.15);
+  padding: 2px 6px;
+  border-radius: 100px;
+}
+
+/* ═══════════════════════════════════════════
+   EDIT MODE STYLES
+═══════════════════════════════════════════ */
+.editable-field {
+  position: relative;
+}
+
+.edit-pencil {
+  position: absolute;
+  top: 50%;
+  right: -28px;
+  transform: translateY(-50%);
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(194,24,91,0.15);
+  border: 1px solid rgba(194,24,91,0.3);
+  color: var(--pink);
+  font-size: 11px;
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.edit-mode .edit-pencil { display: flex; }
+.edit-pencil:hover { background: var(--pink); color: #fff; }
+
+/* ═══════════════════════════════════════════
+   EDIT MODE TOAST
+═══════════════════════════════════════════ */
+.edit-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(60px);
+  background: rgba(10,6,14,0.97);
+  border: 1px solid rgba(194,24,91,0.3);
+  border-radius: 100px;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-2);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.7), 0 0 20px rgba(194,24,91,0.15);
+  z-index: 300;
+  transition: transform 0.35s cubic-bezier(0.34,1.2,0.64,1), opacity 0.25s;
+  opacity: 0;
+  white-space: nowrap;
+}
+
+.edit-toast.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+.edit-toast-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--pink);
+  animation: pulse-dot 1.5s infinite;
+}
+
+.edit-toast-save {
+  margin-left: 6px;
+  padding: 4px 12px;
+  background: var(--pink);
+  border: none;
+  border-radius: 100px;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--font-body);
+  letter-spacing: 0.05em;
+  transition: background 0.2s;
+}
+.edit-toast-save:hover { background: var(--pink-2); }
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════ */
+@media (max-width: 640px) {
+  .profile-banner { height: 160px; }
+
+  .rank-badge { top: 12px; left: 14px; }
+  .rank-level-num { font-size: 10px; }
+  .rank-title-text { font-size: 8px; }
+  .callsign-text { font-size: 8px; }
+
+  .profile-identity { padding: 0 14px; margin-top: -42px; }
+
+  .avatar-wrap { width: 76px; height: 76px; }
+  .avatar-img, .avatar-fallback { width: 76px; height: 76px; font-size: 22px; }
+
+  .identity-fullname { font-size: 15px; }
+
+  .stat-num { font-size: 16px; }
+  .stat-label { font-size: 9px; }
+
+  .chips-row { padding: 12px 14px; }
+  .tabs-wrap { padding: 0 14px; }
+
+  .stats-row { padding: 12px 14px; }
+
+  .modal-sheet { max-height: 80vh; border-radius: 20px 20px 0 0; }
+
+  .badges-grid { grid-template-columns: repeat(3, 1fr); }
+
+  .balance-amount { font-size: 18px; }
+}
+
+@media (min-width: 641px) {
+  .modal-overlay { align-items: center; }
+  .modal-sheet {
+    border-radius: 20px;
+    max-width: 420px;
+    margin-bottom: 0;
+  }
+}
+
+/* ── Loading skeleton ── */
+.skeleton {
+  background: linear-gradient(90deg, var(--bg-3) 25%, rgba(255,255,255,0.04) 50%, var(--bg-3) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: 6px;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── FADE IN ── */
+.fade-up {
+  opacity: 0;
+  transform: translateY(16px);
+  animation: fadeUp 0.5s forwards;
+}
+
+@keyframes fadeUp {
+  to { opacity: 1; transform: none; }
+}
+
+.delay-1 { animation-delay: 0.08s; }
+.delay-2 { animation-delay: 0.16s; }
+.delay-3 { animation-delay: 0.24s; }
+.delay-4 { animation-delay: 0.32s; }
+.delay-5 { animation-delay: 0.40s; }
+
+/* ── RANK SHIELD SVG COLORS ── */
+.shield-gold { color: var(--gold); }
+</style>
+</head>
+<body>
+
+<!-- TOP NAR -->
+<nav class="topbar">
+  <a href="#" class="topbar-back">
+    <i class="ph-bold ph-arrow-left"></i>
+    Back
+  </a>
+  <a href="#" class="topbar-logo">
+    <div class="topbar-logo-mark">T1</div>
+    T1ERA
+  </a>
+  <div style="width:52px;"></div><!-- spacer -->
+</nav>
+
+<!-- PROFILE WRAPPER -->
+<div class="profile-wrap">
+
+  <!-- ══════════════════════════════════
+       BANNER
+  ══════════════════════════════════ -->
+  <div class="profile-banner fade-up" id="profileBanner">
+    <div class="banner-edit-overlay">
+      <i class="ph-bold ph-camera"></i> Change Banner
+    </div>
+
+    <!-- RANK BADGE -->
+    <div class="rank-badge" id="rankBadge">
+      <div class="rank-level-chip">
+        <!-- Shield SVG inline -->
+        <svg class="rank-shield" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2L4 6V12C4 16.42 7.56 20.55 12 22C16.44 20.55 20 16.42 20 12V6L12 2Z"
+                fill="rgba(245,158,11,0.2)" stroke="#f59e0b" stroke-width="1.5" stroke-linejoin="round"/>
+          <text x="12" y="16" text-anchor="middle" font-family="Orbitron" font-size="8" font-weight="800" fill="#f59e0b" id="rankLevelSvg">1</text>
+        </svg>
+        <span class="rank-level-num" id="rankLevelNum">LV 1</span>
+      </div>
+      <div class="rank-title-chip">
+        <span class="rank-title-text" id="rankTitleText">Recruit</span>
+      </div>
+      <div class="callsign-chip">
+        <span style="font-size:8px;color:rgba(194,24,91,0.5)">⬡</span>
+        <span class="callsign-text" id="callsignText">BRAVO</span>
+      </div>
+    </div>
+
+    <!-- XP BAR -->
+    <div class="xp-bar-wrap">
+      <div class="xp-label">XP — <span id="xpVal">0</span> / 1000</div>
+      <div class="xp-track"><div class="xp-fill" id="xpFill"></div></div>
+    </div>
+
+    <!-- DOTS MENU -->
+    <div class="banner-actions">
+      <button class="dots-btn" id="dotsBtn" title="Options">
+        <i class="ph-bold ph-dots-three"></i>
+      </button>
+      <div class="dots-menu" id="dotsMenu">
+        <button class="dots-menu-item" onclick="toggleEditMode()">
+          <i class="ph-bold ph-pencil-simple"></i>
+          Edit Profile
+        </button>
+        <button class="dots-menu-item">
+          <i class="ph-bold ph-share-network"></i>
+          Share Profile
+        </button>
+        <button class="dots-menu-item">
+          <i class="ph-bold ph-qr-code"></i>
+          QR Code
+        </button>
+        <button class="dots-menu-item" style="color:rgba(239,68,68,0.65);">
+          <i class="ph-bold ph-sign-out" style="color:rgba(239,68,68,0.5);"></i>
+          Sign Out
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       IDENTITY
+  ══════════════════════════════════ -->
+  <div class="profile-identity fade-up delay-1">
+
+    <!-- Avatar -->
+    <div class="avatar-wrap">
+      <div class="avatar-ring"></div>
+      <div id="avatarContainer">
+        <!-- filled by Firebase -->
+        <div class="avatar-fallback" id="avatarFallback">M</div>
+      </div>
+      <span class="avatar-online" title="Online"></span>
+      <button class="avatar-edit-btn" title="Change photo">
+        <i class="ph-bold ph-camera"></i>
+      </button>
+    </div>
+
+    <!-- Name row -->
+    <div class="identity-info">
+      <div class="identity-name-row">
+        <div class="editable-field">
+          <span class="identity-fullname" id="displayFullName">MUHAMMAD IKRAM BASRI</span>
+          <button class="edit-pencil" title="Edit name"><i class="ph-bold ph-pencil-simple"></i></button>
+        </div>
+        <span class="identity-nickname" id="displayNickname">(Tam)</span>
+      </div>
+
+      <!-- Badges row -->
+      <div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-top:4px;">
+        <span class="acct-type-badge standard" id="acctTypeBadge">
+          <i class="ph-fill ph-star" style="font-size:9px;"></i>
+          Standard
+        </span>
+        <span class="acct-type-badge free" id="planTypeBadge">Free Plan</span>
+        <span class="verified-tag unverified" id="verifiedTag">
+          Unverified
+          <span class="info-trigger">
+            i
+            <span class="tooltip-bubble">Top up & pay as you go to get verified on T1ERA</span>
+          </span>
+        </span>
+      </div>
+
+      <!-- Email -->
+      <div class="identity-email">
+        <i class="ph-bold ph-envelope-simple"></i>
+        <span id="displayEmail">ewm24k@gmail.com</span>
+      </div>
+
+      <!-- Status -->
+      <div class="status-wrap">
+        <div class="status-display">
+          <span class="status-emoji">💬</span>
+          <input
+            type="text"
+            class="status-text-input"
+            id="statusInput"
+            placeholder="What's your status right now…"
+            value=""
+            maxlength="80"
+          />
+          <button class="status-save-btn" onclick="saveStatus()">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SOCIAL STATS ROW
+  ══════════════════════════════════ -->
+  <div class="stats-row fade-up delay-2">
+    <div class="stat-block" onclick="openModal('following')">
+      <span class="stat-num">128</span>
+      <span class="stat-label">Following</span>
+    </div>
+    <div class="stat-block" onclick="openModal('followers')">
+      <span class="stat-num">47</span>
+      <span class="stat-label">Followers</span>
+    </div>
+    <div class="stat-block">
+      <span class="stat-num" id="sparkCount">0</span>
+      <span class="stat-label">Sparks</span>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       INFO CHIPS
+  ══════════════════════════════════ -->
+  <div class="chips-row fade-up delay-3" id="chipsRow">
+    <!-- filled by JS -->
+  </div>
+
+  <!-- ══════════════════════════════════
+       TABS
+  ══════════════════════════════════ -->
+  <div class="tabs-wrap fade-up delay-4">
+    <div class="tabs-header">
+      <button class="tab-btn active" onclick="switchTab(0, this)">Sparks</button>
+      <button class="tab-btn" onclick="switchTab(1, this)">Activity</button>
+      <button class="tab-btn" onclick="switchTab(2, this)">Intel</button>
+    </div>
+
+    <!-- TAB 0: SPARKS -->
+    <div class="tab-panel active" id="tab-0">
+      <div class="sparks-grid">
+
+        <!-- Demo Spark 1 -->
+        <div class="spark-card">
+          <div class="spark-header">
+            <div class="spark-avatar-fallback">M</div>
+            <div class="spark-meta">
+              <div class="spark-name">Muhammad Ikram <span class="spark-rank-chip">LV1 · Recruit</span></div>
+              <div class="spark-time">2h ago</div>
+            </div>
+          </div>
+          <div class="spark-body">
+            Just started my journey on T1ERA 🚀 The AI modes are next level —
+            <span class="spark-tag">#AIChat</span> changed how I work completely.
+          </div>
+          <div class="spark-actions">
+            <button class="spark-action"><i class="ph-bold ph-heart"></i> 12</button>
+            <button class="spark-action"><i class="ph-bold ph-chat-circle"></i> 4</button>
+            <button class="spark-action"><i class="ph-bold ph-arrows-clockwise"></i> 2</button>
+            <button class="spark-action" style="margin-left:auto;"><i class="ph-bold ph-share-fat"></i></button>
+          </div>
+        </div>
+
+        <!-- Demo Spark 2 -->
+        <div class="spark-card">
+          <div class="spark-header">
+            <div class="spark-avatar-fallback">M</div>
+            <div class="spark-meta">
+              <div class="spark-name">Muhammad Ikram <span class="spark-rank-chip">LV1 · Recruit</span></div>
+              <div class="spark-time">1d ago</div>
+            </div>
+          </div>
+          <div class="spark-body">
+            Working on something in the <span class="spark-tag">#tech</span> space.
+            T1ERA's Vision mode helped me analyze 3 competitor decks in under 10 mins. Wild.
+          </div>
+          <div class="spark-actions">
+            <button class="spark-action"><i class="ph-bold ph-heart"></i> 8</button>
+            <button class="spark-action"><i class="ph-bold ph-chat-circle"></i> 1</button>
+            <button class="spark-action"><i class="ph-bold ph-arrows-clockwise"></i> 3</button>
+            <button class="spark-action" style="margin-left:auto;"><i class="ph-bold ph-share-fat"></i></button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- TAB 1: ACTIVITY -->
+    <div class="tab-panel" id="tab-1">
+      <div class="activity-feed">
+
+        <div class="activity-item">
+          <div class="activity-line"></div>
+          <div class="activity-icon-wrap pink-bg"><i class="ph-bold ph-user-circle-plus" style="color:var(--pink-2);font-size:14px;"></i></div>
+          <div class="activity-body">
+            <div class="activity-text"><strong>Account created</strong> — Welcome to T1ERA</div>
+            <div class="activity-time">20 Feb 2026 · 20:13 UTC+8</div>
+          </div>
+        </div>
+
+        <div class="activity-item">
+          <div class="activity-line"></div>
+          <div class="activity-icon-wrap purple-bg"><i class="ph-bold ph-star" style="color:var(--purple);font-size:14px;"></i></div>
+          <div class="activity-body">
+            <div class="activity-text"><strong>Rank assigned</strong> — Started as <em>Recruit</em>, Callsign: Bravo</div>
+            <div class="activity-time">20 Feb 2026 · 20:13 UTC+8</div>
+          </div>
+        </div>
+
+        <div class="activity-item">
+          <div class="activity-line"></div>
+          <div class="activity-icon-wrap green-bg"><i class="ph-bold ph-check-circle" style="color:var(--green);font-size:14px;"></i></div>
+          <div class="activity-body">
+            <div class="activity-text"><strong>Setup completed</strong> — Profile configured, v1.0</div>
+            <div class="activity-time">20 Feb 2026 · 20:13 UTC+8</div>
+          </div>
+        </div>
+
+        <div class="activity-item">
+          <div class="activity-line"></div>
+          <div class="activity-icon-wrap">
+            <i class="ph-bold ph-lightning" style="color:var(--gold);font-size:14px;"></i>
+          </div>
+          <div class="activity-body">
+            <div class="activity-text"><strong>First Spark published</strong> — 0 XP earned</div>
+            <div class="activity-time">2h ago</div>
+          </div>
+        </div>
+
+        <div class="activity-item">
+          <div class="activity-line"></div>
+          <div class="activity-icon-wrap">
+            <i class="ph-bold ph-currency-dollar" style="color:var(--orange);font-size:14px;"></i>
+          </div>
+          <div class="activity-body">
+            <div class="activity-text"><strong>Balance checked</strong> — MYR 0.00 available</div>
+            <div class="activity-time">Today</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- TAB 2: INTEL -->
+    <div class="tab-panel" id="tab-2">
+
+      <!-- Rank Progress -->
+      <div class="intel-section">
+        <div class="intel-section-title">Rank Progress</div>
+        <div class="rank-progress-card">
+          <div class="rank-progress-top">
+            <div class="rank-progress-left">
+              <svg class="rank-big-shield" viewBox="0 0 48 48" fill="none">
+                <path d="M24 4L8 12V24C8 33 15.1 41.5 24 44C32.9 41.5 40 33 40 24V12L24 4Z"
+                      fill="rgba(245,158,11,0.15)" stroke="#f59e0b" stroke-width="2" stroke-linejoin="round"/>
+                <text x="24" y="30" text-anchor="middle" font-family="Orbitron" font-size="14" font-weight="800" fill="#f59e0b">1</text>
+              </svg>
+              <div class="rank-info-stack">
+                <span class="rank-current-title" id="intelRankTitle">RECRUIT</span>
+                <span class="rank-level-label">Level <span id="intelLevel">1</span> · 0 / 1000 XP</span>
+                <span class="rank-callsign-label">⬡ Callsign: <span id="intelCallsign">Bravo</span></span>
+              </div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:9px;color:var(--text-3);font-family:var(--font-mono);letter-spacing:0.06em;">NEXT RANK</div>
+              <div style="font-family:var(--font-display);font-size:11px;color:rgba(245,158,11,0.5);margin-top:2px;letter-spacing:0.04em;">OPERATIVE</div>
+            </div>
+          </div>
+          <div class="rank-xp-section">
+            <div class="rank-xp-nums">
+              <span class="xp-current">0 XP</span>
+              <span class="xp-next">1000 XP to Operative</span>
+            </div>
+            <div class="rank-xp-bar"><div class="rank-xp-fill"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Badges -->
+      <div class="intel-section">
+        <div class="intel-section-title">Badges</div>
+        <div class="badges-grid">
+          <div class="badge-card">
+            <div class="badge-icon" style="background:rgba(16,185,129,0.1);">🌱</div>
+            <div class="badge-name">Early Bird</div>
+          </div>
+          <div class="badge-card">
+            <div class="badge-icon" style="background:rgba(245,158,11,0.1);">⭐</div>
+            <div class="badge-name">Recruit</div>
+          </div>
+          <div class="badge-card locked">
+            <div class="badge-icon" style="background:rgba(139,92,246,0.1);">🔮</div>
+            <div class="badge-name">Operative</div>
+          </div>
+          <div class="badge-card locked">
+            <div class="badge-icon" style="background:rgba(239,68,68,0.1);">🛡️</div>
+            <div class="badge-name">Guardian</div>
+          </div>
+          <div class="badge-card locked">
+            <div class="badge-icon" style="background:rgba(249,115,22,0.1);">🔥</div>
+            <div class="badge-name">Inferno</div>
+          </div>
+          <div class="badge-card locked">
+            <div class="badge-icon" style="background:rgba(194,24,91,0.1);">💎</div>
+            <div class="badge-name">Elite</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Balance -->
+      <div class="intel-section">
+        <div class="intel-section-title">Balance & Credits</div>
+        <div class="balance-card" id="balanceCard">
+          <div class="balance-left">
+            <div class="balance-amount" id="balanceAmount">MYR 0.00</div>
+            <div class="balance-currency">Pay-as-you-go · Malaysian Ringgit</div>
+          </div>
+          <button class="topup-btn">
+            <i class="ph-bold ph-plus-circle"></i>
+            Top Up
+          </button>
+        </div>
+      </div>
+
+      <!-- Points -->
+      <div class="intel-section">
+        <div class="intel-section-title">Points</div>
+        <div class="points-card">
+          <div class="points-row">
+            <span class="points-row-label">Total Earned</span>
+            <span class="points-row-val" id="pointsTotal">0</span>
+          </div>
+          <div class="points-divider"></div>
+          <div class="points-row">
+            <span class="points-row-label">Available</span>
+            <span class="points-row-val available" id="pointsAvail">0</span>
+          </div>
+          <div class="points-row">
+            <span class="points-row-label">Spent</span>
+            <span class="points-row-val spent" id="pointsSpent">0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Account Info -->
+      <div class="intel-section">
+        <div class="intel-section-title">Account Info</div>
+        <div class="points-card">
+          <div class="points-row">
+            <span class="points-row-label">AI Level</span>
+            <span style="font-size:12px;color:var(--text-2);font-family:var(--font-mono);text-transform:capitalize;" id="aiLevelVal">beginner</span>
+          </div>
+          <div class="points-divider"></div>
+          <div class="points-row">
+            <span class="points-row-label">Member Since</span>
+            <span style="font-size:12px;color:var(--text-2);font-family:var(--font-mono);" id="memberSince">20 Feb 2026</span>
+          </div>
+          <div class="points-row">
+            <span class="points-row-label">Plan</span>
+            <span style="font-size:12px;color:var(--purple);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.06em;" id="planVal">Free</span>
+          </div>
+          <div class="points-divider"></div>
+          <div class="points-row">
+            <span class="points-row-label">Affiliate Status</span>
+            <span style="font-size:12px;color:var(--text-3);font-family:var(--font-mono);text-transform:capitalize;" id="affStatus">None</span>
+          </div>
+          <div class="points-row">
+            <span class="points-row-label">Total Referred</span>
+            <span style="font-size:12px;color:var(--text-2);font-family:var(--font-mono);" id="totalReferred">0</span>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end tab-2 -->
+  </div><!-- end tabs-wrap -->
+
+</div><!-- end profile-wrap -->
+
+<!-- ══════════════════════════════════
+     FOLLOWING / FOLLOWERS MODAL
+══════════════════════════════════ -->
+<div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title" id="modalTitle">Following</span>
+      <button class="modal-close-btn" onclick="closeModal()"><i class="ph-bold ph-x"></i></button>
+    </div>
+    <div class="user-list" id="modalUserList">
+      <!-- filled by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     EDIT MODE TOAST
+══════════════════════════════════ -->
+<div class="edit-toast" id="editToast">
+  <div class="edit-toast-dot"></div>
+  Edit mode active
+  <button class="edit-toast-save" onclick="exitEditMode()">Done</button>
+</div>
+
+<script type="module">
+import { initializeApp }    from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import { getFirestore, doc, getDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+const firebaseConfig = {
+  apiKey:            "AIzaSyBnt9mbb8LdMVeguSHUmS20L6uBHIfxwAs",
+  authDomain:        "t1era-v2.firebaseapp.com",
+  projectId:         "t1era-v2",
+  storageBucket:     "t1era-v2.firebasestorage.app",
+  messagingSenderId: "279266491659",
+  appId:             "1:279266491659:web:28a03c7b7300fcb152b60e"
+};
+
+const app  = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+
+// ── DEMO USERS for modal ──
+const demoFollowing = [
+  { name: 'Azrul Hakim', rank: 'LV3 · Operative', color: '#8b5cf6', initials: 'AH' },
+  { name: 'Siti Nora',   rank: 'LV2 · Scout',     color: '#e91e8c', initials: 'SN' },
+  { name: 'Farid M.',    rank: 'LV5 · Guardian',   color: '#f59e0b', initials: 'FM' },
+  { name: 'Rayyan K.',   rank: 'LV1 · Recruit',    color: '#10b981', initials: 'RK' },
+  { name: 'Hafiz Z.',    rank: 'LV4 · Striker',    color: '#f97316', initials: 'HZ' },
+];
+
+const demoFollowers = [
+  { name: 'Wani Aisyah', rank: 'LV2 · Scout',    color: '#c2185b', initials: 'WA' },
+  { name: 'Danial L.',   rank: 'LV3 · Operative', color: '#8b5cf6', initials: 'DL' },
+  { name: 'Luqman F.',   rank: 'LV1 · Recruit',   color: '#10b981', initials: 'LF' },
+];
+
+// ── POPULATE FROM FIREBASE ──
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    // Not signed in — show demo data
+    loadDemoData();
+    return;
+  }
+
+  try {
+    const snap = await getDoc(doc(db, 'users', user.uid));
+    if (snap.exists()) {
+      const d = snap.data();
+      applyUserData(d, user);
+    } else {
+      loadDemoData();
+    }
+  } catch (err) {
+    console.warn('Firestore fetch error:', err);
+    loadDemoData();
+  }
+});
+
+function applyUserData(d, user) {
+  // Profile photo
+  const photoURL = d.profilePicture?.url || user.photoURL || '';
+  if (photoURL) {
+    const container = document.getElementById('avatarContainer');
+    const fallback  = document.getElementById('avatarFallback');
+    const img = document.createElement('img');
+    img.className = 'avatar-img';
+    img.src = photoURL;
+    img.alt = 'Profile';
+    img.referrerPolicy = 'no-referrer';
+    img.onerror = () => { img.style.display = 'none'; };
+    container.insertBefore(img, fallback);
+    fallback.style.display = 'none';
+  }
+
+  // Fallback initial
+  const initial = (d.fullName || d.nickname || user.email || 'U')[0].toUpperCase();
+  const fallback = document.getElementById('avatarFallback');
+  if (fallback) fallback.textContent = initial;
+
+  // Name
+  const fn = d.fullName || user.displayName || 'User';
+  const nn = d.nickname ? `(${d.nickname})` : '';
+  document.getElementById('displayFullName').textContent = fn;
+  document.getElementById('displayNickname').textContent = nn;
+
+  // Email
+  document.getElementById('displayEmail').textContent = d.emailPrimary || user.email || '';
+
+  // Rank
+  const rank = d.rank || {};
+  const level = rank.level ?? 1;
+  const title = rank.title ?? 'Recruit';
+  const callsign = d.callsign ?? 'Alpha';
+
+  document.getElementById('rankLevelNum').textContent   = `LV ${level}`;
+  document.getElementById('rankLevelSvg').textContent   = level;
+  document.getElementById('rankTitleText').textContent  = title;
+  document.getElementById('callsignText').textContent   = callsign.toUpperCase();
+  document.getElementById('xpVal').textContent          = rank.xp ?? 0;
+  document.getElementById('intelRankTitle').textContent = title.toUpperCase();
+  document.getElementById('intelLevel').textContent     = level;
+  document.getElementById('intelCallsign').textContent  = callsign;
+
+  const xpPct = Math.min(100, ((rank.xp || 0) / 1000) * 100);
+  document.getElementById('xpFill').style.width = `${xpPct}%`;
+  document.getElementById('rankXpFill') && (document.getElementById('rankXpFill').style.width = `${xpPct}%`);
+
+  // Account status
+  const acctStatus = d.accountStatus || {};
+  const isVerified = acctStatus.verified ?? false;
+  const acctType   = acctStatus.type ?? 'standard';
+
+  const verifiedTag = document.getElementById('verifiedTag');
+  if (isVerified) {
+    verifiedTag.className = 'verified-tag verified';
+    verifiedTag.innerHTML = '✓ Verified';
+  }
+
+  document.getElementById('acctTypeBadge').innerHTML =
+    `<i class="ph-fill ph-star" style="font-size:9px;"></i> ${capitalize(acctType)}`;
+
+  // Plan
+  const planType = d.plan?.type ?? 'free';
+  document.getElementById('planTypeBadge').textContent = `${capitalize(planType)} Plan`;
+  document.getElementById('planVal').textContent        = capitalize(planType);
+
+  // Balance
+  const bal = d.balance || {};
+  const currency = bal.currency || 'MYR';
+  const amount   = (bal.amount || 0).toFixed(2);
+  document.getElementById('balanceAmount').textContent = `${currency} ${amount}`;
+
+  // Points
+  const pts = d.points || {};
+  document.getElementById('pointsTotal').textContent = pts.total ?? 0;
+  document.getElementById('pointsAvail').textContent = pts.available ?? 0;
+  document.getElementById('pointsSpent').textContent = pts.spent ?? 0;
+
+  // AI Level
+  document.getElementById('aiLevelVal').textContent = d.aiLevel ?? 'beginner';
+
+  // Affiliate
+  const aff = d.affiliate || {};
+  document.getElementById('affStatus').textContent    = capitalize(aff.status || 'none');
+  document.getElementById('totalReferred').textContent = aff.totalReferred ?? 0;
+
+  // Member since
+  if (d.setupCompletedAt?.toDate) {
+    const dt = d.setupCompletedAt.toDate();
+    document.getElementById('memberSince').textContent = dt.toLocaleDateString('en-MY', { day:'numeric', month:'short', year:'numeric' });
+  }
+
+  // Chips
+  buildChips(d);
+
+  // Status
+  window._userDocRef = doc(db, 'users', user.uid);
+}
+
+function loadDemoData() {
+  // Demo data matching the Firestore structure provided
+  buildChips({
+    industry: 'tech', city: 'Shah Alam', country: 'MY',
+    language: 'en', aiLevel: 'beginner', contactPref: 'whatsapp',
+    plan: { type: 'free' }
+  });
+}
+
+function buildChips(d) {
+  const row = document.getElementById('chipsRow');
+  const chips = [
+    d.industry    ? { icon:'ph-briefcase',      label: capitalize(d.industry) }  : null,
+    d.city        ? { icon:'ph-map-pin',         label: `${d.city}, ${d.country || ''}` } : null,
+    d.language    ? { icon:'ph-translate',       label: d.language.toUpperCase(), cls: '' } : null,
+    d.aiLevel     ? { icon:'ph-robot',           label: `AI: ${capitalize(d.aiLevel)}`, cls: 'highlight' } : null,
+    d.contactPref ? { icon:'ph-chat-circle-dots', label: capitalize(d.contactPref) } : null,
+    d.plan?.type  ? { icon:'ph-crown',           label: `${capitalize(d.plan.type)} Plan`, cls: d.plan.type === 'free' ? '' : 'gold-chip' } : null,
+  ].filter(Boolean);
+
+  row.innerHTML = chips.map(c =>
+    `<span class="chip ${c.cls||''}"><i class="ph-bold ${c.icon}"></i>${c.label}</span>`
+  ).join('');
+}
+
+function capitalize(str) {
+  if (!str) return '';
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+}
+
+// ── SAVE STATUS ──
+window.saveStatus = async function() {
+  const val = document.getElementById('statusInput').value.trim();
+  document.getElementById('statusInput').blur();
+  if (window._userDocRef) {
+    try { await updateDoc(window._userDocRef, { 'userStatus': val }); } catch(e) {}
+  }
+};
+</script>
+
+<script>
+// ══ DOTS MENU ══
+const dotsBtn  = document.getElementById('dotsBtn');
+const dotsMenu = document.getElementById('dotsMenu');
+
+dotsBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  dotsMenu.classList.toggle('open');
+});
+
+document.addEventListener('click', (e) => {
+  if (!dotsBtn.contains(e.target)) dotsMenu.classList.remove('open');
+});
+
+// ══ EDIT MODE ══
+let editModeActive = false;
+
+window.toggleEditMode = function() {
+  dotsMenu.classList.remove('open');
+  editModeActive ? exitEditMode() : enterEditMode();
+};
+
+function enterEditMode() {
+  editModeActive = true;
+  document.body.classList.add('edit-mode');
+  document.getElementById('editToast').classList.add('show');
+}
+
+window.exitEditMode = function() {
+  editModeActive = false;
+  document.body.classList.remove('edit-mode');
+  document.getElementById('editToast').classList.remove('show');
+};
+
+// ══ TABS ══
+window.switchTab = function(idx, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(`tab-${idx}`).classList.add('active');
+};
+
+// ══ FOLLOWING / FOLLOWERS MODAL ══
+const demoFollowing = [
+  { name:'Azrul Hakim', rank:'LV3 · Operative', color:'#8b5cf6', initials:'AH' },
+  { name:'Siti Nora',   rank:'LV2 · Scout',     color:'#e91e8c', initials:'SN' },
+  { name:'Farid M.',    rank:'LV5 · Guardian',   color:'#f59e0b', initials:'FM' },
+  { name:'Rayyan K.',   rank:'LV1 · Recruit',    color:'#10b981', initials:'RK' },
+  { name:'Hafiz Z.',    rank:'LV4 · Striker',    color:'#f97316', initials:'HZ' },
+];
+
+const demoFollowers = [
+  { name:'Wani Aisyah', rank:'LV2 · Scout',    color:'#c2185b', initials:'WA' },
+  { name:'Danial L.',   rank:'LV3 · Operative', color:'#8b5cf6', initials:'DL' },
+  { name:'Luqman F.',   rank:'LV1 · Recruit',   color:'#10b981', initials:'LF' },
+];
+
+window.openModal = function(type) {
+  const list  = type === 'following' ? demoFollowing : demoFollowers;
+  const title = type === 'following' ? 'Following'   : 'Followers';
+  document.getElementById('modalTitle').textContent = title;
+
+  const container = document.getElementById('modalUserList');
+  container.innerHTML = list.map(u => `
+    <div class="user-list-item">
+      <div class="user-list-avatar" style="background:linear-gradient(135deg,${u.color}80,${u.color}40);">
+        ${u.initials}
+      </div>
+      <div class="user-list-info">
+        <div class="user-list-name">${u.name}</div>
+        <div class="user-list-meta">${u.rank}</div>
+      </div>
+      <span class="user-list-badge">${u.rank.split('·')[0].trim()}</span>
+    </div>
+  `).join('');
+
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+};
+
+window.closeModal = function() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+};
+
+window.handleOverlayClick = function(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+};
+
+// ESC closes modal
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeModal();
+});
+</script>
+</body>
+</html>
