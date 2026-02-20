@@ -1520,7 +1520,12 @@
       _setHint('hintEmailBackup','Checking...','checking');
       inp.classList.remove('ok','err');
 
-      // Hit Firestore immediately — no setTimeout wrapper
+      // Wait for Firestore to be ready — same pattern as nickname checker
+      if(!window._db || !window._getDocs){
+        st.timer = setTimeout(_runBackupEmailCheck, 800);
+        return;
+      }
+
       try {
         const uid = window._currentUser ? window._currentUser.uid : null;
         const db  = window._db;
@@ -1543,9 +1548,8 @@
         }
       } catch(e){
         console.error('Backup email check error:',e);
-        st.status='err'; _setIco('icoEmailBackup','err');
-        _setHint('hintEmailBackup','Check failed — please re-enter email.','err');
-        inp.classList.add('err'); inp.classList.remove('ok');
+        // Retry once — do not show error to user on transient failure
+        st.timer = setTimeout(_runBackupEmailCheck, 1500);
       }
     }
 
