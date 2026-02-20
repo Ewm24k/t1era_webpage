@@ -48,14 +48,11 @@
     }
     .bg-noise{opacity:.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:200px;}
 
-    /* ══════════════════════════════════════════
-       GATE SCREEN — Canva dark pink × purple × white
-    ══════════════════════════════════════════ */
+    /* ── GATE SCREEN ── */
     #gateScreen{
       position:fixed;inset:0;z-index:9999;
       display:flex;flex-direction:column;align-items:center;justify-content:center;
       gap:20px;
-      /* rich dark background with Canva-style deep purple-pink mesh */
       background:
         radial-gradient(ellipse at 25% 20%, rgba(168,42,120,.55) 0%, transparent 50%),
         radial-gradient(ellipse at 75% 80%, rgba(109,40,217,.60) 0%, transparent 50%),
@@ -64,114 +61,40 @@
         linear-gradient(135deg,#12041e 0%,#1e0533 40%,#2d0a1e 70%,#180330 100%);
       overflow:hidden;
     }
-    /* subtle animated noise grain overlay on gate */
     #gateScreen::before{
       content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
       background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.07'/%3E%3C/svg%3E");
       background-size:180px;
     }
-    /* floating glow orbs */
     #gateScreen::after{
       content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
-      background:
-        radial-gradient(circle at 50% 50%, rgba(236,72,153,.08) 0%, transparent 60%);
+      background:radial-gradient(circle at 50% 50%, rgba(236,72,153,.08) 0%, transparent 60%);
       animation:gateOrbPulse 3s ease-in-out infinite;
     }
     @keyframes gateOrbPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.15);opacity:.6}}
-
     #gateScreen.hidden{display:none;}
-
-    /* everything inside gate screen sits above the pseudo overlays */
     #gateScreen > *{position:relative;z-index:1;}
 
-    /* ── CANVA-STYLE TRIPLE-RING SPINNER ── */
-    .gate-spinner{
-      position:relative;
-      width:56px;height:56px;
-    }
-    .gate-spinner::before,
-    .gate-spinner::after,
-    .gate-spinner span{
-      content:'';
-      position:absolute;
-      border-radius:50%;
-      border-style:solid;
-      border-color:transparent;
-    }
-    /* outer ring — hot pink */
-    .gate-spinner::before{
-      inset:0;
-      border-width:3px;
-      border-top-color:#ec4899;
-      border-right-color:rgba(236,72,153,.3);
-      animation:gspin 1.1s linear infinite;
-    }
-    /* middle ring — soft purple */
-    .gate-spinner::after{
-      inset:9px;
-      border-width:3px;
-      border-top-color:#c084fc;
-      border-left-color:rgba(192,132,252,.25);
-      animation:gspin .8s linear infinite reverse;
-    }
-    /* inner dot — white glowing core */
-    .gate-spinner span{
-      inset:20px;
-      background:radial-gradient(circle,#fff 0%,rgba(255,255,255,.4) 50%,transparent 100%);
-      border:none;
-      animation:gateCorePulse 1.4s ease-in-out infinite;
-    }
+    .gate-spinner{position:relative;width:56px;height:56px;}
+    .gate-spinner::before,.gate-spinner::after,.gate-spinner span{content:'';position:absolute;border-radius:50%;border-style:solid;border-color:transparent;}
+    .gate-spinner::before{inset:0;border-width:3px;border-top-color:#ec4899;border-right-color:rgba(236,72,153,.3);animation:gspin 1.1s linear infinite;}
+    .gate-spinner::after{inset:9px;border-width:3px;border-top-color:#c084fc;border-left-color:rgba(192,132,252,.25);animation:gspin .8s linear infinite reverse;}
+    .gate-spinner span{inset:20px;background:radial-gradient(circle,#fff 0%,rgba(255,255,255,.4) 50%,transparent 100%);border:none;animation:gateCorePulse 1.4s ease-in-out infinite;}
     @keyframes gspin{to{transform:rotate(360deg)}}
     @keyframes gateCorePulse{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.3);opacity:.4}}
 
-    /* ── STATUS TEXT ── */
-    .gate-txt{
-      font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;
-      letter-spacing:.18em;text-transform:uppercase;
-      /* white fading to soft pink */
-      background:linear-gradient(90deg,rgba(255,255,255,.9),rgba(249,168,212,.7),rgba(255,255,255,.9));
-      background-size:200% 100%;
-      -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
-      animation:gateTxtShimmer 2.2s ease-in-out infinite, gtxtpulse 1.6s ease-in-out infinite;
-    }
+    .gate-txt{font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;background:linear-gradient(90deg,rgba(255,255,255,.9),rgba(249,168,212,.7),rgba(255,255,255,.9));background-size:200% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:gateTxtShimmer 2.2s ease-in-out infinite, gtxtpulse 1.6s ease-in-out infinite;}
     @keyframes gateTxtShimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
     @keyframes gtxtpulse{0%,100%{opacity:.55}50%{opacity:1}}
 
-    /* ── LOGO ROW ── */
-    .gate-logo{
-      display:flex;align-items:center;gap:11px;margin-bottom:4px;
-    }
-    .gate-logomark{
-      width:40px;height:40px;border-radius:11px;
-      /* Canva-style pink-to-purple gradient */
-      background:linear-gradient(135deg,#ec4899 0%,#a855f7 50%,#7c3aed 100%);
-      display:flex;align-items:center;justify-content:center;
-      font-family:'Orbitron',sans-serif;font-weight:900;font-size:13px;color:#fff;
-      box-shadow:0 0 28px rgba(236,72,153,.5), 0 0 56px rgba(168,85,247,.25);
-      animation:gateMarkGlow 2.5s ease-in-out infinite;
-    }
-    @keyframes gateMarkGlow{
-      0%,100%{box-shadow:0 0 28px rgba(236,72,153,.5),0 0 56px rgba(168,85,247,.25);}
-      50%{box-shadow:0 0 40px rgba(236,72,153,.8),0 0 80px rgba(168,85,247,.45);}
-    }
-    .gate-logotxt{
-      font-family:'Orbitron',sans-serif;font-weight:900;font-size:20px;letter-spacing:.1em;
-      /* pink → purple → white shimmer */
-      background:linear-gradient(135deg,#f9a8d4 0%,#e879f9 30%,#c084fc 60%,#ffffff 100%);
-      background-size:200% 100%;
-      -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
-      animation:gateLogoShimmer 3s ease-in-out infinite;
-    }
+    .gate-logo{display:flex;align-items:center;gap:11px;margin-bottom:4px;}
+    .gate-logomark{width:40px;height:40px;border-radius:11px;background:linear-gradient(135deg,#ec4899 0%,#a855f7 50%,#7c3aed 100%);display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-weight:900;font-size:13px;color:#fff;box-shadow:0 0 28px rgba(236,72,153,.5), 0 0 56px rgba(168,85,247,.25);animation:gateMarkGlow 2.5s ease-in-out infinite;}
+    @keyframes gateMarkGlow{0%,100%{box-shadow:0 0 28px rgba(236,72,153,.5),0 0 56px rgba(168,85,247,.25);}50%{box-shadow:0 0 40px rgba(236,72,153,.8),0 0 80px rgba(168,85,247,.45);}}
+    .gate-logotxt{font-family:'Orbitron',sans-serif;font-weight:900;font-size:20px;letter-spacing:.1em;background:linear-gradient(135deg,#f9a8d4 0%,#e879f9 30%,#c084fc 60%,#ffffff 100%);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:gateLogoShimmer 3s ease-in-out infinite;}
     @keyframes gateLogoShimmer{0%,100%{background-position:0% 0}50%{background-position:100% 0}}
 
-    /* ── DECORATIVE PILLS below spinner ── */
-    .gate-pills{
-      display:flex;gap:8px;align-items:center;margin-top:2px;
-    }
-    .gate-pill{
-      width:6px;height:6px;border-radius:50%;
-      animation:gatePillPop 1.4s ease-in-out infinite;
-    }
+    .gate-pills{display:flex;gap:8px;align-items:center;margin-top:2px;}
+    .gate-pill{width:6px;height:6px;border-radius:50%;animation:gatePillPop 1.4s ease-in-out infinite;}
     .gate-pill:nth-child(1){background:#ec4899;animation-delay:0s;}
     .gate-pill:nth-child(2){background:#c084fc;animation-delay:.18s;}
     .gate-pill:nth-child(3){background:#ffffff;animation-delay:.36s;}
@@ -179,120 +102,35 @@
     .gate-pill:nth-child(5){background:#ec4899;animation-delay:.72s;}
     @keyframes gatePillPop{0%,100%{transform:scaleY(1);opacity:.5}50%{transform:scaleY(1.9);opacity:1}}
 
-    /* ══════════════════════════════════════════
-       SAVING SCREEN — reuses gate background + pill styles
-       unique spinner, step tracker, and fade-in/out
-    ══════════════════════════════════════════ */
-    #savingScreen{
-      position:fixed;inset:0;z-index:9998;
-      display:none; /* shown via JS */
-      flex-direction:column;align-items:center;justify-content:center;
-      gap:20px;
-      background:
-        radial-gradient(ellipse at 30% 25%,  rgba(219,39,119,.50) 0%, transparent 50%),
-        radial-gradient(ellipse at 70% 75%,  rgba(109,40,217,.58) 0%, transparent 50%),
-        radial-gradient(ellipse at 65% 15%,  rgba(168,42,120,.28) 0%, transparent 42%),
-        radial-gradient(ellipse at 15% 85%,  rgba(88,28,135,.68)  0%, transparent 44%),
-        linear-gradient(135deg,#12041e 0%,#1e0533 40%,#2d0a1e 70%,#180330 100%);
-      overflow:hidden;
-    }
-    #savingScreen::before{
-      content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
-      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.07'/%3E%3C/svg%3E");
-      background-size:180px;
-    }
-    #savingScreen::after{
-      content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
-      background:radial-gradient(circle at 50% 45%,rgba(192,132,252,.09) 0%,transparent 60%);
-      animation:gateOrbPulse 3.2s ease-in-out infinite;
-    }
-    #savingScreen.on{
-      display:flex;
-      animation:savingFadeIn .35s cubic-bezier(0.4,0,0.2,1) both;
-    }
-    #savingScreen.off{
-      animation:savingFadeOut .4s cubic-bezier(0.4,0,0.2,1) forwards;
-    }
+    /* ── SAVING SCREEN ── */
+    #savingScreen{position:fixed;inset:0;z-index:9998;display:none;flex-direction:column;align-items:center;justify-content:center;gap:20px;background:radial-gradient(ellipse at 30% 25%,rgba(219,39,119,.50) 0%,transparent 50%),radial-gradient(ellipse at 70% 75%,rgba(109,40,217,.58) 0%,transparent 50%),radial-gradient(ellipse at 65% 15%,rgba(168,42,120,.28) 0%,transparent 42%),radial-gradient(ellipse at 15% 85%,rgba(88,28,135,.68) 0%,transparent 44%),linear-gradient(135deg,#12041e 0%,#1e0533 40%,#2d0a1e 70%,#180330 100%);overflow:hidden;}
+    #savingScreen::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.07'/%3E%3C/svg%3E");background-size:180px;}
+    #savingScreen::after{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;background:radial-gradient(circle at 50% 45%,rgba(192,132,252,.09) 0%,transparent 60%);animation:gateOrbPulse 3.2s ease-in-out infinite;}
+    #savingScreen.on{display:flex;animation:savingFadeIn .35s cubic-bezier(0.4,0,0.2,1) both;}
+    #savingScreen.off{animation:savingFadeOut .4s cubic-bezier(0.4,0,0.2,1) forwards;}
     @keyframes savingFadeIn{from{opacity:0}to{opacity:1}}
     @keyframes savingFadeOut{from{opacity:1}to{opacity:0;pointer-events:none}}
     #savingScreen > *{position:relative;z-index:1;}
 
-    /* ── SAVING SPINNER — SVG ring + pulsing core ── */
-    .saving-spinner{
-      position:relative;
-      width:64px;height:64px;
-      display:flex;align-items:center;justify-content:center;
-    }
-    .saving-spinner span{
-      position:absolute;
-      width:20px;height:20px;
-      border-radius:50%;
-      background:radial-gradient(circle,#fff 0%,rgba(249,168,212,.6) 45%,transparent 100%);
-      animation:gateCorePulse 1.5s ease-in-out infinite;
-      z-index:2;
-    }
-    .saving-ring{
-      position:absolute;inset:0;
-      width:64px;height:64px;
-    }
-    .saving-arc{
-      transform-origin:28px 28px;
-      animation:savingArcSpin 1.2s linear infinite;
-    }
+    .saving-spinner{position:relative;width:64px;height:64px;display:flex;align-items:center;justify-content:center;}
+    .saving-spinner span{position:absolute;width:20px;height:20px;border-radius:50%;background:radial-gradient(circle,#fff 0%,rgba(249,168,212,.6) 45%,transparent 100%);animation:gateCorePulse 1.5s ease-in-out infinite;z-index:2;}
+    .saving-ring{position:absolute;inset:0;width:64px;height:64px;}
+    .saving-arc{transform-origin:28px 28px;animation:savingArcSpin 1.2s linear infinite;}
     @keyframes savingArcSpin{to{transform:rotate(360deg)}}
+    .saving-txt{font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;background:linear-gradient(90deg,rgba(255,255,255,.9),rgba(249,168,212,.7),rgba(255,255,255,.9));background-size:200% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:gateTxtShimmer 2.2s ease-in-out infinite, gtxtpulse 1.6s ease-in-out infinite;}
 
-    /* ── SAVING STATUS TEXT ── */
-    .saving-txt{
-      font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;
-      letter-spacing:.18em;text-transform:uppercase;
-      background:linear-gradient(90deg,rgba(255,255,255,.9),rgba(249,168,212,.7),rgba(255,255,255,.9));
-      background-size:200% 100%;
-      -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
-      animation:gateTxtShimmer 2.2s ease-in-out infinite, gtxtpulse 1.6s ease-in-out infinite;
-    }
-
-    /* ── STEP TRACKER ── */
-    .saving-steps{
-      display:flex;flex-direction:column;gap:10px;
-      background:rgba(255,255,255,.04);
-      border:1px solid rgba(236,72,153,.18);
-      border-radius:16px;
-      padding:16px 22px;
-      min-width:220px;
-    }
-    .saving-step{
-      display:flex;align-items:center;gap:10px;
-      font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;
-      color:rgba(255,255,255,.25);
-      transition:color .4s ease, transform .3s ease;
-    }
-    .saving-step.on{
-      color:rgba(255,255,255,.9);
-      transform:translateX(4px);
-    }
-    .saving-step.done{
-      color:rgba(192,132,252,.6);
-    }
-    .saving-step.done .sstep-dot{
-      background:#c084fc;
-      box-shadow:0 0 8px rgba(192,132,252,.6);
-    }
-    .sstep-dot{
-      width:7px;height:7px;border-radius:50%;flex-shrink:0;
-      background:rgba(255,255,255,.15);
-      transition:background .4s, box-shadow .4s;
-    }
-    .saving-step.on .sstep-dot{
-      background:#ec4899;
-      box-shadow:0 0 10px rgba(236,72,153,.8);
-      animation:sstepPulse .8s ease-in-out infinite;
-    }
+    .saving-steps{display:flex;flex-direction:column;gap:10px;background:rgba(255,255,255,.04);border:1px solid rgba(236,72,153,.18);border-radius:16px;padding:16px 22px;min-width:220px;}
+    .saving-step{display:flex;align-items:center;gap:10px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:rgba(255,255,255,.25);transition:color .4s ease, transform .3s ease;}
+    .saving-step.on{color:rgba(255,255,255,.9);transform:translateX(4px);}
+    .saving-step.done{color:rgba(192,132,252,.6);}
+    .saving-step.done .sstep-dot{background:#c084fc;box-shadow:0 0 8px rgba(192,132,252,.6);}
+    .sstep-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;background:rgba(255,255,255,.15);transition:background .4s, box-shadow .4s;}
+    .saving-step.on .sstep-dot{background:#ec4899;box-shadow:0 0 10px rgba(236,72,153,.8);animation:sstepPulse .8s ease-in-out infinite;}
     @keyframes sstepPulse{0%,100%{box-shadow:0 0 10px rgba(236,72,153,.8)}50%{box-shadow:0 0 18px rgba(236,72,153,1)}}
 
     /* ── LAYOUT ── */
     .page{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:32px 16px 48px;}
 
-    /* ── LOGO ── */
     .logo{display:flex;align-items:center;gap:10px;text-decoration:none;margin-bottom:32px;}
     .logomark{width:36px;height:36px;border-radius:9px;background:linear-gradient(135deg,var(--ind),var(--ind2));display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-weight:900;font-size:12px;box-shadow:0 0 20px rgba(236,72,153,.35);}
     .logotxt{font-family:'Orbitron',sans-serif;font-weight:900;font-size:18px;letter-spacing:.08em;background:linear-gradient(135deg,var(--ind),var(--ind2),var(--ind3));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
@@ -316,7 +154,7 @@
     .card-accent{height:3px;background:linear-gradient(90deg,var(--ind),var(--ind2),var(--ind3),var(--ind));background-size:300% 100%;animation:accentFlow 4s linear infinite;}
     @keyframes accentFlow{from{background-position:0 0}to{background-position:300% 0}}
 
-    /* ── SLIDES CONTAINER ── */
+    /* ── SLIDES ── */
     .slides{overflow:hidden;}
     .slide{display:none;}
     .slide.active{display:block;animation:slideIn .35s var(--ease) both;}
@@ -379,57 +217,71 @@
     .terms-box p{margin-bottom:10px;}
     .terms-scroll-hint{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--txt3);margin-bottom:14px;}
 
-
     /* ── UNIQUENESS CHECKER ── */
     .ucheck-wrap{position:relative;}
     .ucheck-wrap .finp{padding-right:44px;}
-    .ucheck-ico{
-      position:absolute;right:12px;top:50%;transform:translateY(-50%);
-      width:22px;height:22px;display:flex;align-items:center;justify-content:center;
-      pointer-events:none;
-    }
-    /* spinner */
-    .ucheck-spin{
-      width:16px;height:16px;border-radius:50%;
-      border:2px solid rgba(255,255,255,.12);
-      border-top-color:var(--ind);
-      animation:spin .7s linear infinite;
-      display:none;
-    }
+    .ucheck-ico{position:absolute;right:12px;top:50%;transform:translateY(-50%);width:22px;height:22px;display:flex;align-items:center;justify-content:center;pointer-events:none;}
+    .ucheck-spin{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.12);border-top-color:var(--ind);animation:spin .7s linear infinite;display:none;}
     .ucheck-ico.checking .ucheck-spin{display:block;}
-    .ucheck-ico.checking .ucheck-ok,
-    .ucheck-ico.checking .ucheck-err{display:none;}
-    /* ok tick */
-    .ucheck-ok{
-      display:none;width:20px;height:20px;border-radius:50%;
-      background:var(--green);align-items:center;justify-content:center;
-      font-size:11px;font-weight:900;color:#fff;
-      box-shadow:0 0 8px rgba(16,185,129,.5);
-      animation:uchkPop .3s cubic-bezier(0.34,1.56,0.64,1) both;
-    }
+    .ucheck-ico.checking .ucheck-ok,.ucheck-ico.checking .ucheck-err{display:none;}
+    .ucheck-ok{display:none;width:20px;height:20px;border-radius:50%;background:var(--green);align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;box-shadow:0 0 8px rgba(16,185,129,.5);animation:uchkPop .3s cubic-bezier(0.34,1.56,0.64,1) both;}
     .ucheck-ico.ok .ucheck-ok{display:flex;}
-    .ucheck-ico.ok .ucheck-spin,
-    .ucheck-ico.ok .ucheck-err{display:none;}
-    /* err cross */
-    .ucheck-err{
-      display:none;width:20px;height:20px;border-radius:50%;
-      background:var(--red);align-items:center;justify-content:center;
-      font-size:11px;font-weight:900;color:#fff;
-      box-shadow:0 0 8px rgba(239,68,68,.5);
-      animation:uchkPop .3s cubic-bezier(0.34,1.56,0.64,1) both;
-    }
+    .ucheck-ico.ok .ucheck-spin,.ucheck-ico.ok .ucheck-err{display:none;}
+    .ucheck-err{display:none;width:20px;height:20px;border-radius:50%;background:var(--red);align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;box-shadow:0 0 8px rgba(239,68,68,.5);animation:uchkPop .3s cubic-bezier(0.34,1.56,0.64,1) both;}
     .ucheck-ico.err .ucheck-err{display:flex;}
-    .ucheck-ico.err .ucheck-spin,
-    .ucheck-ico.err .ucheck-ok{display:none;}
+    .ucheck-ico.err .ucheck-spin,.ucheck-ico.err .ucheck-ok{display:none;}
     @keyframes uchkPop{from{transform:scale(0)}to{transform:scale(1)}}
-    /* hint text below field */
-    .ucheck-hint{
-      font-size:11px;font-weight:600;margin-top:5px;min-height:16px;
-      transition:opacity .2s;
-    }
+    .ucheck-hint{font-size:11px;font-weight:600;margin-top:5px;min-height:16px;transition:opacity .2s;}
     .ucheck-hint.ok{color:var(--green);}
     .ucheck-hint.err{color:var(--red);}
     .ucheck-hint.checking{color:var(--txt3);}
+
+    /* ── ANTI-FRAUD WARNING BOX ── */
+    .fraud-alert{
+      display:none;
+      align-items:flex-start;
+      gap:10px;
+      padding:12px 14px;
+      border-radius:10px;
+      font-size:12px;
+      font-weight:600;
+      line-height:1.6;
+      margin-top:8px;
+      background:rgba(239,68,68,.08);
+      border:1.5px solid rgba(239,68,68,.35);
+      color:#fca5a5;
+      animation:fin .25s ease both;
+    }
+    .fraud-alert.on{display:flex;}
+    .fraud-alert-icon{
+      flex-shrink:0;
+      width:30px;height:30px;border-radius:8px;
+      background:rgba(239,68,68,.15);
+      display:flex;align-items:center;justify-content:center;
+      font-size:16px;
+      margin-top:1px;
+    }
+    .fraud-alert-body{}
+    .fraud-alert-title{
+      font-size:12px;font-weight:800;
+      color:#f87171;
+      letter-spacing:.04em;
+      text-transform:uppercase;
+      margin-bottom:3px;
+      display:flex;align-items:center;gap:6px;
+    }
+    .fraud-alert-title .fraud-badge{
+      display:inline-block;
+      font-size:9px;font-weight:900;
+      letter-spacing:.1em;
+      padding:2px 6px;
+      border-radius:4px;
+      background:rgba(239,68,68,.25);
+      color:#fca5a5;
+      border:1px solid rgba(239,68,68,.4);
+    }
+    .fraud-alert-msg{font-size:11px;color:rgba(252,165,165,.8);font-weight:500;line-height:1.6;}
+
     /* ── WARNING BOX ── */
     .warn-box{background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.25);border-radius:12px;padding:14px 16px;font-size:12px;color:#fcd34d;line-height:1.7;margin-bottom:16px;}
     .warn-box strong{display:block;font-size:13px;font-weight:700;margin-bottom:4px;color:#fbbf24;}
@@ -453,7 +305,6 @@
     .btn-next:disabled{opacity:.5;cursor:not-allowed;transform:none !important;}
     .btn-next.final{background:linear-gradient(135deg,var(--green),#059669);box-shadow:0 4px 20px rgba(16,185,129,.3);}
     .btn-next.final:hover{box-shadow:0 8px 28px rgba(16,185,129,.45);}
-    /* spinner inside btn */
     .btn-spin{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;animation:spin .7s linear infinite;display:none;}
     .btn-next.loading .btn-spin{display:block;}
     .btn-next.loading .btn-lbl{display:none;}
@@ -471,9 +322,7 @@
     .ldot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:ldpulse 2s ease infinite;}
     @keyframes ldpulse{0%,100%{opacity:1}50%{opacity:.3}}
 
-    /* ══════════════════════════════════════════
-       RESPONSIVE — PC (1200px+)
-    ══════════════════════════════════════════ */
+    /* ── RESPONSIVE ── */
     @media(min-width:1200px){
       .page{padding:40px 24px 64px;}
       .card{max-width:760px;}
@@ -493,10 +342,6 @@
       .success-title{font-size:30px;}
       .success-sub{font-size:15px;}
     }
-
-    /* ══════════════════════════════════════════
-       RESPONSIVE — TABLET
-    ══════════════════════════════════════════ */
     @media(min-width:768px) and (max-width:1199px){
       .page{padding:32px 20px 56px;}
       .card{max-width:680px;}
@@ -508,10 +353,6 @@
       .chip{font-size:12px;}
       .terms-box{height:300px;}
     }
-
-    /* ══════════════════════════════════════════
-       RESPONSIVE — MOBILE
-    ══════════════════════════════════════════ */
     @media(max-width:767px){
       .page{padding:20px 12px 40px;}
       .logo{margin-bottom:20px;}
@@ -553,7 +394,6 @@
       .success-sub{font-size:13px;}
       .btn-launch{font-size:13px;padding:12px 20px;}
     }
-
     @media(max-width:380px){
       .page{padding:14px 8px 32px;}
       .slide-head{padding:16px 14px 0;}
@@ -566,7 +406,6 @@
       .terms-box{height:180px;}
       .finp{font-size:12px;padding:10px 11px;}
     }
-
     @media(hover:none){
       .btn-next:hover{transform:none;}
       .btn-back:hover{background:transparent;}
@@ -588,11 +427,8 @@
     <div class="gate-spinner"><span></span></div>
     <div class="gate-txt" id="gateTxt">VERIFYING SESSION...</div>
     <div class="gate-pills">
-      <div class="gate-pill"></div>
-      <div class="gate-pill"></div>
-      <div class="gate-pill"></div>
-      <div class="gate-pill"></div>
-      <div class="gate-pill"></div>
+      <div class="gate-pill"></div><div class="gate-pill"></div><div class="gate-pill"></div>
+      <div class="gate-pill"></div><div class="gate-pill"></div>
     </div>
   </div>
 
@@ -622,11 +458,8 @@
       <div class="saving-step" id="sstep4"><span class="sstep-dot"></span>Finalising profile</div>
     </div>
     <div class="gate-pills">
-      <div class="gate-pill"></div>
-      <div class="gate-pill"></div>
-      <div class="gate-pill"></div>
-      <div class="gate-pill"></div>
-      <div class="gate-pill"></div>
+      <div class="gate-pill"></div><div class="gate-pill"></div><div class="gate-pill"></div>
+      <div class="gate-pill"></div><div class="gate-pill"></div>
     </div>
   </div>
 
@@ -636,7 +469,6 @@
       <span class="logotxt">T1ERA</span>
     </a>
 
-    <!-- PROGRESS -->
     <div class="progress-wrap">
       <div class="progress-top">
         <span class="progress-label">Account Setup</span>
@@ -645,10 +477,8 @@
       <div class="progress-track"><div class="progress-fill" id="progFill" style="width:16.6%"></div></div>
     </div>
 
-    <!-- STEP DOTS -->
     <div class="stepdots" id="stepdots"></div>
 
-    <!-- CARD -->
     <div class="card">
       <div class="card-accent"></div>
       <div class="slides" id="slides">
@@ -736,7 +566,7 @@
           </div>
         </div>
 
-        <!-- SLIDE 2 — PURPOSE / WHY T1ERA -->
+        <!-- SLIDE 2 — PURPOSE -->
         <div class="slide" id="s2">
           <div class="slide-head">
             <div class="slide-icon"><i class="ph-bold ph-crosshair-simple"></i></div>
@@ -893,6 +723,14 @@
                   </div>
                 </div>
                 <div class="ucheck-hint" id="hintEmailPrimary"></div>
+                <!-- Anti-fraud alert for primary email -->
+                <div class="fraud-alert" id="fraudAlertPrimary">
+                  <div class="fraud-alert-icon"><i class="ph-bold ph-shield-warning"></i></div>
+                  <div class="fraud-alert-body">
+                    <div class="fraud-alert-title">Anti-Fraud Detection <span class="fraud-badge">TRIGGERED</span></div>
+                    <div class="fraud-alert-msg" id="fraudMsgPrimary">This email is already associated with an existing account. Using the same email across multiple accounts may be flagged as a bot or dummy account. Please use a unique email address.</div>
+                  </div>
+                </div>
               </div>
               <div class="field">
                 <div class="flbl">Backup Email</div>
@@ -905,6 +743,14 @@
                   </div>
                 </div>
                 <div class="ucheck-hint" id="hintEmailBackup"></div>
+                <!-- Anti-fraud alert for backup email -->
+                <div class="fraud-alert" id="fraudAlertBackup">
+                  <div class="fraud-alert-icon"><i class="ph-bold ph-shield-warning"></i></div>
+                  <div class="fraud-alert-body">
+                    <div class="fraud-alert-title">Anti-Fraud Detection <span class="fraud-badge">TRIGGERED</span></div>
+                    <div class="fraud-alert-msg" id="fraudMsgBackup">This email is already registered in our system. Re-using emails across accounts is a sign of bot or dummy account activity. Please use a different email address.</div>
+                  </div>
+                </div>
               </div>
             </div>
             <div class="field">
@@ -992,7 +838,7 @@
           </div>
         </div>
 
-        <!-- SLIDE 6 — TERMS & CONDITIONS -->
+        <!-- SLIDE 6 — TERMS -->
         <div class="slide" id="s6">
           <div class="slide-head">
             <div class="slide-icon"><i class="ph-bold ph-files"></i></div>
@@ -1002,49 +848,34 @@
           <div class="slide-body">
             <div class="alert err" id="s6Err"></div>
             <div class="alert ok" id="s6Ok"></div>
-
             <div class="terms-scroll-hint"><i class="ph-bold ph-book-open-text" style="font-size:13px;"></i> Scroll down to read all terms before ticking</div>
-
             <div class="terms-box" id="termsBox">
               <h3>1. Acceptance of Terms</h3>
               <p>By creating a T1ERA account, you agree to be legally bound by these Terms and Conditions, our Privacy Policy, and all applicable laws and regulations. If you do not agree with any part of these terms, you must not use T1ERA services.</p>
-
               <h3>2. Account Eligibility</h3>
               <p>You must be at least 13 years of age to use T1ERA. If you are under 18, you represent that you have your parent or guardian's permission. Accounts found to be created fraudulently or by ineligible users will be terminated without notice or refund.</p>
-
               <h3>3. Accurate Information Obligation</h3>
               <p>You agree to provide truthful, accurate, current, and complete information during registration and account setup. This includes your full legal name, contact details, and recovery information. Providing false or misleading information constitutes a material breach of these terms and may result in immediate account termination.</p>
-
               <h3>4. Recovery & Verification Data</h3>
               <p>The phone number, backup email, and emergency contact information you provide are stored securely and used exclusively for account recovery, identity verification for affiliate or partner programmes, and processing verified payments. Providing fake recovery information disqualifies you from any dispute resolution process and voids any pending transactions.</p>
-
               <h3>5. Prohibited Activities</h3>
               <p>You agree not to: (a) use T1ERA for any unlawful purpose; (b) attempt to bypass security measures; (c) impersonate another person or entity; (d) distribute spam, malware, or harmful content; (e) abuse affiliate or referral systems through fraudulent means; (f) engage in money laundering or financial fraud of any kind.</p>
-
               <h3>6. Affiliate & Payment Programme</h3>
               <p>Participation in T1ERA's affiliate or payment programmes requires a verified account with accurate personal information. Payments will only be processed to verified members. T1ERA reserves the right to withhold or void payments from accounts that cannot be verified or are found to have violated these terms. All decisions regarding payment disputes are final.</p>
-
               <h3>7. Intellectual Property</h3>
               <p>All content, branding, AI tools, and systems within T1ERA are proprietary. You may not copy, reproduce, or redistribute any part of the platform without explicit written permission from T1ERA.</p>
-
               <h3>8. Limitation of Liability</h3>
               <p>T1ERA is provided "as is" without warranties of any kind. T1ERA shall not be liable for any indirect, incidental, or consequential damages arising from your use of the platform. Your sole remedy for dissatisfaction is to discontinue use of the service.</p>
-
               <h3>9. Privacy & Data</h3>
               <p>Your data is handled in accordance with our Privacy Policy. We do not sell your personal information to third parties. Data collected during account setup is used solely for service delivery, verification, and improvement of T1ERA.</p>
-
               <h3>10. Termination</h3>
               <p>T1ERA reserves the right to suspend or terminate any account at any time for violation of these terms, suspicious activity, or for any reason at T1ERA's sole discretion. Upon termination, your right to use the service ceases immediately.</p>
-
               <h3>11. Changes to Terms</h3>
               <p>T1ERA may update these terms at any time. Continued use of the platform after changes constitutes your acceptance of the updated terms. We will notify you of material changes via your registered email.</p>
-
               <h3>12. Governing Law</h3>
               <p>These terms are governed by the laws of Malaysia. Any disputes arising from these terms shall be subject to the exclusive jurisdiction of the courts of Malaysia.</p>
-
               <p style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,.06);color:rgba(240,240,255,.3);font-size:11px;">Last updated: February 2026 · T1ERA Platform · All Rights Reserved</p>
             </div>
-
             <div class="check-group">
               <label class="check-item" id="chk1Wrap" onclick="toggleChk('chk1','chk1Wrap')">
                 <div class="cbox" id="chk1"></div>
@@ -1092,24 +923,16 @@
           <span class="ldot"></span> Continue to T1ERA
         </a>
       </div>
-
     </div><!-- /card -->
   </div>
 
-  <!-- FIREBASE SDK (Module) -->
+  <!-- FIREBASE SDK -->
   <script type="module">
     import { initializeApp }        from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
     import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
     import {
-      getFirestore,
-      doc,
-      getDoc,
-      setDoc,
-      serverTimestamp,
-      collection,
-      query,
-      where,
-      getDocs
+      getFirestore, doc, getDoc, setDoc, serverTimestamp,
+      collection, query, where, getDocs
     } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
     const app = initializeApp({
@@ -1142,10 +965,8 @@
         setTimeout(() => { window.location.href = 'auth.html'; }, 800);
         return;
       }
-
       try {
         const snap = await getDoc(doc(db, 'users', user.uid));
-
         if (snap.exists() && snap.data().setupCompletedAt) {
           gateTxt.textContent = 'SETUP COMPLETE — REDIRECTING...';
           setTimeout(() => { window.location.href = 'home.html'; }, 800);
@@ -1156,9 +977,12 @@
       }
 
       window._currentUser = user;
-
       const epInp = document.getElementById('emailPrimary');
-      if (epInp && !epInp.value && user.email) epInp.value = user.email;
+      if (epInp && !epInp.value && user.email) {
+        epInp.value = user.email;
+        // Trigger uniqueness check for auto-filled primary email after Firestore ready
+        setTimeout(() => { if(window._onEmailPrimaryInput) window._onEmailPrimaryInput(); }, 800);
+      }
 
       gateScreen.style.transition = 'opacity 0.4s ease';
       gateScreen.style.opacity    = '0';
@@ -1170,7 +994,6 @@
   <script>
     const TOTAL   = 6;
     let current   = 1;
-    let goingBack = false;
 
     /* ── CHIP TOGGLE ── */
     document.querySelectorAll('.chips').forEach(group => {
@@ -1214,6 +1037,18 @@
     }
     function clrErr(id){ document.getElementById(id).className = 'alert err'; }
 
+    /* ── FRAUD ALERT HELPERS ── */
+    function showFraudAlert(alertId, msgId, msg){
+      const alertEl = document.getElementById(alertId);
+      const msgEl   = document.getElementById(msgId);
+      if(msgEl) msgEl.textContent = msg;
+      alertEl.classList.add('on');
+    }
+    function hideFraudAlert(alertId){
+      const alertEl = document.getElementById(alertId);
+      alertEl.classList.remove('on');
+    }
+
     /* ── VALIDATION ── */
     function validate(n){
       clrErr('s' + n + 'Err');
@@ -1234,19 +1069,15 @@
 
       if(n === 2){
         const sel = document.querySelectorAll('#purposeChips .chip.sel');
-        if(sel.length === 0)
-          return showErr('s2Err','Please select at least one purpose.'), false;
-        if(!document.getElementById('industry').value)
-          return showErr('s2Err','Please select your industry.'), false;
-        if(!document.getElementById('aiLevel').value)
-          return showErr('s2Err','Please select your AI experience level.'), false;
+        if(sel.length === 0) return showErr('s2Err','Please select at least one purpose.'), false;
+        if(!document.getElementById('industry').value) return showErr('s2Err','Please select your industry.'), false;
+        if(!document.getElementById('aiLevel').value)  return showErr('s2Err','Please select your AI experience level.'), false;
         return true;
       }
 
       if(n === 3){
         const sel = document.querySelectorAll('#sourceChips .chip.sel');
-        if(sel.length === 0)
-          return showErr('s3Err','Please select at least one option for how you found T1ERA.'), false;
+        if(sel.length === 0) return showErr('s3Err','Please select at least one option for how you found T1ERA.'), false;
         return true;
       }
 
@@ -1255,28 +1086,19 @@
         const ep    = document.getElementById('emailPrimary').value.trim();
         const eb    = document.getElementById('emailBackup').value.trim();
         const cp    = document.getElementById('contactPref').value;
-        if(!phone)
-          return showErr('s4Err','Real phone number is required.'), false;
-        if(!/^\+?[\d\s\-().]{7,20}$/.test(phone))
-          return showErr('s4Err','Please enter a valid phone number with country code (e.g. +60 12-345 6789).'), false;
-        if(!ep)
-          return showErr('s4Err','Primary email is required.'), false;
-        if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ep))
-          return showErr('s4Err','Primary email format is invalid.'), false;
-        if(!eb)
-          return showErr('s4Err','Backup email is required.'), false;
-        if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(eb))
-          return showErr('s4Err','Backup email format is invalid.'), false;
-        if(ep.toLowerCase() === eb.toLowerCase())
-          return showErr('s4Err','Backup email must be different from your primary email.'), false;
-        if(!cp)
-          return showErr('s4Err','Please select your preferred contact method.'), false;
+        if(!phone) return showErr('s4Err','Real phone number is required.'), false;
+        if(!/^\+?[\d\s\-().]{7,20}$/.test(phone)) return showErr('s4Err','Please enter a valid phone number with country code (e.g. +60 12-345 6789).'), false;
+        if(!ep) return showErr('s4Err','Primary email is required.'), false;
+        if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ep)) return showErr('s4Err','Primary email format is invalid.'), false;
+        if(!eb) return showErr('s4Err','Backup email is required.'), false;
+        if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(eb)) return showErr('s4Err','Backup email format is invalid.'), false;
+        if(ep.toLowerCase() === eb.toLowerCase()) return showErr('s4Err','Backup email must be different from your primary email.'), false;
+        if(!cp) return showErr('s4Err','Please select your preferred contact method.'), false;
         return true;
       }
 
       if(n === 5){
-        if(!document.getElementById('techComfort').value)
-          return showErr('s5Err','Please select your tech comfort level.'), false;
+        if(!document.getElementById('techComfort').value) return showErr('s5Err','Please select your tech comfort level.'), false;
         return true;
       }
 
@@ -1287,8 +1109,7 @@
         if(!c1) document.getElementById('chk1Wrap').classList.add('err-item');
         if(!c2) document.getElementById('chk2Wrap').classList.add('err-item');
         if(!c3) document.getElementById('chk3Wrap').classList.add('err-item');
-        if(!c1 || !c2 || !c3)
-          return showErr('s6Err','You must tick all three checkboxes to continue.'), false;
+        if(!c1 || !c2 || !c3) return showErr('s6Err','You must tick all three checkboxes to continue.'), false;
         return true;
       }
 
@@ -1299,39 +1120,32 @@
     function goTo(n, backwards){
       const from = document.getElementById('s' + current);
       const to   = document.getElementById('s' + n);
-
       from.classList.remove('active', 'back-active');
       to.classList.remove('active', 'back-active');
-      if(backwards){
-        to.classList.add('back-active');
-      } else {
-        to.classList.add('active');
-      }
-
+      to.classList.add(backwards ? 'back-active' : 'active');
       current = n;
       updateProgress(n);
       renderDots();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    /* ── COLLECT ALL DATA ── */
+    /* ── COLLECT DATA ── */
     function collectFormData(){
       function chips(groupId){
         return Array.from(document.querySelectorAll('#' + groupId + ' .chip.sel'))
                     .map(c => c.getAttribute('data-val'));
       }
-
       return {
-        fullName:        document.getElementById('fullName').value.trim(),
-        nickname:        document.getElementById('nickname').value.trim(),
-        callsign:        document.getElementById('callsign').value.trim(),
-        userStatus:      document.getElementById('userStatus').value,
-        dob:             document.getElementById('dob').value,
-        country:         document.getElementById('country').value,
-        city:            document.getElementById('city').value.trim(),
-        purposes:        chips('purposeChips'),
-        industry:        document.getElementById('industry').value,
-        aiLevel:         document.getElementById('aiLevel').value,
+        fullName:         document.getElementById('fullName').value.trim(),
+        nickname:         document.getElementById('nickname').value.trim(),
+        callsign:         document.getElementById('callsign').value.trim(),
+        userStatus:       document.getElementById('userStatus').value,
+        dob:              document.getElementById('dob').value,
+        country:          document.getElementById('country').value,
+        city:             document.getElementById('city').value.trim(),
+        purposes:         chips('purposeChips'),
+        industry:         document.getElementById('industry').value,
+        aiLevel:          document.getElementById('aiLevel').value,
         discoverySources: chips('sourceChips'),
         refCode:          document.getElementById('refCode').value.trim(),
         discoveryNote:    document.getElementById('discovery').value.trim(),
@@ -1353,37 +1167,28 @@
       };
     }
 
-    /* ── SAVING SCREEN HELPERS ── */
+    /* ── SAVING SCREEN ── */
     function showSavingScreen(){
       const s = document.getElementById('savingScreen');
       ['sstep1','sstep2','sstep3','sstep4'].forEach(id => {
-        const el = document.getElementById(id);
-        el.classList.remove('on','done');
+        document.getElementById(id).classList.remove('on','done');
       });
       document.getElementById('savingTxt').textContent = 'SAVING YOUR PROFILE...';
       s.classList.remove('off');
       s.classList.add('on');
-
-      const steps = ['sstep1','sstep2','sstep3','sstep4'];
+      const steps  = ['sstep1','sstep2','sstep3','sstep4'];
       const delays = [0, 600, 1200, 1900];
       steps.forEach((id, i) => {
         setTimeout(() => {
-          if(i > 0) {
-            document.getElementById(steps[i-1]).classList.remove('on');
-            document.getElementById(steps[i-1]).classList.add('done');
-          }
+          if(i > 0){ document.getElementById(steps[i-1]).classList.remove('on'); document.getElementById(steps[i-1]).classList.add('done'); }
           document.getElementById(id).classList.add('on');
         }, delays[i]);
       });
     }
-
     function hideSavingScreen(cb){
       const s = document.getElementById('savingScreen');
       s.classList.add('off');
-      setTimeout(() => {
-        s.classList.remove('on','off');
-        if(cb) cb();
-      }, 420);
+      setTimeout(() => { s.classList.remove('on','off'); if(cb) cb(); }, 420);
     }
 
     /* ── SUBMIT TO FIRESTORE ── */
@@ -1392,7 +1197,6 @@
       btn.disabled = true;
       btn.classList.add('loading');
       clrErr('s6Err');
-
       showSavingScreen();
 
       let retries = 0;
@@ -1414,84 +1218,28 @@
       const user = window._currentUser;
       const data = collectFormData();
 
-      data.profilePicture = {
-        url:      user.photoURL || '',
-        source:   user.photoURL ? 'google' : '',
-        updatedAt: ''
-      };
-
-      data.plan = {
-        type:      'free',
-        startedAt: '',
-        expiresAt: '',
-        features:  []
-      };
-
-      data.balance = {
-        amount:    0,
-        currency:  'MYR',
-        lastTopUp: '',
-        lastSpent: ''
-      };
-
-      data.rank = {
-        level:     1,
-        title:     'Recruit',
-        xp:        0,
-        updatedAt: ''
-      };
-
-      data.accountStatus = {
-        type:       'standard',
-        verified:   false,
-        verifiedAt: '',
-        badge:      ''
-      };
-
-      data.points = {
-        total:     0,
-        available: 0,
-        spent:     0,
-        updatedAt: ''
-      };
-
-      data.affiliate = {
-        id:          '',
-        status:      'none',
-        referredBy:  data.refCode || '',
-        totalReferred: 0,
-        totalEarned:   0,
-        pendingPayout: 0,
-        joinedAt:    ''
-      };
+      data.profilePicture = { url: user.photoURL||'', source: user.photoURL?'google':'', updatedAt:'' };
+      data.plan            = { type:'free', startedAt:'', expiresAt:'', features:[] };
+      data.balance         = { amount:0, currency:'MYR', lastTopUp:'', lastSpent:'' };
+      data.rank            = { level:1, title:'Recruit', xp:0, updatedAt:'' };
+      data.accountStatus   = { type:'standard', verified:false, verifiedAt:'', badge:'' };
+      data.points          = { total:0, available:0, spent:0, updatedAt:'' };
+      data.affiliate       = { id:'', status:'none', referredBy:data.refCode||'', totalReferred:0, totalEarned:0, pendingPayout:0, joinedAt:'' };
 
       const saveStart = Date.now();
 
       try {
-        await window._setDoc(
-          window._doc(window._db, 'users', uid),
-          data,
-          { merge: true }
-        );
+        await window._setDoc(window._doc(window._db,'users',uid), data, { merge:true });
 
-        const ts = window._serverTimestamp ? window._serverTimestamp() : new Date().toISOString();
+        const ts        = window._serverTimestamp ? window._serverTimestamp() : new Date().toISOString();
         const normNick  = data.nickname.trim().toLowerCase().replace(/\s+/g,'_');
         const normPhone = data.phone.trim().replace(/[\s\-().]/g,'');
         const normEmail = data.emailBackup.trim().toLowerCase();
 
         await Promise.all([
-          window._setDoc(
-            window._doc(window._db, 'usernames', normNick),
-            { uid, nickname: data.nickname, createdAt: ts }
-          ),
-          window._setDoc(
-            window._doc(window._db, 'phones', normPhone),
-            { uid, phone: data.phone, createdAt: ts }
-          ),
-          window._setDoc(
-            window._doc(window._db, 'backupEmails', normEmail),
-            { uid, email: data.emailBackup, createdAt: ts }
-          ),
+          window._setDoc(window._doc(window._db,'usernames',normNick),    { uid, nickname:data.nickname, createdAt:ts }),
+          window._setDoc(window._doc(window._db,'phones',normPhone),       { uid, phone:data.phone, createdAt:ts }),
+          window._setDoc(window._doc(window._db,'backupEmails',normEmail), { uid, email:data.emailBackup, createdAt:ts }),
         ]);
 
         const elapsed   = Date.now() - saveStart;
@@ -1499,17 +1247,15 @@
 
         setTimeout(() => {
           ['sstep1','sstep2','sstep3','sstep4'].forEach(id => {
-            const el = document.getElementById(id);
-            el.classList.remove('on');
-            el.classList.add('done');
+            document.getElementById(id).classList.remove('on');
+            document.getElementById(id).classList.add('done');
           });
           document.getElementById('savingTxt').textContent = 'PROFILE SAVED!';
-
           setTimeout(() => {
             hideSavingScreen(() => {
               document.getElementById('s6').style.display = 'none';
-              const successScreen = document.getElementById('successScreen');
-              successScreen.classList.add('on');
+              const ss = document.getElementById('successScreen');
+              ss.classList.add('on');
               document.getElementById('progFill').style.width = '100%';
               document.getElementById('progCount').textContent = 'Complete ✓';
               document.getElementById('successMsg').innerHTML =
@@ -1521,21 +1267,17 @@
           }, 700);
         }, remaining);
 
-      } catch(err) {
+      } catch(err){
         console.error('Firestore error:', err);
-
         hideSavingScreen(() => {
           btn.disabled = false;
           btn.classList.remove('loading');
-
           if(err.code === 'permission-denied'){
-            showErr('s6Err',
-              'Permission denied. Please make sure your email is verified, then try again. ' +
-              '<a href="auth.html" style="color:var(--ind)">Go to sign-in →</a>');
+            showErr('s6Err','Permission denied. Please make sure your email is verified, then try again. <a href="auth.html" style="color:var(--ind)">Go to sign-in →</a>');
           } else if(err.code === 'unavailable' || err.message.includes('network')){
-            showErr('s6Err', 'Network error. Check your internet connection and try again.');
+            showErr('s6Err','Network error. Check your internet connection and try again.');
           } else {
-            showErr('s6Err', 'Something went wrong (' + (err.code || err.message) + '). Please try again.');
+            showErr('s6Err','Something went wrong (' + (err.code || err.message) + '). Please try again.');
           }
         });
       }
@@ -1544,28 +1286,28 @@
     /* ── NEXT & BACK ── */
     window.next = function(n){
       if(!validate(n)) return;
-
-      if(n === TOTAL){
-        submitToFirestore();
-        return;
-      }
+      if(n === TOTAL){ submitToFirestore(); return; }
       goTo(n + 1, false);
     };
-
     window.back = function(n){
       if(n <= 1) return;
       goTo(n - 1, true);
     };
 
-
-    /* ═══════════════════════════════════════════════════════════
-       REAL-TIME UNIQUENESS CHECKER
-       Checks nickname, phone, backup email against Firestore.
-       Collections used:
-         usernames/{nickname_lowercase}   → {uid, createdAt}
-         phones/{e164_normalized}         → {uid, createdAt}
-         backupEmails/{email_lowercase}   → {uid, createdAt}
-    ═══════════════════════════════════════════════════════════ */
+    /* ══════════════════════════════════════════════════════════════════
+       REAL-TIME UNIQUENESS + ANTI-FRAUD CHECKING
+       ──────────────────────────────────────────────────────────────────
+       Rules:
+       1. PRIMARY EMAIL  → must not exist in:
+            users.emailPrimary, users.emailBackup, backupEmails.email
+       2. BACKUP EMAIL   → must not exist in:
+            users.emailPrimary, users.emailBackup, backupEmails.email
+          AND must be different from primary email (frontend + DB)
+       3. PHONE          → must not exist in: phones.phone
+       4. NICKNAME       → must not exist in: usernames.nickname
+       5. SAME-EMAIL FRAUD: if primary === backup (case-insensitive) →
+          show anti-fraud warning on BOTH fields simultaneously
+    ══════════════════════════════════════════════════════════════════ */
     const _ucheckState = {
       nickname:     { status: 'idle', timer: null },
       phone:        { status: 'idle', timer: null },
@@ -1573,16 +1315,15 @@
       emailBackup:  { status: 'idle', timer: null },
     };
 
-    // Normalize helpers
-    function _normNickname(v){ return v.trim().toLowerCase().replace(/\s+/g,'_'); }
-    function _normPhone(v){    return v.trim().replace(/[\s\-().]/g,''); }
-    function _normEmail(v){    return v.trim().toLowerCase(); }
+    // Normalizers
+    const _normNickname = v => v.trim().toLowerCase().replace(/\s+/g,'_');
+    const _normPhone    = v => v.trim().replace(/[\s\-().]/g,'');
+    const _normEmail    = v => v.trim().toLowerCase();
 
-    // Set icon state: 'idle' | 'checking' | 'ok' | 'err'
+    // Icon state setter
     function _setIco(icoId, state){
       const el = document.getElementById(icoId);
-      if(!el) return;
-      el.className = 'ucheck-ico' + (state !== 'idle' ? ' ' + state : '');
+      if(el) el.className = 'ucheck-ico' + (state !== 'idle' ? ' ' + state : '');
     }
     function _setHint(hintId, msg, state){
       const el = document.getElementById(hintId);
@@ -1591,192 +1332,221 @@
       el.className   = 'ucheck-hint' + (state ? ' ' + state : '');
     }
 
-    // Core Firestore check — query by field value across all users
-    async function _checkUnique(collection, field, value, currentUid){
-      if(!window._db || !window._collection || !window._query || !window._where || !window._getDocs)
-        throw new Error('Firestore not ready');
-      const q = window._query(
-        window._collection(window._db, collection),
-        window._where(field, '==', value)
-      );
-      const snap = await window._getDocs(q);
-      if(snap.empty) return true; // available
-      let takenByOther = false;
-      snap.forEach(d => { if(d.data().uid !== currentUid) takenByOther = true; });
-      return !takenByOther;
-    }
-
-    // Generic debounced checker factory
-    function _makeChecker(fieldId, icoId, hintId, collectionName, fieldName, normFn, minLen, formatCheck){
-      const state = _ucheckState[fieldId];
-
-      return async function(){
-        const raw = document.getElementById(fieldId).value;
-        const val = normFn(raw);
-        const inp = document.getElementById(fieldId);
-
-        clearTimeout(state.timer);
-
-        if(!raw.trim() || val.length < minLen){
-          state.status = 'idle';
-          _setIco(icoId, 'idle');
-          _setHint(hintId, '', '');
-          inp.classList.remove('ok','err');
-          return;
-        }
-
-        if(formatCheck && !formatCheck(val)){
-          state.status = 'err';
-          _setIco(icoId, 'idle');
-          _setHint(hintId, '', '');
-          inp.classList.remove('ok','err');
-          return;
-        }
-
-        state.status = 'checking';
-        _setIco(icoId, 'checking');
-        _setHint(hintId, 'Checking availability...', 'checking');
-        inp.classList.remove('ok','err');
-
-        state.timer = setTimeout(async () => {
-          try {
-            const uid = window._currentUser ? window._currentUser.uid : null;
-            const available = await _checkUnique(collectionName, fieldName, val, uid);
-
-            if(available){
-              state.status = 'ok';
-              _setIco(icoId, 'ok');
-              _setHint(hintId, '✓ Available', 'ok');
-              inp.classList.add('ok'); inp.classList.remove('err');
-            } else {
-              state.status = 'err';
-              _setIco(icoId, 'err');
-              const msgs = {
-                nickname:    'This nickname is already taken. Please choose another.',
-                phone:       'This phone number is already registered to another account.',
-                emailBackup: 'This backup email is already linked to another account.',
-              };
-              _setHint(hintId, msgs[fieldId] || 'Already in use.', 'err');
-              inp.classList.add('err'); inp.classList.remove('ok');
-            }
-          } catch(e) {
-            console.warn('Uniqueness check failed:', e);
-            state.status = 'idle';
-            _setIco(icoId, 'idle');
-            _setHint(hintId, '', '');
-            inp.classList.remove('ok','err');
-          }
-        }, 600);
-      };
-    }
-
-    // ── Global email uniqueness check (queries users.emailPrimary, users.emailBackup, backupEmails) ──
-    async function _checkEmailGlobal(emailNorm, currentUid){
-      if(!window._db || !window._collection || !window._query || !window._where || !window._getDocs)
-        throw new Error('Firestore not ready');
+    /* ── CORE: check if email exists ANYWHERE in the system ── */
+    async function _isEmailTakenGlobally(emailNorm, currentUid){
+      if(!window._db) throw new Error('Firestore not ready');
       const [snapA, snapB, snapC] = await Promise.all([
-        window._getDocs(window._query(window._collection(window._db,'users'),        window._where('emailPrimary','==',emailNorm))),
-        window._getDocs(window._query(window._collection(window._db,'users'),        window._where('emailBackup', '==',emailNorm))),
-        window._getDocs(window._query(window._collection(window._db,'backupEmails'), window._where('email',       '==',emailNorm))),
+        window._getDocs(window._query(window._collection(window._db,'users'),       window._where('emailPrimary','==',emailNorm))),
+        window._getDocs(window._query(window._collection(window._db,'users'),       window._where('emailBackup', '==',emailNorm))),
+        window._getDocs(window._query(window._collection(window._db,'backupEmails'),window._where('email',       '==',emailNorm))),
       ]);
-      function takenByOther(snap){ let b=false; snap.forEach(d=>{ if(d.data().uid!==currentUid) b=true; }); return b; }
-      return !takenByOther(snapA) && !takenByOther(snapB) && !takenByOther(snapC);
+      function takenByOther(snap){ let b=false; snap.forEach(d=>{ if(d.data().uid !== currentUid) b=true; }); return b; }
+      return takenByOther(snapA) || takenByOther(snapB) || takenByOther(snapC);
     }
 
-    // ── Primary email checker (same pattern as _makeChecker, uses _checkEmailGlobal) ──
-    const _onEmailPrimaryInput = (function(){
-      const st = _ucheckState.emailPrimary;
+    /* ── PRIMARY EMAIL checker ── */
+    async function _runPrimaryEmailCheck(){
+      const raw = document.getElementById('emailPrimary').value;
+      const val = _normEmail(raw);
+      const inp = document.getElementById('emailPrimary');
+      const st  = _ucheckState.emailPrimary;
+
+      clearTimeout(st.timer);
+
+      // Hide fraud alert initially
+      hideFraudAlert('fraudAlertPrimary');
+
+      if(!raw.trim() || val.length < 5){
+        st.status='idle'; _setIco('icoEmailPrimary','idle'); _setHint('hintEmailPrimary','',''); inp.classList.remove('ok','err'); return;
+      }
+      if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)){
+        st.status='idle'; _setIco('icoEmailPrimary','idle'); _setHint('hintEmailPrimary','',''); inp.classList.remove('ok','err'); return;
+      }
+
+      // Same-as-backup check (fraud detection)
+      const backupVal = _normEmail(document.getElementById('emailBackup').value);
+      if(backupVal.length >= 5 && val === backupVal){
+        st.status = 'err';
+        _setIco('icoEmailPrimary','err');
+        _setHint('hintEmailPrimary','Cannot match backup email.','err');
+        inp.classList.add('err'); inp.classList.remove('ok');
+        showFraudAlert('fraudAlertPrimary','fraudMsgPrimary',
+          '⚠️ Anti-Fraud Detected: Your primary and backup emails are identical. This is a pattern associated with bot and dummy accounts. Please use two different email addresses.');
+        showFraudAlert('fraudAlertBackup','fraudMsgBackup',
+          '⚠️ Anti-Fraud Detected: Your backup and primary emails are identical. Using the same email for both fields suggests a dummy or bot account. Use a unique email for each field.');
+        return;
+      }
+
+      st.status='checking'; _setIco('icoEmailPrimary','checking'); _setHint('hintEmailPrimary','Checking availability...','checking'); inp.classList.remove('ok','err');
+
+      st.timer = setTimeout(async () => {
+        try {
+          const uid   = window._currentUser ? window._currentUser.uid : null;
+          const taken = await _isEmailTakenGlobally(val, uid);
+
+          if(!taken){
+            st.status='ok'; _setIco('icoEmailPrimary','ok'); _setHint('hintEmailPrimary','✓ Available','ok');
+            inp.classList.add('ok'); inp.classList.remove('err');
+            hideFraudAlert('fraudAlertPrimary');
+          } else {
+            st.status='err'; _setIco('icoEmailPrimary','err');
+            _setHint('hintEmailPrimary','Email already registered.','err');
+            inp.classList.add('err'); inp.classList.remove('ok');
+            showFraudAlert('fraudAlertPrimary','fraudMsgPrimary',
+              '🚨 Anti-Fraud Detection Triggered: This email address ('+raw.trim()+') is already linked to an existing T1ERA account — either as a primary or backup email. Reusing emails across multiple accounts is a violation of our Terms of Service and may be flagged as bot or dummy account activity. Please use a unique, personal email address you have not previously registered with.');
+          }
+
+          // Re-trigger backup check in case it depends on primary (same-email guard)
+          const bRaw = document.getElementById('emailBackup').value.trim();
+          if(bRaw.length >= 5) _runBackupEmailCheck();
+
+        } catch(e){
+          console.warn('Primary email check failed:',e);
+          st.status='idle'; _setIco('icoEmailPrimary','idle'); _setHint('hintEmailPrimary','',''); inp.classList.remove('ok','err');
+        }
+      }, 600);
+    }
+    window._onEmailPrimaryInput = _runPrimaryEmailCheck;
+
+    /* ── BACKUP EMAIL checker ── */
+    async function _runBackupEmailCheck(){
+      const raw    = document.getElementById('emailBackup').value;
+      const val    = _normEmail(raw);
+      const inp    = document.getElementById('emailBackup');
+      const st     = _ucheckState.emailBackup;
+
+      clearTimeout(st.timer);
+      hideFraudAlert('fraudAlertBackup');
+
+      if(!raw.trim() || val.length < 5){
+        st.status='idle'; _setIco('icoEmailBackup','idle'); _setHint('hintEmailBackup','',''); inp.classList.remove('ok','err'); return;
+      }
+      if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)){
+        st.status='idle'; _setIco('icoEmailBackup','idle'); _setHint('hintEmailBackup','',''); inp.classList.remove('ok','err'); return;
+      }
+
+      // Same-as-primary check (fraud detection)
+      const primaryVal = _normEmail(document.getElementById('emailPrimary').value);
+      if(primaryVal.length >= 5 && val === primaryVal){
+        st.status='err'; _setIco('icoEmailBackup','err');
+        _setHint('hintEmailBackup','Cannot match primary email.','err');
+        inp.classList.add('err'); inp.classList.remove('ok');
+        showFraudAlert('fraudAlertBackup','fraudMsgBackup',
+          '⚠️ Anti-Fraud Detected: Your backup email matches your primary email. This is associated with bot and dummy account registration. Both email fields must be unique and different from each other.');
+        showFraudAlert('fraudAlertPrimary','fraudMsgPrimary',
+          '⚠️ Anti-Fraud Detected: Your primary email matches the backup email entered. Use two distinct email addresses to proceed.');
+        return;
+      }
+
+      // If primary fraud alert was showing for same-email, clear it now that they differ
+      if(_ucheckState.emailPrimary.status !== 'err'){
+        hideFraudAlert('fraudAlertPrimary');
+      }
+
+      st.status='checking'; _setIco('icoEmailBackup','checking'); _setHint('hintEmailBackup','Checking availability...','checking'); inp.classList.remove('ok','err');
+
+      st.timer = setTimeout(async () => {
+        try {
+          const uid   = window._currentUser ? window._currentUser.uid : null;
+          const taken = await _isEmailTakenGlobally(val, uid);
+
+          if(!taken){
+            st.status='ok'; _setIco('icoEmailBackup','ok'); _setHint('hintEmailBackup','✓ Available','ok');
+            inp.classList.add('ok'); inp.classList.remove('err');
+            hideFraudAlert('fraudAlertBackup');
+          } else {
+            st.status='err'; _setIco('icoEmailBackup','err');
+            _setHint('hintEmailBackup','Email already registered.','err');
+            inp.classList.add('err'); inp.classList.remove('ok');
+            showFraudAlert('fraudAlertBackup','fraudMsgBackup',
+              '🚨 Anti-Fraud Detection Triggered: This email address ('+raw.trim()+') already exists in our system — as a primary email, backup email, or both on another account. Using emails already tied to existing accounts is a pattern of bot and dummy account creation. Please use a fresh, unique email address that has never been registered on T1ERA before.');
+          }
+        } catch(e){
+          console.warn('Backup email check failed:',e);
+          st.status='idle'; _setIco('icoEmailBackup','idle'); _setHint('hintEmailBackup','',''); inp.classList.remove('ok','err');
+        }
+      }, 600);
+    }
+
+    /* ── PHONE checker ── */
+    function _makePhoneChecker(){
+      const st = _ucheckState.phone;
       return async function(){
-        const raw = document.getElementById('emailPrimary').value;
-        const val = _normEmail(raw);
-        const inp = document.getElementById('emailPrimary');
+        const raw = document.getElementById('phone').value;
+        const val = _normPhone(raw);
+        const inp = document.getElementById('phone');
         clearTimeout(st.timer);
-        if(!raw.trim() || val.length < 5){
-          st.status='idle'; _setIco('icoEmailPrimary','idle'); _setHint('hintEmailPrimary','',''); inp.classList.remove('ok','err'); return;
-        }
-        if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)){
-          st.status='idle'; _setIco('icoEmailPrimary','idle'); _setHint('hintEmailPrimary','',''); inp.classList.remove('ok','err'); return;
-        }
-        st.status='checking'; _setIco('icoEmailPrimary','checking'); _setHint('hintEmailPrimary','Checking availability...','checking'); inp.classList.remove('ok','err');
+        if(!raw.trim() || val.length < 7){ st.status='idle'; _setIco('icoPhone','idle'); _setHint('hintPhone','',''); inp.classList.remove('ok','err'); return; }
+        if(!/^\+?[\d]{7,15}$/.test(val)){ st.status='idle'; _setIco('icoPhone','idle'); _setHint('hintPhone','',''); inp.classList.remove('ok','err'); return; }
+        st.status='checking'; _setIco('icoPhone','checking'); _setHint('hintPhone','Checking availability...','checking'); inp.classList.remove('ok','err');
         st.timer = setTimeout(async ()=>{
           try{
             const uid = window._currentUser ? window._currentUser.uid : null;
-            const available = await _checkEmailGlobal(val, uid);
-            if(available){
-              st.status='ok'; _setIco('icoEmailPrimary','ok'); _setHint('hintEmailPrimary','✓ Available','ok'); inp.classList.add('ok'); inp.classList.remove('err');
-              // Re-validate backup in case same-email guard needs updating
-              const bv = _normEmail(document.getElementById('emailBackup').value);
-              if(bv.length >= 5) _onEmailBackupInput();
-            } else {
-              st.status='err'; _setIco('icoEmailPrimary','err'); _setHint('hintEmailPrimary','This email is already registered to another account.','err'); inp.classList.add('err'); inp.classList.remove('ok');
-            }
-          } catch(e){ console.warn('Primary email check failed:',e); st.status='idle'; _setIco('icoEmailPrimary','idle'); _setHint('hintEmailPrimary','',''); inp.classList.remove('ok','err'); }
+            const q   = window._query(window._collection(window._db,'phones'), window._where('phone','==',val));
+            const snap = await window._getDocs(q);
+            let taken = false;
+            snap.forEach(d=>{ if(d.data().uid !== uid) taken = true; });
+            if(!taken){ st.status='ok'; _setIco('icoPhone','ok'); _setHint('hintPhone','✓ Available','ok'); inp.classList.add('ok'); inp.classList.remove('err'); }
+            else { st.status='err'; _setIco('icoPhone','err'); _setHint('hintPhone','This phone number is already registered to another account.','err'); inp.classList.add('err'); inp.classList.remove('ok'); }
+          } catch(e){ console.warn('Phone check failed:',e); st.status='idle'; _setIco('icoPhone','idle'); _setHint('hintPhone','',''); inp.classList.remove('ok','err'); }
         }, 600);
       };
-    })();
+    }
 
-    // Wire up the three fields
-    const _onNicknameInput = _makeChecker(
-      'nickname', 'icoNickname', 'hintNickname',
-      'usernames', 'nickname',
-      _normNickname, 3,
-      v => /^[a-z0-9_]{3,24}$/.test(v)
-    );
+    /* ── NICKNAME checker ── */
+    function _makeNicknameChecker(){
+      const st = _ucheckState.nickname;
+      return async function(){
+        const raw = document.getElementById('nickname').value;
+        const val = _normNickname(raw);
+        const inp = document.getElementById('nickname');
+        clearTimeout(st.timer);
+        if(!raw.trim() || val.length < 3){ st.status='idle'; _setIco('icoNickname','idle'); _setHint('hintNickname','',''); inp.classList.remove('ok','err'); return; }
+        if(!/^[a-z0-9_]{3,24}$/.test(val)){ st.status='idle'; _setIco('icoNickname','idle'); _setHint('hintNickname','',''); inp.classList.remove('ok','err'); return; }
+        st.status='checking'; _setIco('icoNickname','checking'); _setHint('hintNickname','Checking availability...','checking'); inp.classList.remove('ok','err');
+        st.timer = setTimeout(async ()=>{
+          try{
+            const uid  = window._currentUser ? window._currentUser.uid : null;
+            const q    = window._query(window._collection(window._db,'usernames'), window._where('nickname','==',val));
+            const snap = await window._getDocs(q);
+            let taken  = false;
+            snap.forEach(d=>{ if(d.data().uid !== uid) taken = true; });
+            if(!taken){ st.status='ok'; _setIco('icoNickname','ok'); _setHint('hintNickname','✓ Available','ok'); inp.classList.add('ok'); inp.classList.remove('err'); }
+            else { st.status='err'; _setIco('icoNickname','err'); _setHint('hintNickname','This nickname is already taken. Please choose another.','err'); inp.classList.add('err'); inp.classList.remove('ok'); }
+          } catch(e){ console.warn('Nickname check failed:',e); st.status='idle'; _setIco('icoNickname','idle'); _setHint('hintNickname','',''); inp.classList.remove('ok','err'); }
+        }, 600);
+      };
+    }
 
-    const _onPhoneInput = _makeChecker(
-      'phone', 'icoPhone', 'hintPhone',
-      'phones', 'phone',
-      _normPhone, 7,
-      v => /^\+?[\d]{7,15}$/.test(v)
-    );
+    const _onNicknameInput = _makeNicknameChecker();
+    const _onPhoneInput    = _makePhoneChecker();
 
-    const _onEmailBackupInput = _makeChecker(
-      'emailBackup', 'icoEmailBackup', 'hintEmailBackup',
-      'backupEmails', 'email',
-      _normEmail, 5,
-      v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
-    );
-
+    // Wire events
     document.getElementById('nickname').addEventListener('input',    _onNicknameInput);
+    document.getElementById('nickname').addEventListener('blur',     _onNicknameInput);
     document.getElementById('phone').addEventListener('input',       _onPhoneInput);
-    document.getElementById('emailBackup').addEventListener('input', _onEmailBackupInput);
+    document.getElementById('phone').addEventListener('blur',        _onPhoneInput);
+    document.getElementById('emailPrimary').addEventListener('input', _runPrimaryEmailCheck);
+    document.getElementById('emailPrimary').addEventListener('blur',  _runPrimaryEmailCheck);
+    document.getElementById('emailBackup').addEventListener('input',  _runBackupEmailCheck);
+    document.getElementById('emailBackup').addEventListener('blur',   _runBackupEmailCheck);
 
-    // Also trigger on blur so paste events are caught
-    document.getElementById('nickname').addEventListener('blur',    _onNicknameInput);
-    document.getElementById('phone').addEventListener('blur',       _onPhoneInput);
-    document.getElementById('emailBackup').addEventListener('blur', _onEmailBackupInput);
-
-    document.getElementById('emailPrimary').addEventListener('input', _onEmailPrimaryInput);
-    document.getElementById('emailPrimary').addEventListener('blur',  _onEmailPrimaryInput);
-    // When primary changes, re-check backup same-form guard
+    // When primary changes, re-check backup's same-email guard
     document.getElementById('emailPrimary').addEventListener('input', function(){
       const bv = document.getElementById('emailBackup').value.trim();
-      if(bv.length >= 5) _onEmailBackupInput();
+      if(bv.length >= 5) _runBackupEmailCheck();
     });
 
-    // ── Guard: block next() if check is pending or failed ──
-    // This wraps the existing validate() function.
-    // Slides 1 and 4 each have uniqueness checks.
+    /* ── VALIDATE GUARD: block next() if checks pending/failed ── */
     const _origValidate = validate;
     validate = function(n){
       if(!_origValidate(n)) return false;
 
       if(n === 1){
         const s = _ucheckState.nickname.status;
-        if(s === 'checking'){
-          showErr('s1Err', 'Still checking nickname availability — please wait a moment.');
-          return false;
-        }
-        if(s === 'err'){
-          showErr('s1Err', 'Nickname is already taken. Please choose a different one.');
-          document.getElementById('nickname').classList.add('err');
-          return false;
-        }
-        if(s === 'idle' && document.getElementById('nickname').value.trim().length >= 3){
-          showErr('s1Err', 'Please wait — verifying nickname uniqueness...');
-          _onNicknameInput();
-          return false;
-        }
+        if(s === 'checking'){ showErr('s1Err','Still checking nickname availability — please wait a moment.'); return false; }
+        if(s === 'err'){ showErr('s1Err','Nickname is already taken. Please choose a different one.'); document.getElementById('nickname').classList.add('err'); return false; }
+        if(s === 'idle' && document.getElementById('nickname').value.trim().length >= 3){ showErr('s1Err','Please wait — verifying nickname uniqueness...'); _onNicknameInput(); return false; }
       }
 
       if(n === 4){
@@ -1784,47 +1554,23 @@
         const sep = _ucheckState.emailPrimary.status;
         const se  = _ucheckState.emailBackup.status;
 
-        if(sp === 'checking' || sep === 'checking' || se === 'checking'){
-          showErr('s4Err', 'Still verifying your details — please wait a moment.');
-          return false;
-        }
-        if(sp === 'err'){
-          showErr('s4Err', 'Phone number is already registered to another account.');
-          document.getElementById('phone').classList.add('err');
-          return false;
-        }
-        if(sep === 'err'){
-          showErr('s4Err', 'Primary email is already registered to another account.');
-          document.getElementById('emailPrimary').classList.add('err');
-          return false;
-        }
-        if(se === 'err'){
-          showErr('s4Err', 'Backup email is already linked to another account.');
-          document.getElementById('emailBackup').classList.add('err');
-          return false;
-        }
-        // Force-run checks if idle with valid input
+        if(sp==='checking'||sep==='checking'||se==='checking'){ showErr('s4Err','Still verifying your details — please wait a moment.'); return false; }
+        if(sp==='err'){  showErr('s4Err','Phone number is already registered to another account.'); document.getElementById('phone').classList.add('err'); return false; }
+        if(sep==='err'){ showErr('s4Err','Primary email is already registered to another account. Please use a unique email address.'); document.getElementById('emailPrimary').classList.add('err'); return false; }
+        if(se==='err'){  showErr('s4Err','Backup email is already linked to another account. Please use a unique email address.'); document.getElementById('emailBackup').classList.add('err'); return false; }
+
         const phoneVal  = _normPhone(document.getElementById('phone').value);
         const emailPVal = _normEmail(document.getElementById('emailPrimary').value);
         const emailBVal = _normEmail(document.getElementById('emailBackup').value);
-        if(sp  === 'idle' && /^\+?[\d]{7,15}$/.test(phoneVal)){
-          showErr('s4Err', 'Please wait — verifying phone number...');
-          _onPhoneInput(); return false;
-        }
-        if(sep === 'idle' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailPVal)){
-          showErr('s4Err', 'Please wait — verifying primary email...');
-          _onEmailPrimaryInput(); return false;
-        }
-        if(se  === 'idle' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailBVal)){
-          showErr('s4Err', 'Please wait — verifying backup email...');
-          _onEmailBackupInput(); return false;
-        }
+        if(sp==='idle'  && /^\+?[\d]{7,15}$/.test(phoneVal)){     showErr('s4Err','Please wait — verifying phone number...'); _onPhoneInput(); return false; }
+        if(sep==='idle' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailPVal)){ showErr('s4Err','Please wait — verifying primary email...'); _runPrimaryEmailCheck(); return false; }
+        if(se==='idle'  && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailBVal)){ showErr('s4Err','Please wait — verifying backup email...'); _runBackupEmailCheck(); return false; }
       }
 
       return true;
     };
 
-    /* ── ENTER KEY SUPPORT ── */
+    /* ── ENTER KEY ── */
     document.addEventListener('keydown', e => {
       if(e.key !== 'Enter') return;
       if(e.target.tagName === 'TEXTAREA') return;
