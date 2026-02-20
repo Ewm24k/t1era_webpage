@@ -774,7 +774,7 @@
                   </div>
                   <div class="fraud-alert-body">
                     <div class="fraud-alert-msg" id="fraudMsgPrimary">Our system has detected that this email address is already linked to an existing T1ERA account. Each email can only be associated with one account. Creating multiple accounts using the same email is a violation of our Terms of Service and may be flagged as bot or dummy account activity.</div>
-                    <a class="fraud-alert-contact" href="mailto:t1era@proton.me"><i class="ph-bold ph-envelope"></i> If this is a mistake, contact t1era@proton.me</a>
+                    <a class="fraud-alert-contact" href="/cdn-cgi/l/email-protection#e296d3879083a292908d968d8ccc8f87"><i class="ph-bold ph-envelope"></i> If this is a mistake, contact <span class="__cf_email__" data-cfemail="1165207463705161637e657e7f3f7c74">[email&#160;protected]</span></a>
                   </div>
                 </div>
               </div>
@@ -797,7 +797,7 @@
                   </div>
                   <div class="fraud-alert-body">
                     <div class="fraud-alert-msg" id="fraudMsgBackup">Our system has detected that this email address is already registered in T1ERA — either as a primary or backup email on another account. Each email address can only be used on one account. Re-using emails is a pattern associated with bot and dummy account creation and is strictly prohibited.</div>
-                    <a class="fraud-alert-contact" href="mailto:t1era@proton.me"><i class="ph-bold ph-envelope"></i> If this is a mistake, contact t1era@proton.me</a>
+                    <a class="fraud-alert-contact" href="/cdn-cgi/l/email-protection#5327623621321323213c273c3d7d3e36"><i class="ph-bold ph-envelope"></i> If this is a mistake, contact <span class="__cf_email__" data-cfemail="f185c0948390b181839e859e9fdf9c94">[email&#160;protected]</span></a>
                   </div>
                 </div>
               </div>
@@ -976,7 +976,7 @@
   </div>
 
   <!-- FIREBASE SDK -->
-  <script type="module">
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="module">
     import { initializeApp }        from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
     import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
     import {
@@ -1607,22 +1607,19 @@
     document.getElementById('emailBackup').addEventListener('input',  _runBackupEmailCheck);
     document.getElementById('emailBackup').addEventListener('blur',   _runBackupEmailCheck);
 
-    // When primary changes, re-check backup's same-email guard
-    document.getElementById('emailPrimary').addEventListener('input', function(){
-      const bv = document.getElementById('emailBackup').value.trim();
-      if(bv.length >= 5) _runBackupEmailCheck();
-    });
+    // Primary is readonly — no cross-trigger needed.
+    // Backup's same-email guard is checked inside _runBackupEmailCheck itself.
 
-    /* ── VALIDATE GUARD: block next() if checks pending/failed ── */
+    /* ── VALIDATE GUARD ── */
+    // Simple: only block if a check actively returned 'err'. 
+    // Real-time checks already fire while typing — Continue button does NOT re-trigger them.
     const _origValidate = validate;
     validate = function(n){
       if(!_origValidate(n)) return false;
 
       if(n === 1){
         const s = _ucheckState.nickname.status;
-        if(s === 'checking'){ showErr('s1Err','Still checking nickname availability — please wait a moment.'); return false; }
         if(s === 'err'){ showErr('s1Err','Nickname is already taken. Please choose a different one.'); document.getElementById('nickname').classList.add('err'); return false; }
-        if(s === 'idle' && document.getElementById('nickname').value.trim().length >= 3){ showErr('s1Err','Please wait — verifying nickname uniqueness...'); _onNicknameInput(); return false; }
       }
 
       if(n === 4){
@@ -1630,63 +1627,21 @@
         const sep = _ucheckState.emailPrimary.status;
         const se  = _ucheckState.emailBackup.status;
 
-        // ── Primary email must match the Firebase Auth signed-in email ──
-        const authEmail = window._authEmail || (window._currentUser ? (window._currentUser.email||'').trim().toLowerCase() : '');
-        const epVal     = document.getElementById('emailPrimary').value.trim().toLowerCase();
-        if(authEmail && epVal !== authEmail){
-          document.getElementById('emailPrimary').value = window._currentUser ? (window._currentUser.email||'') : '';
-          showErr('s4Err','Primary email must match the email you used to sign in. The field has been reset.');
-          _runPrimaryEmailCheck();
-          return false;
-        }
-
-        // ── Block if any check is still running ──
-        if(sp==='checking'||sep==='checking'||se==='checking'){
-          showErr('s4Err','Still verifying your details — please wait a moment.');
-          return false;
-        }
-
-        // ── Block on phone failure ──
         if(sp==='err'){
           showErr('s4Err','Phone number is already registered to another account.');
           document.getElementById('phone').classList.add('err');
           return false;
         }
-
-        // ── Block on primary email failure — trigger/show fraud panel instead of plain error ──
         if(sep==='err'){
-          showFraudAlert('fraudAlertPrimary','fraudMsgPrimary',
-            'Our system has detected that this email (' + (window._currentUser ? window._currentUser.email : epVal) + ') is already linked to an existing T1ERA account. Each email can only be associated with one account. If you believe this is an error, contact t1era@proton.me.');
+          showErr('s4Err','Your sign-in email is already linked to an existing account. See the alert below for details.');
           document.getElementById('emailPrimary').classList.add('err');
-          showErr('s4Err','System detected an existing account tied to your sign-in email. See the alert below the email field for details.');
           document.getElementById('fraudAlertPrimary').scrollIntoView({ behavior:'smooth', block:'center' });
           return false;
         }
-
-        // ── Block on backup email failure — trigger/show fraud panel ──
         if(se==='err'){
+          showErr('s4Err','Backup email is already registered. See the alert below for details.');
           document.getElementById('emailBackup').classList.add('err');
-          showErr('s4Err','System detected an existing account tied to the backup email. See the alert below the backup field for details.');
           document.getElementById('fraudAlertBackup').scrollIntoView({ behavior:'smooth', block:'center' });
-          return false;
-        }
-
-        // ── Force-run checks if still idle with valid input ──
-        const phoneVal  = _normPhone(document.getElementById('phone').value);
-        const emailBVal = _normEmail(document.getElementById('emailBackup').value);
-        if(sp==='idle'  && /^\+?[\d]{7,15}$/.test(phoneVal)){
-          showErr('s4Err','Please wait — verifying phone number...');
-          _onPhoneInput();
-          return false;
-        }
-        if(sep==='idle' && authEmail){
-          showErr('s4Err','Please wait — verifying your sign-in email with the system...');
-          _runPrimaryEmailCheck();
-          return false;
-        }
-        if(se==='idle'  && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailBVal)){
-          showErr('s4Err','Please wait — verifying backup email...');
-          _runBackupEmailCheck();
           return false;
         }
       }
