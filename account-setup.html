@@ -580,10 +580,6 @@
   <div class="bg-layer bg-glow"></div>
   <div class="bg-layer bg-noise"></div>
 
-  <!-- ══════════════════════════════════════════
-       GATE SCREEN — covers page while auth resolves
-       Hides once we confirm user is eligible to be here
-  ══════════════════════════════════════════ -->
   <div id="gateScreen">
     <div class="gate-logo">
       <div class="gate-logomark">T1</div>
@@ -600,10 +596,6 @@
     </div>
   </div>
 
-  <!-- ══════════════════════════════════════════
-       SAVING SCREEN — Canva pink/purple overlay
-       shown while Firestore is writing the profile
-  ══════════════════════════════════════════ -->
   <div id="savingScreen">
     <div class="gate-logo">
       <div class="gate-logomark">T1</div>
@@ -661,9 +653,7 @@
       <div class="card-accent"></div>
       <div class="slides" id="slides">
 
-        <!-- ══════════════════════════
-             SLIDE 1 — PERSONAL INFO
-        ══════════════════════════ -->
+        <!-- SLIDE 1 — PERSONAL INFO -->
         <div class="slide active" id="s1">
           <div class="slide-head">
             <div class="slide-icon"><i class="ph-bold ph-user-circle"></i></div>
@@ -746,9 +736,7 @@
           </div>
         </div>
 
-        <!-- ══════════════════════════
-             SLIDE 2 — PURPOSE / WHY T1ERA
-        ══════════════════════════ -->
+        <!-- SLIDE 2 — PURPOSE / WHY T1ERA -->
         <div class="slide" id="s2">
           <div class="slide-head">
             <div class="slide-icon"><i class="ph-bold ph-crosshair-simple"></i></div>
@@ -817,9 +805,7 @@
           </div>
         </div>
 
-        <!-- ══════════════════════════
-             SLIDE 3 — HOW DID YOU FIND US
-        ══════════════════════════ -->
+        <!-- SLIDE 3 — HOW DID YOU FIND US -->
         <div class="slide" id="s3">
           <div class="slide-head">
             <div class="slide-icon"><i class="ph-bold ph-broadcast"></i></div>
@@ -865,9 +851,7 @@
           </div>
         </div>
 
-        <!-- ══════════════════════════
-             SLIDE 4 — CONTACT & RECOVERY
-        ══════════════════════════ -->
+        <!-- SLIDE 4 — CONTACT & RECOVERY -->
         <div class="slide" id="s4">
           <div class="slide-head">
             <div class="slide-icon"><i class="ph-bold ph-lock-key"></i></div>
@@ -900,7 +884,15 @@
             <div class="field-row">
               <div class="field">
                 <div class="flbl">Current / Primary Email</div>
-                <input class="finp" id="emailPrimary" type="email" placeholder="Your active email"/>
+                <div class="ucheck-wrap">
+                  <input class="finp" id="emailPrimary" type="email" placeholder="Your active email" autocomplete="off"/>
+                  <div class="ucheck-ico" id="icoEmailPrimary">
+                    <div class="ucheck-spin"></div>
+                    <div class="ucheck-ok">✓</div>
+                    <div class="ucheck-err">✗</div>
+                  </div>
+                </div>
+                <div class="ucheck-hint" id="hintEmailPrimary"></div>
               </div>
               <div class="field">
                 <div class="flbl">Backup Email</div>
@@ -944,9 +936,7 @@
           </div>
         </div>
 
-        <!-- ══════════════════════════
-             SLIDE 5 — PREFERENCES
-        ══════════════════════════ -->
+        <!-- SLIDE 5 — PREFERENCES -->
         <div class="slide" id="s5">
           <div class="slide-head">
             <div class="slide-icon"><i class="ph-bold ph-sliders-horizontal"></i></div>
@@ -1002,9 +992,7 @@
           </div>
         </div>
 
-        <!-- ══════════════════════════
-             SLIDE 6 — TERMS & CONDITIONS
-        ══════════════════════════ -->
+        <!-- SLIDE 6 — TERMS & CONDITIONS -->
         <div class="slide" id="s6">
           <div class="slide-head">
             <div class="slide-icon"><i class="ph-bold ph-files"></i></div>
@@ -1108,9 +1096,7 @@
     </div><!-- /card -->
   </div>
 
-  <!-- ═══════════════════════════════════
-       FIREBASE SDK (Module)
-  ═══════════════════════════════════ -->
+  <!-- FIREBASE SDK (Module) -->
   <script type="module">
     import { initializeApp }        from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
     import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
@@ -1138,7 +1124,6 @@
     const auth = getAuth(app);
     const db   = getFirestore(app);
 
-    // Make db & helpers available globally so the vanilla JS below can call them
     window._db              = db;
     window._doc             = doc;
     window._setDoc          = setDoc;
@@ -1148,57 +1133,40 @@
     window._where           = where;
     window._getDocs         = getDocs;
 
-    // ══════════════════════════════════════════════════
-    // GATEKEEPER — mirrors the logic in auth.html
-    //
-    // CASE 1: Not logged in  →  redirect to auth.html
-    // CASE 2: Logged in + setup already done  →  redirect to home.html
-    // CASE 3: Logged in + setup NOT done  →  stay here, reveal page
-    // ══════════════════════════════════════════════════
     const gateScreen = document.getElementById('gateScreen');
     const gateTxt    = document.getElementById('gateTxt');
 
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
-        // ── CASE 1: Not authenticated ──
         gateTxt.textContent = 'REDIRECTING TO SIGN IN...';
         setTimeout(() => { window.location.href = 'auth.html'; }, 800);
         return;
       }
 
-      // User is authenticated — check if setup is already completed
       try {
         const snap = await getDoc(doc(db, 'users', user.uid));
 
         if (snap.exists() && snap.data().setupCompletedAt) {
-          // ── CASE 2: Setup already done — send to home ──
           gateTxt.textContent = 'SETUP COMPLETE — REDIRECTING...';
           setTimeout(() => { window.location.href = 'home.html'; }, 800);
           return;
         }
       } catch (err) {
-        // Firestore read failed (network, permissions, etc.)
-        // Don't block the user — let them proceed with setup
         console.warn('Gatekeeper Firestore check failed:', err);
       }
 
-      // ── CASE 3: Authenticated, setup incomplete — reveal the page ──
       window._currentUser = user;
 
-      // Pre-fill primary email from Google account if blank
       const epInp = document.getElementById('emailPrimary');
       if (epInp && !epInp.value && user.email) epInp.value = user.email;
 
-      // Dismiss the gate screen with a smooth fade
       gateScreen.style.transition = 'opacity 0.4s ease';
       gateScreen.style.opacity    = '0';
       setTimeout(() => gateScreen.classList.add('hidden'), 420);
     });
   </script>
 
-  <!-- ═══════════════════════════════════
-       UI + NAVIGATION + SUBMISSION
-  ═══════════════════════════════════ -->
+  <!-- UI + NAVIGATION + SUBMISSION -->
   <script>
     const TOTAL   = 6;
     let current   = 1;
@@ -1354,7 +1322,6 @@
       }
 
       return {
-        // Slide 1 — Personal
         fullName:        document.getElementById('fullName').value.trim(),
         nickname:        document.getElementById('nickname').value.trim(),
         callsign:        document.getElementById('callsign').value.trim(),
@@ -1362,37 +1329,25 @@
         dob:             document.getElementById('dob').value,
         country:         document.getElementById('country').value,
         city:            document.getElementById('city').value.trim(),
-
-        // Slide 2 — Purpose
         purposes:        chips('purposeChips'),
         industry:        document.getElementById('industry').value,
         aiLevel:         document.getElementById('aiLevel').value,
-
-        // Slide 3 — Discovery
         discoverySources: chips('sourceChips'),
         refCode:          document.getElementById('refCode').value.trim(),
         discoveryNote:    document.getElementById('discovery').value.trim(),
-
-        // Slide 4 — Contact
         phone:            document.getElementById('phone').value.trim(),
         emailPrimary:     document.getElementById('emailPrimary').value.trim(),
         emailBackup:      document.getElementById('emailBackup').value.trim(),
         contactPref:      document.getElementById('contactPref').value,
         emergencyName:    document.getElementById('emergencyName').value.trim(),
         emergencyPhone:   document.getElementById('emergencyPhone').value.trim(),
-
-        // Slide 5 — Preferences
         language:         document.getElementById('language').value,
         notifications:    chips('notifChips'),
         techComfort:      document.getElementById('techComfort').value,
         goals:            document.getElementById('goals').value.trim(),
-
-        // Slide 6 — Agreement
         agreedToTerms:     true,
         agreedAllAccurate: true,
         agreedAgeEligible: true,
-
-        // Meta
         setupCompletedAt: window._serverTimestamp ? window._serverTimestamp() : new Date().toISOString(),
         setupVersion:     '1.0'
       };
@@ -1401,7 +1356,6 @@
     /* ── SAVING SCREEN HELPERS ── */
     function showSavingScreen(){
       const s = document.getElementById('savingScreen');
-      // reset all steps
       ['sstep1','sstep2','sstep3','sstep4'].forEach(id => {
         const el = document.getElementById(id);
         el.classList.remove('on','done');
@@ -1410,12 +1364,10 @@
       s.classList.remove('off');
       s.classList.add('on');
 
-      // animate steps sequentially — purely cosmetic, gives a feeling of work being done
       const steps = ['sstep1','sstep2','sstep3','sstep4'];
       const delays = [0, 600, 1200, 1900];
       steps.forEach((id, i) => {
         setTimeout(() => {
-          // mark previous as done
           if(i > 0) {
             document.getElementById(steps[i-1]).classList.remove('on');
             document.getElementById(steps[i-1]).classList.add('done');
@@ -1441,10 +1393,8 @@
       btn.classList.add('loading');
       clrErr('s6Err');
 
-      // ✨ Show the Canva-style saving overlay immediately
       showSavingScreen();
 
-      // Wait for Firebase to be ready (auth state sets _currentUser)
       let retries = 0;
       while(!window._currentUser && retries < 20){
         await new Promise(r => setTimeout(r, 250));
@@ -1464,14 +1414,12 @@
       const user = window._currentUser;
       const data = collectFormData();
 
-      // ── PROFILE PICTURE ──
       data.profilePicture = {
         url:      user.photoURL || '',
         source:   user.photoURL ? 'google' : '',
         updatedAt: ''
       };
 
-      // ── PLATFORM FIELDS ──
       data.plan = {
         type:      'free',
         startedAt: '',
@@ -1517,21 +1465,15 @@
         joinedAt:    ''
       };
 
-      // Ensure the saving screen has been visible for at least 2.4s
-      // so the step animation finishes gracefully before we dismiss
       const saveStart = Date.now();
 
       try {
-        // ── Write main user document ──
         await window._setDoc(
           window._doc(window._db, 'users', uid),
           data,
           { merge: true }
         );
 
-        // ── Write uniqueness index documents ──
-        // These act as a registry so no other account can claim the same
-        // nickname, phone number, or backup email.
         const ts = window._serverTimestamp ? window._serverTimestamp() : new Date().toISOString();
         const normNick  = data.nickname.trim().toLowerCase().replace(/\s+/g,'_');
         const normPhone = data.phone.trim().replace(/[\s\-().]/g,'');
@@ -1552,12 +1494,10 @@
           ),
         ]);
 
-        // ✅ Mark last step done, update text, then fade out
         const elapsed   = Date.now() - saveStart;
         const remaining = Math.max(0, 2600 - elapsed);
 
         setTimeout(() => {
-          // Mark all steps done
           ['sstep1','sstep2','sstep3','sstep4'].forEach(id => {
             const el = document.getElementById(id);
             el.classList.remove('on');
@@ -1565,10 +1505,8 @@
           });
           document.getElementById('savingTxt').textContent = 'PROFILE SAVED!';
 
-          // Brief pause so user sees "PROFILE SAVED!" then fade out
           setTimeout(() => {
             hideSavingScreen(() => {
-              // Reveal success screen
               document.getElementById('s6').style.display = 'none';
               const successScreen = document.getElementById('successScreen');
               successScreen.classList.add('on');
@@ -1629,9 +1567,10 @@
          backupEmails/{email_lowercase}   → {uid, createdAt}
     ═══════════════════════════════════════════════════════════ */
     const _ucheckState = {
-      nickname:    { status: 'idle', timer: null },
-      phone:       { status: 'idle', timer: null },
-      emailBackup: { status: 'idle', timer: null },
+      nickname:     { status: 'idle', timer: null },
+      phone:        { status: 'idle', timer: null },
+      emailPrimary: { status: 'idle', timer: null },
+      emailBackup:  { status: 'idle', timer: null },
     };
 
     // Normalize helpers
@@ -1661,8 +1600,6 @@
         window._where(field, '==', value)
       );
       const snap = await window._getDocs(q);
-      // If doc exists but belongs to THIS user, still treat as available
-      // (they may be re-filling the form)
       if(snap.empty) return true; // available
       let takenByOther = false;
       snap.forEach(d => { if(d.data().uid !== currentUid) takenByOther = true; });
@@ -1678,10 +1615,8 @@
         const val = normFn(raw);
         const inp = document.getElementById(fieldId);
 
-        // Clear previous timer
         clearTimeout(state.timer);
 
-        // Reset if empty
         if(!raw.trim() || val.length < minLen){
           state.status = 'idle';
           _setIco(icoId, 'idle');
@@ -1690,7 +1625,6 @@
           return;
         }
 
-        // Format check (basic regex)
         if(formatCheck && !formatCheck(val)){
           state.status = 'err';
           _setIco(icoId, 'idle');
@@ -1699,13 +1633,11 @@
           return;
         }
 
-        // Show checking state immediately
         state.status = 'checking';
         _setIco(icoId, 'checking');
         _setHint(hintId, 'Checking availability...', 'checking');
         inp.classList.remove('ok','err');
 
-        // Debounce — wait 600ms after user stops typing
         state.timer = setTimeout(async () => {
           try {
             const uid = window._currentUser ? window._currentUser.uid : null;
@@ -1728,7 +1660,6 @@
               inp.classList.add('err'); inp.classList.remove('ok');
             }
           } catch(e) {
-            // Firestore error — don't block the user, just clear state
             console.warn('Uniqueness check failed:', e);
             state.status = 'idle';
             _setIco(icoId, 'idle');
@@ -1739,12 +1670,57 @@
       };
     }
 
+    // ── Global email uniqueness check (queries users.emailPrimary, users.emailBackup, backupEmails) ──
+    async function _checkEmailGlobal(emailNorm, currentUid){
+      if(!window._db || !window._collection || !window._query || !window._where || !window._getDocs)
+        throw new Error('Firestore not ready');
+      const [snapA, snapB, snapC] = await Promise.all([
+        window._getDocs(window._query(window._collection(window._db,'users'),        window._where('emailPrimary','==',emailNorm))),
+        window._getDocs(window._query(window._collection(window._db,'users'),        window._where('emailBackup', '==',emailNorm))),
+        window._getDocs(window._query(window._collection(window._db,'backupEmails'), window._where('email',       '==',emailNorm))),
+      ]);
+      function takenByOther(snap){ let b=false; snap.forEach(d=>{ if(d.data().uid!==currentUid) b=true; }); return b; }
+      return !takenByOther(snapA) && !takenByOther(snapB) && !takenByOther(snapC);
+    }
+
+    // ── Primary email checker (same pattern as _makeChecker, uses _checkEmailGlobal) ──
+    const _onEmailPrimaryInput = (function(){
+      const st = _ucheckState.emailPrimary;
+      return async function(){
+        const raw = document.getElementById('emailPrimary').value;
+        const val = _normEmail(raw);
+        const inp = document.getElementById('emailPrimary');
+        clearTimeout(st.timer);
+        if(!raw.trim() || val.length < 5){
+          st.status='idle'; _setIco('icoEmailPrimary','idle'); _setHint('hintEmailPrimary','',''); inp.classList.remove('ok','err'); return;
+        }
+        if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)){
+          st.status='idle'; _setIco('icoEmailPrimary','idle'); _setHint('hintEmailPrimary','',''); inp.classList.remove('ok','err'); return;
+        }
+        st.status='checking'; _setIco('icoEmailPrimary','checking'); _setHint('hintEmailPrimary','Checking availability...','checking'); inp.classList.remove('ok','err');
+        st.timer = setTimeout(async ()=>{
+          try{
+            const uid = window._currentUser ? window._currentUser.uid : null;
+            const available = await _checkEmailGlobal(val, uid);
+            if(available){
+              st.status='ok'; _setIco('icoEmailPrimary','ok'); _setHint('hintEmailPrimary','✓ Available','ok'); inp.classList.add('ok'); inp.classList.remove('err');
+              // Re-validate backup in case same-email guard needs updating
+              const bv = _normEmail(document.getElementById('emailBackup').value);
+              if(bv.length >= 5) _onEmailBackupInput();
+            } else {
+              st.status='err'; _setIco('icoEmailPrimary','err'); _setHint('hintEmailPrimary','This email is already registered to another account.','err'); inp.classList.add('err'); inp.classList.remove('ok');
+            }
+          } catch(e){ console.warn('Primary email check failed:',e); st.status='idle'; _setIco('icoEmailPrimary','idle'); _setHint('hintEmailPrimary','',''); inp.classList.remove('ok','err'); }
+        }, 600);
+      };
+    })();
+
     // Wire up the three fields
     const _onNicknameInput = _makeChecker(
       'nickname', 'icoNickname', 'hintNickname',
       'usernames', 'nickname',
       _normNickname, 3,
-      v => /^[a-z0-9_]{3,24}$/.test(v)  // only alphanumeric + underscore
+      v => /^[a-z0-9_]{3,24}$/.test(v)
     );
 
     const _onPhoneInput = _makeChecker(
@@ -1770,6 +1746,14 @@
     document.getElementById('phone').addEventListener('blur',       _onPhoneInput);
     document.getElementById('emailBackup').addEventListener('blur', _onEmailBackupInput);
 
+    document.getElementById('emailPrimary').addEventListener('input', _onEmailPrimaryInput);
+    document.getElementById('emailPrimary').addEventListener('blur',  _onEmailPrimaryInput);
+    // When primary changes, re-check backup same-form guard
+    document.getElementById('emailPrimary').addEventListener('input', function(){
+      const bv = document.getElementById('emailBackup').value.trim();
+      if(bv.length >= 5) _onEmailBackupInput();
+    });
+
     // ── Guard: block next() if check is pending or failed ──
     // This wraps the existing validate() function.
     // Slides 1 and 4 each have uniqueness checks.
@@ -1789,7 +1773,6 @@
           return false;
         }
         if(s === 'idle' && document.getElementById('nickname').value.trim().length >= 3){
-          // User typed something valid length but check hasn't run yet — run it now
           showErr('s1Err', 'Please wait — verifying nickname uniqueness...');
           _onNicknameInput();
           return false;
@@ -1797,10 +1780,11 @@
       }
 
       if(n === 4){
-        const sp = _ucheckState.phone.status;
-        const se = _ucheckState.emailBackup.status;
+        const sp  = _ucheckState.phone.status;
+        const sep = _ucheckState.emailPrimary.status;
+        const se  = _ucheckState.emailBackup.status;
 
-        if(sp === 'checking' || se === 'checking'){
+        if(sp === 'checking' || sep === 'checking' || se === 'checking'){
           showErr('s4Err', 'Still verifying your details — please wait a moment.');
           return false;
         }
@@ -1809,19 +1793,29 @@
           document.getElementById('phone').classList.add('err');
           return false;
         }
+        if(sep === 'err'){
+          showErr('s4Err', 'Primary email is already registered to another account.');
+          document.getElementById('emailPrimary').classList.add('err');
+          return false;
+        }
         if(se === 'err'){
           showErr('s4Err', 'Backup email is already linked to another account.');
           document.getElementById('emailBackup').classList.add('err');
           return false;
         }
         // Force-run checks if idle with valid input
-        const phoneVal = _normPhone(document.getElementById('phone').value);
-        const emailVal = _normEmail(document.getElementById('emailBackup').value);
-        if(sp === 'idle' && /^\+?[\d]{7,15}$/.test(phoneVal)){
+        const phoneVal  = _normPhone(document.getElementById('phone').value);
+        const emailPVal = _normEmail(document.getElementById('emailPrimary').value);
+        const emailBVal = _normEmail(document.getElementById('emailBackup').value);
+        if(sp  === 'idle' && /^\+?[\d]{7,15}$/.test(phoneVal)){
           showErr('s4Err', 'Please wait — verifying phone number...');
           _onPhoneInput(); return false;
         }
-        if(se === 'idle' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)){
+        if(sep === 'idle' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailPVal)){
+          showErr('s4Err', 'Please wait — verifying primary email...');
+          _onEmailPrimaryInput(); return false;
+        }
+        if(se  === 'idle' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailBVal)){
           showErr('s4Err', 'Please wait — verifying backup email...');
           _onEmailBackupInput(); return false;
         }
