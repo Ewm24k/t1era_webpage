@@ -1030,14 +1030,24 @@
       // ── PRIMARY EMAIL: always lock to the signed-in account's email ──
       // Whether user signed in via Google, email/password, or any provider,
       // user.email is the authoritative email for this account. It is auto-filled
-      // and locked — the user cannot change it. This enforces 1 account = 1 email.
+      // and locked. Enforces 1 account = 1 email.
       window._authEmail = user.email ? user.email.trim().toLowerCase() : '';
       const epInp = document.getElementById('emailPrimary');
       if(epInp){
         epInp.value    = user.email || '';
         epInp.readOnly = true;
-        // Trigger DB uniqueness check on the auto-filled value after Firestore is ready
-        setTimeout(() => { if(window._onEmailPrimaryInput) window._onEmailPrimaryInput(); }, 900);
+        // Retry loop — wait until both Firestore (_db) and the checker function are
+        // available before running the uniqueness check. The blind 900ms timeout was
+        // unreliable; this guarantees the green tick always appears on pass.
+        let _epAttempts = 0;
+        const _epWait = setInterval(() => {
+          _epAttempts++;
+          if(window._db && window._onEmailPrimaryInput){
+            clearInterval(_epWait);
+            window._onEmailPrimaryInput();
+          }
+          if(_epAttempts > 40) clearInterval(_epWait); // abort after ~10s
+        }, 250);
       }
 
       gateScreen.style.transition = 'opacity 0.4s ease';
@@ -1182,6 +1192,10 @@
       to.classList.remove('active', 'back-active');
       to.classList.add(backwards ? 'back-active' : 'active');
       current = n;
+      // When landing on slide 4, re-run primary email check so green tick always shows
+      if(n === 4 && window._onEmailPrimaryInput){
+        setTimeout(() => window._onEmailPrimaryInput(), 120);
+      }
       updateProgress(n);
       renderDots();
       window.scrollTo({ top: 0, behavior: 'smooth' });
