@@ -1550,73 +1550,97 @@
     }
 
     /* ── PHONE checker ── */
+    async function _doPhoneQuery(val, raw, inp, st){
+      if(!window._db || !window._getDocs){ st.timer = setTimeout(()=> _doPhoneQuery(val,raw,inp,st), 800); return; }
+      try{
+        const uid  = window._currentUser ? window._currentUser.uid : null;
+        const snap = await window._getDocs(window._query(window._collection(window._db,'phones'), window._where('phone','==',val)));
+        let taken  = false;
+        snap.forEach(d=>{ if(d.data().uid !== uid) taken = true; });
+        if(!taken){ st.status='ok';  _setIco('icoPhone','ok');  _setHint('hintPhone','✓ Available','ok');  inp.classList.add('ok');  inp.classList.remove('err'); }
+        else       { st.status='err'; _setIco('icoPhone','err'); _setHint('hintPhone','Phone already registered to another account.','err'); inp.classList.add('err'); inp.classList.remove('ok'); }
+      } catch(e){ console.warn('Phone check failed:',e); st.timer = setTimeout(()=> _doPhoneQuery(val,raw,inp,st), 1500); }
+    }
+
     function _makePhoneChecker(){
       const st = _ucheckState.phone;
-      return async function(){
-        const raw = document.getElementById('phone').value;
-        const val = _normPhone(raw);
-        const inp = document.getElementById('phone');
+      return function(e){
+        const raw    = document.getElementById('phone').value;
+        const val    = _normPhone(raw);
+        const inp    = document.getElementById('phone');
+        const isBlur = e && e.type === 'blur';
         clearTimeout(st.timer);
         if(!raw.trim() || val.length < 7){ st.status='idle'; _setIco('icoPhone','idle'); _setHint('hintPhone','',''); inp.classList.remove('ok','err'); return; }
-        if(!/^\+?[\d]{7,15}$/.test(val)){ st.status='idle'; _setIco('icoPhone','idle'); _setHint('hintPhone','',''); inp.classList.remove('ok','err'); return; }
-        st.status='checking'; _setIco('icoPhone','checking'); _setHint('hintPhone','Checking availability...','checking'); inp.classList.remove('ok','err');
-        st.timer = setTimeout(async ()=>{
-          try{
-            const uid = window._currentUser ? window._currentUser.uid : null;
-            const q   = window._query(window._collection(window._db,'phones'), window._where('phone','==',val));
-            const snap = await window._getDocs(q);
-            let taken = false;
-            snap.forEach(d=>{ if(d.data().uid !== uid) taken = true; });
-            if(!taken){ st.status='ok'; _setIco('icoPhone','ok'); _setHint('hintPhone','✓ Available','ok'); inp.classList.add('ok'); inp.classList.remove('err'); }
-            else { st.status='err'; _setIco('icoPhone','err'); _setHint('hintPhone','This phone number is already registered to another account.','err'); inp.classList.add('err'); inp.classList.remove('ok'); }
-          } catch(e){ console.warn('Phone check failed:',e); st.status='idle'; _setIco('icoPhone','idle'); _setHint('hintPhone','',''); inp.classList.remove('ok','err'); }
-        }, 600);
+        if(!/^\+?[\d]{7,15}$/.test(val)){  st.status='idle'; _setIco('icoPhone','idle'); _setHint('hintPhone','',''); inp.classList.remove('ok','err'); return; }
+        st.status='checking'; _setIco('icoPhone','checking'); _setHint('hintPhone','Checking...','checking'); inp.classList.remove('ok','err');
+        // blur = fire immediately, input while typing = 400ms debounce
+        st.timer = setTimeout(()=> _doPhoneQuery(val, raw, inp, st), isBlur ? 0 : 400);
       };
     }
 
-    /* ── NICKNAME checker ── */
+    async function _doNicknameQuery(val, inp, st){
+      if(!window._db || !window._getDocs){ st.timer = setTimeout(()=> _doNicknameQuery(val,inp,st), 800); return; }
+      try{
+        const uid  = window._currentUser ? window._currentUser.uid : null;
+        const snap = await window._getDocs(window._query(window._collection(window._db,'usernames'), window._where('nickname','==',val)));
+        let taken  = false;
+        snap.forEach(d=>{ if(d.data().uid !== uid) taken = true; });
+        if(!taken){ st.status='ok';  _setIco('icoNickname','ok');  _setHint('hintNickname','✓ Available','ok');  inp.classList.add('ok');  inp.classList.remove('err'); }
+        else       { st.status='err'; _setIco('icoNickname','err'); _setHint('hintNickname','This nickname is already taken.','err'); inp.classList.add('err'); inp.classList.remove('ok'); }
+      } catch(e){ console.warn('Nickname check failed:',e); st.timer = setTimeout(()=> _doNicknameQuery(val,inp,st), 1500); }
+    }
+
     function _makeNicknameChecker(){
       const st = _ucheckState.nickname;
-      return async function(){
-        const raw = document.getElementById('nickname').value;
-        const val = _normNickname(raw);
-        const inp = document.getElementById('nickname');
+      return function(e){
+        const raw    = document.getElementById('nickname').value;
+        const val    = _normNickname(raw);
+        const inp    = document.getElementById('nickname');
+        const isBlur = e && e.type === 'blur';
         clearTimeout(st.timer);
         if(!raw.trim() || val.length < 3){ st.status='idle'; _setIco('icoNickname','idle'); _setHint('hintNickname','',''); inp.classList.remove('ok','err'); return; }
         if(!/^[a-z0-9_]{3,24}$/.test(val)){ st.status='idle'; _setIco('icoNickname','idle'); _setHint('hintNickname','',''); inp.classList.remove('ok','err'); return; }
-        st.status='checking'; _setIco('icoNickname','checking'); _setHint('hintNickname','Checking availability...','checking'); inp.classList.remove('ok','err');
-        st.timer = setTimeout(async ()=>{
-          try{
-            const uid  = window._currentUser ? window._currentUser.uid : null;
-            const q    = window._query(window._collection(window._db,'usernames'), window._where('nickname','==',val));
-            const snap = await window._getDocs(q);
-            let taken  = false;
-            snap.forEach(d=>{ if(d.data().uid !== uid) taken = true; });
-            if(!taken){ st.status='ok'; _setIco('icoNickname','ok'); _setHint('hintNickname','✓ Available','ok'); inp.classList.add('ok'); inp.classList.remove('err'); }
-            else { st.status='err'; _setIco('icoNickname','err'); _setHint('hintNickname','This nickname is already taken. Please choose another.','err'); inp.classList.add('err'); inp.classList.remove('ok'); }
-          } catch(e){ console.warn('Nickname check failed:',e); st.status='idle'; _setIco('icoNickname','idle'); _setHint('hintNickname','',''); inp.classList.remove('ok','err'); }
-        }, 600);
+        st.status='checking'; _setIco('icoNickname','checking'); _setHint('hintNickname','Checking...','checking'); inp.classList.remove('ok','err');
+        st.timer = setTimeout(()=> _doNicknameQuery(val, inp, st), isBlur ? 0 : 400);
       };
     }
 
     const _onNicknameInput = _makeNicknameChecker();
     const _onPhoneInput    = _makePhoneChecker();
 
-    // Wire events
-    document.getElementById('nickname').addEventListener('input',    _onNicknameInput);
-    document.getElementById('nickname').addEventListener('blur',     _onNicknameInput);
-    document.getElementById('phone').addEventListener('input',       _onPhoneInput);
-    document.getElementById('phone').addEventListener('blur',        _onPhoneInput);
-    document.getElementById('emailPrimary').addEventListener('blur', _runPrimaryEmailCheck);
-    document.getElementById('emailBackup').addEventListener('input', function(){
-      // Small debounce on input so we wait for user to finish typing
-      clearTimeout(_ucheckState.emailBackup.timer);
-      _ucheckState.emailBackup.timer = setTimeout(_runBackupEmailCheck, 300);
-    });
-    document.getElementById('emailBackup').addEventListener('blur', _runBackupEmailCheck);
+    // ── WIRE ALL EVENTS — covers typing, paste, autofill, programmatic set ──
+    document.getElementById('nickname').addEventListener('input',  _onNicknameInput);
+    document.getElementById('nickname').addEventListener('blur',   _onNicknameInput);
+    document.getElementById('nickname').addEventListener('change', _onNicknameInput);
 
-    // Primary is readonly — no cross-trigger needed.
-    // Backup's same-email guard is checked inside _runBackupEmailCheck itself.
+    document.getElementById('phone').addEventListener('input',  _onPhoneInput);
+    document.getElementById('phone').addEventListener('blur',   _onPhoneInput);
+    document.getElementById('phone').addEventListener('change', _onPhoneInput);
+
+    document.getElementById('emailBackup').addEventListener('input',  _runBackupEmailCheck);
+    document.getElementById('emailBackup').addEventListener('blur',   _runBackupEmailCheck);
+    document.getElementById('emailBackup').addEventListener('change', _runBackupEmailCheck);
+
+    // ── POLL EVERY 800ms — catches autofill that fires no events at all ──
+    // Stores last seen value per field; if changed, runs the checker immediately.
+    (function(){
+      const watched = {
+        nickname:    { last: '', check: _onNicknameInput },
+        phone:       { last: '', check: _onPhoneInput },
+        emailBackup: { last: '', check: _runBackupEmailCheck },
+      };
+      setInterval(function(){
+        Object.keys(watched).forEach(function(id){
+          const el  = document.getElementById(id);
+          if(!el) return;
+          const cur = el.value;
+          if(cur !== watched[id].last){
+            watched[id].last = cur;
+            watched[id].check({ type: 'blur' }); // treat polled autofill as blur = immediate
+          }
+        });
+      }, 800);
+    })();
 
     /* ── VALIDATE GUARD ── */
     const _origValidate = validate;
