@@ -236,51 +236,93 @@
     .ucheck-hint.err{color:var(--red);}
     .ucheck-hint.checking{color:var(--txt3);}
 
+    /* ── LOCKED / READONLY FIELD ── */
+    .finp[readonly]{
+      background:rgba(255,255,255,.015);
+      color:rgba(240,240,255,.45);
+      cursor:not-allowed;
+      border-color:rgba(255,255,255,.05);
+    }
+    .finp[readonly]:focus{
+      border-color:rgba(255,255,255,.08);
+      box-shadow:none;
+    }
+    .field-lock-notice{
+      display:flex;align-items:center;gap:6px;
+      font-size:10px;font-weight:700;
+      color:rgba(240,240,255,.25);
+      letter-spacing:.06em;
+      margin-top:5px;
+      text-transform:uppercase;
+    }
+    .field-lock-notice i{font-size:12px;color:rgba(192,132,252,.5);}
+
     /* ── ANTI-FRAUD WARNING BOX ── */
     .fraud-alert{
       display:none;
-      align-items:flex-start;
-      gap:10px;
-      padding:12px 14px;
-      border-radius:10px;
+      flex-direction:column;
+      gap:0;
+      border-radius:12px;
       font-size:12px;
       font-weight:600;
       line-height:1.6;
-      margin-top:8px;
-      background:rgba(239,68,68,.08);
-      border:1.5px solid rgba(239,68,68,.35);
-      color:#fca5a5;
-      animation:fin .25s ease both;
+      margin-top:10px;
+      background:rgba(239,68,68,.06);
+      border:1.5px solid rgba(239,68,68,.3);
+      overflow:hidden;
     }
-    .fraud-alert.on{display:flex;}
+    .fraud-alert.on{display:flex;animation:fin .3s ease both;}
+    .fraud-alert-header{
+      display:flex;align-items:center;gap:10px;
+      padding:10px 14px 8px;
+      background:rgba(239,68,68,.1);
+      border-bottom:1px solid rgba(239,68,68,.2);
+    }
     .fraud-alert-icon{
       flex-shrink:0;
-      width:30px;height:30px;border-radius:8px;
-      background:rgba(239,68,68,.15);
+      width:28px;height:28px;border-radius:7px;
+      background:rgba(239,68,68,.18);
       display:flex;align-items:center;justify-content:center;
-      font-size:16px;
-      margin-top:1px;
+      font-size:15px;color:#f87171;
     }
-    .fraud-alert-body{}
     .fraud-alert-title{
-      font-size:12px;font-weight:800;
+      font-size:11px;font-weight:800;
       color:#f87171;
-      letter-spacing:.04em;
+      letter-spacing:.06em;
       text-transform:uppercase;
-      margin-bottom:3px;
-      display:flex;align-items:center;gap:6px;
+      display:flex;align-items:center;gap:7px;
+      flex:1;
     }
-    .fraud-alert-title .fraud-badge{
+    .fraud-badge{
       display:inline-block;
-      font-size:9px;font-weight:900;
-      letter-spacing:.1em;
-      padding:2px 6px;
+      font-size:8px;font-weight:900;
+      letter-spacing:.12em;
+      padding:2px 7px;
       border-radius:4px;
-      background:rgba(239,68,68,.25);
+      background:rgba(239,68,68,.22);
       color:#fca5a5;
       border:1px solid rgba(239,68,68,.4);
     }
-    .fraud-alert-msg{font-size:11px;color:rgba(252,165,165,.8);font-weight:500;line-height:1.6;}
+    .fraud-alert-body{padding:10px 14px 12px;}
+    .fraud-alert-msg{font-size:11px;color:rgba(252,165,165,.85);font-weight:500;line-height:1.65;margin-bottom:8px;}
+    .fraud-alert-contact{
+      display:inline-flex;align-items:center;gap:6px;
+      font-size:10px;font-weight:700;
+      color:rgba(252,165,165,.6);
+      letter-spacing:.03em;
+      padding:5px 10px;
+      border-radius:6px;
+      background:rgba(239,68,68,.1);
+      border:1px solid rgba(239,68,68,.2);
+      text-decoration:none;
+      transition:all .2s;
+    }
+    .fraud-alert-contact:hover{
+      color:#fca5a5;
+      background:rgba(239,68,68,.18);
+      border-color:rgba(239,68,68,.35);
+    }
+    .fraud-alert-contact i{font-size:11px;}
 
     /* ── WARNING BOX ── */
     .warn-box{background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.25);border-radius:12px;padding:14px 16px;font-size:12px;color:#fcd34d;line-height:1.7;margin-bottom:16px;}
@@ -715,20 +757,24 @@
               <div class="field">
                 <div class="flbl">Current / Primary Email</div>
                 <div class="ucheck-wrap">
-                  <input class="finp" id="emailPrimary" type="email" placeholder="Your active email" autocomplete="off"/>
+                  <input class="finp" id="emailPrimary" type="email" placeholder="Auto-filled from your sign-in" autocomplete="off" readonly/>
                   <div class="ucheck-ico" id="icoEmailPrimary">
                     <div class="ucheck-spin"></div>
                     <div class="ucheck-ok">✓</div>
                     <div class="ucheck-err">✗</div>
                   </div>
                 </div>
+                <div class="field-lock-notice"><i class="ph-bold ph-lock-simple"></i> Locked — must match your sign-in email</div>
                 <div class="ucheck-hint" id="hintEmailPrimary"></div>
-                <!-- Anti-fraud alert for primary email -->
+                <!-- Anti-fraud / account-detected alert for primary email -->
                 <div class="fraud-alert" id="fraudAlertPrimary">
-                  <div class="fraud-alert-icon"><i class="ph-bold ph-shield-warning"></i></div>
+                  <div class="fraud-alert-header">
+                    <div class="fraud-alert-icon"><i class="ph-bold ph-shield-warning"></i></div>
+                    <div class="fraud-alert-title">System Detected Existing Account <span class="fraud-badge">BLOCKED</span></div>
+                  </div>
                   <div class="fraud-alert-body">
-                    <div class="fraud-alert-title">Anti-Fraud Detection <span class="fraud-badge">TRIGGERED</span></div>
-                    <div class="fraud-alert-msg" id="fraudMsgPrimary">This email is already associated with an existing account. Using the same email across multiple accounts may be flagged as a bot or dummy account. Please use a unique email address.</div>
+                    <div class="fraud-alert-msg" id="fraudMsgPrimary">Our system has detected that this email address is already linked to an existing T1ERA account. Each email can only be associated with one account. Creating multiple accounts using the same email is a violation of our Terms of Service and may be flagged as bot or dummy account activity.</div>
+                    <a class="fraud-alert-contact" href="mailto:t1era@proton.me"><i class="ph-bold ph-envelope"></i> If this is a mistake, contact t1era@proton.me</a>
                   </div>
                 </div>
               </div>
@@ -745,10 +791,13 @@
                 <div class="ucheck-hint" id="hintEmailBackup"></div>
                 <!-- Anti-fraud alert for backup email -->
                 <div class="fraud-alert" id="fraudAlertBackup">
-                  <div class="fraud-alert-icon"><i class="ph-bold ph-shield-warning"></i></div>
+                  <div class="fraud-alert-header">
+                    <div class="fraud-alert-icon"><i class="ph-bold ph-shield-warning"></i></div>
+                    <div class="fraud-alert-title">System Detected Existing Account <span class="fraud-badge">BLOCKED</span></div>
+                  </div>
                   <div class="fraud-alert-body">
-                    <div class="fraud-alert-title">Anti-Fraud Detection <span class="fraud-badge">TRIGGERED</span></div>
-                    <div class="fraud-alert-msg" id="fraudMsgBackup">This email is already registered in our system. Re-using emails across accounts is a sign of bot or dummy account activity. Please use a different email address.</div>
+                    <div class="fraud-alert-msg" id="fraudMsgBackup">Our system has detected that this email address is already registered in T1ERA — either as a primary or backup email on another account. Each email address can only be used on one account. Re-using emails is a pattern associated with bot and dummy account creation and is strictly prohibited.</div>
+                    <a class="fraud-alert-contact" href="mailto:t1era@proton.me"><i class="ph-bold ph-envelope"></i> If this is a mistake, contact t1era@proton.me</a>
                   </div>
                 </div>
               </div>
@@ -977,11 +1026,18 @@
       }
 
       window._currentUser = user;
+
+      // ── PRIMARY EMAIL: always lock to the signed-in account's email ──
+      // Whether user signed in via Google, email/password, or any provider,
+      // user.email is the authoritative email for this account. It is auto-filled
+      // and locked — the user cannot change it. This enforces 1 account = 1 email.
+      window._authEmail = user.email ? user.email.trim().toLowerCase() : '';
       const epInp = document.getElementById('emailPrimary');
-      if (epInp && !epInp.value && user.email) {
-        epInp.value = user.email;
-        // Trigger uniqueness check for auto-filled primary email after Firestore ready
-        setTimeout(() => { if(window._onEmailPrimaryInput) window._onEmailPrimaryInput(); }, 800);
+      if(epInp){
+        epInp.value    = user.email || '';
+        epInp.readOnly = true;
+        // Trigger DB uniqueness check on the auto-filled value after Firestore is ready
+        setTimeout(() => { if(window._onEmailPrimaryInput) window._onEmailPrimaryInput(); }, 900);
       }
 
       gateScreen.style.transition = 'opacity 0.4s ease';
@@ -1043,6 +1099,8 @@
       const msgEl   = document.getElementById(msgId);
       if(msgEl) msgEl.textContent = msg;
       alertEl.classList.add('on');
+      // Scroll the alert into view smoothly
+      setTimeout(() => alertEl.scrollIntoView({ behavior:'smooth', block:'nearest' }), 80);
     }
     function hideFraudAlert(alertId){
       const alertEl = document.getElementById(alertId);
@@ -1344,40 +1402,43 @@
       return takenByOther(snapA) || takenByOther(snapB) || takenByOther(snapC);
     }
 
-    /* ── PRIMARY EMAIL checker ── */
+    /* ── PRIMARY EMAIL checker ──
+       The field is readonly and always equals window._authEmail (the signed-in
+       Firebase Auth email). We only DB-check it. The user cannot type anything.
+       If the DB finds this email on another account → account-detected fraud panel.
+    ── */
     async function _runPrimaryEmailCheck(){
-      const raw = document.getElementById('emailPrimary').value;
-      const val = _normEmail(raw);
       const inp = document.getElementById('emailPrimary');
       const st  = _ucheckState.emailPrimary;
 
       clearTimeout(st.timer);
-
-      // Hide fraud alert initially
       hideFraudAlert('fraudAlertPrimary');
 
-      if(!raw.trim() || val.length < 5){
-        st.status='idle'; _setIco('icoEmailPrimary','idle'); _setHint('hintEmailPrimary','',''); inp.classList.remove('ok','err'); return;
+      // Always keep the field locked to auth email
+      const authEmail = window._authEmail || (window._currentUser ? (window._currentUser.email||'').trim().toLowerCase() : '');
+      if(authEmail && inp.value.trim().toLowerCase() !== authEmail){
+        inp.value = window._currentUser ? (window._currentUser.email || '') : '';
       }
-      if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)){
+
+      const val = _normEmail(inp.value);
+      if(!val || val.length < 5 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)){
         st.status='idle'; _setIco('icoEmailPrimary','idle'); _setHint('hintEmailPrimary','',''); inp.classList.remove('ok','err'); return;
       }
 
-      // Same-as-backup check (fraud detection)
+      // Same-as-backup check — show fraud alert on BOTH fields
       const backupVal = _normEmail(document.getElementById('emailBackup').value);
       if(backupVal.length >= 5 && val === backupVal){
-        st.status = 'err';
-        _setIco('icoEmailPrimary','err');
+        st.status='err'; _setIco('icoEmailPrimary','err');
         _setHint('hintEmailPrimary','Cannot match backup email.','err');
         inp.classList.add('err'); inp.classList.remove('ok');
         showFraudAlert('fraudAlertPrimary','fraudMsgPrimary',
-          '⚠️ Anti-Fraud Detected: Your primary and backup emails are identical. This is a pattern associated with bot and dummy accounts. Please use two different email addresses.');
+          'Your sign-in email and backup email are identical. Each email must be unique and used on only one account. Using the same address for both fields is a pattern associated with bot and dummy account activity. Please use a different email for your backup.');
         showFraudAlert('fraudAlertBackup','fraudMsgBackup',
-          '⚠️ Anti-Fraud Detected: Your backup and primary emails are identical. Using the same email for both fields suggests a dummy or bot account. Use a unique email for each field.');
+          'Your backup email matches your sign-in (primary) email. Both must be different and unique. Please enter a different email address in the backup field.');
         return;
       }
 
-      st.status='checking'; _setIco('icoEmailPrimary','checking'); _setHint('hintEmailPrimary','Checking availability...','checking'); inp.classList.remove('ok','err');
+      st.status='checking'; _setIco('icoEmailPrimary','checking'); _setHint('hintEmailPrimary','Verifying with system...','checking'); inp.classList.remove('ok','err');
 
       st.timer = setTimeout(async () => {
         try {
@@ -1385,18 +1446,19 @@
           const taken = await _isEmailTakenGlobally(val, uid);
 
           if(!taken){
-            st.status='ok'; _setIco('icoEmailPrimary','ok'); _setHint('hintEmailPrimary','✓ Available','ok');
+            st.status='ok'; _setIco('icoEmailPrimary','ok'); _setHint('hintEmailPrimary','✓ Verified — matches your sign-in','ok');
             inp.classList.add('ok'); inp.classList.remove('err');
             hideFraudAlert('fraudAlertPrimary');
           } else {
+            // Another account already holds this email — show account-detected fraud panel
             st.status='err'; _setIco('icoEmailPrimary','err');
-            _setHint('hintEmailPrimary','Email already registered.','err');
+            _setHint('hintEmailPrimary','Account already exists for this email.','err');
             inp.classList.add('err'); inp.classList.remove('ok');
             showFraudAlert('fraudAlertPrimary','fraudMsgPrimary',
-              '🚨 Anti-Fraud Detection Triggered: This email address ('+raw.trim()+') is already linked to an existing T1ERA account — either as a primary or backup email. Reusing emails across multiple accounts is a violation of our Terms of Service and may be flagged as bot or dummy account activity. Please use a unique, personal email address you have not previously registered with.');
+              'Our system has detected that this email (' + (window._currentUser ? window._currentUser.email : val) + ') is already linked to an existing T1ERA account. Each email address can only be associated with one account. If you believe this is an error or you previously registered under a different session, please reach out to our support team.');
           }
 
-          // Re-trigger backup check in case it depends on primary (same-email guard)
+          // Re-trigger backup check in case same-email guard needs updating
           const bRaw = document.getElementById('emailBackup').value.trim();
           if(bRaw.length >= 5) _runBackupEmailCheck();
 
@@ -1425,20 +1487,20 @@
         st.status='idle'; _setIco('icoEmailBackup','idle'); _setHint('hintEmailBackup','',''); inp.classList.remove('ok','err'); return;
       }
 
-      // Same-as-primary check (fraud detection)
+      // Same-as-primary check — fraud detection
       const primaryVal = _normEmail(document.getElementById('emailPrimary').value);
       if(primaryVal.length >= 5 && val === primaryVal){
         st.status='err'; _setIco('icoEmailBackup','err');
-        _setHint('hintEmailBackup','Cannot match primary email.','err');
+        _setHint('hintEmailBackup','Cannot match your sign-in email.','err');
         inp.classList.add('err'); inp.classList.remove('ok');
         showFraudAlert('fraudAlertBackup','fraudMsgBackup',
-          '⚠️ Anti-Fraud Detected: Your backup email matches your primary email. This is associated with bot and dummy account registration. Both email fields must be unique and different from each other.');
+          'Your backup email cannot be the same as your sign-in (primary) email. Each email address must be unique and used on only one account. This pattern is associated with bot and dummy account creation. Please use a different email address.');
         showFraudAlert('fraudAlertPrimary','fraudMsgPrimary',
-          '⚠️ Anti-Fraud Detected: Your primary email matches the backup email entered. Use two distinct email addresses to proceed.');
+          'Your sign-in email matches the backup email entered. Both fields must use distinct, different addresses. Please enter a unique backup email.');
         return;
       }
 
-      // If primary fraud alert was showing for same-email, clear it now that they differ
+      // If primary fraud alert was only showing due to same-email, clear it now
       if(_ucheckState.emailPrimary.status !== 'err'){
         hideFraudAlert('fraudAlertPrimary');
       }
@@ -1456,10 +1518,10 @@
             hideFraudAlert('fraudAlertBackup');
           } else {
             st.status='err'; _setIco('icoEmailBackup','err');
-            _setHint('hintEmailBackup','Email already registered.','err');
+            _setHint('hintEmailBackup','Account already exists for this email.','err');
             inp.classList.add('err'); inp.classList.remove('ok');
             showFraudAlert('fraudAlertBackup','fraudMsgBackup',
-              '🚨 Anti-Fraud Detection Triggered: This email address ('+raw.trim()+') already exists in our system — as a primary email, backup email, or both on another account. Using emails already tied to existing accounts is a pattern of bot and dummy account creation. Please use a fresh, unique email address that has never been registered on T1ERA before.');
+              'Our system has detected that this email address (' + raw.trim() + ') is already registered in T1ERA — either as a primary or backup email on another account. Each email can only be linked to one T1ERA account. If you believe this is an error, please contact our support team.');
           }
         } catch(e){
           console.warn('Backup email check failed:',e);
@@ -1554,17 +1616,65 @@
         const sep = _ucheckState.emailPrimary.status;
         const se  = _ucheckState.emailBackup.status;
 
-        if(sp==='checking'||sep==='checking'||se==='checking'){ showErr('s4Err','Still verifying your details — please wait a moment.'); return false; }
-        if(sp==='err'){  showErr('s4Err','Phone number is already registered to another account.'); document.getElementById('phone').classList.add('err'); return false; }
-        if(sep==='err'){ showErr('s4Err','Primary email is already registered to another account. Please use a unique email address.'); document.getElementById('emailPrimary').classList.add('err'); return false; }
-        if(se==='err'){  showErr('s4Err','Backup email is already linked to another account. Please use a unique email address.'); document.getElementById('emailBackup').classList.add('err'); return false; }
+        // ── Primary email must match the Firebase Auth signed-in email ──
+        const authEmail = window._authEmail || (window._currentUser ? (window._currentUser.email||'').trim().toLowerCase() : '');
+        const epVal     = document.getElementById('emailPrimary').value.trim().toLowerCase();
+        if(authEmail && epVal !== authEmail){
+          document.getElementById('emailPrimary').value = window._currentUser ? (window._currentUser.email||'') : '';
+          showErr('s4Err','Primary email must match the email you used to sign in. The field has been reset.');
+          _runPrimaryEmailCheck();
+          return false;
+        }
 
+        // ── Block if any check is still running ──
+        if(sp==='checking'||sep==='checking'||se==='checking'){
+          showErr('s4Err','Still verifying your details — please wait a moment.');
+          return false;
+        }
+
+        // ── Block on phone failure ──
+        if(sp==='err'){
+          showErr('s4Err','Phone number is already registered to another account.');
+          document.getElementById('phone').classList.add('err');
+          return false;
+        }
+
+        // ── Block on primary email failure — trigger/show fraud panel instead of plain error ──
+        if(sep==='err'){
+          showFraudAlert('fraudAlertPrimary','fraudMsgPrimary',
+            'Our system has detected that this email (' + (window._currentUser ? window._currentUser.email : epVal) + ') is already linked to an existing T1ERA account. Each email can only be associated with one account. If you believe this is an error, contact t1era@proton.me.');
+          document.getElementById('emailPrimary').classList.add('err');
+          showErr('s4Err','System detected an existing account tied to your sign-in email. See the alert below the email field for details.');
+          document.getElementById('fraudAlertPrimary').scrollIntoView({ behavior:'smooth', block:'center' });
+          return false;
+        }
+
+        // ── Block on backup email failure — trigger/show fraud panel ──
+        if(se==='err'){
+          document.getElementById('emailBackup').classList.add('err');
+          showErr('s4Err','System detected an existing account tied to the backup email. See the alert below the backup field for details.');
+          document.getElementById('fraudAlertBackup').scrollIntoView({ behavior:'smooth', block:'center' });
+          return false;
+        }
+
+        // ── Force-run checks if still idle with valid input ──
         const phoneVal  = _normPhone(document.getElementById('phone').value);
-        const emailPVal = _normEmail(document.getElementById('emailPrimary').value);
         const emailBVal = _normEmail(document.getElementById('emailBackup').value);
-        if(sp==='idle'  && /^\+?[\d]{7,15}$/.test(phoneVal)){     showErr('s4Err','Please wait — verifying phone number...'); _onPhoneInput(); return false; }
-        if(sep==='idle' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailPVal)){ showErr('s4Err','Please wait — verifying primary email...'); _runPrimaryEmailCheck(); return false; }
-        if(se==='idle'  && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailBVal)){ showErr('s4Err','Please wait — verifying backup email...'); _runBackupEmailCheck(); return false; }
+        if(sp==='idle'  && /^\+?[\d]{7,15}$/.test(phoneVal)){
+          showErr('s4Err','Please wait — verifying phone number...');
+          _onPhoneInput();
+          return false;
+        }
+        if(sep==='idle' && authEmail){
+          showErr('s4Err','Please wait — verifying your sign-in email with the system...');
+          _runPrimaryEmailCheck();
+          return false;
+        }
+        if(se==='idle'  && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailBVal)){
+          showErr('s4Err','Please wait — verifying backup email...');
+          _runBackupEmailCheck();
+          return false;
+        }
       }
 
       return true;
