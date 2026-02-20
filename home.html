@@ -1738,12 +1738,12 @@
 
     /* Section label inside mobile nav */
     .mobile-nav-section {
-      font-size: 9px;
+      font-size: 8px;
       font-weight: 700;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.14em;
       text-transform: uppercase;
-      color: rgba(194, 24, 91, 0.5);
-      padding: 10px 12px 4px;
+      color: rgba(194, 24, 91, 0.45);
+      padding: 8px 11px 3px;
       font-family: 'Space Grotesk', sans-serif;
     }
 
@@ -1751,23 +1751,23 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 9px 12px;
-      color: rgba(255,255,255,0.65);
+      padding: 7px 11px;
+      color: rgba(255,255,255,0.6);
       text-decoration: none;
       font-weight: 500;
-      font-size: 13px;
+      font-size: 11px;
       font-family: 'Space Grotesk', sans-serif;
-      border-radius: 10px;
-      letter-spacing: 0.01em;
+      border-radius: 8px;
+      letter-spacing: 0.02em;
       transition: background 0.18s ease, color 0.18s ease;
       position: relative;
     }
 
     .mobile-nav a::after {
       content: '›';
-      font-size: 16px;
+      font-size: 13px;
       font-weight: 300;
-      color: rgba(194, 24, 91, 0.4);
+      color: rgba(194, 24, 91, 0.35);
       transition: color 0.18s ease, transform 0.18s ease;
     }
 
@@ -1801,6 +1801,18 @@
       color: #fdba74;
     }
     .mobile-nav a.nav-accent-orange::after { color: rgba(249, 115, 22, 0.5); }
+
+    .mobile-nav a.nav-accent-terminal {
+      color: #10b981;
+      background: rgba(16, 185, 129, 0.06);
+      font-family: 'Orbitron', monospace;
+      letter-spacing: 0.06em;
+    }
+    .mobile-nav a.nav-accent-terminal:hover {
+      background: rgba(16, 185, 129, 0.12);
+      color: #34d399;
+    }
+    .mobile-nav a.nav-accent-terminal::after { color: rgba(16, 185, 129, 0.5); }
 
     /* thin divider inside nav */
     .mobile-nav-divider {
@@ -2260,7 +2272,7 @@
             </nav>
 
             <div class="header-actions">
-              <a class="btn" href="https://t1era-or-kode-blind.gitbook.io/t1era/documentation" target="_blank" rel="noopener">Docs</a>
+              <a class="btn" href="Pod-Workflow.html">Terminal</a>
 
               <!-- ══ LOGIN BUTTON (shown when signed out) ══ -->
               <a class="btn-auth" href="auth.html" id="authBtn">
@@ -2313,6 +2325,7 @@
         <div class="mobile-nav-section">Quick Access</div>
         <a href="ChatT1era.html" class="nav-accent-pink">AI Chat</a>
         <a href="generate.html" class="nav-accent-orange">Video Generator</a>
+        <a href="Pod-Workflow.html" class="nav-accent-terminal">Terminal</a>
         <div class="mobile-nav-divider"></div>
         <div class="mobile-nav-section">Navigation</div>
         <a href="#modes">Modes</a>
