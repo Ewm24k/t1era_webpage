@@ -773,7 +773,7 @@
                   </div>
                   <div class="fraud-alert-body">
                     <div class="fraud-alert-msg" id="fraudMsgPrimary">Our system has detected that this email address is already linked to an existing T1ERA account. Each email can only be associated with one account. Creating multiple accounts using the same email is a violation of our Terms of Service and may be flagged as bot or dummy account activity.</div>
-                    <a class="fraud-alert-contact" href="mailto:support@t1era.com"><i class="ph-bold ph-envelope"></i> If this is a mistake, contact support@t1era.com</a>
+                    <a class="fraud-alert-contact" href="/cdn-cgi/l/email-protection#c9babcb9b9a6bbbd89bdf8acbba8e7aaa6a4"><i class="ph-bold ph-envelope"></i> If this is a mistake, contact <span class="__cf_email__" data-cfemail="fa898f8a8a95888eba8ecb9f889bd4999597">[email&#160;protected]</span></a>
                   </div>
                 </div>
               </div>
@@ -795,7 +795,7 @@
                   </div>
                   <div class="fraud-alert-body">
                     <div class="fraud-alert-msg" id="fraudMsgBackup">Our system has detected that this email address is already registered in T1ERA — either as a primary or backup email on another account. Each email address can only be used on one account. Re-using emails is a pattern associated with bot and dummy account creation and is strictly prohibited.</div>
-                    <a class="fraud-alert-contact" href="mailto:support@t1era.com"><i class="ph-bold ph-envelope"></i> If this is a mistake, contact support@t1era.com</a>
+                    <a class="fraud-alert-contact" href="/cdn-cgi/l/email-protection#d7a4a2a7a7b8a5a397a3e6b2a5b6f9b4b8ba"><i class="ph-bold ph-envelope"></i> If this is a mistake, contact <span class="__cf_email__" data-cfemail="d1a2a4a1a1bea3a591a5e0b4a3b0ffb2bebc">[email&#160;protected]</span></a>
                   </div>
                 </div>
               </div>
@@ -974,7 +974,7 @@
   </div>
 
   <!-- FIREBASE SDK -->
-  <script type="module">
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="module">
     import { initializeApp }        from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
     import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
     import {
@@ -993,27 +993,6 @@
 
     const auth = getAuth(app);
     const db   = getFirestore(app);
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // FAST POINT-READ HELPERS
-    // Instead of slow getDocs() collection queries, we use getDoc() on a
-    // document whose ID IS the normalised value. O(1) single round-trip.
-    //
-    // Collections used:
-    //   emailIndex/{base64(email)}  → { uid, type:'primary'|'backup', createdAt }
-    //   phones/{normPhone}          → { uid, phone, createdAt }
-    //   usernames/{normNickname}    → { uid, nickname, createdAt }
-    //
-    // encodeEmailKey: btoa is safe for email chars (a-z, 0-9, @, ., -)
-    // We use encodeURIComponent first so non-ASCII is handled, then btoa.
-    // ─────────────────────────────────────────────────────────────────────────
-    function encodeEmailKey(email) {
-      // Produce a Firestore-safe document ID from an email address
-      // btoa(encodeURIComponent(email)) handles all special chars
-      try { return btoa(encodeURIComponent(email.trim().toLowerCase())); }
-      catch(e) { return btoa(email.trim().toLowerCase().replace(/[^\x00-\x7F]/g,'')); }
-    }
-    window._encodeEmailKey = encodeEmailKey;
 
     // Expose Firestore primitives to global scope for the UI script
     window._db              = db;
@@ -1292,17 +1271,13 @@
         const ts         = window._serverTimestamp ? window._serverTimestamp() : new Date().toISOString();
         const normNick   = data.nickname.trim().toLowerCase().replace(/\s+/g,'_');
         const normPhone  = data.phone.trim().replace(/[\s\-().]/g,'');
-        const normEmail  = data.emailPrimary.trim().toLowerCase();
         const normBackup = data.emailBackup.trim().toLowerCase();
-        const enc        = window._encodeEmailKey;
 
-        // ── Write all index docs in parallel ──
-        // emailIndex uses base64 doc ID for O(1) future point reads
+        // ── Write all lookup docs in parallel (doc ID = normalised value = O(1) point reads) ──
         await Promise.all([
-          window._setDoc(window._doc(window._db,'usernames', normNick),    {uid, nickname:data.nickname, createdAt:ts}),
-          window._setDoc(window._doc(window._db,'phones',    normPhone),   {uid, phone:data.phone, createdAt:ts}),
-          window._setDoc(window._doc(window._db,'emailIndex',enc(normEmail)),  {uid, email:normEmail,  type:'primary', createdAt:ts}),
-          window._setDoc(window._doc(window._db,'emailIndex',enc(normBackup)), {uid, email:normBackup, type:'backup',  createdAt:ts}),
+          window._setDoc(window._doc(window._db,'usernames',   normNick),    {uid, nickname:data.nickname, createdAt:ts}),
+          window._setDoc(window._doc(window._db,'phones',      normPhone),   {uid, phone:data.phone, createdAt:ts}),
+          window._setDoc(window._doc(window._db,'backupEmails',normBackup),  {uid, email:normBackup, createdAt:ts}),
         ]);
 
         const elapsed=Date.now()-saveStart, remaining=Math.max(0,2600-elapsed);
@@ -1361,9 +1336,9 @@
        500ms–2s → 50–150ms. No index scanning needed.
 
        Collections (doc ID = the normalised value):
-         emailIndex / base64(email)   → { uid, type }
-         phones     / normPhone       → { uid }
-         usernames  / normNickname    → { uid }
+         backupEmails / normEmail     → { uid, email }
+         phones       / normPhone     → { uid, phone }
+         usernames    / normNickname  → { uid, nickname }
     ══════════════════════════════════════════════════════════════════ */
     const _ucheckState = {
       nickname:     {status:'idle', timer:null},
@@ -1385,18 +1360,6 @@
       if(!el) return;
       el.textContent=msg;
       el.className='ucheck-hint'+(state?' '+state:'');
-    }
-
-    /* ─ FAST EMAIL CHECK: single getDoc on emailIndex/{base64(email)} ─ */
-    async function _isEmailTakenFast(emailNorm) {
-      if(!window._db || !window._getDoc || !window._encodeEmailKey) throw new Error('Firestore not ready');
-      const key  = window._encodeEmailKey(emailNorm);
-      const snap = await window._getDoc(window._doc(window._db, 'emailIndex', key));
-      if(!snap.exists()) return false;
-      const data = snap.data();
-      // Taken by another user (not current user)
-      const uid  = window._currentUser ? window._currentUser.uid : null;
-      return data.uid !== uid;
     }
 
     /* ── PRIMARY EMAIL checker ── */
@@ -1433,8 +1396,12 @@
 
       // Debounce 300ms — much shorter since point reads are fast
       st.timer=setTimeout(async()=>{
+        if(!window._db||!window._getDoc){ st.timer=setTimeout(()=>_runPrimaryEmailCheck(),800); return; }
         try {
-          const taken=await _isEmailTakenFast(val);
+          // Point read: backupEmails/{normEmail} — same technique as phone/nickname
+          const snap=await window._getDoc(window._doc(window._db,'backupEmails',val));
+          const uid=window._currentUser?window._currentUser.uid:null;
+          const taken=snap.exists()&&snap.data().uid!==uid;
           if(!taken){
             st.status='ok';_setIco('icoEmailPrimary','ok');
             _setHint('hintEmailPrimary','✓ Verified — matches your sign-in','ok');
@@ -1447,19 +1414,17 @@
             showFraudAlert('fraudAlertPrimary','fraudMsgPrimary',
               'Our system detected that this email ('+val+') is already linked to an existing T1ERA account. Each email can only be associated with one account. If you believe this is an error, please contact support.');
           }
-          // Re-trigger backup check in case same-email guard needs updating
           const bRaw=document.getElementById('emailBackup').value.trim();
           if(bRaw.length>=5) _runBackupEmailCheck();
         } catch(e){
           console.warn('Primary email check failed:',e);
-          // On error: silently fall back to idle so user isn't blocked
           st.status='idle';_setIco('icoEmailPrimary','idle');_setHint('hintEmailPrimary','','');inp.classList.remove('ok','err');
         }
       }, 300);
     }
     window._onEmailPrimaryInput = _runPrimaryEmailCheck;
 
-    /* ── BACKUP EMAIL checker ── */
+    /* ── BACKUP EMAIL checker — getDoc() point read on backupEmails/{normEmail} ── */
     function _runBackupEmailCheck(e){
       const raw=document.getElementById('emailBackup').value;
       const val=_normEmail(raw);
@@ -1467,12 +1432,16 @@
       const st=_ucheckState.emailBackup;
       const isBlur=e&&e.type==='blur';
       clearTimeout(st.timer);
+
+      // Reset: clear fraud alert and icon whenever input changes
       hideFraudAlert('fraudAlertBackup');
 
+      // 1. Empty / too short / invalid format → idle
       if(!raw.trim()||val.length<5||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)){
         st.status='idle';_setIco('icoEmailBackup','idle');_setHint('hintEmailBackup','','');inp.classList.remove('ok','err');return;
       }
-      // Same-as-primary instant check
+
+      // 2. Same as primary → instant err (no DB call needed)
       const pv=_normEmail(document.getElementById('emailPrimary').value);
       if(pv&&val===pv){
         st.status='err';_setIco('icoEmailBackup','err');_setHint('hintEmailBackup','Cannot match sign-in email.','err');
@@ -1481,22 +1450,23 @@
         return;
       }
 
+      // 3. Valid — show checking spinner
       st.status='checking';_setIco('icoEmailBackup','checking');_setHint('hintEmailBackup','Checking...','checking');inp.classList.remove('ok','err');
 
-      // Blur = immediate, typing = 300ms debounce (point reads are fast)
+      // 4. Debounce then single getDoc() point read — identical to phone/nickname
       st.timer=setTimeout(async()=>{
         if(!window._db||!window._getDoc){
-          // Retry if Firestore not yet ready
           st.timer=setTimeout(()=>_runBackupEmailCheck({type:'blur'}),800); return;
         }
         try {
-          const taken=await _isEmailTakenFast(val);
+          // Single point read on backupEmails/{normEmail} — O(1), same as phones/{normPhone}
+          const snap=await window._getDoc(window._doc(window._db,'backupEmails',val));
+          const uid=window._currentUser?window._currentUser.uid:null;
+          const taken=snap.exists()&&snap.data().uid!==uid;
           if(!taken){
-            st.status='ok';_setIco('icoEmailBackup','ok');_setHint('hintEmailBackup','✓ Available','ok');
-            inp.classList.add('ok');inp.classList.remove('err');hideFraudAlert('fraudAlertBackup');
+            st.status='ok';_setIco('icoEmailBackup','ok');_setHint('hintEmailBackup','✓ Available','ok');inp.classList.add('ok');inp.classList.remove('err');
           } else {
-            st.status='err';_setIco('icoEmailBackup','err');_setHint('hintEmailBackup','Email already registered on another account.','err');
-            inp.classList.add('err');inp.classList.remove('ok');
+            st.status='err';_setIco('icoEmailBackup','err');_setHint('hintEmailBackup','Email already registered on another account.','err');inp.classList.add('err');inp.classList.remove('ok');
             showFraudAlert('fraudAlertBackup','fraudMsgBackup',
               raw.trim()+' is already linked to another T1ERA account. Each email can only belong to one account. Contact support if this is a mistake.');
           }
@@ -1651,24 +1621,4 @@
         if(se==='err'){
           showErr('s4Err','Backup email is already registered on another account. See the alert below.');
           document.getElementById('emailBackup').classList.add('err');
-          document.getElementById('fraudAlertBackup').scrollIntoView({behavior:'smooth',block:'center'});
-          return false;
-        }
-      }
-
-      return true;
-    };
-
-    /* ── ENTER KEY ── */
-    document.addEventListener('keydown',e=>{
-      if(e.key!=='Enter') return;
-      if(e.target.tagName==='TEXTAREA') return;
-      next(current);
-    });
-
-    /* ── INIT ── */
-    renderDots();
-    updateProgress(1);
-  </script>
-</body>
-</html>
+          document.getElementById('fraudAlertBackup').scrollIntoView({behavior:'smooth',block:'
