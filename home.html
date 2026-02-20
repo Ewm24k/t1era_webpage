@@ -54,14 +54,15 @@
       --text-secondary: rgba(255, 255, 255, 0.7);
       --text-tertiary: rgba(255, 255, 255, 0.5);
       
-      --accent-primary: #3b82f6;
-      --accent-secondary: #8b5cf6;
-      --accent-tertiary: #06b6d4;
+      /* ── CHANGED: blue → dark pink, cyan → hot pink ── */
+      --accent-primary: #c2185b;       /* dark pink (was #3b82f6 blue) */
+      --accent-secondary: #8b5cf6;     /* purple — kept */
+      --accent-tertiary: #e91e8c;      /* hot/normal pink (was #06b6d4 cyan) */
       --accent-success: #10b981;
       --accent-video: #f97316;
       
-      --glow-primary: rgba(59, 130, 246, 0.3);
-      --glow-secondary: rgba(139, 92, 246, 0.3);
+      --glow-primary: rgba(194, 24, 91, 0.3);    /* dark pink glow */
+      --glow-secondary: rgba(139, 92, 246, 0.3); /* purple glow — kept */
       --glow-video: rgba(249, 115, 22, 0.3);
       
       --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
@@ -111,7 +112,8 @@
       position: fixed;
       inset: 0;
       z-index: 0;
-      background: radial-gradient(ellipse at 50% 0%, rgba(59, 130, 246, 0.15), transparent 50%),
+      /* CHANGED: blue radial → dark pink radial */
+      background: radial-gradient(ellipse at 50% 0%, rgba(194, 24, 91, 0.15), transparent 50%),
                   radial-gradient(ellipse at 0% 50%, rgba(139, 92, 246, 0.1), transparent 50%);
       pointer-events: none;
     }
@@ -155,7 +157,8 @@
     .logo-mark {
       width: 40px;
       height: 40px;
-      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      /* CHANGED: blue+purple → dark pink+purple */
+      background: linear-gradient(135deg, #c2185b, #8b5cf6);
       border-radius: 10px;
       display: flex;
       align-items: center;
@@ -163,7 +166,8 @@
       font-weight: 900;
       font-size: 16px;
       font-family: 'Orbitron', sans-serif;
-      box-shadow: 0 0 20px var(--glow-primary);
+      /* CHANGED: glow to dark pink */
+      box-shadow: 0 0 20px rgba(194, 24, 91, 0.5);
       position: relative;
       overflow: hidden;
       animation: logoGlow 3s ease-in-out infinite, logoSpin 8s linear infinite;
@@ -179,11 +183,12 @@
 
     @keyframes logoGlow {
       0%, 100% { 
-        box-shadow: 0 0 20px var(--glow-primary), 0 0 30px var(--glow-primary);
+        /* CHANGED: dark pink glow */
+        box-shadow: 0 0 20px rgba(194,24,91,0.5), 0 0 30px rgba(194,24,91,0.3);
         transform: scale(1) rotate(var(--rotation, 0deg));
       }
       50% { 
-        box-shadow: 0 0 30px var(--glow-primary), 0 0 50px var(--glow-secondary), 0 0 70px var(--glow-primary);
+        box-shadow: 0 0 30px rgba(194,24,91,0.7), 0 0 50px rgba(139,92,246,0.4), 0 0 70px rgba(233,30,140,0.3);
         transform: scale(1.05) rotate(var(--rotation, 0deg));
       }
     }
@@ -220,7 +225,8 @@
       left: 0;
       right: 0;
       height: 2px;
-      background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+      /* CHANGED: blue → dark pink */
+      background: linear-gradient(90deg, #c2185b, #8b5cf6);
       transform: scaleX(0);
       transition: transform 0.3s var(--transition);
     }
@@ -286,14 +292,15 @@
     }
 
     .btn-primary {
-      background: linear-gradient(145deg, #4a8aff, #3266cc);
-      border: 1px solid rgba(59, 130, 246, 0.3);
+      /* CHANGED: blue → dark pink */
+      background: linear-gradient(145deg, #e91e6a, #9c1545);
+      border: 1px solid rgba(194, 24, 91, 0.3);
       box-shadow: 
         6px 6px 20px rgba(0, 0, 0, 0.6),
-        -4px -4px 15px rgba(59, 130, 246, 0.1),
+        -4px -4px 15px rgba(194, 24, 91, 0.1),
         inset 0 2px 0 rgba(255, 255, 255, 0.2),
         inset 0 -2px 0 rgba(0, 0, 0, 0.2),
-        0 0 30px rgba(59, 130, 246, 0.3);
+        0 0 30px rgba(194, 24, 91, 0.3);
     }
 
     .btn-primary::before {
@@ -301,21 +308,21 @@
     }
 
     .btn-primary:hover {
-      background: linear-gradient(145deg, #5a9aff, #4276dc);
+      background: linear-gradient(145deg, #f0257a, #c2185b);
       box-shadow: 
         8px 8px 25px rgba(0, 0, 0, 0.7),
-        -6px -6px 20px rgba(59, 130, 246, 0.15),
+        -6px -6px 20px rgba(194, 24, 91, 0.15),
         inset 0 2px 0 rgba(255, 255, 255, 0.25),
         inset 0 -2px 0 rgba(0, 0, 0, 0.25),
-        0 0 40px rgba(59, 130, 246, 0.5);
+        0 0 40px rgba(194, 24, 91, 0.5);
       transform: translateY(-4px);
     }
 
     .btn-primary:active {
       box-shadow: 
         3px 3px 10px rgba(0, 0, 0, 0.8) inset,
-        -2px -2px 8px rgba(59, 130, 246, 0.2) inset,
-        0 0 20px rgba(59, 130, 246, 0.3);
+        -2px -2px 8px rgba(194, 24, 91, 0.2) inset,
+        0 0 20px rgba(194, 24, 91, 0.3);
     }
 
     /* ── Video Generate Button ── */
@@ -363,21 +370,17 @@
       box-shadow: 0 0 8px var(--accent-success);
     }
 
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
-    }
-
-    /* ── AI Chat Button Style ── */
+    /* ── AI Chat Button Style — CHANGED cyan → hot pink ── */
     .btn-chat {
-      background: linear-gradient(145deg, #0ec5e0, #0999b0);
-      border: 1px solid rgba(6, 182, 212, 0.3);
+      /* CHANGED: cyan → hot pink */
+      background: linear-gradient(145deg, #f0257a, #c2185b);
+      border: 1px solid rgba(233, 30, 140, 0.3);
       box-shadow: 
         6px 6px 20px rgba(0, 0, 0, 0.6),
-        -4px -4px 15px rgba(6, 182, 212, 0.1),
+        -4px -4px 15px rgba(233, 30, 140, 0.1),
         inset 0 2px 0 rgba(255, 255, 255, 0.2),
         inset 0 -2px 0 rgba(0, 0, 0, 0.2),
-        0 0 30px rgba(6, 182, 212, 0.4);
+        0 0 30px rgba(233, 30, 140, 0.4);
       position: relative;
       overflow: hidden;
       display: inline-flex;
@@ -407,33 +410,28 @@
     }
 
     .btn-chat:hover {
-      background: linear-gradient(145deg, #1ed5f0, #0aa9c0);
+      background: linear-gradient(145deg, #f5358a, #d4236b);
       box-shadow: 
         8px 8px 25px rgba(0, 0, 0, 0.7),
-        -6px -6px 20px rgba(6, 182, 212, 0.15),
+        -6px -6px 20px rgba(233, 30, 140, 0.15),
         inset 0 2px 0 rgba(255, 255, 255, 0.25),
         inset 0 -2px 0 rgba(0, 0, 0, 0.25),
-        0 0 40px rgba(6, 182, 212, 0.6);
+        0 0 40px rgba(233, 30, 140, 0.6);
       transform: translateY(-4px);
     }
 
     .btn-chat:active {
       box-shadow: 
         3px 3px 10px rgba(0, 0, 0, 0.8) inset,
-        -2px -2px 8px rgba(6, 182, 212, 0.2) inset,
-        0 0 20px rgba(6, 182, 212, 0.4);
+        -2px -2px 8px rgba(233, 30, 140, 0.2) inset,
+        0 0 20px rgba(233, 30, 140, 0.4);
       transform: translateY(1px);
     }
 
-    /* ══════════════════════════════════════
-       WEB3 AUTH BUTTON — clean flat style
-       No emboss. Transparent bg + border glow.
-       Shown by default (signed-out state).
-       Firebase hides it when signed in.
-    ══════════════════════════════════════ */
+    /* ══ WEB3 AUTH BUTTON ══ */
     .btn-auth {
       position: relative;
-      display: inline-flex;         /* visible by default = signed-out state */
+      display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
@@ -445,27 +443,26 @@
       letter-spacing: 0.03em;
       text-decoration: none;
       cursor: pointer;
-      color: #e0e7ff;
+      color: #f5c6d9;
       white-space: nowrap;
       background: transparent;
-      border: 1px solid rgba(99,102,241,0.55);
+      /* CHANGED: indigo border → dark pink border */
+      border: 1px solid rgba(194, 24, 91, 0.55);
       outline: none;
       overflow: hidden;
       transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
     }
 
-    /* subtle static glow layer behind the text */
     .btn-auth::before {
       content: '';
       position: absolute;
       inset: 0;
-      background: rgba(99,102,241,0.06);
+      background: rgba(194, 24, 91, 0.06);
       border-radius: inherit;
       transition: background 0.2s ease;
       pointer-events: none;
     }
 
-    /* shimmer sweep on hover */
     .btn-auth::after {
       content: '';
       position: absolute;
@@ -478,15 +475,15 @@
 
     .btn-auth:hover {
       color: #fff;
-      border-color: rgba(139,92,246,0.85);
+      border-color: rgba(233, 30, 140, 0.85);
       background: transparent;
     }
     .btn-auth:hover::before {
-      background: rgba(99,102,241,0.14);
+      background: rgba(194, 24, 91, 0.14);
     }
     .btn-auth:hover::after { left: 130%; }
     .btn-auth:active {
-      background: rgba(99,102,241,0.2);
+      background: rgba(194, 24, 91, 0.2);
     }
 
     .btn-auth i {
@@ -500,10 +497,7 @@
       z-index: 1;
     }
 
-    /* ══════════════════════════════════════
-       USER AVATAR — shown when signed in
-       hidden by default; Firebase reveals it
-    ══════════════════════════════════════ */
+    /* ══ USER AVATAR ══ */
     #userAvatarBtn {
       display: none;
       visibility: hidden;
@@ -525,12 +519,13 @@
       position: absolute;
       inset: -3px;
       border-radius: 50%;
+      /* CHANGED: blue → dark pink in conic gradient */
       background: conic-gradient(
-        #3b82f6 0deg,
-        #6366f1 90deg,
-        #8b5cf6 180deg,
-        #06b6d4 270deg,
-        #3b82f6 360deg
+        #c2185b 0deg,
+        #8b5cf6 90deg,
+        #e91e8c 180deg,
+        #ad1457 270deg,
+        #c2185b 360deg
       );
       animation: avatarRingSpin 3s linear infinite;
       z-index: 0;
@@ -551,7 +546,6 @@
       display: block;
     }
 
-    /* fallback initials avatar if no photo */
     .user-avatar-initials {
       position: relative;
       z-index: 1;
@@ -559,7 +553,8 @@
       height: 40px;
       border-radius: 50%;
       border: 2.5px solid #000;
-      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      /* CHANGED: blue → dark pink */
+      background: linear-gradient(135deg, #c2185b, #8b5cf6);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -570,7 +565,6 @@
       letter-spacing: 0.02em;
     }
 
-    /* online pulse dot */
     .user-avatar-dot {
       position: absolute;
       bottom: 1px;
@@ -593,13 +587,14 @@
       right: 0;
       min-width: 220px;
       background: rgba(10,10,15,0.97);
-      border: 1px solid rgba(99,102,241,0.3);
+      /* CHANGED: indigo border → dark pink */
+      border: 1px solid rgba(194, 24, 91, 0.3);
       border-radius: 16px;
       padding: 8px;
       box-shadow:
-        0 0 0 1px rgba(99,102,241,0.1),
+        0 0 0 1px rgba(194, 24, 91, 0.1),
         0 20px 60px rgba(0,0,0,0.8),
-        0 0 40px rgba(99,102,241,0.12);
+        0 0 40px rgba(194, 24, 91, 0.12);
       backdrop-filter: blur(20px);
       z-index: 9999;
       animation: dropIn 0.2s cubic-bezier(0.4,0,0.2,1) both;
@@ -656,13 +651,15 @@
     }
 
     .dropdown-item:hover {
-      background: rgba(99,102,241,0.12);
+      /* CHANGED: indigo → dark pink */
+      background: rgba(194, 24, 91, 0.12);
       color: #fff;
     }
 
     .dropdown-item i {
       font-size: 16px;
-      color: rgba(99,102,241,0.8);
+      /* CHANGED: indigo → dark pink */
+      color: rgba(194, 24, 91, 0.8);
       flex-shrink: 0;
     }
 
@@ -675,9 +672,10 @@
       font-weight: 700;
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      color: rgba(99,102,241,0.6);
-      background: rgba(99,102,241,0.1);
-      border: 1px solid rgba(99,102,241,0.2);
+      /* CHANGED: indigo → dark pink */
+      color: rgba(194, 24, 91, 0.6);
+      background: rgba(194, 24, 91, 0.1);
+      border: 1px solid rgba(194, 24, 91, 0.2);
       padding: 2px 6px;
       border-radius: 4px;
       flex-shrink: 0;
@@ -701,10 +699,142 @@
 
     .dropdown-item.signout i { color: rgba(239,68,68,0.65); }
 
-    /* ── AI Chat Banner ── */
+    /* ═══════════════════════════════════════════
+       SIGNOUT NOTIFICATION POPUP
+    ═══════════════════════════════════════════ */
+    #signoutNotif {
+      position: fixed;
+      top: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-100px);
+      z-index: 99999;
+      background: rgba(10, 8, 12, 0.97);
+      border: 1px solid rgba(194, 24, 91, 0.45);
+      border-radius: 16px;
+      padding: 0;
+      min-width: 340px;
+      max-width: 90vw;
+      box-shadow:
+        0 0 0 1px rgba(194, 24, 91, 0.1),
+        0 24px 60px rgba(0, 0, 0, 0.85),
+        0 0 60px rgba(194, 24, 91, 0.18);
+      backdrop-filter: blur(24px) saturate(180%);
+      overflow: hidden;
+      opacity: 0;
+      transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
+                  opacity 0.35s ease;
+      pointer-events: none;
+    }
+
+    #signoutNotif.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .signout-notif-bar {
+      height: 3px;
+      background: linear-gradient(90deg, #c2185b, #8b5cf6, #e91e8c);
+      background-size: 200% 100%;
+      animation: notifBarSlide 1.8s ease-in-out infinite;
+    }
+
+    @keyframes notifBarSlide {
+      0%   { background-position: 0% 0%; }
+      100% { background-position: 200% 0%; }
+    }
+
+    .signout-notif-inner {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 18px 20px;
+    }
+
+    .signout-notif-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(194,24,91,0.2), rgba(139,92,246,0.15));
+      border: 1px solid rgba(194,24,91,0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+      animation: notifIconPulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes notifIconPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+    }
+
+    .signout-notif-body {
+      flex: 1;
+    }
+
+    .signout-notif-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 2px;
+    }
+
+    .signout-notif-sub {
+      font-size: 12px;
+      color: rgba(255,255,255,0.45);
+      font-weight: 500;
+    }
+
+    .signout-notif-countdown {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: rgba(194,24,91,0.12);
+      border: 2px solid rgba(194,24,91,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 13px;
+      font-weight: 800;
+      color: #e91e8c;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    /* SVG ring progress */
+    .signout-notif-countdown svg {
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      width: 38px;
+      height: 38px;
+      transform: rotate(-90deg);
+    }
+
+    .signout-notif-countdown circle {
+      fill: none;
+      stroke: #c2185b;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-dasharray: 100;
+      stroke-dashoffset: 100;
+      transition: stroke-dashoffset 1s linear;
+    }
+
+    .signout-notif-countdown .count-num {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── AI Chat Banner — CHANGED cyan → pink ── */
     .chat-banner {
-      background: linear-gradient(135deg, rgba(6, 182, 212, 0.12), rgba(139, 92, 246, 0.08));
-      border: 1px solid rgba(6, 182, 212, 0.35);
+      /* CHANGED: cyan tint → hot pink tint */
+      background: linear-gradient(135deg, rgba(233, 30, 140, 0.12), rgba(139, 92, 246, 0.08));
+      border: 1px solid rgba(233, 30, 140, 0.35);
       border-radius: 20px;
       padding: 28px 32px;
       margin-bottom: 20px;
@@ -724,7 +854,8 @@
       right: -10%;
       width: 200px;
       height: 200px;
-      background: radial-gradient(circle, rgba(6, 182, 212, 0.15), transparent 70%);
+      /* CHANGED: cyan → hot pink */
+      background: radial-gradient(circle, rgba(233, 30, 140, 0.15), transparent 70%);
       pointer-events: none;
     }
 
@@ -738,8 +869,9 @@
       width: 52px;
       height: 52px;
       border-radius: 14px;
-      background: linear-gradient(135deg, rgba(6, 182, 212, 0.25), rgba(139, 92, 246, 0.2));
-      border: 1px solid rgba(6, 182, 212, 0.4);
+      /* CHANGED: cyan → hot pink */
+      background: linear-gradient(135deg, rgba(233, 30, 140, 0.25), rgba(139, 92, 246, 0.2));
+      border: 1px solid rgba(233, 30, 140, 0.4);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -764,9 +896,10 @@
       display: inline-flex;
       align-items: center;
       gap: 5px;
-      background: rgba(6, 182, 212, 0.2);
-      border: 1px solid rgba(6, 182, 212, 0.4);
-      color: #06b6d4;
+      /* CHANGED: cyan → hot pink */
+      background: rgba(233, 30, 140, 0.2);
+      border: 1px solid rgba(233, 30, 140, 0.4);
+      color: #e91e8c;
       font-size: 11px;
       font-weight: 700;
       padding: 3px 8px;
@@ -780,7 +913,8 @@
       width: 6px;
       height: 6px;
       border-radius: 50%;
-      background: #06b6d4;
+      /* CHANGED: cyan → hot pink */
+      background: #e91e8c;
       animation: pulse 1.5s ease-in-out infinite;
     }
 
@@ -918,7 +1052,8 @@
     }
 
     .gradient-text {
-      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary), var(--accent-tertiary));
+      /* CHANGED: blue → dark pink */
+      background: linear-gradient(135deg, #c2185b, #8b5cf6, #e91e8c);
       -webkit-background-clip: text;
       background-clip: text;
       -webkit-text-fill-color: transparent;
@@ -939,7 +1074,8 @@
       display: inline-block;
       width: 3px;
       height: 1em;
-      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      /* CHANGED: blue → dark pink */
+      background: linear-gradient(135deg, #c2185b, #8b5cf6);
       margin-left: 4px;
       animation: blink 1s infinite;
       vertical-align: middle;
@@ -1014,16 +1150,18 @@
       text-transform: uppercase;
       letter-spacing: 0.05em;
       color: var(--text-primary);
-      background: rgba(59, 130, 246, 0.2);
+      /* CHANGED: blue → dark pink */
+      background: rgba(194, 24, 91, 0.2);
       padding: 6px 12px;
       border-radius: 6px;
-      border: 1px solid var(--accent-primary);
+      border: 1px solid #c2185b;
     }
 
     .showcase-item:hover {
       transform: translateY(-8px);
-      border-color: var(--accent-primary);
-      box-shadow: 0 0 30px var(--glow-primary), var(--shadow-lg);
+      /* CHANGED: blue border → dark pink */
+      border-color: #c2185b;
+      box-shadow: 0 0 30px rgba(194, 24, 91, 0.4), var(--shadow-lg);
     }
 
     .showcase-item:hover img { transform: scale(1.1); }
@@ -1052,7 +1190,8 @@
 
     .tag:hover {
       background: var(--bg-tertiary);
-      border-color: var(--accent-primary);
+      /* CHANGED: blue → dark pink */
+      border-color: #c2185b;
       color: var(--text-primary);
       transform: translateY(-2px);
     }
@@ -1062,7 +1201,8 @@
       width: 6px;
       height: 6px;
       border-radius: 50%;
-      background: var(--accent-primary);
+      /* CHANGED: blue → dark pink */
+      background: #c2185b;
       margin-right: 6px;
     }
 
@@ -1100,7 +1240,8 @@
     .stat-value {
       font-size: 36px;
       font-weight: 800;
-      color: var(--accent-primary);
+      /* CHANGED: blue → dark pink */
+      color: #c2185b;
       margin-bottom: 8px;
       font-family: 'Space Grotesk', sans-serif;
     }
@@ -1122,7 +1263,8 @@
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      color: var(--accent-primary);
+      /* CHANGED: blue → dark pink */
+      color: #c2185b;
       margin-bottom: 16px;
     }
 
@@ -1166,7 +1308,8 @@
       left: 0;
       right: 0;
       height: 4px;
-      background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+      /* CHANGED: blue → dark pink */
+      background: linear-gradient(90deg, #c2185b, #8b5cf6);
       transform: scaleX(0);
       transform-origin: left;
       transition: transform 0.4s var(--transition);
@@ -1174,8 +1317,9 @@
 
     .mode-card:hover {
       transform: translateY(-4px);
-      border-color: var(--accent-primary);
-      box-shadow: 0 0 40px var(--glow-primary), var(--shadow-lg);
+      /* CHANGED: blue → dark pink */
+      border-color: #c2185b;
+      box-shadow: 0 0 40px rgba(194, 24, 91, 0.3), var(--shadow-lg);
     }
 
     .mode-card:hover::before { transform: scaleX(1); }
@@ -1212,7 +1356,8 @@
       width: 56px;
       height: 56px;
       border-radius: 12px;
-      background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+      /* CHANGED: blue → dark pink tint */
+      background: linear-gradient(135deg, rgba(194, 24, 91, 0.1), rgba(139, 92, 246, 0.1));
       border: 1px solid var(--border-primary);
       display: flex;
       align-items: center;
@@ -1331,7 +1476,8 @@
       right: -50%;
       width: 100%;
       height: 100%;
-      background: radial-gradient(circle, rgba(59, 130, 246, 0.1), transparent);
+      /* CHANGED: blue → dark pink */
+      background: radial-gradient(circle, rgba(194, 24, 91, 0.1), transparent);
       pointer-events: none;
     }
 
@@ -1371,13 +1517,18 @@
       transition: all 0.3s var(--transition);
     }
 
-    .feature-item:hover { border-color: var(--accent-primary); transform: translateX(4px); }
+    .feature-item:hover {
+      /* CHANGED: blue → dark pink */
+      border-color: #c2185b;
+      transform: translateX(4px);
+    }
 
     .feature-item-icon {
       width: 12px;
       height: 12px;
       border-radius: 4px;
-      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      /* CHANGED: blue → dark pink */
+      background: linear-gradient(135deg, #c2185b, #8b5cf6);
       flex-shrink: 0;
     }
 
@@ -1417,10 +1568,12 @@
 
     .progress-bar-fill {
       height: 100%;
-      background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+      /* CHANGED: blue → dark pink */
+      background: linear-gradient(90deg, #c2185b, #8b5cf6);
       border-radius: 100px;
       transition: width 1s var(--transition);
-      box-shadow: 0 0 20px var(--glow-primary);
+      /* CHANGED: blue glow → dark pink glow */
+      box-shadow: 0 0 20px rgba(194, 24, 91, 0.5);
     }
 
     .roadmap-grid {
@@ -1437,7 +1590,11 @@
       transition: all 0.3s var(--transition);
     }
 
-    .milestone:hover { border-color: var(--accent-primary); transform: translateY(-2px); }
+    .milestone:hover {
+      /* CHANGED: blue → dark pink */
+      border-color: #c2185b;
+      transform: translateY(-2px);
+    }
 
     .milestone-header {
       display: flex;
@@ -1482,7 +1639,8 @@
       margin-bottom: 8px;
     }
 
-    .milestone li::before { content: '→'; position: absolute; left: 0; color: var(--accent-primary); }
+    /* CHANGED: blue arrow → dark pink */
+    .milestone li::before { content: '→'; position: absolute; left: 0; color: #c2185b; }
 
     /* ====== FOOTER ====== */
     footer {
@@ -1523,7 +1681,8 @@
       transition: color 0.2s ease;
     }
 
-    .footer-legal a:hover { color: #6366f1; }
+    /* CHANGED: indigo → dark pink */
+    .footer-legal a:hover { color: #c2185b; }
 
     .footer-links { display: flex; gap: 16px; flex-wrap: wrap; }
 
@@ -1629,6 +1788,7 @@
       .stats-bar { grid-template-columns: 1fr; }
       .video-banner { flex-direction: column; }
       .chat-banner { flex-direction: column; }
+      #signoutNotif { min-width: 90vw; }
     }
 
     /* ====== CANVA POPUP ====== */
@@ -1652,10 +1812,11 @@
       width: 100%;
       max-width: 960px;
       background: #0d0d0d;
-      border: 1px solid rgba(59, 130, 246, 0.35);
+      /* CHANGED: blue border → dark pink border */
+      border: 1px solid rgba(194, 24, 91, 0.35);
       border-radius: 20px;
       overflow: hidden;
-      box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.1), 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 80px rgba(59, 130, 246, 0.15), 0 0 140px rgba(139, 92, 246, 0.1);
+      box-shadow: 0 0 0 1px rgba(194, 24, 91, 0.1), 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 80px rgba(194, 24, 91, 0.15), 0 0 140px rgba(139, 92, 246, 0.1);
       transform: scale(0.92) translateY(24px);
       transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     }
@@ -1665,8 +1826,9 @@
       align-items: center;
       justify-content: space-between;
       padding: 14px 20px;
-      background: linear-gradient(135deg, rgba(59,130,246,0.08), rgba(139,92,246,0.06));
-      border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+      /* CHANGED: blue tint → dark pink tint */
+      background: linear-gradient(135deg, rgba(194,24,91,0.08), rgba(139,92,246,0.06));
+      border-bottom: 1px solid rgba(194, 24, 91, 0.2);
     }
     .canva-popup-title {
       display: flex;
@@ -1682,8 +1844,9 @@
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      background: var(--accent-primary);
-      box-shadow: 0 0 8px var(--accent-primary);
+      /* CHANGED: blue → dark pink */
+      background: #c2185b;
+      box-shadow: 0 0 8px #c2185b;
       animation: pulse 2s ease-in-out infinite;
     }
     .canva-close-btn {
@@ -1749,9 +1912,10 @@
       width: 48px;
       height: 48px;
       border-radius: 50%;
-      border: 3px solid rgba(59, 130, 246, 0.15);
-      border-top-color: var(--accent-primary);
-      border-right-color: var(--accent-secondary);
+      /* CHANGED: blue → dark pink */
+      border: 3px solid rgba(194, 24, 91, 0.15);
+      border-top-color: #c2185b;
+      border-right-color: #8b5cf6;
       animation: spinnerSpin 0.9s linear infinite;
     }
     @keyframes spinnerSpin { to { transform: rotate(360deg); } }
@@ -1773,7 +1937,8 @@
     .canva-loader-bar-fill {
       height: 100%;
       width: 40%;
-      background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+      /* CHANGED: blue → dark pink */
+      background: linear-gradient(90deg, #c2185b, #8b5cf6);
       border-radius: 10px;
       animation: loaderPulse 1.4s ease-in-out infinite;
     }
@@ -1827,7 +1992,8 @@
       position: relative;
       transform: scale(0.9) translateY(20px);
       transition: all 0.3s var(--transition);
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 80px var(--glow-primary);
+      /* CHANGED: blue glow → dark pink */
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 80px rgba(194, 24, 91, 0.2);
     }
     .modal-overlay.active .modal { transform: scale(1) translateY(0); }
     .modal-close {
@@ -1850,7 +2016,8 @@
     }
     .modal-close:hover {
       background: var(--bg-tertiary);
-      border-color: var(--accent-primary);
+      /* CHANGED: blue → dark pink */
+      border-color: #c2185b;
       color: var(--text-primary);
       transform: rotate(90deg);
     }
@@ -1858,7 +2025,8 @@
       width: 80px;
       height: 80px;
       margin: 0 auto 24px;
-      background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+      /* CHANGED: blue tint → dark pink tint */
+      background: linear-gradient(135deg, rgba(194, 24, 91, 0.1), rgba(139, 92, 246, 0.1));
       border: 2px solid var(--border-primary);
       border-radius: 20px;
       display: flex;
@@ -1868,8 +2036,8 @@
       animation: modalIconPulse 2s ease-in-out infinite;
     }
     @keyframes modalIconPulse {
-      0%, 100% { transform: scale(1); box-shadow: 0 0 20px var(--glow-primary); }
-      50% { transform: scale(1.05); box-shadow: 0 0 40px var(--glow-primary), 0 0 60px var(--glow-secondary); }
+      0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(194, 24, 91, 0.3); }
+      50% { transform: scale(1.05); box-shadow: 0 0 40px rgba(194, 24, 91, 0.4), 0 0 60px rgba(139, 92, 246, 0.3); }
     }
     .modal-title {
       font-size: 28px;
@@ -1877,7 +2045,8 @@
       text-align: center;
       margin-bottom: 12px;
       font-family: 'Space Grotesk', sans-serif;
-      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      /* CHANGED: blue → dark pink */
+      background: linear-gradient(135deg, #c2185b, #8b5cf6);
       -webkit-background-clip: text;
       background-clip: text;
       -webkit-text-fill-color: transparent;
@@ -1895,11 +2064,12 @@
       margin: 0 auto 32px;
       padding: 8px 16px;
       border-radius: 8px;
-      background: rgba(59, 130, 246, 0.1);
-      border: 1px solid var(--accent-primary);
+      /* CHANGED: blue → dark pink */
+      background: rgba(194, 24, 91, 0.1);
+      border: 1px solid #c2185b;
       font-size: 14px;
       font-weight: 700;
-      color: var(--accent-primary);
+      color: #c2185b;
       font-family: 'Space Grotesk', sans-serif;
     }
     .modal-content {
@@ -1928,7 +2098,8 @@
       width: 8px;
       height: 8px;
       border-radius: 2px;
-      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      /* CHANGED: blue → dark pink */
+      background: linear-gradient(135deg, #c2185b, #8b5cf6);
       flex-shrink: 0;
     }
     .modal-actions { display: flex; gap: 12px; }
@@ -1949,11 +2120,12 @@
       gap: 8px;
     }
     .modal-btn-primary {
-      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      /* CHANGED: blue → dark pink */
+      background: linear-gradient(135deg, #c2185b, #8b5cf6);
       color: var(--text-primary);
-      box-shadow: 0 4px 20px var(--glow-primary);
+      box-shadow: 0 4px 20px rgba(194, 24, 91, 0.4);
     }
-    .modal-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 30px var(--glow-primary); }
+    .modal-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 30px rgba(194, 24, 91, 0.5); }
     .modal-btn-secondary {
       background: var(--bg-secondary);
       border: 1px solid var(--border-primary);
@@ -1961,7 +2133,8 @@
     }
     .modal-btn-secondary:hover {
       background: var(--bg-tertiary);
-      border-color: var(--accent-primary);
+      /* CHANGED: blue → dark pink */
+      border-color: #c2185b;
       color: var(--text-primary);
       transform: translateY(-2px);
     }
@@ -1971,9 +2144,35 @@
       .modal-actions { flex-direction: column; }
       .modal-btn { width: 100%; }
     }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
   </style>
 </head>
 <body>
+
+  <!-- ═══════════════════════════════════════════
+       SIGNOUT NOTIFICATION POPUP
+  ═══════════════════════════════════════════ -->
+  <div id="signoutNotif" role="alert" aria-live="polite">
+    <div class="signout-notif-bar"></div>
+    <div class="signout-notif-inner">
+      <div class="signout-notif-icon">👋</div>
+      <div class="signout-notif-body">
+        <div class="signout-notif-title">Signed out successfully</div>
+        <div class="signout-notif-sub">Redirecting you in <span id="notifCountText">3</span>s…</div>
+      </div>
+      <div class="signout-notif-countdown">
+        <svg viewBox="0 0 38 38">
+          <circle cx="19" cy="19" r="16" id="notifRing"/>
+        </svg>
+        <span class="count-num" id="notifCountNum">3</span>
+      </div>
+    </div>
+  </div>
+
   <div id="mainContent" class="visible">
     <div class="bg-grid"></div>
     <div class="bg-gradient"></div>
@@ -2113,16 +2312,8 @@
               </a>
             </div>
 
-            <div class="hero-cta">
-              <a class="btn btn-primary" href="https://t.me/T1ERA_SecBot" target="_blank" rel="noopener">
-                <span class="btn-icon"></span>
-                Start on Telegram
-              </a>
-              <a class="btn btn-primary" href="#" id="webappBtn" style="background: linear-gradient(135deg, var(--accent-secondary), var(--accent-tertiary));">
-                Launch WebApp
-              </a>
-              <a class="btn" href="https://t1era-or-kode-blind.gitbook.io/t1era/documentation" target="_blank" rel="noopener">View Documentation</a>
-            </div>
+            <!-- ── REMOVED: "Start on Telegram", "Launch WebApp", "View Documentation" buttons ── -->
+            <!-- hero-cta section intentionally removed as requested -->
 
             <!-- AI Showcase Gallery -->
             <div class="ai-showcase fade-in">
@@ -2314,7 +2505,7 @@
                     <span class="btn-icon"></span>
                     Get Started
                   </a>
-                  <a class="btn btn-primary" href="ChatT1era.html" style="background: linear-gradient(135deg, var(--accent-tertiary), var(--accent-secondary));">
+                  <a class="btn btn-primary" href="ChatT1era.html" style="background: linear-gradient(135deg, #e91e8c, #8b5cf6);">
                     💬 Try Chat
                   </a>
                   <a class="btn btn-video" href="https://fdcb6cb22aa4aa08b2.gradio.live" target="_blank">
@@ -2332,15 +2523,17 @@
                     Quick Start Commands
                   </h4>
                   <div style="font-family: 'Space Grotesk', monospace; font-size: 14px; line-height: 2; color: var(--text-secondary);">
-                    <div><span style="color: var(--accent-primary);">/chat</span> — Start AI conversation</div>
-                    <div><span style="color: var(--accent-primary);">/power</span> — Analyze images</div>
-                    <div><span style="color: var(--accent-primary);">/vtt</span> — Generate video scripts</div>
-                    <div><span style="color: var(--accent-primary);">/minathor</span> — Create video concepts</div>
-                    <div><span style="color: var(--accent-primary);">/account</span> — View dashboard</div>
-                    <div><span style="color: var(--accent-primary);">/reset</span> — Clear session</div>
+                    <!-- CHANGED: blue command color → dark pink -->
+                    <div><span style="color: #c2185b;">/chat</span> — Start AI conversation</div>
+                    <div><span style="color: #c2185b;">/power</span> — Analyze images</div>
+                    <div><span style="color: #c2185b;">/vtt</span> — Generate video scripts</div>
+                    <div><span style="color: #c2185b;">/minathor</span> — Create video concepts</div>
+                    <div><span style="color: #c2185b;">/account</span> — View dashboard</div>
+                    <div><span style="color: #c2185b;">/reset</span> — Clear session</div>
                   </div>
                   <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border-primary);">
-                    <a href="ChatT1era.html" style="display:flex;align-items:center;gap:10px;padding:12px;background:rgba(6,182,212,0.06);border:1px solid rgba(6,182,212,0.25);border-radius:10px;text-decoration:none;color:#06b6d4;font-size:13px;font-weight:600;transition:all 0.2s;margin-bottom:10px;">
+                    <!-- CHANGED: cyan → hot pink for chat link -->
+                    <a href="ChatT1era.html" style="display:flex;align-items:center;gap:10px;padding:12px;background:rgba(233,30,140,0.06);border:1px solid rgba(233,30,140,0.25);border-radius:10px;text-decoration:none;color:#e91e8c;font-size:13px;font-weight:600;transition:all 0.2s;margin-bottom:10px;">
                       💬 Open AI Chat Interface →
                     </a>
                     <a href="generate.html" style="display:flex;align-items:center;gap:10px;padding:12px;background:rgba(249,115,22,0.06);border:1px solid rgba(249,115,22,0.25);border-radius:10px;text-decoration:none;color:#fb923c;font-size:13px;font-weight:600;transition:all 0.2s;">
@@ -2546,6 +2739,39 @@
       }
     })();
 
+    // ══ SIGNOUT NOTIFICATION + REFRESH ══
+    function showSignoutNotif(onDone) {
+      const notif      = document.getElementById('signoutNotif');
+      const countNum   = document.getElementById('notifCountNum');
+      const countText  = document.getElementById('notifCountText');
+      const ring       = document.getElementById('notifRing');
+
+      // Circumference of the SVG ring (r=16): 2π×16 ≈ 100.5
+      const CIRC = 100.5;
+      ring.style.strokeDasharray  = CIRC;
+      ring.style.strokeDashoffset = CIRC;
+
+      let count = 3;
+      notif.classList.add('show');
+
+      // Animate ring fill immediately
+      setTimeout(() => {
+        ring.style.transition = `stroke-dashoffset ${count}s linear`;
+        ring.style.strokeDashoffset = 0;
+      }, 60);
+
+      const tick = setInterval(() => {
+        count--;
+        countNum.textContent  = count;
+        countText.textContent = count;
+        if (count <= 0) {
+          clearInterval(tick);
+          notif.classList.remove('show');
+          setTimeout(onDone, 400);
+        }
+      }, 1000);
+    }
+
     // ══ CANVA POPUP ══
     (function() {
       const canvaOverlay  = document.getElementById('canvaOverlay');
@@ -2728,7 +2954,6 @@
   import { initializeApp }                        from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
   import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 
-  // ✅ FIXED: Same config as auth.html (t1era-v2)
   const firebaseConfig = {
     apiKey:            "AIzaSyBnt9mbb8LdMVeguSHUmS20L6uBHIfxwAs",
     authDomain:        "t1era-v2.firebaseapp.com",
@@ -2778,8 +3003,20 @@
         btn.id = 'signOutBtn';
         btn.innerHTML = '<i class="ph-bold ph-sign-out"></i><span>Sign Out</span>';
         btn.addEventListener('click', async () => {
+          // Close dropdown immediately
           userDropdown.classList.remove('open');
-          await signOut(auth);
+
+          try {
+            await signOut(auth);
+          } catch (e) {
+            console.error('Sign out error:', e);
+          }
+
+          // Show styled notification, then reload/redirect
+          window.showSignoutNotif(() => {
+            // Redirect to auth page (same as what your app considers the "logged out" landing)
+            window.location.href = 'index.html';
+          });
         });
         userDropdown.appendChild(btn);
       }
