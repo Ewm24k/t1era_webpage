@@ -583,50 +583,50 @@
     .user-dropdown {
       display: none;
       position: absolute;
-      top: calc(100% + 14px);
+      top: calc(100% + 10px);
       right: 0;
-      min-width: 220px;
-      background: rgba(10,10,15,0.97);
-      /* CHANGED: indigo border → dark pink */
-      border: 1px solid rgba(194, 24, 91, 0.3);
-      border-radius: 16px;
-      padding: 8px;
+      min-width: 200px;
+      background: rgba(8, 6, 12, 0.98);
+      border: 1px solid rgba(194, 24, 91, 0.22);
+      border-radius: 14px;
+      padding: 6px;
       box-shadow:
-        0 0 0 1px rgba(194, 24, 91, 0.1),
-        0 20px 60px rgba(0,0,0,0.8),
-        0 0 40px rgba(194, 24, 91, 0.12);
-      backdrop-filter: blur(20px);
+        0 0 0 1px rgba(194, 24, 91, 0.07),
+        0 16px 48px rgba(0,0,0,0.9),
+        0 0 32px rgba(194, 24, 91, 0.1);
+      backdrop-filter: blur(24px) saturate(200%);
       z-index: 9999;
-      animation: dropIn 0.2s cubic-bezier(0.4,0,0.2,1) both;
+      animation: dropIn 0.22s cubic-bezier(0.34, 1.4, 0.64, 1) both;
     }
 
     @keyframes dropIn {
-      from { opacity:0; transform:translateY(-8px) scale(0.97); }
-      to   { opacity:1; transform:none; }
+      from { opacity:0; transform:translateY(-6px) scale(0.96); }
+      to   { opacity:1; transform:translateY(0) scale(1); }
     }
 
     .user-dropdown.open { display: block; }
 
     .dropdown-header {
-      padding: 12px 14px 10px;
-      border-bottom: 1px solid rgba(255,255,255,0.07);
-      margin-bottom: 6px;
+      padding: 10px 12px 8px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      margin-bottom: 4px;
     }
 
     .dropdown-name {
       font-family: 'Space Grotesk', sans-serif;
-      font-size: 14px;
+      font-size: 12px;
       font-weight: 700;
       color: #fff;
-      margin-bottom: 2px;
+      margin-bottom: 1px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      letter-spacing: 0.01em;
     }
 
     .dropdown-email {
-      font-size: 11px;
-      color: rgba(255,255,255,0.4);
+      font-size: 10px;
+      color: rgba(255,255,255,0.3);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -635,32 +635,30 @@
     .dropdown-item {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 10px 14px;
-      border-radius: 10px;
-      font-size: 13px;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 7px 12px;
+      border-radius: 8px;
+      font-size: 11.5px;
       font-weight: 600;
-      color: rgba(255,255,255,0.7);
+      font-family: 'Space Grotesk', sans-serif;
+      letter-spacing: 0.01em;
+      color: rgba(255,255,255,0.55);
       text-decoration: none;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: background 0.15s ease, color 0.15s ease;
       border: none;
       background: none;
       width: 100%;
       text-align: left;
     }
 
-    .dropdown-item:hover {
-      /* CHANGED: indigo → dark pink */
-      background: rgba(194, 24, 91, 0.12);
-      color: #fff;
-    }
+    /* Hide phosphor icons inside dropdown */
+    .dropdown-item i { display: none; }
 
-    .dropdown-item i {
-      font-size: 16px;
-      /* CHANGED: indigo → dark pink */
-      color: rgba(194, 24, 91, 0.8);
-      flex-shrink: 0;
+    .dropdown-item:hover {
+      background: rgba(194, 24, 91, 0.1);
+      color: rgba(255,255,255,0.9);
     }
 
     .dropdown-item span:first-of-type {
@@ -668,36 +666,35 @@
     }
 
     .dropdown-item-soon {
-      font-size: 9px;
+      font-size: 8px;
       font-weight: 700;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
-      /* CHANGED: indigo → dark pink */
-      color: rgba(194, 24, 91, 0.6);
-      background: rgba(194, 24, 91, 0.1);
-      border: 1px solid rgba(194, 24, 91, 0.2);
-      padding: 2px 6px;
-      border-radius: 4px;
+      color: rgba(194, 24, 91, 0.5);
+      background: rgba(194, 24, 91, 0.08);
+      border: 1px solid rgba(194, 24, 91, 0.15);
+      padding: 1px 5px;
+      border-radius: 3px;
       flex-shrink: 0;
     }
 
     .dropdown-divider {
       height: 1px;
-      background: rgba(255,255,255,0.07);
-      margin: 6px 8px;
+      background: rgba(255,255,255,0.05);
+      margin: 4px 6px;
     }
 
     .dropdown-item.signout {
-      color: rgba(239,68,68,0.75);
-      margin-top: 2px;
+      color: rgba(239,68,68,0.6);
+      margin-top: 0;
     }
 
     .dropdown-item.signout:hover {
-      background: rgba(239,68,68,0.1);
+      background: rgba(239,68,68,0.08);
       color: #ef4444;
     }
 
-    .dropdown-item.signout i { color: rgba(239,68,68,0.65); }
+    .dropdown-item.signout i { display: none; }
 
     /* ═══════════════════════════════════════════
        SIGNOUT NOTIFICATION POPUP
@@ -1716,33 +1713,101 @@
     .mobile-nav {
       display: none;
       position: fixed;
-      top: 72px;
-      left: 0;
-      right: 0;
-      background: rgba(0, 0, 0, 0.95);
-      backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--border-primary);
-      padding: 24px;
+      top: 64px;
+      left: 12px;
+      right: 12px;
+      background: rgba(8, 6, 12, 0.98);
+      backdrop-filter: blur(28px) saturate(180%);
+      border: 1px solid rgba(194, 24, 91, 0.2);
+      border-radius: 16px;
+      padding: 8px;
       z-index: 999;
       opacity: 0;
-      transform: translateY(-20px);
-      transition: all 0.3s var(--transition);
+      transform: translateY(-12px) scale(0.97);
+      transition: opacity 0.25s ease, transform 0.28s cubic-bezier(0.34, 1.4, 0.64, 1);
+      box-shadow:
+        0 0 0 1px rgba(194, 24, 91, 0.08),
+        0 20px 50px rgba(0,0,0,0.85),
+        0 0 40px rgba(194, 24, 91, 0.08);
     }
 
-    .mobile-nav.active { opacity: 1; transform: translateY(0); }
+    .mobile-nav.active {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    /* Section label inside mobile nav */
+    .mobile-nav-section {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(194, 24, 91, 0.5);
+      padding: 10px 12px 4px;
+      font-family: 'Space Grotesk', sans-serif;
+    }
 
     .mobile-nav a {
-      display: block;
-      padding: 12px 0;
-      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 9px 12px;
+      color: rgba(255,255,255,0.65);
       text-decoration: none;
       font-weight: 500;
-      border-bottom: 1px solid var(--border-primary);
-      transition: color 0.3s var(--transition);
+      font-size: 13px;
+      font-family: 'Space Grotesk', sans-serif;
+      border-radius: 10px;
+      letter-spacing: 0.01em;
+      transition: background 0.18s ease, color 0.18s ease;
+      position: relative;
     }
 
-    .mobile-nav a:last-child { border-bottom: none; }
-    .mobile-nav a:hover { color: var(--text-primary); }
+    .mobile-nav a::after {
+      content: '›';
+      font-size: 16px;
+      font-weight: 300;
+      color: rgba(194, 24, 91, 0.4);
+      transition: color 0.18s ease, transform 0.18s ease;
+    }
+
+    .mobile-nav a:hover {
+      background: rgba(194, 24, 91, 0.08);
+      color: #fff;
+    }
+
+    .mobile-nav a:hover::after {
+      color: #c2185b;
+      transform: translateX(2px);
+    }
+
+    /* special accented links */
+    .mobile-nav a.nav-accent-pink {
+      color: #e91e8c;
+      background: rgba(233, 30, 140, 0.06);
+    }
+    .mobile-nav a.nav-accent-pink:hover {
+      background: rgba(233, 30, 140, 0.12);
+      color: #f472b6;
+    }
+    .mobile-nav a.nav-accent-pink::after { color: rgba(233, 30, 140, 0.5); }
+
+    .mobile-nav a.nav-accent-orange {
+      color: #fb923c;
+      background: rgba(249, 115, 22, 0.06);
+    }
+    .mobile-nav a.nav-accent-orange:hover {
+      background: rgba(249, 115, 22, 0.12);
+      color: #fdba74;
+    }
+    .mobile-nav a.nav-accent-orange::after { color: rgba(249, 115, 22, 0.5); }
+
+    /* thin divider inside nav */
+    .mobile-nav-divider {
+      height: 1px;
+      background: rgba(255,255,255,0.05);
+      margin: 4px 8px;
+    }
 
     /* ====== RESPONSIVE ====== */
     @media (max-width: 1024px) {
@@ -2245,11 +2310,15 @@
 
       <!-- Mobile Nav -->
       <nav class="mobile-nav" id="mobileNav">
-        <a href="ChatT1era.html">💬 AI Chat</a>
-        <a href="generate.html">🎬 AI Video Generator</a>
+        <div class="mobile-nav-section">Quick Access</div>
+        <a href="ChatT1era.html" class="nav-accent-pink">AI Chat</a>
+        <a href="generate.html" class="nav-accent-orange">Video Generator</a>
+        <div class="mobile-nav-divider"></div>
+        <div class="mobile-nav-section">Navigation</div>
         <a href="#modes">Modes</a>
         <a href="#features">Features</a>
         <a href="#roadmap">Roadmap</a>
+        <div class="mobile-nav-divider"></div>
         <a href="https://t1era-or-kode-blind.gitbook.io/t1era/documentation" target="_blank" rel="noopener">Documentation</a>
       </nav>
 
@@ -2973,65 +3042,110 @@
   const dropdownEmail   = document.getElementById('dropdownEmail');
   const userDropdown    = document.getElementById('userDropdown');
 
+  // ══════════════════════════════════════════════════════
+  // FAST AUTH FIX: Why Chrome normal browser is slow:
+  // Firebase Auth uses indexedDB + token re-validation on
+  // page load. In Chrome cached sessions, this takes 300-
+  // 800ms before onAuthStateChanged fires. Incognito/mobile
+  // is faster because caches are fresh or empty.
+  //
+  // FIX: Persist a lightweight auth snapshot to localStorage.
+  // Render it INSTANTLY on page load (optimistic UI), then
+  // let Firebase confirm/correct within its normal cycle.
+  // ══════════════════════════════════════════════════════
+
+  const AUTH_CACHE_KEY = 't1era_auth_cache';
+
+  function saveAuthCache(user) {
+    if (user) {
+      try {
+        localStorage.setItem(AUTH_CACHE_KEY, JSON.stringify({
+          uid:         user.uid,
+          displayName: user.displayName || '',
+          email:       user.email || '',
+          photoURL:    user.photoURL || ''
+        }));
+      } catch(e) {}
+    } else {
+      try { localStorage.removeItem(AUTH_CACHE_KEY); } catch(e) {}
+    }
+  }
+
+  function loadAuthCache() {
+    try {
+      const raw = localStorage.getItem(AUTH_CACHE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch(e) { return null; }
+  }
+
+  function applySignedInUI(displayName, email, photoURL) {
+    authBtn.style.display          = 'none';
+    authBtn.style.visibility       = 'hidden';
+    userAvatarBtn.style.display    = 'block';
+    userAvatarBtn.style.visibility = 'visible';
+    dropdownName.textContent  = displayName || 'T1ERA User';
+    dropdownEmail.textContent = email || '';
+    if (photoURL) {
+      userAvatarInner.innerHTML =
+        `<img class="user-avatar-img" src="${photoURL}" alt="avatar" referrerpolicy="no-referrer"/>`;
+    } else {
+      const initial = (displayName || email || 'U')[0].toUpperCase();
+      userAvatarInner.innerHTML =
+        `<div class="user-avatar-initials">${initial}</div>`;
+    }
+  }
+
+  function applySignedOutUI() {
+    authBtn.style.display          = 'inline-flex';
+    authBtn.style.visibility       = 'visible';
+    userAvatarBtn.style.display    = 'none';
+    userAvatarBtn.style.visibility = 'hidden';
+    userDropdown.classList.remove('open');
+    const existingSignOut = document.getElementById('signOutBtn');
+    if (existingSignOut) {
+      existingSignOut.previousElementSibling?.remove();
+      existingSignOut.remove();
+    }
+  }
+
+  function injectSignOutBtn() {
+    if (document.getElementById('signOutBtn')) return;
+    const divider = document.createElement('div');
+    divider.className = 'dropdown-divider';
+    userDropdown.appendChild(divider);
+    const btn = document.createElement('button');
+    btn.className = 'dropdown-item signout';
+    btn.id = 'signOutBtn';
+    btn.innerHTML = '<span>Sign Out</span>';
+    btn.addEventListener('click', async () => {
+      userDropdown.classList.remove('open');
+      saveAuthCache(null);
+      try { await signOut(auth); } catch (e) { console.error('Sign out error:', e); }
+      window.showSignoutNotif(() => { window.location.href = 'index.html'; });
+    });
+    userDropdown.appendChild(btn);
+  }
+
+  // ── STEP 1: Optimistic instant render from cache ──
+  const cached = loadAuthCache();
+  if (cached) {
+    // User was previously signed in → show avatar NOW without waiting for Firebase
+    applySignedInUI(cached.displayName, cached.email, cached.photoURL);
+    injectSignOutBtn();
+  }
+  // If no cache → keep default HTML (Login button visible) — no flash
+
+  // ── STEP 2: Firebase confirms true state (may take 100-800ms on Chrome) ──
   onAuthStateChanged(auth, user => {
     if (user) {
-      // ── SIGNED IN: show avatar, hide login ──
-      authBtn.style.display          = 'none';
-      userAvatarBtn.style.display    = 'block';
-      userAvatarBtn.style.visibility = 'visible';
-
-      dropdownName.textContent  = user.displayName || 'T1ERA User';
-      dropdownEmail.textContent = user.email || '';
-
-      if (user.photoURL) {
-        userAvatarInner.innerHTML =
-          `<img class="user-avatar-img" src="${user.photoURL}" alt="avatar" referrerpolicy="no-referrer"/>`;
-      } else {
-        const initial = (user.displayName || user.email || 'U')[0].toUpperCase();
-        userAvatarInner.innerHTML =
-          `<div class="user-avatar-initials">${initial}</div>`;
-      }
-
-      // Inject Sign Out into dropdown ONLY once
-      if (!document.getElementById('signOutBtn')) {
-        const divider = document.createElement('div');
-        divider.className = 'dropdown-divider';
-        userDropdown.appendChild(divider);
-
-        const btn = document.createElement('button');
-        btn.className = 'dropdown-item signout';
-        btn.id = 'signOutBtn';
-        btn.innerHTML = '<i class="ph-bold ph-sign-out"></i><span>Sign Out</span>';
-        btn.addEventListener('click', async () => {
-          // Close dropdown immediately
-          userDropdown.classList.remove('open');
-
-          try {
-            await signOut(auth);
-          } catch (e) {
-            console.error('Sign out error:', e);
-          }
-
-          // Show styled notification, then reload/redirect
-          window.showSignoutNotif(() => {
-            // Redirect to auth page (same as what your app considers the "logged out" landing)
-            window.location.href = 'index.html';
-          });
-        });
-        userDropdown.appendChild(btn);
-      }
-
+      saveAuthCache(user);
+      applySignedInUI(user.displayName, user.email, user.photoURL);
+      injectSignOutBtn();
     } else {
-      // ── SIGNED OUT ──
-      authBtn.style.display          = 'inline-flex';
-      userAvatarBtn.style.display    = 'none';
-      userAvatarBtn.style.visibility = 'hidden';
-      userDropdown.classList.remove('open');
-
-      const existingSignOut = document.getElementById('signOutBtn');
-      if (existingSignOut) {
-        existingSignOut.previousElementSibling?.remove();
-        existingSignOut.remove();
+      saveAuthCache(null);
+      // Only switch to signed-out UI if we're not mid-signout animation
+      if (!document.getElementById('signoutNotif')?.classList.contains('show')) {
+        applySignedOutUI();
       }
     }
   });
