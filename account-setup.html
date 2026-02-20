@@ -1489,69 +1489,49 @@
     }
     window._onEmailPrimaryInput = _runPrimaryEmailCheck;
 
-    /* ── BACKUP EMAIL checker — runs immediately, no debounce delays ── */
-    async function _runBackupEmailCheck(){
-      const raw = document.getElementById('emailBackup').value;
-      const val = _normEmail(raw);
-      const inp = document.getElementById('emailBackup');
-      const st  = _ucheckState.emailBackup;
-
-      clearTimeout(st.timer);
-      hideFraudAlert('fraudAlertBackup');
-
-      if(!raw.trim() || val.length < 5 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)){
-        st.status='idle'; _setIco('icoEmailBackup','idle'); _setHint('hintEmailBackup','',''); inp.classList.remove('ok','err'); return;
-      }
-
-      // Same-as-primary guard — no DB needed, instant
-      const primaryVal = _normEmail(document.getElementById('emailPrimary').value);
-      if(primaryVal.length >= 5 && val === primaryVal){
-        st.status='err'; _setIco('icoEmailBackup','err');
-        _setHint('hintEmailBackup','Cannot match your sign-in email.','err');
-        inp.classList.add('err'); inp.classList.remove('ok');
-        showFraudAlert('fraudAlertBackup','fraudMsgBackup','Your backup email cannot be the same as your sign-in email. Use two different addresses.');
-        showFraudAlert('fraudAlertPrimary','fraudMsgPrimary','Your sign-in email matches the backup email. Both fields must be different.');
-        return;
-      }
-      if(_ucheckState.emailPrimary.status !== 'err') hideFraudAlert('fraudAlertPrimary');
-
-      // Show spinner immediately
-      st.status='checking'; _setIco('icoEmailBackup','checking');
-      _setHint('hintEmailBackup','Checking...','checking');
-      inp.classList.remove('ok','err');
-
-      // Wait for Firestore to be ready — same pattern as nickname checker
-      if(!window._db || !window._getDocs){
-        st.timer = setTimeout(_runBackupEmailCheck, 800);
-        return;
-      }
-
-      try {
-        const uid = window._currentUser ? window._currentUser.uid : null;
-        const db  = window._db;
-        const [s1, s2, s3] = await Promise.all([
-          window._getDocs(window._query(window._collection(db,'users'),        window._where('emailPrimary','==',val))),
-          window._getDocs(window._query(window._collection(db,'users'),        window._where('emailBackup', '==',val))),
-          window._getDocs(window._query(window._collection(db,'backupEmails'), window._where('email',       '==',val))),
-        ]);
-        function other(s){ let t=false; s.forEach(d=>{ if(d.data().uid!==uid) t=true; }); return t; }
-        const taken = other(s1) || other(s2) || other(s3);
-        if(!taken){
-          st.status='ok'; _setIco('icoEmailBackup','ok'); _setHint('hintEmailBackup','✓ Available','ok');
-          inp.classList.add('ok'); inp.classList.remove('err'); hideFraudAlert('fraudAlertBackup');
-        } else {
-          st.status='err'; _setIco('icoEmailBackup','err');
-          _setHint('hintEmailBackup','Email already in use on another account.','err');
-          inp.classList.add('err'); inp.classList.remove('ok');
-          showFraudAlert('fraudAlertBackup','fraudMsgBackup',
-            raw.trim()+' is already registered on another T1ERA account (as primary or backup). Each email can only belong to one account. Contact t1era@proton.me if this is a mistake.');
+    /* ── BACKUP EMAIL checker ── */
+    function _makeBackupEmailChecker(){
+      const st = _ucheckState.emailBackup;
+      return function(e){
+        const raw    = document.getElementById('emailBackup').value;
+        const val    = _normEmail(raw);
+        const inp    = document.getElementById('emailBackup');
+        const isBlur = e && e.type === 'blur';
+        clearTimeout(st.timer);
+        hideFraudAlert('fraudAlertBackup');
+        if(!raw.trim() || val.length < 5 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)){
+          st.status='idle'; _setIco('icoEmailBackup','idle'); _setHint('hintEmailBackup','',''); inp.classList.remove('ok','err'); return;
         }
-      } catch(e){
-        console.error('Backup email check error:',e);
-        // Retry once — do not show error to user on transient failure
-        st.timer = setTimeout(_runBackupEmailCheck, 1500);
-      }
+        // same-as-primary instant check
+        const pv = _normEmail(document.getElementById('emailPrimary').value);
+        if(pv && val === pv){
+          st.status='err'; _setIco('icoEmailBackup','err'); _setHint('hintEmailBackup','Cannot match sign-in email.','err');
+          inp.classList.add('err'); inp.classList.remove('ok');
+          showFraudAlert('fraudAlertBackup','fraudMsgBackup','Backup email cannot be the same as your sign-in email. Use a different address.');
+          return;
+        }
+        st.status='checking'; _setIco('icoEmailBackup','checking'); _setHint('hintEmailBackup','Checking...','checking'); inp.classList.remove('ok','err');
+        st.timer = setTimeout(()=> _doBackupEmailQuery(val, raw, inp, st), isBlur ? 0 : 400);
+      };
     }
+    async function _doBackupEmailQuery(val, raw, inp, st){
+      if(!window._db || !window._getDocs){ st.timer = setTimeout(()=> _doBackupEmailQuery(val,raw,inp,st), 800); return; }
+      try{
+        const uid = window._currentUser ? window._currentUser.uid : null;
+        const [s1,s2,s3] = await Promise.all([
+          window._getDocs(window._query(window._collection(window._db,'users'),        window._where('emailPrimary','==',val))),
+          window._getDocs(window._query(window._collection(window._db,'users'),        window._where('emailBackup', '==',val))),
+          window._getDocs(window._query(window._collection(window._db,'backupEmails'), window._where('email',       '==',val))),
+        ]);
+        let taken = false;
+        [s1,s2,s3].forEach(s=> s.forEach(d=>{ if(d.data().uid !== uid) taken = true; }));
+        if(!taken){ st.status='ok';  _setIco('icoEmailBackup','ok');  _setHint('hintEmailBackup','✓ Available','ok');  inp.classList.add('ok');  inp.classList.remove('err'); hideFraudAlert('fraudAlertBackup'); }
+        else      { st.status='err'; _setIco('icoEmailBackup','err'); _setHint('hintEmailBackup','Email already registered on another account.','err'); inp.classList.add('err'); inp.classList.remove('ok');
+          showFraudAlert('fraudAlertBackup','fraudMsgBackup', raw.trim()+' is already linked to another T1ERA account. Each email can only belong to one account. Contact t1era@proton.me if this is a mistake.');
+        }
+      } catch(e){ console.warn('Backup email check failed:',e); st.timer = setTimeout(()=> _doBackupEmailQuery(val,raw,inp,st), 1500); }
+    }
+    const _runBackupEmailCheck = _makeBackupEmailChecker();
 
     /* ── PHONE checker ── */
     async function _doPhoneQuery(val, raw, inp, st){
