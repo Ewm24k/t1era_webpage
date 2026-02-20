@@ -1489,13 +1489,7 @@
     }
     window._onEmailPrimaryInput = _runPrimaryEmailCheck;
 
-    /* ── BACKUP EMAIL checker ──
-       Checks the typed email against ALL of these on OTHER users:
-         users.emailPrimary  — another user's primary
-         users.emailBackup   — another user's backup
-         backupEmails.email  — the backupEmails index collection
-       Any match → red ✗ + fraud panel. Clean → green ✓.
-    ── */
+    /* ── BACKUP EMAIL checker — runs immediately, no debounce delays ── */
     async function _runBackupEmailCheck(){
       const raw = document.getElementById('emailBackup').value;
       const val = _normEmail(raw);
@@ -1505,96 +1499,54 @@
       clearTimeout(st.timer);
       hideFraudAlert('fraudAlertBackup');
 
-      // Empty or too short — reset
-      if(!raw.trim() || val.length < 5){
-        st.status='idle'; _setIco('icoEmailBackup','idle'); _setHint('hintEmailBackup','',''); inp.classList.remove('ok','err'); return;
-      }
-      // Invalid format — reset silently
-      if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)){
+      if(!raw.trim() || val.length < 5 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)){
         st.status='idle'; _setIco('icoEmailBackup','idle'); _setHint('hintEmailBackup','',''); inp.classList.remove('ok','err'); return;
       }
 
-      // ── Same-as-primary guard ──
+      // Same-as-primary guard — no DB needed, instant
       const primaryVal = _normEmail(document.getElementById('emailPrimary').value);
       if(primaryVal.length >= 5 && val === primaryVal){
         st.status='err'; _setIco('icoEmailBackup','err');
         _setHint('hintEmailBackup','Cannot match your sign-in email.','err');
         inp.classList.add('err'); inp.classList.remove('ok');
-        showFraudAlert('fraudAlertBackup','fraudMsgBackup',
-          'Your backup email cannot be the same as your sign-in email. Each account must use two distinct email addresses. This pattern is flagged as bot/dummy account activity.');
-        showFraudAlert('fraudAlertPrimary','fraudMsgPrimary',
-          'Your sign-in email matches the backup email entered. Both fields must be different. Please use a unique email for backup.');
+        showFraudAlert('fraudAlertBackup','fraudMsgBackup','Your backup email cannot be the same as your sign-in email. Use two different addresses.');
+        showFraudAlert('fraudAlertPrimary','fraudMsgPrimary','Your sign-in email matches the backup email. Both fields must be different.');
         return;
       }
-
-      // Clear primary fraud if it was only due to same-email match
       if(_ucheckState.emailPrimary.status !== 'err') hideFraudAlert('fraudAlertPrimary');
 
-      // ── Show spinner, then hit database ──
+      // Show spinner immediately
       st.status='checking'; _setIco('icoEmailBackup','checking');
-      _setHint('hintEmailBackup','Checking database...','checking');
+      _setHint('hintEmailBackup','Checking...','checking');
       inp.classList.remove('ok','err');
 
-      st.timer = setTimeout(async () => {
-        // If Firestore not ready yet, retry once after 1s
-        if(!window._db || !window._getDocs){
-          console.warn('Firestore not ready for backup email check, retrying...');
-          st.timer = setTimeout(() => _runBackupEmailCheck(), 1000);
-          return;
+      // Hit Firestore immediately — no setTimeout wrapper
+      try {
+        const uid = window._currentUser ? window._currentUser.uid : null;
+        const db  = window._db;
+        const [s1, s2, s3] = await Promise.all([
+          window._getDocs(window._query(window._collection(db,'users'),        window._where('emailPrimary','==',val))),
+          window._getDocs(window._query(window._collection(db,'users'),        window._where('emailBackup', '==',val))),
+          window._getDocs(window._query(window._collection(db,'backupEmails'), window._where('email',       '==',val))),
+        ]);
+        function other(s){ let t=false; s.forEach(d=>{ if(d.data().uid!==uid) t=true; }); return t; }
+        const taken = other(s1) || other(s2) || other(s3);
+        if(!taken){
+          st.status='ok'; _setIco('icoEmailBackup','ok'); _setHint('hintEmailBackup','✓ Available','ok');
+          inp.classList.add('ok'); inp.classList.remove('err'); hideFraudAlert('fraudAlertBackup');
+        } else {
+          st.status='err'; _setIco('icoEmailBackup','err');
+          _setHint('hintEmailBackup','Email already in use on another account.','err');
+          inp.classList.add('err'); inp.classList.remove('ok');
+          showFraudAlert('fraudAlertBackup','fraudMsgBackup',
+            raw.trim()+' is already registered on another T1ERA account (as primary or backup). Each email can only belong to one account. Contact t1era@proton.me if this is a mistake.');
         }
-
-        try {
-          const uid = window._currentUser ? window._currentUser.uid : null;
-
-          // Query ALL three locations simultaneously — no partial check
-          const [snapPrimary, snapBackup, snapIndex] = await Promise.all([
-            window._getDocs(window._query(
-              window._collection(window._db, 'users'),
-              window._where('emailPrimary', '==', val)
-            )),
-            window._getDocs(window._query(
-              window._collection(window._db, 'users'),
-              window._where('emailBackup', '==', val)
-            )),
-            window._getDocs(window._query(
-              window._collection(window._db, 'backupEmails'),
-              window._where('email', '==', val)
-            )),
-          ]);
-
-          // Taken = any doc that belongs to a DIFFERENT user
-          function takenByOther(snap){
-            let found = false;
-            snap.forEach(d => { if(d.data().uid !== uid) found = true; });
-            return found;
-          }
-
-          const taken = takenByOther(snapPrimary) || takenByOther(snapBackup) || takenByOther(snapIndex);
-
-          if(!taken){
-            st.status='ok';
-            _setIco('icoEmailBackup','ok');
-            _setHint('hintEmailBackup','✓ Available','ok');
-            inp.classList.add('ok'); inp.classList.remove('err');
-            hideFraudAlert('fraudAlertBackup');
-          } else {
-            st.status='err';
-            _setIco('icoEmailBackup','err');
-            _setHint('hintEmailBackup','Email already in use on another account.','err');
-            inp.classList.add('err'); inp.classList.remove('ok');
-            showFraudAlert('fraudAlertBackup','fraudMsgBackup',
-              'Our system detected that ' + raw.trim() + ' is already registered on another T1ERA account — either as a primary or backup email. Each email address can only belong to one account. If this is a mistake, contact t1era@proton.me.');
-          }
-
-        } catch(e){
-          console.error('Backup email DB check failed:', e);
-          // On error keep 'checking' spinner so user knows something is pending — do NOT silently pass
-          st.status='checking'; _setIco('icoEmailBackup','checking');
-          _setHint('hintEmailBackup','Verification failed — retrying...','checking');
-          // Retry once after 2s
-          st.timer = setTimeout(() => _runBackupEmailCheck(), 2000);
-        }
-      }, 600);
+      } catch(e){
+        console.error('Backup email check error:',e);
+        st.status='err'; _setIco('icoEmailBackup','err');
+        _setHint('hintEmailBackup','Check failed — please re-enter email.','err');
+        inp.classList.add('err'); inp.classList.remove('ok');
+      }
     }
 
     /* ── PHONE checker ── */
@@ -1655,10 +1607,13 @@
     document.getElementById('nickname').addEventListener('blur',     _onNicknameInput);
     document.getElementById('phone').addEventListener('input',       _onPhoneInput);
     document.getElementById('phone').addEventListener('blur',        _onPhoneInput);
-    document.getElementById('emailPrimary').addEventListener('input', _runPrimaryEmailCheck);
-    document.getElementById('emailPrimary').addEventListener('blur',  _runPrimaryEmailCheck);
-    document.getElementById('emailBackup').addEventListener('input',  _runBackupEmailCheck);
-    document.getElementById('emailBackup').addEventListener('blur',   _runBackupEmailCheck);
+    document.getElementById('emailPrimary').addEventListener('blur', _runPrimaryEmailCheck);
+    document.getElementById('emailBackup').addEventListener('input', function(){
+      // Small debounce on input so we wait for user to finish typing
+      clearTimeout(_ucheckState.emailBackup.timer);
+      _ucheckState.emailBackup.timer = setTimeout(_runBackupEmailCheck, 300);
+    });
+    document.getElementById('emailBackup').addEventListener('blur', _runBackupEmailCheck);
 
     // Primary is readonly — no cross-trigger needed.
     // Backup's same-email guard is checked inside _runBackupEmailCheck itself.
