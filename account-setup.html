@@ -1517,16 +1517,16 @@
       } catch(e){ console.warn('Nickname check failed:',e); st.timer = setTimeout(()=> _doNicknameQuery(val,inp,st), 1500); }
     }
 
-    const _onNicknameInput = _makeNicknameChecker();
-    const _onPhoneInput    = _makePhoneChecker();
+    const _runNicknameCheck = _makeNicknameChecker();
+    const _runPhoneCheck    = _makePhoneChecker();
 
-    document.getElementById('nickname').addEventListener('input',  _onNicknameInput);
-    document.getElementById('nickname').addEventListener('blur',   _onNicknameInput);
-    document.getElementById('nickname').addEventListener('change', _onNicknameInput);
+    document.getElementById('nickname').addEventListener('input',  _runNicknameCheck);
+    document.getElementById('nickname').addEventListener('blur',   _runNicknameCheck);
+    document.getElementById('nickname').addEventListener('change', _runNicknameCheck);
 
-    document.getElementById('phone').addEventListener('input',  _onPhoneInput);
-    document.getElementById('phone').addEventListener('blur',   _onPhoneInput);
-    document.getElementById('phone').addEventListener('change', _onPhoneInput);
+    document.getElementById('phone').addEventListener('input',  _runPhoneCheck);
+    document.getElementById('phone').addEventListener('blur',   _runPhoneCheck);
+    document.getElementById('phone').addEventListener('change', _runPhoneCheck);
 
     document.getElementById('emailBackup').addEventListener('input',  _runBackupEmailCheck);
     document.getElementById('emailBackup').addEventListener('blur',   _runBackupEmailCheck);
