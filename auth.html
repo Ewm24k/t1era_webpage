@@ -673,6 +673,9 @@
       GoogleAuthProvider, signInWithPopup, onAuthStateChanged,
       fetchSignInMethodsForEmail, getAdditionalUserInfo
     } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+    import {
+      getFirestore, doc, getDoc
+    } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
     const app = initializeApp({
       apiKey:            "AIzaSyBnt9mbb8LdMVeguSHUmS20L6uBHIfxwAs",
@@ -684,6 +687,7 @@
     });
 
     const auth = getAuth(app);
+    const db   = getFirestore(app);
     // ══════════════════════════════════════════════
     // CAPTAIN'S FIX: GOOGLE PROVIDER CONFIGURATION
     // ══════════════════════════════════════════════
@@ -700,7 +704,7 @@
 
     let isLoggingOut = false;
 
-    onAuthStateChanged(auth, user => {
+    onAuthStateChanged(auth, async user => {
       if (user) {
         document.getElementById('authF').style.display = 'none';
         const p = document.getElementById('lgdin');
@@ -721,18 +725,34 @@
         const txt = document.getElementById('redirectTxt');
 
         if (window._isNewSignup) {
-          // --- SCENARIO A: NEW USER -> SETUP ---
+          // --- SCENARIO A: BRAND NEW USER (this session) -> SETUP ---
           window._isNewSignup = false;
           txt.textContent = 'Initializing Profile...';
-          let secs = 2;
-          const interval = setInterval(() => {
-            secs--;
-            if (secs <= 0) { clearInterval(interval); window.location.href = 'account-setup.html'; }
-          }, 1000);
+          setTimeout(() => { window.location.href = 'account-setup.html'; }, 800);
+
         } else {
-          // --- SCENARIO B: RETURNING USER -> HOME ---
-          txt.textContent = 'Redirecting to Home...';
-          setTimeout(() => { window.location.href = 'home.html'; }, 1500);
+          // --- SCENARIO B: RETURNING SESSION — check Firestore before deciding ---
+          // A user might have signed up before but never finished setup.
+          // We MUST check setupCompletedAt rather than blindly going to home.html.
+          txt.textContent = 'Checking account status...';
+          try {
+            const snap = await getDoc(doc(db, 'users', user.uid));
+            if (snap.exists() && snap.data().setupCompletedAt) {
+              // Setup is done — go home
+              txt.textContent = 'Redirecting to Home...';
+              setTimeout(() => { window.location.href = 'home.html'; }, 800);
+            } else {
+              // Setup not done — send to account-setup
+              txt.textContent = 'Completing your profile...';
+              setTimeout(() => { window.location.href = 'account-setup.html'; }, 800);
+            }
+          } catch (err) {
+            // Firestore read failed (permissions/network) — fail safe to account-setup
+            // so the user is never silently locked out of onboarding
+            console.warn('Auth redirect Firestore check failed:', err);
+            txt.textContent = 'Completing your profile...';
+            setTimeout(() => { window.location.href = 'account-setup.html'; }, 800);
+          }
         }
       } else {
         document.getElementById('authF').style.display = '';
