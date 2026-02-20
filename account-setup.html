@@ -1,680 +1,1050 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="theme-color" content="#000000" />
-  <title>T1ERA — Sign In</title>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>T1ERA — Account Setup</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700;800&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
-
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web@2.1.1/src/index.js"></script>
   <style>
-    :root {
-      --bg:       #000000;
-      --bg2:      #0a0a0a;
-      --bgcard:   #111111;
-      --bginp:    #0d0d0d;
-      --bdr:      rgba(255,255,255,0.09);
-      --bdrf:     rgba(59,130,246,0.55);
-      --bdrok:    rgba(16,185,129,0.55);
-      --bdrerr:   rgba(239,68,68,0.55);
-      --txt:      #ffffff;
-      --txt2:     rgba(255,255,255,0.6);
-      --txt3:     rgba(255,255,255,0.32);
-      --blue:     #3b82f6;
-      --purple:   #8b5cf6;
-      --cyan:     #06b6d4;
-      --green:    #10b981;
-      --red:      #ef4444;
-      --amber:    #f59e0b;
-      --glow:     rgba(59,130,246,0.22);
-      --ease:     cubic-bezier(0.4,0,0.2,1);
+    :root{
+      --bg:#050508;
+      --bg2:#0c0c12;
+      --bg3:#111118;
+      --bdr:rgba(255,255,255,.07);
+      --bdrf:rgba(236,72,153,.6);
+      --bdrok:rgba(16,185,129,.5);
+      --bdrerr:rgba(239,68,68,.5);
+      --txt:#f0f0ff;
+      --txt2:rgba(240,240,255,.55);
+      --txt3:rgba(240,240,255,.25);
+      --ind:#ec4899;
+      --ind2:#a855f7;
+      --ind3:#c084fc;
+      --green:#10b981;
+      --red:#ef4444;
+      --amber:#f59e0b;
+      --ease:cubic-bezier(0.4,0,0.2,1);
+      --bouncy:cubic-bezier(0.34,1.56,0.64,1);
     }
     *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
-    html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+    html,body{min-height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);-webkit-font-smoothing:antialiased;overflow-x:hidden;}
 
-    /* BG */
-    .bgf{position:fixed;inset:0;z-index:0;pointer-events:none;}
-    .bggrid{background-image:linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px);background-size:60px 60px;}
-    .bgglow{background:radial-gradient(ellipse at 15% 15%,rgba(59,130,246,.11),transparent 55%),radial-gradient(ellipse at 85% 85%,rgba(139,92,246,.09),transparent 55%);}
+    /* ── BG ── */
+    .bg-layer{position:fixed;inset:0;z-index:0;pointer-events:none;}
+    .bg-grid{
+      background-image:
+        linear-gradient(rgba(236,72,153,.04) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(236,72,153,.04) 1px,transparent 1px);
+      background-size:48px 48px;
+    }
+    .bg-glow{
+      background:
+        radial-gradient(ellipse at 20% 10%,rgba(236,72,153,.12),transparent 50%),
+        radial-gradient(ellipse at 80% 90%,rgba(168,85,247,.09),transparent 50%),
+        radial-gradient(ellipse at 50% 50%,rgba(192,132,252,.05),transparent 60%);
+    }
+    .bg-noise{opacity:.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:200px;}
 
-    /* PARTICLES */
-    .ptw{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;}
-    .pt{position:absolute;width:2px;height:2px;background:rgba(59,130,246,.5);border-radius:50%;box-shadow:0 0 6px rgba(59,130,246,.7);animation:ptf 10s infinite ease-in-out;}
-    @keyframes ptf{0%,100%{opacity:0;transform:translate(0,0) scale(1)}10%{opacity:1}90%{opacity:1}100%{opacity:0;transform:translate(var(--tx),var(--ty)) scale(0)}}
+    /* ══════════════════════════════════════════
+       GATE SCREEN — Canva dark pink × purple × white
+    ══════════════════════════════════════════ */
+    #gateScreen{
+      position:fixed;inset:0;z-index:9999;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      gap:20px;
+      /* rich dark background with Canva-style deep purple-pink mesh */
+      background:
+        radial-gradient(ellipse at 25% 20%, rgba(168,42,120,.55) 0%, transparent 50%),
+        radial-gradient(ellipse at 75% 80%, rgba(109,40,217,.60) 0%, transparent 50%),
+        radial-gradient(ellipse at 60% 10%, rgba(219,39,119,.30) 0%, transparent 40%),
+        radial-gradient(ellipse at 10% 90%, rgba(88,28,135,.70) 0%, transparent 45%),
+        linear-gradient(135deg,#12041e 0%,#1e0533 40%,#2d0a1e 70%,#180330 100%);
+      overflow:hidden;
+    }
+    /* subtle animated noise grain overlay on gate */
+    #gateScreen::before{
+      content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.07'/%3E%3C/svg%3E");
+      background-size:180px;
+    }
+    /* floating glow orbs */
+    #gateScreen::after{
+      content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(236,72,153,.08) 0%, transparent 60%);
+      animation:gateOrbPulse 3s ease-in-out infinite;
+    }
+    @keyframes gateOrbPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.15);opacity:.6}}
 
-    /* LAYOUT */
-    .page{position:relative;z-index:1;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 16px;}
-    .card{width:100%;max-width:460px;background:var(--bgcard);border:1px solid var(--bdr);border-radius:24px;padding:40px 36px;box-shadow:0 0 0 1px rgba(59,130,246,.05),0 24px 60px rgba(0,0,0,.75),0 0 70px rgba(59,130,246,.07);animation:cardIn .5s var(--ease) both;}
-    @keyframes cardIn{from{opacity:0;transform:translateY(22px) scale(.97)}to{opacity:1;transform:none}}
+    #gateScreen.hidden{display:none;}
 
-    /* LOGO */
-    .logorow{display:flex;align-items:center;gap:12px;justify-content:center;margin-bottom:28px;text-decoration:none;}
-    .logomark{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-weight:900;font-size:15px;box-shadow:0 0 24px var(--glow);position:relative;overflow:hidden;}
-    .logomark::before{content:'';position:absolute;inset:-50%;background:linear-gradient(45deg,transparent,rgba(255,255,255,.25),transparent);animation:shine 3s linear infinite;}
-    @keyframes shine{from{transform:translateX(-100%) translateY(-100%) rotate(45deg)}to{transform:translateX(200%) translateY(200%) rotate(45deg)}}
-    .logotxt{font-family:'Orbitron',sans-serif;font-weight:900;font-size:22px;letter-spacing:.08em;background:linear-gradient(135deg,var(--blue),var(--purple),var(--cyan));background-size:200% 200%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:gs 4s ease infinite;}
-    @keyframes gs{0%,100%{background-position:0 50%}50%{background-position:100% 50%}}
+    /* everything inside gate screen sits above the pseudo overlays */
+    #gateScreen > *{position:relative;z-index:1;}
 
-    /* HEADING */
-    .hdg{text-align:center;margin-bottom:26px;}
-    .hdg h1{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:800;margin-bottom:5px;}
-    .hdg p{font-size:13px;color:var(--txt2);}
+    /* ── CANVA-STYLE TRIPLE-RING SPINNER ── */
+    .gate-spinner{
+      position:relative;
+      width:56px;height:56px;
+    }
+    .gate-spinner::before,
+    .gate-spinner::after,
+    .gate-spinner span{
+      content:'';
+      position:absolute;
+      border-radius:50%;
+      border-style:solid;
+      border-color:transparent;
+    }
+    /* outer ring — hot pink */
+    .gate-spinner::before{
+      inset:0;
+      border-width:3px;
+      border-top-color:#ec4899;
+      border-right-color:rgba(236,72,153,.3);
+      animation:gspin 1.1s linear infinite;
+    }
+    /* middle ring — soft purple */
+    .gate-spinner::after{
+      inset:9px;
+      border-width:3px;
+      border-top-color:#c084fc;
+      border-left-color:rgba(192,132,252,.25);
+      animation:gspin .8s linear infinite reverse;
+    }
+    /* inner dot — white glowing core */
+    .gate-spinner span{
+      inset:20px;
+      background:radial-gradient(circle,#fff 0%,rgba(255,255,255,.4) 50%,transparent 100%);
+      border:none;
+      animation:gateCorePulse 1.4s ease-in-out infinite;
+    }
+    @keyframes gspin{to{transform:rotate(360deg)}}
+    @keyframes gateCorePulse{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.3);opacity:.4}}
 
-    /* TABS */
-    .tabs{display:flex;background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:4px;margin-bottom:24px;gap:4px;}
-    .tab{flex:1;padding:10px;border-radius:9px;border:none;background:transparent;color:var(--txt2);font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .25s var(--ease);-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
-    .tab.on{background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;box-shadow:0 4px 16px var(--glow);}
+    /* ── STATUS TEXT ── */
+    .gate-txt{
+      font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;
+      letter-spacing:.18em;text-transform:uppercase;
+      /* white fading to soft pink */
+      background:linear-gradient(90deg,rgba(255,255,255,.9),rgba(249,168,212,.7),rgba(255,255,255,.9));
+      background-size:200% 100%;
+      -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+      animation:gateTxtShimmer 2.2s ease-in-out infinite, gtxtpulse 1.6s ease-in-out infinite;
+    }
+    @keyframes gateTxtShimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
+    @keyframes gtxtpulse{0%,100%{opacity:.55}50%{opacity:1}}
 
-    /* PANELS */
-    .panel{display:none;}
-    .panel.on{display:block;animation:fin .3s var(--ease);}
-    @keyframes fin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+    /* ── LOGO ROW ── */
+    .gate-logo{
+      display:flex;align-items:center;gap:11px;margin-bottom:4px;
+    }
+    .gate-logomark{
+      width:40px;height:40px;border-radius:11px;
+      /* Canva-style pink-to-purple gradient */
+      background:linear-gradient(135deg,#ec4899 0%,#a855f7 50%,#7c3aed 100%);
+      display:flex;align-items:center;justify-content:center;
+      font-family:'Orbitron',sans-serif;font-weight:900;font-size:13px;color:#fff;
+      box-shadow:0 0 28px rgba(236,72,153,.5), 0 0 56px rgba(168,85,247,.25);
+      animation:gateMarkGlow 2.5s ease-in-out infinite;
+    }
+    @keyframes gateMarkGlow{
+      0%,100%{box-shadow:0 0 28px rgba(236,72,153,.5),0 0 56px rgba(168,85,247,.25);}
+      50%{box-shadow:0 0 40px rgba(236,72,153,.8),0 0 80px rgba(168,85,247,.45);}
+    }
+    .gate-logotxt{
+      font-family:'Orbitron',sans-serif;font-weight:900;font-size:20px;letter-spacing:.1em;
+      /* pink → purple → white shimmer */
+      background:linear-gradient(135deg,#f9a8d4 0%,#e879f9 30%,#c084fc 60%,#ffffff 100%);
+      background-size:200% 100%;
+      -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+      animation:gateLogoShimmer 3s ease-in-out infinite;
+    }
+    @keyframes gateLogoShimmer{0%,100%{background-position:0% 0}50%{background-position:100% 0}}
 
-    /* ALERTS */
-    .alert{display:none;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:10px;font-size:13px;font-weight:500;line-height:1.5;margin-bottom:14px;}
-    .alert.on{display:flex;animation:fin .25s var(--ease);}
+    /* ── DECORATIVE PILLS below spinner ── */
+    .gate-pills{
+      display:flex;gap:8px;align-items:center;margin-top:2px;
+    }
+    .gate-pill{
+      width:6px;height:6px;border-radius:50%;
+      animation:gatePillPop 1.4s ease-in-out infinite;
+    }
+    .gate-pill:nth-child(1){background:#ec4899;animation-delay:0s;}
+    .gate-pill:nth-child(2){background:#c084fc;animation-delay:.18s;}
+    .gate-pill:nth-child(3){background:#ffffff;animation-delay:.36s;}
+    .gate-pill:nth-child(4){background:#c084fc;animation-delay:.54s;}
+    .gate-pill:nth-child(5){background:#ec4899;animation-delay:.72s;}
+    @keyframes gatePillPop{0%,100%{transform:scaleY(1);opacity:.5}50%{transform:scaleY(1.9);opacity:1}}
+
+    /* ══════════════════════════════════════════
+       SAVING SCREEN — reuses gate background + pill styles
+       unique spinner, step tracker, and fade-in/out
+    ══════════════════════════════════════════ */
+    #savingScreen{
+      position:fixed;inset:0;z-index:9998;
+      display:none; /* shown via JS */
+      flex-direction:column;align-items:center;justify-content:center;
+      gap:20px;
+      background:
+        radial-gradient(ellipse at 30% 25%,  rgba(219,39,119,.50) 0%, transparent 50%),
+        radial-gradient(ellipse at 70% 75%,  rgba(109,40,217,.58) 0%, transparent 50%),
+        radial-gradient(ellipse at 65% 15%,  rgba(168,42,120,.28) 0%, transparent 42%),
+        radial-gradient(ellipse at 15% 85%,  rgba(88,28,135,.68)  0%, transparent 44%),
+        linear-gradient(135deg,#12041e 0%,#1e0533 40%,#2d0a1e 70%,#180330 100%);
+      overflow:hidden;
+    }
+    #savingScreen::before{
+      content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.07'/%3E%3C/svg%3E");
+      background-size:180px;
+    }
+    #savingScreen::after{
+      content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
+      background:radial-gradient(circle at 50% 45%,rgba(192,132,252,.09) 0%,transparent 60%);
+      animation:gateOrbPulse 3.2s ease-in-out infinite;
+    }
+    #savingScreen.on{
+      display:flex;
+      animation:savingFadeIn .35s cubic-bezier(0.4,0,0.2,1) both;
+    }
+    #savingScreen.off{
+      animation:savingFadeOut .4s cubic-bezier(0.4,0,0.2,1) forwards;
+    }
+    @keyframes savingFadeIn{from{opacity:0}to{opacity:1}}
+    @keyframes savingFadeOut{from{opacity:1}to{opacity:0;pointer-events:none}}
+    #savingScreen > *{position:relative;z-index:1;}
+
+    /* ── SAVING SPINNER — SVG ring + pulsing core ── */
+    .saving-spinner{
+      position:relative;
+      width:64px;height:64px;
+      display:flex;align-items:center;justify-content:center;
+    }
+    .saving-spinner span{
+      position:absolute;
+      width:20px;height:20px;
+      border-radius:50%;
+      background:radial-gradient(circle,#fff 0%,rgba(249,168,212,.6) 45%,transparent 100%);
+      animation:gateCorePulse 1.5s ease-in-out infinite;
+      z-index:2;
+    }
+    .saving-ring{
+      position:absolute;inset:0;
+      width:64px;height:64px;
+    }
+    .saving-arc{
+      transform-origin:28px 28px;
+      animation:savingArcSpin 1.2s linear infinite;
+    }
+    @keyframes savingArcSpin{to{transform:rotate(360deg)}}
+
+    /* ── SAVING STATUS TEXT ── */
+    .saving-txt{
+      font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;
+      letter-spacing:.18em;text-transform:uppercase;
+      background:linear-gradient(90deg,rgba(255,255,255,.9),rgba(249,168,212,.7),rgba(255,255,255,.9));
+      background-size:200% 100%;
+      -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+      animation:gateTxtShimmer 2.2s ease-in-out infinite, gtxtpulse 1.6s ease-in-out infinite;
+    }
+
+    /* ── STEP TRACKER ── */
+    .saving-steps{
+      display:flex;flex-direction:column;gap:10px;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(236,72,153,.18);
+      border-radius:16px;
+      padding:16px 22px;
+      min-width:220px;
+    }
+    .saving-step{
+      display:flex;align-items:center;gap:10px;
+      font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;
+      color:rgba(255,255,255,.25);
+      transition:color .4s ease, transform .3s ease;
+    }
+    .saving-step.on{
+      color:rgba(255,255,255,.9);
+      transform:translateX(4px);
+    }
+    .saving-step.done{
+      color:rgba(192,132,252,.6);
+    }
+    .saving-step.done .sstep-dot{
+      background:#c084fc;
+      box-shadow:0 0 8px rgba(192,132,252,.6);
+    }
+    .sstep-dot{
+      width:7px;height:7px;border-radius:50%;flex-shrink:0;
+      background:rgba(255,255,255,.15);
+      transition:background .4s, box-shadow .4s;
+    }
+    .saving-step.on .sstep-dot{
+      background:#ec4899;
+      box-shadow:0 0 10px rgba(236,72,153,.8);
+      animation:sstepPulse .8s ease-in-out infinite;
+    }
+    @keyframes sstepPulse{0%,100%{box-shadow:0 0 10px rgba(236,72,153,.8)}50%{box-shadow:0 0 18px rgba(236,72,153,1)}}
+
+    /* ── LAYOUT ── */
+    .page{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:32px 16px 48px;}
+
+    /* ── LOGO ── */
+    .logo{display:flex;align-items:center;gap:10px;text-decoration:none;margin-bottom:32px;}
+    .logomark{width:36px;height:36px;border-radius:9px;background:linear-gradient(135deg,var(--ind),var(--ind2));display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-weight:900;font-size:12px;box-shadow:0 0 20px rgba(236,72,153,.35);}
+    .logotxt{font-family:'Orbitron',sans-serif;font-weight:900;font-size:18px;letter-spacing:.08em;background:linear-gradient(135deg,var(--ind),var(--ind2),var(--ind3));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+
+    /* ── PROGRESS BAR ── */
+    .progress-wrap{width:100%;max-width:680px;margin-bottom:28px;}
+    .progress-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+    .progress-label{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:var(--txt3);letter-spacing:.1em;text-transform:uppercase;}
+    .progress-count{font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;color:var(--ind);letter-spacing:.08em;}
+    .progress-track{height:3px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;}
+    .progress-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--ind),var(--ind2),var(--ind3));transition:width .5s var(--ease);}
+
+    /* ── STEP DOTS ── */
+    .stepdots{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:28px;}
+    .stepdot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.08);transition:all .3s var(--ease);cursor:default;}
+    .stepdot.active{background:var(--ind);border-color:var(--ind);box-shadow:0 0 10px rgba(236,72,153,.6);transform:scale(1.3);}
+    .stepdot.done{background:var(--green);border-color:var(--green);}
+
+    /* ── CARD ── */
+    .card{width:100%;max-width:680px;background:var(--bg2);border:1px solid var(--bdr);border-radius:24px;overflow:hidden;box-shadow:0 0 0 1px rgba(236,72,153,.04),0 32px 80px rgba(0,0,0,.7),0 0 60px rgba(236,72,153,.06);}
+    .card-accent{height:3px;background:linear-gradient(90deg,var(--ind),var(--ind2),var(--ind3),var(--ind));background-size:300% 100%;animation:accentFlow 4s linear infinite;}
+    @keyframes accentFlow{from{background-position:0 0}to{background-position:300% 0}}
+
+    /* ── SLIDES CONTAINER ── */
+    .slides{overflow:hidden;}
+    .slide{display:none;}
+    .slide.active{display:block;animation:slideIn .35s var(--ease) both;}
+    .slide.back-active{display:block;animation:slideInBack .35s var(--ease) both;}
+    @keyframes slideIn{from{opacity:0;transform:translateX(32px)}to{opacity:1;transform:none}}
+    @keyframes slideInBack{from{opacity:0;transform:translateX(-32px)}to{opacity:1;transform:none}}
+
+    /* ── SLIDE HEADER ── */
+    .slide-head{padding:28px 32px 0;}
+    .slide-icon{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:14px;position:relative;overflow:hidden;}
+    .slide-icon::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(236,72,153,.25),rgba(168,85,247,.15));border:1px solid rgba(236,72,153,.3);}
+    .slide-icon i{position:relative;z-index:1;font-size:22px;color:rgba(255,255,255,.85);}
+    .slide-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--txt);margin-bottom:5px;line-height:1.2;}
+    .slide-sub{font-size:13px;color:var(--txt2);line-height:1.6;margin-bottom:24px;}
+
+    /* ── FORM BODY ── */
+    .slide-body{padding:0 32px 28px;}
+
+    /* ── FIELD ── */
+    .field{margin-bottom:16px;}
+    .field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+    .flbl{font-size:11px;font-weight:700;color:var(--txt3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:7px;display:flex;align-items:center;justify-content:space-between;}
+    .fopt{font-size:10px;font-weight:600;color:var(--ind);opacity:.7;}
+    .finp{width:100%;padding:12px 14px;background:rgba(255,255,255,.03);border:1.5px solid var(--bdr);border-radius:11px;color:var(--txt);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .2s,box-shadow .2s;-webkit-appearance:none;}
+    .finp::placeholder{color:var(--txt3);}
+    .finp:focus{border-color:var(--bdrf);box-shadow:0 0 0 3px rgba(236,72,153,.1);}
+    .finp.ok{border-color:var(--bdrok);}
+    .finp.err{border-color:var(--bdrerr);}
+    select.finp{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(240,240,255,0.3)' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;}
+    select.finp option{background:#1a1a2e;color:var(--txt);}
+    textarea.finp{resize:vertical;min-height:80px;line-height:1.6;}
+
+    /* ── CHECKBOX GROUP ── */
+    .check-group{display:flex;flex-direction:column;gap:10px;margin-top:4px;}
+    .check-item{display:flex;align-items:flex-start;gap:12px;padding:13px 14px;background:rgba(255,255,255,.02);border:1.5px solid var(--bdr);border-radius:11px;cursor:pointer;transition:all .2s;user-select:none;}
+    .check-item:hover{background:rgba(236,72,153,.06);border-color:rgba(236,72,153,.25);}
+    .check-item.checked{background:rgba(236,72,153,.08);border-color:rgba(236,72,153,.4);}
+    .check-item.err-item{border-color:var(--bdrerr);}
+    .cbox{width:20px;height:20px;border-radius:6px;border:1.5px solid rgba(255,255,255,.15);background:transparent;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;transition:all .25s;font-size:12px;}
+    .check-item.checked .cbox{background:linear-gradient(135deg,var(--ind),var(--ind2));border-color:var(--ind);box-shadow:0 0 10px rgba(236,72,153,.4);}
+    .ctext{flex:1;}
+    .ctext strong{display:block;font-size:13px;font-weight:600;color:var(--txt);margin-bottom:2px;}
+    .ctext span{font-size:12px;color:var(--txt2);line-height:1.5;}
+
+    /* ── MULTI SELECT CHIPS ── */
+    .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;}
+    .chip{padding:8px 14px;border-radius:20px;border:1.5px solid var(--bdr);background:rgba(255,255,255,.02);color:var(--txt2);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;user-select:none;display:flex;align-items:center;gap:6px;}
+    .chip:hover{border-color:rgba(236,72,153,.4);color:var(--txt);}
+    .chip.sel{border-color:var(--ind);background:rgba(236,72,153,.12);color:var(--txt);box-shadow:0 0 12px rgba(236,72,153,.2);}
+    .chip-icon{font-size:15px;display:flex;align-items:center;line-height:1;}
+    .chip-icon i{font-size:15px;}
+
+    /* ── TERMS SCROLL BOX ── */
+    .terms-box{height:280px;overflow-y:auto;background:rgba(0,0,0,.3);border:1px solid var(--bdr);border-radius:12px;padding:18px 20px;font-size:12px;color:var(--txt2);line-height:1.8;margin-bottom:16px;scroll-behavior:smooth;}
+    .terms-box::-webkit-scrollbar{width:4px;}
+    .terms-box::-webkit-scrollbar-track{background:transparent;}
+    .terms-box::-webkit-scrollbar-thumb{background:rgba(236,72,153,.3);border-radius:4px;}
+    .terms-box h3{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--txt);margin:16px 0 6px;}
+    .terms-box h3:first-child{margin-top:0;}
+    .terms-box p{margin-bottom:10px;}
+    .terms-scroll-hint{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--txt3);margin-bottom:14px;}
+
+    /* ── WARNING BOX ── */
+    .warn-box{background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.25);border-radius:12px;padding:14px 16px;font-size:12px;color:#fcd34d;line-height:1.7;margin-bottom:16px;}
+    .warn-box strong{display:block;font-size:13px;font-weight:700;margin-bottom:4px;color:#fbbf24;}
+
+    /* ── ALERT ── */
+    .alert{display:none;align-items:flex-start;gap:10px;padding:11px 14px;border-radius:10px;font-size:12px;font-weight:600;line-height:1.5;margin-bottom:14px;}
+    .alert.on{display:flex;animation:fin .25s ease both;}
     .alert.err{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#fca5a5;}
     .alert.ok{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);color:#6ee7b7;}
-    .alert.warn{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);color:#fcd34d;}
-    .aico{font-size:16px;flex-shrink:0;margin-top:1px;}
+    @keyframes fin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
-    /* LOCKOUT */
-    .lockbar{display:none;padding:12px 14px;border-radius:10px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.35);color:#fca5a5;font-size:13px;font-weight:600;text-align:center;margin-bottom:14px;}
-    .lockbar.on{display:block;animation:fin .25s var(--ease);}
-
-    /* ATTEMPT DOTS */
-    .dots{display:none;align-items:center;gap:6px;margin-top:8px;justify-content:center;}
-    .dot{width:8px;height:8px;border-radius:50%;background:var(--bdr);border:1px solid rgba(255,255,255,.1);transition:background .3s;}
-    .dot.bad{background:var(--red);}
-
-    /* FIELD */
-    .field{margin-bottom:13px;}
-    .flbl{display:flex;align-items:center;justify-content:space-between;font-size:12px;font-weight:600;color:var(--txt2);margin-bottom:7px;letter-spacing:.02em;}
-    .fst{font-size:11px;}
-    .fst.ok{color:var(--green);}
-    .fst.err{color:var(--red);}
-
-    .inpw{position:relative;}
-    .iico{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:15px;pointer-events:none;opacity:.45;transition:opacity .2s;}
-    .inpw:focus-within .iico{opacity:.7;}
-    input{width:100%;padding:12px 40px 12px 40px;background:var(--bginp);border:1.5px solid var(--bdr);border-radius:10px;color:var(--txt);font-size:14px;font-family:'Inter',sans-serif;outline:none;transition:border-color .2s,box-shadow .2s;}
-    input::placeholder{color:var(--txt3);}
-    input:focus{border-color:var(--bdrf);box-shadow:0 0 0 3px rgba(59,130,246,.1);}
-    input.vld{border-color:var(--bdrok);box-shadow:0 0 0 3px rgba(16,185,129,.08);}
-    input.inv{border-color:var(--bdrerr);box-shadow:0 0 0 3px rgba(239,68,68,.08);}
-    .iend{position:absolute;right:10px;top:50%;transform:translateY(-50%);display:flex;align-items:center;gap:4px;}
-    .eye{background:none;border:none;cursor:pointer;font-size:15px;padding:4px;color:var(--txt3);transition:color .2s;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
-    .eye:hover{color:var(--txt);}
-    .ichk{font-size:15px;}
-
-    /* PASSWORD RULES */
-    .pwrules{background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;padding:12px 14px;margin-top:8px;display:none;}
-    .pwrules.on{display:block;animation:fin .2s var(--ease);}
-    .rule{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--txt3);padding:3px 0;transition:color .2s;}
-    .rule.met{color:var(--green);}
-    .rdot{width:6px;height:6px;border-radius:50%;flex-shrink:0;background:var(--txt3);transition:background .2s,box-shadow .2s;}
-    .rule.met .rdot{background:var(--green);box-shadow:0 0 6px var(--green);}
-
-    /* STRENGTH */
-    .srow{display:flex;align-items:center;gap:8px;margin-top:7px;}
-    .strk{flex:1;height:4px;border-radius:4px;background:var(--bdr);overflow:hidden;}
-    .sfill{height:100%;border-radius:4px;width:0%;transition:width .35s var(--ease),background .35s;}
-    .sword{font-size:11px;font-weight:700;min-width:44px;text-align:right;}
-
-    /* SUBMIT BTN */
-    .bsub{width:100%;padding:14px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all .3s var(--ease);box-shadow:0 4px 20px var(--glow);display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;position:relative;overflow:hidden;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
-    .bsub::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.15),transparent);}
-    .bsub:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 28px rgba(59,130,246,.42);}
-    .bsub:active:not(:disabled){transform:translateY(1px);}
-    .bsub:disabled{opacity:.55;cursor:not-allowed;}
-    .bsub .spin{width:17px;height:17px;border-radius:50%;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;animation:spin .7s linear infinite;display:none;}
-    .bsub.ld .spin{display:block;}
-    .bsub.ld .lbl{display:none;}
+    /* ── FOOTER BUTTONS ── */
+    .slide-footer{padding:0 32px 28px;display:flex;align-items:center;gap:12px;}
+    .btn-back{flex:0 0 auto;padding:12px 20px;border-radius:11px;border:1.5px solid var(--bdr);background:transparent;color:var(--txt2);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .25s;display:flex;align-items:center;gap:6px;}
+    .btn-back:hover{border-color:rgba(255,255,255,.2);color:var(--txt);}
+    .btn-back i{font-size:16px;}
+    .btn-next{flex:1;padding:13px;border-radius:11px;border:none;background:linear-gradient(135deg,var(--ind),var(--ind2));color:#fff;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all .3s var(--ease);box-shadow:0 4px 20px rgba(236,72,153,.3);display:flex;align-items:center;justify-content:center;gap:8px;position:relative;overflow:hidden;}
+    .btn-next::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.12),transparent);}
+    .btn-next:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(236,72,153,.45);}
+    .btn-next:active{transform:translateY(1px);}
+    .btn-next:disabled{opacity:.5;cursor:not-allowed;transform:none !important;}
+    .btn-next.final{background:linear-gradient(135deg,var(--green),#059669);box-shadow:0 4px 20px rgba(16,185,129,.3);}
+    .btn-next.final:hover{box-shadow:0 8px 28px rgba(16,185,129,.45);}
+    /* spinner inside btn */
+    .btn-spin{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;animation:spin .7s linear infinite;display:none;}
+    .btn-next.loading .btn-spin{display:block;}
+    .btn-next.loading .btn-lbl{display:none;}
     @keyframes spin{to{transform:rotate(360deg)}}
 
-    /* DIVIDER */
-    .dvd{display:flex;align-items:center;gap:10px;margin:16px 0;color:var(--txt3);font-size:12px;font-weight:600;}
-    .dvd::before,.dvd::after{content:'';flex:1;height:1px;background:var(--bdr);}
+    /* ── SUCCESS SCREEN ── */
+    #successScreen{display:none;padding:48px 32px;text-align:center;}
+    #successScreen.on{display:block;animation:fin .5s ease both;}
+    .success-ring{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--green),#059669);display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto 20px;box-shadow:0 0 50px rgba(16,185,129,.4);animation:rpop .6s var(--bouncy) both;}
+    @keyframes rpop{from{transform:scale(0)}to{transform:scale(1)}}
+    .success-title{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:var(--txt);margin-bottom:8px;}
+    .success-sub{font-size:14px;color:var(--txt2);line-height:1.7;margin-bottom:28px;}
+    .btn-launch{display:inline-flex;align-items:center;gap:10px;padding:14px 28px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--ind),var(--ind2));color:#fff;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;cursor:pointer;text-decoration:none;transition:all .3s;box-shadow:0 4px 20px rgba(236,72,153,.35);}
+    .btn-launch:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(236,72,153,.5);}
+    .ldot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:ldpulse 2s ease infinite;}
+    @keyframes ldpulse{0%,100%{opacity:1}50%{opacity:.3}}
 
-    /* GOOGLE BTN */
-    .bgoo{width:100%;padding:12px;border-radius:12px;border:1px solid var(--bdr);background:var(--bg2);color:var(--txt);font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .3s var(--ease);-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
-    .bgoo:hover{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.18);transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.4);}
-    .bgoo:disabled{opacity:.5;cursor:not-allowed;}
-    .bgoo svg{width:19px;height:19px;flex-shrink:0;}
-
-    /* FORGOT / BACK */
-    .forgot{display:block;text-align:right;font-size:12px;color:var(--blue);text-decoration:none;margin-top:5px;transition:opacity .2s;-webkit-tap-highlight-color:transparent;}
-    .forgot:hover{opacity:.7;}
-    .backbtn{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--blue);background:none;border:none;cursor:pointer;padding:0;margin-bottom:16px;font-family:'Inter',sans-serif;transition:opacity .2s;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
-    .backbtn:hover{opacity:.7;}
-
-    /* LOGGED IN */
-    #lgdin{display:none;text-align:center;}
-    #lgdin.on{display:block;animation:fin .4s var(--ease);}
-    .avt{width:76px;height:76px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:800;margin:0 auto 14px;border:3px solid rgba(59,130,246,.4);box-shadow:0 0 30px var(--glow);overflow:hidden;}
-    .avt img{width:100%;height:100%;object-fit:cover;}
-    .wname{font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:800;margin-bottom:4px;}
-    .wemail{font-size:13px;color:var(--txt2);margin-bottom:8px;}
-    .vbadge{display:inline-flex;align-items:center;gap:5px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);color:#6ee7b7;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;margin-bottom:24px;}
-    .blaunch{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;cursor:pointer;text-decoration:none;transition:all .3s var(--ease);box-shadow:0 4px 20px var(--glow);margin-bottom:10px;}
-    .blaunch:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(59,130,246,.5);}
-    .ldot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s ease-in-out infinite;}
-    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-    .bout{width:100%;padding:11px;border-radius:10px;border:1px solid var(--bdr);background:transparent;color:var(--txt2);font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .25s;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
-    .bout:hover{border-color:rgba(239,68,68,.5);color:#fca5a5;}
-    .bout:disabled{opacity:0.6;cursor:not-allowed;}
-
-    /* FOOTER */
-    .foot{text-align:center;font-size:11px;color:var(--txt3);margin-top:20px;line-height:1.7;}
-    .foot a{color:var(--blue);text-decoration:none;}
-    .foot a:hover{text-decoration:underline;}
-
-    @media(max-width:480px){.card{padding:28px 18px;border-radius:20px;}.hdg h1{font-size:20px;}}
-
-    /* REDIRECT SPINNER */
-    .rspinner{width:36px;height:36px;border-radius:50%;border:3px solid rgba(59,130,246,.15);border-top-color:var(--blue);border-right-color:var(--purple);animation:rspin 1s linear infinite;}
-    @keyframes rspin{to{transform:rotate(360deg)}}
-    @keyframes rtxtpulse{0%,100%{opacity:.4}50%{opacity:1}}
-
-    /* CYBERSECURITY POPUP */
-    #csPopupOverlay{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);animation:popOverIn .35s var(--ease) both;}
-    @keyframes popOverIn{from{opacity:0}to{opacity:1}}
-    #csPopupOverlay.hiding{animation:popOverOut .3s var(--ease) forwards;}
-    @keyframes popOverOut{from{opacity:1}to{opacity:0}}
-    #csPopupBox{position:relative;display:inline-flex;border:2px solid rgba(59,130,246,.4);border-radius:16px;box-shadow:0 0 0 1px rgba(59,130,246,.08),0 32px 80px rgba(0,0,0,.85),0 0 60px rgba(59,130,246,.15);overflow:hidden;max-width:calc(100vw - 32px);max-height:calc(100vh - 32px);animation:popBoxIn .4s var(--ease) .1s both;}
-    @keyframes popBoxIn{from{opacity:0;transform:scale(.93) translateY(18px)}to{opacity:1;transform:none}}
-    #csPopupBox::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--blue),var(--purple),var(--cyan));z-index:2;}
-    #csPopupImg{display:block;max-width:calc(100vw - 32px);max-height:calc(100vh - 32px);width:auto;height:auto;}
-    @media(max-width:480px){#csPopupBox{border-radius:12px;}#csPopupImg{max-width:calc(100vw - 24px);max-height:calc(100vh - 24px);}}
-    #csPopupClose{position:absolute;top:10px;right:10px;width:32px;height:32px;border-radius:50%;border:1px solid rgba(255,255,255,.15);background:rgba(0,0,0,.6);color:#fff;font-size:17px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s,border-color .2s,transform .15s;z-index:10;backdrop-filter:blur(4px);-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
-    #csPopupClose:hover{background:rgba(239,68,68,.7);border-color:rgba(239,68,68,.6);transform:scale(1.1);}
-    #csPopupClose:active{transform:scale(.95);}
-
-    /* ═══════════════════════════════════
-       HOV SECURITY
-    ═══════════════════════════════════ */
-    #hovOverlay{
-      position:fixed;inset:0;z-index:10000;
-      display:none;align-items:center;justify-content:center;
-      padding:16px;
-      background:rgba(0,0,0,.92);
-      /* ✅ FIX: removed backdrop-filter — causes tap/scroll issues on Android WebView */
-      -webkit-backdrop-filter:blur(12px);
-      backdrop-filter:blur(12px);
+    /* ══════════════════════════════════════════
+       RESPONSIVE — PC (1200px+)
+    ══════════════════════════════════════════ */
+    @media(min-width:1200px){
+      .page{padding:40px 24px 64px;}
+      .card{max-width:760px;}
+      .progress-wrap{max-width:760px;}
+      .slide-head{padding:36px 40px 0;}
+      .slide-body{padding:0 40px 32px;}
+      .slide-footer{padding:0 40px 32px;}
+      .slide-title{font-size:26px;}
+      .slide-sub{font-size:14px;}
+      .finp{font-size:15px;padding:13px 16px;}
+      .flbl{font-size:12px;}
+      .chip{font-size:13px;padding:10px 16px;}
+      .terms-box{height:320px;font-size:13px;}
+      .btn-next{font-size:16px;padding:15px;}
+      .btn-back{font-size:14px;padding:13px 22px;}
+      #successScreen{padding:60px 40px;}
+      .success-title{font-size:30px;}
+      .success-sub{font-size:15px;}
     }
-    #hovOverlay.on{display:flex;animation:hovFadeIn .4s cubic-bezier(0.4,0,0.2,1) both;}
-    @keyframes hovFadeIn{from{opacity:0}to{opacity:1}}
-    #hovBox{
-      width:100%;max-width:520px;
-      background:linear-gradient(145deg,#0c0c14,#0f0f1a);
-      border:1px solid rgba(99,102,241,.35);
-      border-radius:24px;
-      overflow:hidden;
-      box-shadow:0 0 0 1px rgba(99,102,241,.1),0 40px 100px rgba(0,0,0,.9),0 0 80px rgba(99,102,241,.15);
-      animation:hovBoxIn .45s cubic-bezier(0.4,0,0.2,1) .05s both;
-      max-height:92vh;
-      overflow-y:auto;
-      /* ✅ FIX: prevent scroll fighting on mobile */
-      -webkit-overflow-scrolling:touch;
-      overscroll-behavior:contain;
+
+    /* ══════════════════════════════════════════
+       RESPONSIVE — TABLET
+    ══════════════════════════════════════════ */
+    @media(min-width:768px) and (max-width:1199px){
+      .page{padding:32px 20px 56px;}
+      .card{max-width:680px;}
+      .progress-wrap{max-width:680px;}
+      .slide-head{padding:28px 32px 0;}
+      .slide-body{padding:0 32px 28px;}
+      .slide-footer{padding:0 32px 28px;}
+      .slide-title{font-size:22px;}
+      .chip{font-size:12px;}
+      .terms-box{height:300px;}
     }
-    @keyframes hovBoxIn{from{opacity:0;transform:scale(.94) translateY(20px)}to{opacity:1;transform:none}}
-    #hovBox::-webkit-scrollbar{width:4px;}
-    #hovBox::-webkit-scrollbar-track{background:transparent;}
-    #hovBox::-webkit-scrollbar-thumb{background:rgba(99,102,241,.3);border-radius:4px;}
-    .hov-accent{height:4px;background:linear-gradient(90deg,#6366f1,#8b5cf6,#06b6d4,#6366f1);background-size:300% 100%;animation:hovBar 3s linear infinite;}
-    @keyframes hovBar{from{background-position:0 0}to{background-position:300% 0}}
-    .hov-header{padding:22px 28px 16px;border-bottom:1px solid rgba(99,102,241,.12);}
-    .hov-brand{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
-    .hov-shield{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 0 20px rgba(99,102,241,.4);flex-shrink:0;position:relative;overflow:hidden;}
-    .hov-shield::before{content:"";position:absolute;inset:-50%;background:linear-gradient(45deg,transparent,rgba(255,255,255,.2),transparent);animation:shine 2.5s linear infinite;}
-    .hov-brandtxt{font-family:"Orbitron",sans-serif;font-size:11px;font-weight:700;letter-spacing:.12em;color:rgba(255,255,255,.4);line-height:1.3;}
-    .hov-brandtxt strong{display:block;font-size:13px;letter-spacing:.06em;background:linear-gradient(135deg,#6366f1,#a5b4fc);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
-    .hov-title{font-family:"Space Grotesk",sans-serif;font-size:19px;font-weight:800;color:#fff;margin-bottom:4px;}
-    .hov-sub{font-size:12px;color:rgba(255,255,255,.45);}
-    .hov-steps{display:flex;align-items:center;gap:0;padding:14px 28px;border-bottom:1px solid rgba(99,102,241,.1);}
-    .hov-step{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;position:relative;}
-    .hov-step:not(:last-child)::after{content:"";position:absolute;top:12px;left:calc(50% + 14px);right:calc(-50% + 14px);height:1px;background:rgba(99,102,241,.2);}
-    .hov-step.done::after{background:rgba(99,102,241,.6);}
-    .hov-snum{width:24px;height:24px;border-radius:50%;border:1.5px solid rgba(99,102,241,.3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:rgba(255,255,255,.35);background:transparent;transition:all .3s;z-index:1;}
-    .hov-step.active .hov-snum{border-color:#6366f1;color:#fff;background:linear-gradient(135deg,#6366f1,#8b5cf6);box-shadow:0 0 12px rgba(99,102,241,.5);}
-    .hov-step.done .hov-snum{border-color:#10b981;background:#10b981;color:#fff;}
-    .hov-slbl{font-size:10px;color:rgba(255,255,255,.3);font-weight:600;letter-spacing:.03em;}
-    .hov-step.active .hov-slbl{color:rgba(255,255,255,.6);}
-    .hov-step.done .hov-slbl{color:#10b981;}
-    .hov-panel{display:none;padding:20px 28px 24px;animation:hovFadeIn .3s ease both;}
-    .hov-panel.on{display:block;}
-    .hov-qlbl{font-family:"Space Grotesk",sans-serif;font-size:12px;font-weight:700;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;display:flex;align-items:center;gap:7px;}
-    .hov-qlbl span{display:inline-block;width:6px;height:6px;border-radius:50%;background:#6366f1;box-shadow:0 0 8px #6366f1;animation:pulse 1.5s ease infinite;}
-    .hov-math{background:rgba(99,102,241,.07);border:1px solid rgba(99,102,241,.2);border-radius:14px;padding:20px;text-align:center;margin-bottom:16px;}
-    .hov-mathq{font-family:"Orbitron",sans-serif;font-size:28px;font-weight:700;color:#fff;letter-spacing:.05em;text-shadow:0 0 20px rgba(99,102,241,.5);}
 
-    /* ✅ FIX: HOV inputs — unified styling, works on mobile */
-    .hov-inp{
-      width:100%;
-      padding:14px 16px;
-      background:rgba(255,255,255,.04);
-      border:1.5px solid rgba(99,102,241,.25);
-      border-radius:11px;
-      color:#fff;
-      font-family:"Space Grotesk",sans-serif;
-      font-size:20px;
-      font-weight:700;
-      text-align:center;
-      outline:none;
-      transition:border-color .2s,box-shadow .2s;
-      /* ✅ CRITICAL mobile fixes */
-      -webkit-appearance:none;
-      appearance:none;
-      -webkit-tap-highlight-color:transparent;
-      touch-action:manipulation;
-      /* larger touch target */
-      min-height:52px;
+    /* ══════════════════════════════════════════
+       RESPONSIVE — MOBILE
+    ══════════════════════════════════════════ */
+    @media(max-width:767px){
+      .page{padding:20px 12px 40px;}
+      .logo{margin-bottom:20px;}
+      .logotxt{font-size:16px;}
+      .logomark{width:30px;height:30px;font-size:10px;}
+      .progress-wrap{margin-bottom:16px;}
+      .stepdots{gap:6px;margin-bottom:16px;}
+      .stepdot{width:7px;height:7px;}
+      .card{border-radius:18px;}
+      .slide-head{padding:20px 16px 0;}
+      .slide-icon{width:40px;height:40px;font-size:19px;border-radius:11px;margin-bottom:10px;}
+      .slide-title{font-size:18px;margin-bottom:4px;}
+      .slide-sub{font-size:12px;margin-bottom:18px;}
+      .slide-body{padding:0 16px 20px;}
+      .field{margin-bottom:13px;}
+      .field-row{grid-template-columns:1fr;gap:0;}
+      .flbl{font-size:11px;margin-bottom:6px;}
+      .finp{font-size:13px;padding:11px 12px;}
+      select.finp{padding-right:32px;}
+      .chips{gap:6px;}
+      .chip{font-size:11px;padding:7px 11px;border-radius:16px;min-width:0;flex:0 0 auto;}
+      .chip-icon{font-size:13px;}
+      .check-item{padding:11px 12px;gap:10px;}
+      .cbox{width:18px;height:18px;font-size:11px;border-radius:5px;}
+      .ctext strong{font-size:12px;}
+      .ctext span{font-size:11px;}
+      .terms-box{height:220px;padding:14px;font-size:11px;}
+      .terms-box h3{font-size:12px;}
+      .terms-scroll-hint{font-size:10px;}
+      .warn-box{font-size:11px;padding:12px 13px;}
+      .warn-box strong{font-size:12px;}
+      .alert{font-size:11px;padding:10px 12px;}
+      .slide-footer{padding:0 16px 20px;gap:8px;flex-wrap:wrap;}
+      .btn-back{flex:0 0 auto;padding:11px 14px;font-size:13px;}
+      .btn-next{font-size:14px;padding:12px;}
+      #successScreen{padding:32px 16px;}
+      .success-ring{width:64px;height:64px;font-size:28px;}
+      .success-title{font-size:20px;}
+      .success-sub{font-size:13px;}
+      .btn-launch{font-size:13px;padding:12px 20px;}
     }
-    .hov-inp:focus{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.15);}
-    .hov-inp.ok{border-color:#10b981;box-shadow:0 0 0 3px rgba(16,185,129,.1);}
-    .hov-inp.bad{border-color:#ef4444;box-shadow:0 0 0 3px rgba(239,68,68,.1);}
-    /* remove mobile number spinners */
-    .hov-inp::-webkit-inner-spin-button,
-    .hov-inp::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
-    .hov-inp[type=number]{-moz-appearance:textfield;}
 
-    /* ✅ FIX: remove number spinners — they cause issues on mobile */
-    .hov-inp::-webkit-inner-spin-button,
-    .hov-inp::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
-    .hov-inp[type=number]{-moz-appearance:textfield;}
-
-    .hov-canvas{background:linear-gradient(135deg,rgba(99,102,241,.06),rgba(139,92,246,.04));border:1px solid rgba(99,102,241,.2);border-radius:14px;padding:18px 14px;min-height:120px;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:12px;margin-bottom:14px;position:relative;overflow:hidden;}
-    .hov-canvas::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 30% 50%,rgba(99,102,241,.06),transparent 60%),radial-gradient(ellipse at 70% 50%,rgba(139,92,246,.05),transparent 60%);pointer-events:none;}
-    .hov-obj{border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:26px;animation:objPop .4s cubic-bezier(0.34,1.56,0.64,1) both;filter:drop-shadow(0 4px 12px rgba(0,0,0,.5));flex-shrink:0;}
-    @keyframes objPop{from{opacity:0;transform:scale(0) rotate(-15deg)}to{opacity:1;transform:scale(1) rotate(0)}}
-
-    .hov-swatches{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
-    .hov-swatch{
-      flex:1;min-width:68px;padding:11px 6px;
-      border-radius:10px;border:2px solid transparent;
-      background:rgba(255,255,255,.04);color:#fff;
-      font-family:"Space Grotesk",sans-serif;font-size:12px;font-weight:700;
-      cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;
-      transition:all .2s;
-      /* ✅ mobile fixes */
-      -webkit-tap-highlight-color:transparent;
-      touch-action:manipulation;
-      min-height:44px; /* comfortable touch target */
+    @media(max-width:380px){
+      .page{padding:14px 8px 32px;}
+      .slide-head{padding:16px 14px 0;}
+      .slide-body{padding:0 14px 16px;}
+      .slide-footer{padding:0 14px 16px;flex-wrap:wrap;}
+      .btn-back{flex:0 0 100%;order:2;justify-content:center;}
+      .btn-next{flex:0 0 100%;order:1;}
+      .slide-title{font-size:16px;}
+      .chip{font-size:10px;padding:6px 9px;}
+      .terms-box{height:180px;}
+      .finp{font-size:12px;padding:10px 11px;}
     }
-    .hov-swatch:hover{background:rgba(255,255,255,.08);transform:translateY(-2px);}
-    .hov-swatch.sel{border-color:#6366f1;background:rgba(99,102,241,.15);box-shadow:0 0 12px rgba(99,102,241,.2);}
-    .hov-swatch .sdot{width:11px;height:11px;border-radius:50%;flex-shrink:0;}
 
-    /* ✅ FIX: counter row — bigger tap targets, no readonly on input */
-    .hov-counter{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
-    .hov-cbtn{
-      /* ✅ FIX: enlarged for comfortable mobile tap — was 42px */
-      width:52px;height:52px;
-      border-radius:12px;
-      border:1.5px solid rgba(99,102,241,.3);
-      background:rgba(99,102,241,.08);
-      color:#fff;font-size:26px;font-weight:700;
-      cursor:pointer;
-      display:flex;align-items:center;justify-content:center;
-      transition:all .2s;flex-shrink:0;
-      /* ✅ mobile fixes */
-      -webkit-tap-highlight-color:transparent;
-      touch-action:manipulation;
-      user-select:none;
-      -webkit-user-select:none;
-    }
-    .hov-cbtn:hover{background:rgba(99,102,241,.2);border-color:#6366f1;}
-    .hov-cbtn:active{transform:scale(.93);background:rgba(99,102,241,.3);}
-
-    /* ✅ FIX: counter value display — NOT an input to avoid keyboard issues */
-    .hov-cval{
-      flex:1;padding:12px;
-      background:rgba(255,255,255,.04);
-      border:1.5px solid rgba(99,102,241,.25);
-      border-radius:10px;
-      color:#fff;
-      font-family:"Orbitron",sans-serif;font-size:22px;font-weight:700;
-      text-align:center;
-      /* display-only, not editable — keyboard triggered by +/- only */
-      pointer-events:none;
-      min-height:52px;
-      display:flex;align-items:center;justify-content:center;
-    }
-    .hov-cval.ok{border-color:#10b981;}
-    .hov-cval.bad{border-color:#ef4444;}
-
-    .hov-btn{
-      width:100%;padding:14px;
-      border-radius:12px;border:none;
-      background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;
-      font-family:"Space Grotesk",sans-serif;font-size:15px;font-weight:700;
-      cursor:pointer;transition:all .3s;
-      box-shadow:0 4px 20px rgba(99,102,241,.3);
-      display:flex;align-items:center;justify-content:center;gap:8px;
-      position:relative;overflow:hidden;margin-top:4px;
-      /* ✅ mobile fixes */
-      -webkit-tap-highlight-color:transparent;
-      touch-action:manipulation;
-      min-height:50px;
-    }
-    .hov-btn::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.12),transparent);}
-    .hov-btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(99,102,241,.45);}
-    .hov-btn:active{transform:translateY(1px);}
-    .hov-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
-
-    .hov-err{display:none;align-items:center;gap:8px;padding:10px 13px;border-radius:10px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#fca5a5;font-size:12px;font-weight:600;margin-bottom:12px;}
-    .hov-err.on{display:flex;animation:hovFadeIn .25s ease both;}
-    .hov-tries{display:flex;align-items:center;justify-content:center;gap:5px;margin-top:10px;}
-    .hov-try{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.1);transition:background .3s;}
-    .hov-try.used{background:#ef4444;box-shadow:0 0 6px #ef4444;}
-
-    .hov-success{display:none;padding:32px 28px;text-align:center;}
-    .hov-success.on{display:block;animation:hovFadeIn .4s ease both;}
-    .hov-checkring{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#10b981,#059669);display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 16px;box-shadow:0 0 40px rgba(16,185,129,.4);animation:ringPop .5s cubic-bezier(0.34,1.56,0.64,1) both;}
-    @keyframes ringPop{from{transform:scale(0)}to{transform:scale(1)}}
-    .hov-stitle{font-family:"Space Grotesk",sans-serif;font-size:20px;font-weight:800;color:#fff;margin-bottom:6px;}
-    .hov-ssub{font-size:13px;color:rgba(255,255,255,.5);margin-bottom:24px;}
-
-    .hov-locked{display:none;padding:32px 28px;text-align:center;}
-    .hov-locked.on{display:block;animation:hovFadeIn .4s ease both;}
-    .hov-lockicon{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#ef4444,#dc2626);display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 16px;box-shadow:0 0 40px rgba(239,68,68,.4);animation:ringPop .5s cubic-bezier(0.34,1.56,0.64,1) both;}
-    .hov-ltitle{font-family:"Space Grotesk",sans-serif;font-size:20px;font-weight:800;color:#fca5a5;margin-bottom:6px;}
-    .hov-lsub{font-size:13px;color:rgba(255,255,255,.45);margin-bottom:8px;line-height:1.6;}
-    .hov-timer{font-family:"Orbitron",sans-serif;font-size:28px;font-weight:700;color:#ef4444;margin:12px 0;text-shadow:0 0 20px rgba(239,68,68,.4);}
-    .hov-lbtn{width:100%;padding:12px;border-radius:11px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:rgba(255,255,255,.6);font-family:"Space Grotesk",sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .25s;margin-top:8px;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
-    .hov-lbtn:hover{background:rgba(255,255,255,.08);color:#fff;}
-
-    @media(max-width:480px){
-      #hovBox{border-radius:20px;}
-      .hov-header,.hov-panel,.hov-success,.hov-locked{padding-left:18px;padding-right:18px;}
-      .hov-steps{padding-left:18px;padding-right:18px;}
-      .hov-mathq{font-size:22px;}
-      /* ✅ even bigger tap targets on small screens */
-      .hov-cbtn{width:56px;height:56px;font-size:28px;}
-      .hov-btn{padding:16px;font-size:16px;}
+    @media(hover:none){
+      .btn-next:hover{transform:none;}
+      .btn-back:hover{background:transparent;}
+      .chip:hover{transform:none;}
+      .check-item:hover{background:rgba(255,255,255,.02);border-color:var(--bdr);}
     }
   </style>
 </head>
 <body>
-  <div class="bgf bggrid"></div>
-  <div class="bgf bgglow"></div>
-  <div class="ptw" id="pts"></div>
+  <div class="bg-layer bg-grid"></div>
+  <div class="bg-layer bg-glow"></div>
+  <div class="bg-layer bg-noise"></div>
 
-  <!-- ═══════════════════════════════════
-       CYBERSECURITY IMAGE POPUP
-  ═══════════════════════════════════ -->
-
-  <!-- ═══════════════════════════════════
-       HOV SECURITY — HUMAN OVER VERIFICATION
-  ═══════════════════════════════════ -->
-  <div id="hovOverlay" role="dialog" aria-modal="true" aria-label="Human Verification">
-    <div id="hovBox">
-      <div class="hov-accent"></div>
-
-      <div class="hov-header">
-        <div class="hov-brand">
-          <div class="hov-shield">🛡️</div>
-          <div class="hov-brandtxt">
-            <strong>HOV SECURITY</strong>
-            HUMAN OVER VERIFICATION
-          </div>
-        </div>
-        <div class="hov-title">Verify You Are Human</div>
-        <div class="hov-sub">Anti-bot protection powered by T1ERA HOV Security System</div>
-      </div>
-
-      <div class="hov-steps">
-        <div class="hov-step active" id="hstep1"><div class="hov-snum">1</div><div class="hov-slbl">Math</div></div>
-        <div class="hov-step" id="hstep2"><div class="hov-snum">2</div><div class="hov-slbl">Count</div></div>
-        <div class="hov-step" id="hstep3"><div class="hov-snum">3</div><div class="hov-slbl">Colour</div></div>
-      </div>
-
-      <!-- STEP 1: MATH -->
-      <div class="hov-panel on" id="hpanel1">
-        <div class="hov-err" id="hErr1"><span>⚠️</span><span id="hErr1Txt"></span></div>
-        <div class="hov-qlbl"><span></span>Solve the equation</div>
-        <div class="hov-math">
-          <div class="hov-mathq" id="hMathQ">?</div>
-        </div>
-        <!--
-          ✅ KEY FIXES for mobile:
-          - type="text" instead of "number" (number type has mobile bugs)
-          - inputmode="numeric" → shows numeric keypad on mobile
-          - pattern="[0-9]*" → triggers numeric keyboard on iOS
-          - autocomplete="off" → prevents autofill popups blocking input
-          - enterkeyhint="done" → shows "Done" on mobile keyboard
-        -->
-        <input
-          class="hov-inp"
-          id="hMathA"
-          type="text"
-          inputmode="numeric"
-          pattern="[0-9]*"
-          placeholder="Type your answer"
-          autocomplete="off"
-          autocorrect="off"
-          autocapitalize="off"
-          spellcheck="false"
-          enterkeyhint="done"
-        />
-        <div class="hov-tries" id="hTries1"></div>
-        <button class="hov-btn" id="hMathBtn" style="margin-top:14px;">
-          Continue →
-        </button>
-      </div>
-
-      <!-- STEP 2: COUNT OBJECTS -->
-      <div class="hov-panel" id="hpanel2">
-        <div class="hov-err" id="hErr2"><span>⚠️</span><span id="hErr2Txt"></span></div>
-        <div class="hov-qlbl"><span></span>How many objects do you see?</div>
-        <div class="hov-canvas" id="hCanvas"></div>
-        <!--
-          ✅ KEY FIX: counter uses +/- buttons only.
-          The display is a div (not input) so no keyboard pops up on mobile.
-          This avoids the readonly-input-blocking-touch issue entirely.
-        -->
-        <div class="hov-counter">
-          <button class="hov-cbtn" id="hCountMinus" aria-label="Decrease">−</button>
-          <div class="hov-cval" id="hCountVal" role="status" aria-live="polite">0</div>
-          <button class="hov-cbtn" id="hCountPlus" aria-label="Increase">+</button>
-        </div>
-        <div class="hov-tries" id="hTries2"></div>
-        <button class="hov-btn" id="hCountBtn">Continue →</button>
-      </div>
-
-      <!-- STEP 3: COLOUR -->
-      <div class="hov-panel" id="hpanel3">
-        <div class="hov-err" id="hErr3"><span>⚠️</span><span id="hErr3Txt"></span></div>
-        <div class="hov-qlbl"><span></span>What colour is shown below?</div>
-        <div class="hov-canvas" id="hColCanvas" style="min-height:90px;"></div>
-        <div class="hov-swatches" id="hSwatches"></div>
-        <div class="hov-tries" id="hTries3"></div>
-        <button class="hov-btn" id="hColBtn">Verify &amp; Continue 🔓</button>
-      </div>
-
-      <!-- SUCCESS -->
-      <div class="hov-success" id="hSuccess">
-        <div class="hov-checkring">✓</div>
-        <div class="hov-stitle">Human Verified!</div>
-        <div class="hov-ssub">HOV Security clearance granted. Creating your account...</div>
-      </div>
-
-      <!-- LOCKED -->
-      <div class="hov-locked" id="hLocked">
-        <div class="hov-lockicon">🔒</div>
-        <div class="hov-ltitle">Access Temporarily Blocked</div>
-        <div class="hov-lsub">Too many failed verification attempts detected.<br>HOV Security has flagged this session as suspicious.</div>
-        <div class="hov-timer" id="hLockTimer">60</div>
-        <div class="hov-lsub" style="font-size:11px;opacity:.6;">seconds remaining before you can try again</div>
-        <button class="hov-lbtn" onclick="location.href='home.html'">🏠 Go to Home Page</button>
-        <button class="hov-lbtn" onclick="location.href='https://t.me/T1ERA_SecBot'" style="margin-top:4px;">🚀 Open Telegram Instead</button>
-      </div>
+  <!-- ══════════════════════════════════════════
+       GATE SCREEN — covers page while auth resolves
+       Hides once we confirm user is eligible to be here
+  ══════════════════════════════════════════ -->
+  <div id="gateScreen">
+    <div class="gate-logo">
+      <div class="gate-logomark">T1</div>
+      <span class="gate-logotxt">T1ERA</span>
+    </div>
+    <div class="gate-spinner"><span></span></div>
+    <div class="gate-txt" id="gateTxt">VERIFYING SESSION...</div>
+    <div class="gate-pills">
+      <div class="gate-pill"></div>
+      <div class="gate-pill"></div>
+      <div class="gate-pill"></div>
+      <div class="gate-pill"></div>
+      <div class="gate-pill"></div>
     </div>
   </div>
 
-  <div id="csPopupOverlay" role="dialog" aria-modal="true" aria-label="Cybersecurity notice">
-    <div id="csPopupBox">
-      <button id="csPopupClose" aria-label="Close popup" title="Close">&#x2715;</button>
-      <img id="csPopupImg" src="assets/cybersecurity1.png" alt="Cybersecurity Notice" draggable="false" />
+  <!-- ══════════════════════════════════════════
+       SAVING SCREEN — Canva pink/purple overlay
+       shown while Firestore is writing the profile
+  ══════════════════════════════════════════ -->
+  <div id="savingScreen">
+    <div class="gate-logo">
+      <div class="gate-logomark">T1</div>
+      <span class="gate-logotxt">T1ERA</span>
+    </div>
+    <div class="saving-spinner">
+      <span></span>
+      <svg class="saving-ring" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="28" cy="28" r="24" fill="none" stroke="rgba(236,72,153,.15)" stroke-width="3"/>
+        <circle class="saving-arc" cx="28" cy="28" r="24" fill="none" stroke="url(#savingGrad)" stroke-width="3" stroke-linecap="round" stroke-dasharray="150.8" stroke-dashoffset="113"/>
+        <defs>
+          <linearGradient id="savingGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#ec4899"/>
+            <stop offset="100%" stop-color="#c084fc"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+    <div class="saving-txt" id="savingTxt">SAVING YOUR PROFILE...</div>
+    <div class="saving-steps" id="savingSteps">
+      <div class="saving-step" id="sstep1"><span class="sstep-dot"></span>Encrypting your data</div>
+      <div class="saving-step" id="sstep2"><span class="sstep-dot"></span>Connecting to servers</div>
+      <div class="saving-step" id="sstep3"><span class="sstep-dot"></span>Writing to database</div>
+      <div class="saving-step" id="sstep4"><span class="sstep-dot"></span>Finalising profile</div>
+    </div>
+    <div class="gate-pills">
+      <div class="gate-pill"></div>
+      <div class="gate-pill"></div>
+      <div class="gate-pill"></div>
+      <div class="gate-pill"></div>
+      <div class="gate-pill"></div>
     </div>
   </div>
 
   <div class="page">
-    <div class="card">
-      <a href="home.html" class="logorow">
-        <div class="logomark">T1</div>
-        <span class="logotxt">T1ERA</span>
-      </a>
+    <a href="home.html" class="logo">
+      <div class="logomark">T1</div>
+      <span class="logotxt">T1ERA</span>
+    </a>
 
-      <!-- LOGGED IN STATE -->
-      <div id="lgdin">
-        <div class="avt" id="av"></div>
-        <div class="wname" id="wn"></div>
-        <div class="wemail" id="we"></div>
-        <div class="vbadge" id="vb">✅ Success</div>
-        <a href="https://t1era.netlify.app" class="blaunch" id="blaunchBtn">
-          <span class="ldot"></span>Continue to T1ERA
-        </a>
-        <button class="bout" id="outBtn">Sign Out</button>
-        <div id="redirectUI" style="display:none;flex-direction:column;align-items:center;gap:14px;margin-top:8px;">
-          <div class="rspinner"></div>
-          <span id="redirectTxt" style="font-size:13px;font-weight:600;color:rgba(255,255,255,.5);letter-spacing:.06em;animation:rtxtpulse 1.2s ease-in-out infinite;">Please Wait...</span>
-        </div>
+    <!-- PROGRESS -->
+    <div class="progress-wrap">
+      <div class="progress-top">
+        <span class="progress-label">Account Setup</span>
+        <span class="progress-count" id="progCount">Step 1 of 6</span>
       </div>
-
-      <!-- AUTH FORMS -->
-      <div id="authF">
-        <div class="hdg">
-          <h1>Welcome to T1ERA</h1>
-          <p>Sign in or create your account to get started</p>
-        </div>
-        <div class="tabs">
-          <button class="tab on" id="tLgn" onclick="sw('login')">Sign In</button>
-          <button class="tab" id="tSgn" onclick="sw('signup')">Create Account</button>
-        </div>
-
-        <!-- LOGIN PANEL -->
-        <div class="panel on" id="pLgn">
-          <div class="lockbar" id="lockbar"></div>
-          <div class="alert err" id="lErr"></div>
-          <div class="alert ok" id="lOk"></div>
-          <div class="field">
-            <div class="flbl">Email address<span class="fst" id="lESt"></span></div>
-            <div class="inpw">
-              <span class="iico">✉️</span>
-              <input type="email" id="lE" placeholder="you@gmail.com" autocomplete="email" oninput="chkEmail('lE','lESt')" onblur="chkEmail('lE','lESt',true)"/>
-              <div class="iend"><span class="ichk" id="lEChk"></span></div>
-            </div>
-          </div>
-          <div class="field">
-            <div class="flbl">Password</div>
-            <div class="inpw">
-              <span class="iico">🔒</span>
-              <input type="password" id="lP" placeholder="Your password" autocomplete="current-password"/>
-              <div class="iend"><button class="eye" type="button" onclick="eye('lP',this)">👁</button></div>
-            </div>
-            <a href="#" class="forgot" id="fgLink">Forgot password?</a>
-          </div>
-          <div class="dots" id="dotRow">
-            <span style="font-size:11px;color:var(--txt3)">Attempts:</span>
-            <div class="dot" id="d1"></div><div class="dot" id="d2"></div>
-            <div class="dot" id="d3"></div><div class="dot" id="d4"></div>
-            <div class="dot" id="d5"></div>
-          </div>
-          <button class="bsub" id="lBtn" onclick="doLogin()"><div class="spin"></div><span class="lbl">Sign In</span></button>
-          <div class="dvd">or</div>
-          <button class="bgoo" id="lGBtn" onclick="doGoogle('login')">
-            <svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-            Sign in with Google
-          </button>
-        </div>
-
-        <!-- SIGNUP PANEL -->
-        <div class="panel" id="pSgn">
-          <div class="alert err" id="sErr"></div>
-          <div class="alert ok" id="sOk"></div>
-          <div class="field">
-            <div class="flbl">Full name<span class="fst" id="sNSt"></span></div>
-            <div class="inpw">
-              <span class="iico">👤</span>
-              <input type="text" id="sN" placeholder="Your full name" autocomplete="name" oninput="chkName()" onblur="chkName(true)"/>
-              <div class="iend"><span class="ichk" id="sNChk"></span></div>
-            </div>
-          </div>
-          <div class="field">
-            <div class="flbl">Email address<span class="fst" id="sESt"></span></div>
-            <div class="inpw">
-              <span class="iico">✉️</span>
-              <input type="email" id="sE" placeholder="you@gmail.com" autocomplete="email" oninput="chkEmail('sE','sESt')" onblur="chkEmail('sE','sESt',true)"/>
-              <div class="iend"><span class="ichk" id="sEChk"></span></div>
-            </div>
-          </div>
-          <div class="field">
-            <div class="flbl">Password<span class="fst" id="sPSt"></span></div>
-            <div class="inpw">
-              <span class="iico">🔒</span>
-              <input type="password" id="sP" placeholder="Create a strong password" autocomplete="new-password" oninput="onPwInput()" onfocus="document.getElementById('pwr').classList.add('on')"/>
-              <div class="iend"><button class="eye" type="button" onclick="eye('sP',this)">👁</button></div>
-            </div>
-            <div class="pwrules" id="pwr">
-              <div class="rule" id="r8"><span class="rdot"></span>At least 8 characters</div>
-              <div class="rule" id="rUp"><span class="rdot"></span>One uppercase letter (A–Z)</div>
-              <div class="rule" id="rNum"><span class="rdot"></span>One number (0–9)</div>
-              <div class="rule" id="rSpc"><span class="rdot"></span>One special character (!@#$%^&amp;*)</div>
-            </div>
-            <div class="srow">
-              <div class="strk"><div class="sfill" id="sfill"></div></div>
-              <span class="sword" id="sword"></span>
-            </div>
-          </div>
-          <button class="bsub" id="sBtn" onclick="doSignup()"><div class="spin"></div><span class="lbl">Create Account</span></button>
-          <div class="dvd">or</div>
-          <button class="bgoo" id="gSignupBtn">
-            <svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-            Sign up with Google
-          </button>
-        </div>
-
-        <!-- RESET PANEL -->
-        <div class="panel" id="pRst">
-          <button class="backbtn" onclick="sw('login')">← Back to Sign In</button>
-          <div class="hdg" style="margin-bottom:16px;"><h1>Reset Password</h1><p>We'll send a reset link to your email</p></div>
-          <div class="alert err" id="rErr"></div>
-          <div class="alert ok" id="rOk"></div>
-          <div class="field">
-            <div class="flbl">Email address<span class="fst" id="rESt"></span></div>
-            <div class="inpw">
-              <span class="iico">✉️</span>
-              <input type="email" id="rE" placeholder="you@gmail.com" oninput="chkEmail('rE','rESt')" onblur="chkEmail('rE','rESt',true)"/>
-              <div class="iend"><span class="ichk" id="rEChk"></span></div>
-            </div>
-          </div>
-          <button class="bsub" id="rBtn" onclick="doReset()"><div class="spin"></div><span class="lbl">Send Reset Link</span></button>
-        </div>
-      </div>
-
-      <div class="foot">
-        By continuing you agree to T1ERA's <a href="terms.html">Terms of Service</a> and <a href="privacy.html">Privacy Policy</a>.
-      </div>
+      <div class="progress-track"><div class="progress-fill" id="progFill" style="width:16.6%"></div></div>
     </div>
+
+    <!-- STEP DOTS -->
+    <div class="stepdots" id="stepdots"></div>
+
+    <!-- CARD -->
+    <div class="card">
+      <div class="card-accent"></div>
+      <div class="slides" id="slides">
+
+        <!-- ══════════════════════════
+             SLIDE 1 — PERSONAL INFO
+        ══════════════════════════ -->
+        <div class="slide active" id="s1">
+          <div class="slide-head">
+            <div class="slide-icon"><i class="ph-bold ph-user-circle"></i></div>
+            <div class="slide-title">Tell Us About Yourself</div>
+            <div class="slide-sub">This helps us personalise your T1ERA experience and verify your identity when needed.</div>
+          </div>
+          <div class="slide-body">
+            <div class="alert err" id="s1Err"></div>
+            <div class="field-row">
+              <div class="field">
+                <div class="flbl">Full Legal Name</div>
+                <input class="finp" id="fullName" type="text" placeholder="e.g. Ahmad Zulkifli bin Rashid" autocomplete="name"/>
+              </div>
+              <div class="field">
+                <div class="flbl">Nickname / Display Name</div>
+                <input class="finp" id="nickname" type="text" placeholder="e.g. ZulAhmad, AZ99"/>
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <div class="flbl">Callsign <span class="fopt">Optional</span></div>
+                <input class="finp" id="callsign" type="text" placeholder="e.g. PHANTOM-7, BRAVO"/>
+              </div>
+              <div class="field">
+                <div class="flbl">Current Status</div>
+                <select class="finp" id="userStatus">
+                  <option value="">— Select your status —</option>
+                  <option value="student">Student</option>
+                  <option value="worker">Full-time Worker</option>
+                  <option value="freelancer">Freelancer</option>
+                  <option value="entrepreneur">Entrepreneur / Business Owner</option>
+                  <option value="military">Military / Defence</option>
+                  <option value="government">Government Officer</option>
+                  <option value="retired">Retired</option>
+                  <option value="unemployed">Currently Seeking Work</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+            </div>
+            <div class="field">
+              <div class="flbl">Date of Birth</div>
+              <input class="finp" id="dob" type="date"/>
+            </div>
+            <div class="field">
+              <div class="flbl">Country / Region</div>
+              <select class="finp" id="country">
+                <option value="">— Select country —</option>
+                <option value="MY">Malaysia</option>
+                <option value="SG">Singapore</option>
+                <option value="ID">Indonesia</option>
+                <option value="TH">Thailand</option>
+                <option value="PH">Philippines</option>
+                <option value="VN">Vietnam</option>
+                <option value="AU">Australia</option>
+                <option value="GB">United Kingdom</option>
+                <option value="US">United States</option>
+                <option value="AE">UAE</option>
+                <option value="SA">Saudi Arabia</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div class="field">
+              <div class="flbl">City / State <span class="fopt">Optional</span></div>
+              <input class="finp" id="city" type="text" placeholder="e.g. Kuala Lumpur, Selangor"/>
+            </div>
+          </div>
+          <div class="slide-footer">
+            <button class="btn-next" onclick="next(1)">
+              <span class="btn-lbl">Continue <i class="ph-bold ph-arrow-right" style="vertical-align:-2px;"></i></span>
+              <div class="btn-spin"></div>
+            </button>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════
+             SLIDE 2 — PURPOSE / WHY T1ERA
+        ══════════════════════════ -->
+        <div class="slide" id="s2">
+          <div class="slide-head">
+            <div class="slide-icon"><i class="ph-bold ph-crosshair-simple"></i></div>
+            <div class="slide-title">Why Are You Here?</div>
+            <div class="slide-sub">Select all that apply. This helps us tailor features, tools and content relevant to you.</div>
+          </div>
+          <div class="slide-body">
+            <div class="alert err" id="s2Err"></div>
+            <div class="field">
+              <div class="flbl">Primary Purpose <span class="fopt">Choose all that apply</span></div>
+              <div class="chips" id="purposeChips">
+                <div class="chip" data-val="hobby"><span class="chip-icon"><i class="ph-bold ph-game-controller"></i></span>Hobby & Gaming</div>
+                <div class="chip" data-val="work"><span class="chip-icon"><i class="ph-bold ph-briefcase"></i></span>Professional Work</div>
+                <div class="chip" data-val="business"><span class="chip-icon"><i class="ph-bold ph-trend-up"></i></span>Business & Trade</div>
+                <div class="chip" data-val="study"><span class="chip-icon"><i class="ph-bold ph-book-open"></i></span>Learning & Study</div>
+                <div class="chip" data-val="ai_tools"><span class="chip-icon"><i class="ph-bold ph-robot"></i></span>AI Tools & Automation</div>
+                <div class="chip" data-val="investment"><span class="chip-icon"><i class="ph-bold ph-currency-circle-dollar"></i></span>Investment & Finance</div>
+                <div class="chip" data-val="content"><span class="chip-icon"><i class="ph-bold ph-video-camera"></i></span>Content Creation</div>
+                <div class="chip" data-val="community"><span class="chip-icon"><i class="ph-bold ph-globe-hemisphere-west"></i></span>Community & Network</div>
+                <div class="chip" data-val="research"><span class="chip-icon"><i class="ph-bold ph-flask"></i></span>Research & Development</div>
+                <div class="chip" data-val="affiliate"><span class="chip-icon"><i class="ph-bold ph-handshake"></i></span>Affiliate & Referral</div>
+                <div class="chip" data-val="payaround"><span class="chip-icon"><i class="ph-bold ph-compass"></i></span>Explore & Play Around</div>
+                <div class="chip" data-val="crypto"><span class="chip-icon"><i class="ph-bold ph-circles-three-plus"></i></span>Crypto & Web3</div>
+                <div class="chip" data-val="security"><span class="chip-icon"><i class="ph-bold ph-shield-check"></i></span>Cybersecurity</div>
+                <div class="chip" data-val="other_purpose"><span class="chip-icon"><i class="ph-bold ph-lightning"></i></span>Other</div>
+              </div>
+            </div>
+            <div class="field" style="margin-top:20px;">
+              <div class="flbl">Industry / Field</div>
+              <select class="finp" id="industry">
+                <option value="">— Select your industry —</option>
+                <option value="tech">Technology & Software</option>
+                <option value="finance">Finance & Banking</option>
+                <option value="education">Education</option>
+                <option value="healthcare">Healthcare & Medical</option>
+                <option value="military_def">Military & Defence</option>
+                <option value="ecommerce">E-commerce & Retail</option>
+                <option value="media">Media & Entertainment</option>
+                <option value="logistics">Logistics & Supply Chain</option>
+                <option value="construction">Construction & Engineering</option>
+                <option value="agriculture">Agriculture</option>
+                <option value="creative">Creative & Design</option>
+                <option value="law">Legal & Compliance</option>
+                <option value="student_field">Student (No Industry Yet)</option>
+                <option value="other_ind">Other</option>
+              </select>
+            </div>
+            <div class="field">
+              <div class="flbl">Experience Level with AI Tools</div>
+              <select class="finp" id="aiLevel">
+                <option value="">— Select level —</option>
+                <option value="none">None — completely new to AI</option>
+                <option value="beginner">Beginner — heard about it, tried a little</option>
+                <option value="intermediate">Intermediate — use AI tools regularly</option>
+                <option value="advanced">Advanced — build or integrate AI systems</option>
+                <option value="expert">Expert — develop or research AI</option>
+              </select>
+            </div>
+          </div>
+          <div class="slide-footer">
+            <button class="btn-back" onclick="back(2)"><i class="ph-bold ph-arrow-left"></i> Back</button>
+            <button class="btn-next" onclick="next(2)">
+              <span class="btn-lbl">Continue <i class="ph-bold ph-arrow-right" style="vertical-align:-2px;"></i></span>
+              <div class="btn-spin"></div>
+            </button>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════
+             SLIDE 3 — HOW DID YOU FIND US
+        ══════════════════════════ -->
+        <div class="slide" id="s3">
+          <div class="slide-head">
+            <div class="slide-icon"><i class="ph-bold ph-broadcast"></i></div>
+            <div class="slide-title">How Did You Find T1ERA?</div>
+            <div class="slide-sub">Understanding how you discovered us helps us grow and reach more people like you.</div>
+          </div>
+          <div class="slide-body">
+            <div class="alert err" id="s3Err"></div>
+            <div class="field">
+              <div class="flbl">Discovery Source <span class="fopt">Choose all that apply</span></div>
+              <div class="chips" id="sourceChips">
+                <div class="chip" data-val="friend"><span class="chip-icon"><i class="ph-bold ph-users"></i></span>Friend / Family</div>
+                <div class="chip" data-val="telegram"><span class="chip-icon"><i class="ph-bold ph-paper-plane-tilt"></i></span>Telegram Group</div>
+                <div class="chip" data-val="whatsapp"><span class="chip-icon"><i class="ph-bold ph-chats"></i></span>WhatsApp / Chat</div>
+                <div class="chip" data-val="tiktok"><span class="chip-icon"><i class="ph-bold ph-music-notes"></i></span>TikTok</div>
+                <div class="chip" data-val="instagram"><span class="chip-icon"><i class="ph-bold ph-instagram-logo"></i></span>Instagram</div>
+                <div class="chip" data-val="youtube"><span class="chip-icon"><i class="ph-bold ph-youtube-logo"></i></span>YouTube</div>
+                <div class="chip" data-val="twitter"><span class="chip-icon"><i class="ph-bold ph-twitter-logo"></i></span>X / Twitter</div>
+                <div class="chip" data-val="facebook"><span class="chip-icon"><i class="ph-bold ph-facebook-logo"></i></span>Facebook</div>
+                <div class="chip" data-val="google_search"><span class="chip-icon"><i class="ph-bold ph-magnifying-glass"></i></span>Google Search</div>
+                <div class="chip" data-val="reddit"><span class="chip-icon"><i class="ph-bold ph-reddit-logo"></i></span>Reddit / Forum</div>
+                <div class="chip" data-val="news"><span class="chip-icon"><i class="ph-bold ph-newspaper"></i></span>News / Blog Article</div>
+                <div class="chip" data-val="event"><span class="chip-icon"><i class="ph-bold ph-calendar-star"></i></span>Event / Conference</div>
+                <div class="chip" data-val="affiliate_ref"><span class="chip-icon"><i class="ph-bold ph-link-simple"></i></span>Affiliate / Referral Link</div>
+                <div class="chip" data-val="other_src"><span class="chip-icon"><i class="ph-bold ph-lightning"></i></span>Other</div>
+              </div>
+            </div>
+            <div class="field" style="margin-top:20px;">
+              <div class="flbl">Referral Code <span class="fopt">Optional</span></div>
+              <input class="finp" id="refCode" type="text" placeholder="Enter referral code if you have one"/>
+            </div>
+            <div class="field">
+              <div class="flbl">Anything Else? <span class="fopt">Optional</span></div>
+              <textarea class="finp" id="discovery" placeholder="Tell us more about how you found T1ERA or what you heard about us..."></textarea>
+            </div>
+          </div>
+          <div class="slide-footer">
+            <button class="btn-back" onclick="back(3)"><i class="ph-bold ph-arrow-left"></i> Back</button>
+            <button class="btn-next" onclick="next(3)">
+              <span class="btn-lbl">Continue <i class="ph-bold ph-arrow-right" style="vertical-align:-2px;"></i></span>
+              <div class="btn-spin"></div>
+            </button>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════
+             SLIDE 4 — CONTACT & RECOVERY
+        ══════════════════════════ -->
+        <div class="slide" id="s4">
+          <div class="slide-head">
+            <div class="slide-icon"><i class="ph-bold ph-lock-key"></i></div>
+            <div class="slide-title">Recovery & Verification Info</div>
+            <div class="slide-sub">This information is used <strong>only</strong> for account recovery, identity verification, and affiliate payment processing. Keep it accurate.</div>
+          </div>
+          <div class="slide-body">
+            <div class="alert err" id="s4Err"></div>
+            <div class="warn-box">
+              <strong><i class="ph-bold ph-warning" style="vertical-align:-2px;margin-right:5px;"></i>Important — Please Read</strong>
+              This section collects your real contact information. It will be used when:
+              <br>• You lose access to your account and need manual verification
+              <br>• T1ERA verifies your identity for affiliate or partner status
+              <br>• Processing verified withdrawal payments
+              <br><br>
+              <strong>Providing false or fake information is a serious violation of T1ERA's Terms of Service.</strong> Any account found with fraudulent recovery details will be permanently suspended and any pending payments will be voided with no exception.
+            </div>
+            <div class="field">
+              <div class="flbl">Real Phone Number</div>
+              <input class="finp" id="phone" type="tel" placeholder="e.g. +60 12-345 6789 (with country code)"/>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <div class="flbl">Current / Primary Email</div>
+                <input class="finp" id="emailPrimary" type="email" placeholder="Your active email"/>
+              </div>
+              <div class="field">
+                <div class="flbl">Backup Email</div>
+                <input class="finp" id="emailBackup" type="email" placeholder="Different from primary"/>
+              </div>
+            </div>
+            <div class="field">
+              <div class="flbl">Preferred Contact Method</div>
+              <select class="finp" id="contactPref">
+                <option value="">— Select preference —</option>
+                <option value="telegram">Telegram</option>
+                <option value="whatsapp">WhatsApp</option>
+                <option value="email">Email</option>
+                <option value="phone">Phone Call</option>
+                <option value="sms">SMS</option>
+              </select>
+            </div>
+            <div class="field">
+              <div class="flbl">Emergency Contact Name <span class="fopt">Optional but recommended</span></div>
+              <input class="finp" id="emergencyName" type="text" placeholder="Trusted person who can verify your identity"/>
+            </div>
+            <div class="field">
+              <div class="flbl">Emergency Contact Phone <span class="fopt">Optional</span></div>
+              <input class="finp" id="emergencyPhone" type="tel" placeholder="Their phone number with country code"/>
+            </div>
+          </div>
+          <div class="slide-footer">
+            <button class="btn-back" onclick="back(4)"><i class="ph-bold ph-arrow-left"></i> Back</button>
+            <button class="btn-next" onclick="next(4)">
+              <span class="btn-lbl">Continue <i class="ph-bold ph-arrow-right" style="vertical-align:-2px;"></i></span>
+              <div class="btn-spin"></div>
+            </button>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════
+             SLIDE 5 — PREFERENCES
+        ══════════════════════════ -->
+        <div class="slide" id="s5">
+          <div class="slide-head">
+            <div class="slide-icon"><i class="ph-bold ph-sliders-horizontal"></i></div>
+            <div class="slide-title">Your Preferences</div>
+            <div class="slide-sub">Customise your T1ERA experience. You can change these anytime from your profile settings.</div>
+          </div>
+          <div class="slide-body">
+            <div class="alert err" id="s5Err"></div>
+            <div class="field">
+              <div class="flbl">Preferred Language</div>
+              <select class="finp" id="language">
+                <option value="en">English</option>
+                <option value="my">Bahasa Malaysia</option>
+                <option value="id">Bahasa Indonesia</option>
+                <option value="zh">Chinese (Simplified)</option>
+                <option value="ar">Arabic</option>
+                <option value="th">Thai</option>
+                <option value="other_lang">Other</option>
+              </select>
+            </div>
+            <div class="field">
+              <div class="flbl">Notification Preferences <span class="fopt">Choose all that apply</span></div>
+              <div class="chips" id="notifChips">
+                <div class="chip" data-val="n_updates"><span class="chip-icon"><i class="ph-bold ph-megaphone"></i></span>Platform Updates</div>
+                <div class="chip" data-val="n_security"><span class="chip-icon"><i class="ph-bold ph-shield-warning"></i></span>Security Alerts</div>
+                <div class="chip" data-val="n_news"><span class="chip-icon"><i class="ph-bold ph-newspaper"></i></span>T1ERA News</div>
+                <div class="chip" data-val="n_affiliate"><span class="chip-icon"><i class="ph-bold ph-wallet"></i></span>Affiliate Earnings</div>
+                <div class="chip" data-val="n_ai"><span class="chip-icon"><i class="ph-bold ph-cpu"></i></span>New AI Features</div>
+                <div class="chip" data-val="n_events"><span class="chip-icon"><i class="ph-bold ph-star"></i></span>Events & Webinars</div>
+              </div>
+            </div>
+            <div class="field" style="margin-top:20px;">
+              <div class="flbl">How Would You Rate Your Tech Comfort?</div>
+              <select class="finp" id="techComfort">
+                <option value="">— Select level —</option>
+                <option value="basic">Basic — I mainly use apps on my phone</option>
+                <option value="moderate">Moderate — Comfortable with computers</option>
+                <option value="advanced">Advanced — I can set up systems & tools</option>
+                <option value="developer">Developer — I write code</option>
+              </select>
+            </div>
+            <div class="field">
+              <div class="flbl">Goals With T1ERA <span class="fopt">Short description</span></div>
+              <textarea class="finp" id="goals" placeholder="e.g. I want to automate my business workflows using AI tools and build passive income through the affiliate programme..."></textarea>
+            </div>
+          </div>
+          <div class="slide-footer">
+            <button class="btn-back" onclick="back(5)"><i class="ph-bold ph-arrow-left"></i> Back</button>
+            <button class="btn-next" onclick="next(5)">
+              <span class="btn-lbl">Continue <i class="ph-bold ph-arrow-right" style="vertical-align:-2px;"></i></span>
+              <div class="btn-spin"></div>
+            </button>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════
+             SLIDE 6 — TERMS & CONDITIONS
+        ══════════════════════════ -->
+        <div class="slide" id="s6">
+          <div class="slide-head">
+            <div class="slide-icon"><i class="ph-bold ph-files"></i></div>
+            <div class="slide-title">Terms & Conditions</div>
+            <div class="slide-sub">Please read and scroll through the full terms below, then tick all three checkboxes to proceed.</div>
+          </div>
+          <div class="slide-body">
+            <div class="alert err" id="s6Err"></div>
+            <div class="alert ok" id="s6Ok"></div>
+
+            <div class="terms-scroll-hint"><i class="ph-bold ph-book-open-text" style="font-size:13px;"></i> Scroll down to read all terms before ticking</div>
+
+            <div class="terms-box" id="termsBox">
+              <h3>1. Acceptance of Terms</h3>
+              <p>By creating a T1ERA account, you agree to be legally bound by these Terms and Conditions, our Privacy Policy, and all applicable laws and regulations. If you do not agree with any part of these terms, you must not use T1ERA services.</p>
+
+              <h3>2. Account Eligibility</h3>
+              <p>You must be at least 13 years of age to use T1ERA. If you are under 18, you represent that you have your parent or guardian's permission. Accounts found to be created fraudulently or by ineligible users will be terminated without notice or refund.</p>
+
+              <h3>3. Accurate Information Obligation</h3>
+              <p>You agree to provide truthful, accurate, current, and complete information during registration and account setup. This includes your full legal name, contact details, and recovery information. Providing false or misleading information constitutes a material breach of these terms and may result in immediate account termination.</p>
+
+              <h3>4. Recovery & Verification Data</h3>
+              <p>The phone number, backup email, and emergency contact information you provide are stored securely and used exclusively for account recovery, identity verification for affiliate or partner programmes, and processing verified payments. Providing fake recovery information disqualifies you from any dispute resolution process and voids any pending transactions.</p>
+
+              <h3>5. Prohibited Activities</h3>
+              <p>You agree not to: (a) use T1ERA for any unlawful purpose; (b) attempt to bypass security measures; (c) impersonate another person or entity; (d) distribute spam, malware, or harmful content; (e) abuse affiliate or referral systems through fraudulent means; (f) engage in money laundering or financial fraud of any kind.</p>
+
+              <h3>6. Affiliate & Payment Programme</h3>
+              <p>Participation in T1ERA's affiliate or payment programmes requires a verified account with accurate personal information. Payments will only be processed to verified members. T1ERA reserves the right to withhold or void payments from accounts that cannot be verified or are found to have violated these terms. All decisions regarding payment disputes are final.</p>
+
+              <h3>7. Intellectual Property</h3>
+              <p>All content, branding, AI tools, and systems within T1ERA are proprietary. You may not copy, reproduce, or redistribute any part of the platform without explicit written permission from T1ERA.</p>
+
+              <h3>8. Limitation of Liability</h3>
+              <p>T1ERA is provided "as is" without warranties of any kind. T1ERA shall not be liable for any indirect, incidental, or consequential damages arising from your use of the platform. Your sole remedy for dissatisfaction is to discontinue use of the service.</p>
+
+              <h3>9. Privacy & Data</h3>
+              <p>Your data is handled in accordance with our Privacy Policy. We do not sell your personal information to third parties. Data collected during account setup is used solely for service delivery, verification, and improvement of T1ERA.</p>
+
+              <h3>10. Termination</h3>
+              <p>T1ERA reserves the right to suspend or terminate any account at any time for violation of these terms, suspicious activity, or for any reason at T1ERA's sole discretion. Upon termination, your right to use the service ceases immediately.</p>
+
+              <h3>11. Changes to Terms</h3>
+              <p>T1ERA may update these terms at any time. Continued use of the platform after changes constitutes your acceptance of the updated terms. We will notify you of material changes via your registered email.</p>
+
+              <h3>12. Governing Law</h3>
+              <p>These terms are governed by the laws of Malaysia. Any disputes arising from these terms shall be subject to the exclusive jurisdiction of the courts of Malaysia.</p>
+
+              <p style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,.06);color:rgba(240,240,255,.3);font-size:11px;">Last updated: February 2026 · T1ERA Platform · All Rights Reserved</p>
+            </div>
+
+            <div class="check-group">
+              <label class="check-item" id="chk1Wrap" onclick="toggleChk('chk1','chk1Wrap')">
+                <div class="cbox" id="chk1"></div>
+                <div class="ctext">
+                  <strong>I have read and agree to the Terms & Conditions</strong>
+                  <span>I confirm I have scrolled through and understood the full terms above.</span>
+                </div>
+              </label>
+              <label class="check-item" id="chk2Wrap" onclick="toggleChk('chk2','chk2Wrap')">
+                <div class="cbox" id="chk2"></div>
+                <div class="ctext">
+                  <strong>I confirm all information I provided is truthful and accurate</strong>
+                  <span>I understand that false information may result in account termination and voided payments.</span>
+                </div>
+              </label>
+              <label class="check-item" id="chk3Wrap" onclick="toggleChk('chk3','chk3Wrap')">
+                <div class="cbox" id="chk3"></div>
+                <div class="ctext">
+                  <strong>I am at least 13 years old and eligible to use T1ERA</strong>
+                  <span>If under 18, I confirm I have parental or guardian permission to create this account.</span>
+                </div>
+              </label>
+            </div>
+          </div>
+          <div class="slide-footer">
+            <button class="btn-back" onclick="back(6)"><i class="ph-bold ph-arrow-left"></i> Back</button>
+            <button class="btn-next final" id="finalBtn" onclick="next(6)">
+              <span class="btn-lbl"><i class="ph-bold ph-check-circle" style="font-size:16px;vertical-align:-2px;margin-right:4px;"></i>Agree & Complete Setup</span>
+              <div class="btn-spin"></div>
+            </button>
+          </div>
+        </div>
+
+      </div><!-- /slides -->
+
+      <!-- SUCCESS SCREEN -->
+      <div id="successScreen">
+        <div class="success-ring"><i class="ph-bold ph-confetti"></i></div>
+        <div class="success-title">You're All Set!</div>
+        <div class="success-sub" id="successMsg">
+          Welcome to T1ERA. Your profile has been saved successfully.<br>
+          Your account is now active and ready to use.
+        </div>
+        <a href="https://t1era.netlify.app/" class="btn-launch">
+          <span class="ldot"></span> Continue to T1ERA
+        </a>
+      </div>
+
+    </div><!-- /card -->
   </div>
 
   <!-- ═══════════════════════════════════
-       FIREBASE MODULE (FINAL PRO VERSION + AUTO REDIRECT)
+       FIREBASE SDK (Module)
   ═══════════════════════════════════ -->
   <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+    import { initializeApp }        from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
     import {
-      getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
-      signOut, sendPasswordResetEmail, updateProfile,
-      GoogleAuthProvider, signInWithPopup, onAuthStateChanged,
-      fetchSignInMethodsForEmail, getAdditionalUserInfo
-    } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-    import {
-      getFirestore, doc, getDoc
+      getFirestore,
+      doc,
+      getDoc,
+      setDoc,
+      serverTimestamp
     } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
     const app = initializeApp({
@@ -688,411 +1058,470 @@
 
     const auth = getAuth(app);
     const db   = getFirestore(app);
-    // ══════════════════════════════════════════════
-    // CAPTAIN'S FIX: GOOGLE PROVIDER CONFIGURATION
-    // ══════════════════════════════════════════════
-    const gp = new GoogleAuthProvider();
-    gp.setCustomParameters({ prompt: 'select_account' });
 
-    window._auth = auth;
-    window._gp   = gp;
-    window._fb   = {
-      createUserWithEmailAndPassword, signInWithEmailAndPassword,
-      signOut, sendPasswordResetEmail, updateProfile,
-      signInWithPopup, fetchSignInMethodsForEmail, getAdditionalUserInfo
-    };
+    // Make db & helpers available globally so the vanilla JS below can call them
+    window._db             = db;
+    window._doc            = doc;
+    window._setDoc         = setDoc;
+    window._serverTimestamp = serverTimestamp;
 
-    let isLoggingOut = false;
+    // ══════════════════════════════════════════════════
+    // GATEKEEPER — mirrors the logic in auth.html
+    //
+    // CASE 1: Not logged in  →  redirect to auth.html
+    // CASE 2: Logged in + setup already done  →  redirect to home.html
+    // CASE 3: Logged in + setup NOT done  →  stay here, reveal page
+    // ══════════════════════════════════════════════════
+    const gateScreen = document.getElementById('gateScreen');
+    const gateTxt    = document.getElementById('gateTxt');
 
-    onAuthStateChanged(auth, async user => {
-      if (user) {
-        document.getElementById('authF').style.display = 'none';
-        const p = document.getElementById('lgdin');
-        p.classList.add('on');
-        const av = document.getElementById('av');
-        av.innerHTML = user.photoURL
-          ? `<img src="${user.photoURL}" alt="av" referrerpolicy="no-referrer">`
-          : (user.displayName||user.email||'U')[0].toUpperCase();
-        document.getElementById('wn').textContent = user.displayName || 'T1ERA User';
-        document.getElementById('we').textContent = user.email || '';
-        const vb = document.getElementById('vb');
-        vb.textContent = '✅ Success';
-        vb.style.color = '';
-
-        document.getElementById('blaunchBtn').style.display = 'none';
-        document.getElementById('outBtn').style.display = 'none';
-        document.getElementById('redirectUI').style.display = 'flex';
-        const txt = document.getElementById('redirectTxt');
-
-        if (window._isNewSignup) {
-          // --- SCENARIO A: BRAND NEW USER (this session) -> SETUP ---
-          window._isNewSignup = false;
-          txt.textContent = 'Initializing Profile...';
-          setTimeout(() => { window.location.href = 'account-setup.html'; }, 800);
-
-        } else {
-          // --- SCENARIO B: RETURNING SESSION — check Firestore before deciding ---
-          // A user might have signed up before but never finished setup.
-          // We MUST check setupCompletedAt rather than blindly going to home.html.
-          txt.textContent = 'Checking account status...';
-          try {
-            const snap = await getDoc(doc(db, 'users', user.uid));
-            if (snap.exists() && snap.data().setupCompletedAt) {
-              // Setup is done — go home
-              txt.textContent = 'Redirecting to Home...';
-              setTimeout(() => { window.location.href = 'home.html'; }, 800);
-            } else {
-              // Setup not done — send to account-setup
-              txt.textContent = 'Completing your profile...';
-              setTimeout(() => { window.location.href = 'account-setup.html'; }, 800);
-            }
-          } catch (err) {
-            // Firestore read failed (permissions/network) — fail safe to account-setup
-            // so the user is never silently locked out of onboarding
-            console.warn('Auth redirect Firestore check failed:', err);
-            txt.textContent = 'Completing your profile...';
-            setTimeout(() => { window.location.href = 'account-setup.html'; }, 800);
-          }
-        }
-      } else {
-        document.getElementById('authF').style.display = '';
-        document.getElementById('lgdin').classList.remove('on');
-        if (isLoggingOut) {
-          setTimeout(() => {
-            const ok = document.getElementById('lOk');
-            ok.innerHTML = '<span class="aico">✅</span><span>Securely signed out.</span>';
-            ok.className = 'alert ok on';
-            isLoggingOut = false;
-          }, 50);
-        }
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        // ── CASE 1: Not authenticated ──
+        gateTxt.textContent = 'REDIRECTING TO SIGN IN...';
+        setTimeout(() => { window.location.href = 'auth.html'; }, 800);
+        return;
       }
-    });
 
-    document.getElementById('outBtn').addEventListener('click', async () => {
-      const btn = document.getElementById('outBtn');
-      btn.disabled = true;
-      btn.textContent = 'Disconnecting...';
-      isLoggingOut = true;
-      try { await window._fb.signOut(window._auth); }
-      catch (e) { console.error("Sign out failed", e); isLoggingOut = false; }
-      finally { btn.disabled = false; btn.textContent = 'Sign Out'; }
+      // User is authenticated — check if setup is already completed
+      try {
+        const snap = await getDoc(doc(db, 'users', user.uid));
+
+        if (snap.exists() && snap.data().setupCompletedAt) {
+          // ── CASE 2: Setup already done — send to home ──
+          gateTxt.textContent = 'SETUP COMPLETE — REDIRECTING...';
+          setTimeout(() => { window.location.href = 'home.html'; }, 800);
+          return;
+        }
+      } catch (err) {
+        // Firestore read failed (network, permissions, etc.)
+        // Don't block the user — let them proceed with setup
+        console.warn('Gatekeeper Firestore check failed:', err);
+      }
+
+      // ── CASE 3: Authenticated, setup incomplete — reveal the page ──
+      window._currentUser = user;
+
+      // Pre-fill primary email from Google account if blank
+      const epInp = document.getElementById('emailPrimary');
+      if (epInp && !epInp.value && user.email) epInp.value = user.email;
+
+      // Dismiss the gate screen with a smooth fade
+      gateScreen.style.transition = 'opacity 0.4s ease';
+      gateScreen.style.opacity    = '0';
+      setTimeout(() => gateScreen.classList.add('hidden'), 420);
     });
   </script>
 
   <!-- ═══════════════════════════════════
-       UI + VALIDATION SCRIPT (FINAL VERSION)
+       UI + NAVIGATION + SUBMISSION
   ═══════════════════════════════════ -->
   <script>
-    /* PARTICLES */
-    const ptw = document.getElementById('pts');
-    for(let i=0;i<30;i++){
-      const p=document.createElement('div'); p.className='pt';
-      p.style.left=Math.random()*100+'%'; p.style.top=Math.random()*100+'%';
-      p.style.setProperty('--tx',(Math.random()-.5)*280+'px');
-      p.style.setProperty('--ty',(Math.random()-.5)*280+'px');
-      p.style.animationDelay=Math.random()*10+'s';
-      p.style.animationDuration=(8+Math.random()*6)+'s';
-      ptw.appendChild(p);
+    const TOTAL   = 6;
+    let current   = 1;
+    let goingBack = false;
+
+    /* ── CHIP TOGGLE ── */
+    document.querySelectorAll('.chips').forEach(group => {
+      group.querySelectorAll('.chip').forEach(chip => {
+        chip.addEventListener('click', () => chip.classList.toggle('sel'));
+      });
+    });
+
+    /* ── CHECKBOX TOGGLE ── */
+    window.toggleChk = function(boxId, wrapId){
+      const box  = document.getElementById(boxId);
+      const wrap = document.getElementById(wrapId);
+      const on   = wrap.classList.toggle('checked');
+      box.textContent = on ? '✓' : '';
+      wrap.classList.remove('err-item');
+    };
+
+    /* ── STEP DOTS ── */
+    function renderDots(){
+      const c = document.getElementById('stepdots');
+      c.innerHTML = '';
+      for(let i = 1; i <= TOTAL; i++){
+        const d = document.createElement('div');
+        d.className = 'stepdot' + (i === current ? ' active' : i < current ? ' done' : '');
+        c.appendChild(d);
+      }
     }
 
-    /* BRUTE FORCE PROTECTION */
-    const MAX=5, LOCK_S=60;
-    let fails=+(sessionStorage.getItem('t1f')||'0');
-    let lockTil=+(sessionStorage.getItem('t1l')||'0');
-    let lockTmr=null;
-    const locked=()=>Date.now()<lockTil;
-    function markFail(){fails++;sessionStorage.setItem('t1f',fails);updDots();if(fails>=MAX){lockTil=Date.now()+LOCK_S*1000;sessionStorage.setItem('t1l',lockTil);startLock();}}
-    function markOk(){fails=0;lockTil=0;sessionStorage.removeItem('t1f');sessionStorage.removeItem('t1l');updDots();}
-    function updDots(){for(let i=1;i<=5;i++){const d=document.getElementById('d'+i);if(!d)return;d.classList.remove('bad');if(i<=fails)d.classList.add('bad');}document.getElementById('dotRow').style.display=(fails>0&&!locked())?'flex':'none';}
-    function startLock(){clearInterval(lockTmr);const bar=document.getElementById('lockbar');const lb=document.getElementById('lBtn');const gb=document.getElementById('lGBtn');lockTmr=setInterval(()=>{const rem=Math.ceil((lockTil-Date.now())/1000);if(rem<=0){clearInterval(lockTmr);bar.classList.remove('on');lb.disabled=gb.disabled=false;fails=0;sessionStorage.removeItem('t1f');sessionStorage.removeItem('t1l');updDots();}else{bar.textContent=`🔒 Too many failed attempts. Please wait ${rem}s before trying again.`;bar.classList.add('on');lb.disabled=gb.disabled=true;}},500);}
-    if(locked())startLock();
-    updDots();
+    /* ── PROGRESS ── */
+    function updateProgress(n){
+      document.getElementById('progFill').style.width = ((n / TOTAL) * 100) + '%';
+      document.getElementById('progCount').textContent = `Step ${n} of ${TOTAL}`;
+    }
 
-    /* EMAIL VALIDATION */
-    const EMAIL_RE=/^(?!.*\.\.)(?!^\.)([a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*)@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/;
-    const TYPOS={'gmai.com':'gmail.com','gmial.com':'gmail.com','gmal.com':'gmail.com','gamil.com':'gmail.com','gnail.com':'gmail.com','gmail.co':'gmail.com','gmailc.om':'gmail.com','gmail.cm':'gmail.com','gmaill.com':'gmail.com','hotmal.com':'hotmail.com','hotmial.com':'hotmail.com','hotmail.co':'hotmail.com','hotmai.com':'hotmail.com','yahooo.com':'yahoo.com','yaho.com':'yahoo.com','yahoo.co':'yahoo.com','yhoo.com':'yahoo.com','outlok.com':'outlook.com','outloo.com':'outlook.com','outllok.com':'outlook.com','iclod.com':'icloud.com','icoud.com':'icloud.com','iclould.com':'icloud.com'};
-    const CHK={lE:'lEChk',sE:'sEChk',rE:'rEChk'};
-    function chkEmail(inpId,stId,blur=false){const inp=document.getElementById(inpId);const st=document.getElementById(stId);const chk=document.getElementById(CHK[inpId]||'');const val=inp.value.trim();if(!val){inp.className='';st.textContent='';if(chk)chk.textContent='';return false;}const dom=val.split('@')[1]?.toLowerCase();const fix=dom&&TYPOS[dom];if(fix){inp.className='inv';st.className='fst err';st.textContent=`Did you mean @${fix}?`;if(chk)chk.textContent='⚠️';return false;}if(!EMAIL_RE.test(val)){if(blur||val.length>7){inp.className='inv';st.className='fst err';st.textContent='Invalid email format';if(chk)chk.textContent='❌';}return false;}inp.className='vld';st.className='fst ok';st.textContent='✓ Looks good';if(chk)chk.textContent='✅';return true;}
-    window.chkEmail=chkEmail;
+    /* ── ALERTS ── */
+    function showErr(id, msg){
+      const el = document.getElementById(id);
+      el.innerHTML = '<i class="ph-bold ph-warning" style="vertical-align:-2px;margin-right:5px;"></i>' + msg;
+      el.className = 'alert err on';
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    function clrErr(id){ document.getElementById(id).className = 'alert err'; }
 
-    /* NAME */
-    function chkName(blur=false){const inp=document.getElementById('sN');const st=document.getElementById('sNSt');const chk=document.getElementById('sNChk');const val=inp.value.trim();if(!val){inp.className='';st.textContent='';chk.textContent='';return false;}if(/<[^>]*>/.test(val)||/[<>;"'`]/.test(val)){inp.className='inv';st.className='fst err';st.textContent='Invalid characters';chk.textContent='❌';return false;}if(val.length<2){if(blur){inp.className='inv';st.className='fst err';st.textContent='Too short';chk.textContent='❌';}return false;}inp.className='vld';st.className='fst ok';st.textContent='✓';chk.textContent='✅';return true;}
-    window.chkName=chkName;
+    /* ── VALIDATION ── */
+    function validate(n){
+      clrErr('s' + n + 'Err');
 
-    /* PASSWORD RULES */
-    const RULES=[{id:'r8',fn:v=>v.length>=8},{id:'rUp',fn:v=>/[A-Z]/.test(v)},{id:'rNum',fn:v=>/[0-9]/.test(v)},{id:'rSpc',fn:v=>/[!@#$%^&*()\-_=+\[\]{};:'"\\|,.<>/?`~]/.test(v)}];
-    const STR=[{w:'0%',bg:'transparent',lbl:'',c:'var(--txt3)'},{w:'25%',bg:'#ef4444',lbl:'Weak',c:'#ef4444'},{w:'50%',bg:'#f97316',lbl:'Fair',c:'#f97316'},{w:'75%',bg:'#eab308',lbl:'Good',c:'#eab308'},{w:'100%',bg:'#10b981',lbl:'Strong',c:'#10b981'}];
-    function onPwInput(){const val=document.getElementById('sP').value;let met=0;RULES.forEach(r=>{const ok=r.fn(val);if(ok)met++;const el=document.getElementById(r.id);el.className='rule '+(ok?'met':'');});const s=STR[met];document.getElementById('sfill').style.width=s.w;document.getElementById('sfill').style.background=s.bg;document.getElementById('sword').textContent=s.lbl;document.getElementById('sword').style.color=s.c;const inp=document.getElementById('sP');const st=document.getElementById('sPSt');inp.className=val.length===0?'':(met===4?'vld':'inv');if(val.length>0){st.className='fst '+(met===4?'ok':'err');st.textContent=met===4?'✓ Strong':`${met}/4 rules`;}else st.textContent='';}
-    window.onPwInput=onPwInput;
-
-    /* HELPERS */
-    function setLd(id,on){const b=document.getElementById(id);b.disabled=on;b.classList.toggle('ld',on);}
-    function showA(id,msg,type){const e=document.getElementById(id);const ico=type==='err'?'⚠️':type==='ok'?'✅':'ℹ️';e.innerHTML=`<span class="aico">${ico}</span><span>${msg}</span>`;e.className=`alert ${type} on`;}
-    function clrA(id){document.getElementById(id).className='alert';}
-    function eye(id,btn){const i=document.getElementById(id);i.type=i.type==='password'?'text':'password';btn.textContent=i.type==='password'?'👁':'🙈';}
-    window.eye=eye;
-    function sanitize(v){return v.replace(/<[^>]*>/g,'').replace(/[<>;"'`]/g,'').trim();}
-    function fbMsg(code){const m={'auth/user-not-found':'No account found. Please sign up first.','auth/wrong-password':'Incorrect password.','auth/invalid-credential':'Email or password is incorrect.','auth/email-already-in-use':'Email already registered. Sign in instead.','auth/weak-password':'Password too weak.','auth/invalid-email':'Invalid email address.','auth/too-many-requests':'Account temporarily locked.','auth/network-request-failed':'Network error. Check connection.'};return m[code]||'Authentication failed. Please try again.';}
-
-    /* TAB SWITCH */
-    function sw(tab){['tLgn','tSgn'].forEach(t=>document.getElementById(t)?.classList.remove('on'));['pLgn','pSgn','pRst'].forEach(p=>document.getElementById(p)?.classList.remove('on'));if(tab==='login'){document.getElementById('tLgn').classList.add('on');document.getElementById('pLgn').classList.add('on');}if(tab==='signup'){document.getElementById('tSgn').classList.add('on');document.getElementById('pSgn').classList.add('on');}if(tab==='reset'){document.getElementById('pRst').classList.add('on');}}
-    window.sw=sw;
-    document.getElementById('fgLink').addEventListener('click',e=>{e.preventDefault();const v=document.getElementById('lE').value.trim();if(v)document.getElementById('rE').value=v;sw('reset');});
-
-    /* LOGIN */
-    async function doLogin(){clrA('lErr');clrA('lOk');if(locked())return;const email=sanitize(document.getElementById('lE').value);const pass=document.getElementById('lP').value;if(!chkEmail('lE','lESt',true)){showA('lErr','Valid email required.','err');return;}if(!pass){showA('lErr','Password required.','err');return;}setLd('lBtn',true);try{
-        // NO VERIFICATION CHECK — just sign in
-        await window._fb.signInWithEmailAndPassword(window._auth,email,pass);markOk();showA('lOk','Welcome back!','ok');}catch(err){markFail();showA('lErr',fbMsg(err.code),'err');setLd('lBtn',false);}}
-    window.doLogin=doLogin;
-
-    /* SIGNUP */
-    async function doSignup(){clrA('sErr');clrA('sOk');const name=sanitize(document.getElementById('sN').value);const email=sanitize(document.getElementById('sE').value);const pass=document.getElementById('sP').value;let ok=true;if(!chkName(true))ok=false;if(!chkEmail('sE','sESt',true))ok=false;const allRules=RULES.every(r=>r.fn(pass));if(!allRules){document.getElementById('sP').className='inv';document.getElementById('pwr').classList.add('on');ok=false;}if(!ok){showA('sErr','Please fix the errors above.','err');return;}setLd('sBtn',true);openHov(async function(){await doSignupFirebase(name,email,pass);});}
-    window.doSignup=doSignup;
-
-    async function doSignupFirebase(name,email,pass){try{const methods=await window._fb.fetchSignInMethodsForEmail(window._auth,email);if(methods.length>0){showA('sErr','Email already registered. <a href="#" onclick="sw(\'login\');return false;" style="color:var(--blue)">Sign in →</a>','err');setLd('sBtn',false);return;}}catch(e){}try{const cred=await window._fb.createUserWithEmailAndPassword(window._auth,email,pass);await window._fb.updateProfile(cred.user,{displayName:name});window._isNewSignup=true;}catch(err){showA('sErr',fbMsg(err.code),'err');setLd('sBtn',false);}}
-
-    /* GOOGLE AUTH */
-    async function doGoogle(mode){clrA('lErr');if(locked())return;const btnId=mode==='login'?'lGBtn':'gSignupBtn';const btn=document.getElementById(btnId);if(btn){btn.style.opacity='0.6';btn.style.pointerEvents='none';}try{const result=await window._fb.signInWithPopup(window._auth,window._gp);const info=window._fb.getAdditionalUserInfo(result);if(mode==='login'&&info.isNewUser){await window._fb.signOut(window._auth);markFail();showA('lErr','No account found. <a href="#" onclick="sw(\'signup\');" style="color:var(--blue)">Sign up first →</a>','err');return;}if(mode==='signup'&&info.isNewUser){window._isNewSignup=true;}markOk();}catch(err){console.error("Google Auth Crash Handler:",err);if(err.message&&(err.message.includes('closed')||err.message.includes('blocked')||err.message.includes('Assertion'))){showA(mode==='login'?'lErr':'sErr','Browser blocked the popup. Please try again.','warn');}else{showA(mode==='login'?'lErr':'sErr',fbMsg(err.code),'err');}}finally{if(btn){btn.style.opacity='';btn.style.pointerEvents='';}}}
-    window.doGoogle=doGoogle;
-
-    /* RESET */
-    async function doReset(){clrA('rErr');clrA('rOk');const email=sanitize(document.getElementById('rE').value);if(!chkEmail('rE','rESt',true)){showA('rErr','Valid email required.','err');return;}setLd('rBtn',true);try{await window._fb.sendPasswordResetEmail(window._auth,email);showA('rOk','Reset link sent to your email.','ok');}catch(err){showA('rErr',fbMsg(err.code),'err');}setLd('rBtn',false);}
-    window.doReset=doReset;
-
-    /* ENTER KEY */
-    document.addEventListener('keydown',e=>{if(e.key!=='Enter')return;if(document.getElementById('pLgn').classList.contains('on'))doLogin();if(document.getElementById('pSgn').classList.contains('on'))doSignup();if(document.getElementById('pRst').classList.contains('on'))doReset();});
-
-    /* ═══════════════════════════════════
-       HOV SECURITY SYSTEM — MOBILE FIXED
-    ═══════════════════════════════════ */
-    (function(){
-      const STEP_MAX_TRIES=3, LOCK_SECONDS=60;
-      let hovStep=1, stepTries={1:0,2:0,3:0}, hovData={}, hovCallback=null, lockTimer=null;
-      // ✅ counter value stored in JS, not in a readonly input
-      let countVal = 0;
-
-      const OBJS=['🔴','🟠','🟡','🟢','🔵','🟣','⚫','⚪','🟤','★','◆','▲','●','■','♦','✦','❋','⬟'];
-      const COLOURS=[
-        {name:'Red',hex:'#ef4444'},{name:'Blue',hex:'#3b82f6'},{name:'Green',hex:'#10b981'},
-        {name:'Yellow',hex:'#eab308'},{name:'Purple',hex:'#8b5cf6'},{name:'Orange',hex:'#f97316'},
-        {name:'Cyan',hex:'#06b6d4'},{name:'Pink',hex:'#ec4899'}
-      ];
-      function rnd(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
-
-      function genMath(){
-        const op=['+','-'][rnd(0,1)];
-        let a,b;
-        if(op==='+'){a=rnd(1,49);b=rnd(1,49);}else{a=rnd(10,99);b=rnd(1,a);}
-        hovData.mathAns=op==='+'?a+b:a-b;
-        document.getElementById('hMathQ').textContent=`${a} ${op} ${b} = ?`;
-        const inp=document.getElementById('hMathA');
-        inp.value='';
-        inp.className='hov-inp';
-        inp.removeAttribute('disabled');
+      if(n === 1){
+        if(!document.getElementById('fullName').value.trim())
+          return showErr('s1Err','Full legal name is required.'), false;
+        if(!document.getElementById('nickname').value.trim())
+          return showErr('s1Err','Nickname / Display Name is required.'), false;
+        if(!document.getElementById('userStatus').value)
+          return showErr('s1Err','Please select your current status.'), false;
+        if(!document.getElementById('dob').value)
+          return showErr('s1Err','Date of birth is required.'), false;
+        if(!document.getElementById('country').value)
+          return showErr('s1Err','Please select your country.'), false;
+        return true;
       }
 
-      function genObjects(){
-        const count=rnd(3,12); hovData.objCount=count;
-        const c=document.getElementById('hCanvas'); c.innerHTML='';
-        // ✅ reset counter display
-        countVal=0;
-        updateCountDisplay('hov-cval');
-        for(let i=0;i<count;i++){
-          const el=document.createElement('div'); el.className='hov-obj';
-          el.textContent=OBJS[rnd(0,OBJS.length-1)]; el.style.fontSize=rnd(28,42)+'px';
-          el.style.animationDelay=(i*0.06)+'s'; c.appendChild(el);
-        }
+      if(n === 2){
+        const sel = document.querySelectorAll('#purposeChips .chip.sel');
+        if(sel.length === 0)
+          return showErr('s2Err','Please select at least one purpose.'), false;
+        if(!document.getElementById('industry').value)
+          return showErr('s2Err','Please select your industry.'), false;
+        if(!document.getElementById('aiLevel').value)
+          return showErr('s2Err','Please select your AI experience level.'), false;
+        return true;
       }
 
-      function genColour(){
-        const opts=[...COLOURS].sort(()=>Math.random()-.5);
-        const cor=opts[0]; hovData.colourAnswer=cor.name; hovData.selectedColour=null;
-        const cc=document.getElementById('hColCanvas'); cc.innerHTML=''; cc.style.background=cor.hex;
-        const sw=document.getElementById('hSwatches'); sw.innerHTML='';
-        opts.slice(0,4).sort(()=>Math.random()-.5).forEach(c=>{
-          const b=document.createElement('button'); b.className='hov-swatch';
-          b.innerHTML=`<span class="sdot" style="background:${c.hex}"></span>${c.name}`;
-          // ✅ use addEventListener instead of onclick for better mobile support
-          b.addEventListener('touchstart',function(e){e.preventDefault();selectSwatch(b,c.name);},{passive:false});
-          b.addEventListener('click',function(){selectSwatch(b,c.name);});
-          sw.appendChild(b);
+      if(n === 3){
+        const sel = document.querySelectorAll('#sourceChips .chip.sel');
+        if(sel.length === 0)
+          return showErr('s3Err','Please select at least one option for how you found T1ERA.'), false;
+        return true;
+      }
+
+      if(n === 4){
+        const phone = document.getElementById('phone').value.trim();
+        const ep    = document.getElementById('emailPrimary').value.trim();
+        const eb    = document.getElementById('emailBackup').value.trim();
+        const cp    = document.getElementById('contactPref').value;
+        if(!phone)
+          return showErr('s4Err','Real phone number is required.'), false;
+        if(!/^\+?[\d\s\-().]{7,20}$/.test(phone))
+          return showErr('s4Err','Please enter a valid phone number with country code (e.g. +60 12-345 6789).'), false;
+        if(!ep)
+          return showErr('s4Err','Primary email is required.'), false;
+        if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ep))
+          return showErr('s4Err','Primary email format is invalid.'), false;
+        if(!eb)
+          return showErr('s4Err','Backup email is required.'), false;
+        if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(eb))
+          return showErr('s4Err','Backup email format is invalid.'), false;
+        if(ep.toLowerCase() === eb.toLowerCase())
+          return showErr('s4Err','Backup email must be different from your primary email.'), false;
+        if(!cp)
+          return showErr('s4Err','Please select your preferred contact method.'), false;
+        return true;
+      }
+
+      if(n === 5){
+        if(!document.getElementById('techComfort').value)
+          return showErr('s5Err','Please select your tech comfort level.'), false;
+        return true;
+      }
+
+      if(n === 6){
+        const c1 = document.getElementById('chk1Wrap').classList.contains('checked');
+        const c2 = document.getElementById('chk2Wrap').classList.contains('checked');
+        const c3 = document.getElementById('chk3Wrap').classList.contains('checked');
+        if(!c1) document.getElementById('chk1Wrap').classList.add('err-item');
+        if(!c2) document.getElementById('chk2Wrap').classList.add('err-item');
+        if(!c3) document.getElementById('chk3Wrap').classList.add('err-item');
+        if(!c1 || !c2 || !c3)
+          return showErr('s6Err','You must tick all three checkboxes to continue.'), false;
+        return true;
+      }
+
+      return true;
+    }
+
+    /* ── NAVIGATE ── */
+    function goTo(n, backwards){
+      const from = document.getElementById('s' + current);
+      const to   = document.getElementById('s' + n);
+
+      from.classList.remove('active', 'back-active');
+      to.classList.remove('active', 'back-active');
+      if(backwards){
+        to.classList.add('back-active');
+      } else {
+        to.classList.add('active');
+      }
+
+      current = n;
+      updateProgress(n);
+      renderDots();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* ── COLLECT ALL DATA ── */
+    function collectFormData(){
+      function chips(groupId){
+        return Array.from(document.querySelectorAll('#' + groupId + ' .chip.sel'))
+                    .map(c => c.getAttribute('data-val'));
+      }
+
+      return {
+        // Slide 1 — Personal
+        fullName:        document.getElementById('fullName').value.trim(),
+        nickname:        document.getElementById('nickname').value.trim(),
+        callsign:        document.getElementById('callsign').value.trim(),
+        userStatus:      document.getElementById('userStatus').value,
+        dob:             document.getElementById('dob').value,
+        country:         document.getElementById('country').value,
+        city:            document.getElementById('city').value.trim(),
+
+        // Slide 2 — Purpose
+        purposes:        chips('purposeChips'),
+        industry:        document.getElementById('industry').value,
+        aiLevel:         document.getElementById('aiLevel').value,
+
+        // Slide 3 — Discovery
+        discoverySources: chips('sourceChips'),
+        refCode:          document.getElementById('refCode').value.trim(),
+        discoveryNote:    document.getElementById('discovery').value.trim(),
+
+        // Slide 4 — Contact
+        phone:            document.getElementById('phone').value.trim(),
+        emailPrimary:     document.getElementById('emailPrimary').value.trim(),
+        emailBackup:      document.getElementById('emailBackup').value.trim(),
+        contactPref:      document.getElementById('contactPref').value,
+        emergencyName:    document.getElementById('emergencyName').value.trim(),
+        emergencyPhone:   document.getElementById('emergencyPhone').value.trim(),
+
+        // Slide 5 — Preferences
+        language:         document.getElementById('language').value,
+        notifications:    chips('notifChips'),
+        techComfort:      document.getElementById('techComfort').value,
+        goals:            document.getElementById('goals').value.trim(),
+
+        // Slide 6 — Agreement
+        agreedToTerms:     true,
+        agreedAllAccurate: true,
+        agreedAgeEligible: true,
+
+        // Meta
+        setupCompletedAt: window._serverTimestamp ? window._serverTimestamp() : new Date().toISOString(),
+        setupVersion:     '1.0'
+      };
+    }
+
+    /* ── SAVING SCREEN HELPERS ── */
+    function showSavingScreen(){
+      const s = document.getElementById('savingScreen');
+      // reset all steps
+      ['sstep1','sstep2','sstep3','sstep4'].forEach(id => {
+        const el = document.getElementById(id);
+        el.classList.remove('on','done');
+      });
+      document.getElementById('savingTxt').textContent = 'SAVING YOUR PROFILE...';
+      s.classList.remove('off');
+      s.classList.add('on');
+
+      // animate steps sequentially — purely cosmetic, gives a feeling of work being done
+      const steps = ['sstep1','sstep2','sstep3','sstep4'];
+      const delays = [0, 600, 1200, 1900];
+      steps.forEach((id, i) => {
+        setTimeout(() => {
+          // mark previous as done
+          if(i > 0) {
+            document.getElementById(steps[i-1]).classList.remove('on');
+            document.getElementById(steps[i-1]).classList.add('done');
+          }
+          document.getElementById(id).classList.add('on');
+        }, delays[i]);
+      });
+    }
+
+    function hideSavingScreen(cb){
+      const s = document.getElementById('savingScreen');
+      s.classList.add('off');
+      setTimeout(() => {
+        s.classList.remove('on','off');
+        if(cb) cb();
+      }, 420);
+    }
+
+    /* ── SUBMIT TO FIRESTORE ── */
+    async function submitToFirestore(){
+      const btn = document.getElementById('finalBtn');
+      btn.disabled = true;
+      btn.classList.add('loading');
+      clrErr('s6Err');
+
+      // ✨ Show the Canva-style saving overlay immediately
+      showSavingScreen();
+
+      // Wait for Firebase to be ready (auth state sets _currentUser)
+      let retries = 0;
+      while(!window._currentUser && retries < 20){
+        await new Promise(r => setTimeout(r, 250));
+        retries++;
+      }
+
+      if(!window._currentUser){
+        hideSavingScreen(() => {
+          btn.disabled = false;
+          btn.classList.remove('loading');
+          showErr('s6Err', 'Session expired. Please <a href="auth.html" style="color:var(--ind)">sign in again</a>.');
+        });
+        return;
+      }
+
+      const uid  = window._currentUser.uid;
+      const user = window._currentUser;
+      const data = collectFormData();
+
+      // ── PROFILE PICTURE ──
+      data.profilePicture = {
+        url:      user.photoURL || '',
+        source:   user.photoURL ? 'google' : '',
+        updatedAt: ''
+      };
+
+      // ── PLATFORM FIELDS ──
+      data.plan = {
+        type:      'free',
+        startedAt: '',
+        expiresAt: '',
+        features:  []
+      };
+
+      data.balance = {
+        amount:    0,
+        currency:  'MYR',
+        lastTopUp: '',
+        lastSpent: ''
+      };
+
+      data.rank = {
+        level:     1,
+        title:     'Recruit',
+        xp:        0,
+        updatedAt: ''
+      };
+
+      data.accountStatus = {
+        type:       'standard',
+        verified:   false,
+        verifiedAt: '',
+        badge:      ''
+      };
+
+      data.points = {
+        total:     0,
+        available: 0,
+        spent:     0,
+        updatedAt: ''
+      };
+
+      data.affiliate = {
+        id:          '',
+        status:      'none',
+        referredBy:  data.refCode || '',
+        totalReferred: 0,
+        totalEarned:   0,
+        pendingPayout: 0,
+        joinedAt:    ''
+      };
+
+      // Ensure the saving screen has been visible for at least 2.4s
+      // so the step animation finishes gracefully before we dismiss
+      const saveStart = Date.now();
+
+      try {
+        await window._setDoc(
+          window._doc(window._db, 'users', uid),
+          data,
+          { merge: true }
+        );
+
+        // ✅ Mark last step done, update text, then fade out
+        const elapsed   = Date.now() - saveStart;
+        const remaining = Math.max(0, 2600 - elapsed);
+
+        setTimeout(() => {
+          // Mark all steps done
+          ['sstep1','sstep2','sstep3','sstep4'].forEach(id => {
+            const el = document.getElementById(id);
+            el.classList.remove('on');
+            el.classList.add('done');
+          });
+          document.getElementById('savingTxt').textContent = 'PROFILE SAVED!';
+
+          // Brief pause so user sees "PROFILE SAVED!" then fade out
+          setTimeout(() => {
+            hideSavingScreen(() => {
+              // Reveal success screen
+              document.getElementById('s6').style.display = 'none';
+              const successScreen = document.getElementById('successScreen');
+              successScreen.classList.add('on');
+              document.getElementById('progFill').style.width = '100%';
+              document.getElementById('progCount').textContent = 'Complete ✓';
+              document.getElementById('successMsg').innerHTML =
+                'Welcome to T1ERA, <strong>' + (data.nickname || data.fullName) + '</strong>!<br>' +
+                'Your profile has been saved to our system.<br>' +
+                'Your account is now active and ready to use.';
+              renderDots();
+            });
+          }, 700);
+        }, remaining);
+
+      } catch(err) {
+        console.error('Firestore error:', err);
+
+        hideSavingScreen(() => {
+          btn.disabled = false;
+          btn.classList.remove('loading');
+
+          if(err.code === 'permission-denied'){
+            showErr('s6Err',
+              'Permission denied. Please make sure your email is verified, then try again. ' +
+              '<a href="auth.html" style="color:var(--ind)">Go to sign-in →</a>');
+          } else if(err.code === 'unavailable' || err.message.includes('network')){
+            showErr('s6Err', 'Network error. Check your internet connection and try again.');
+          } else {
+            showErr('s6Err', 'Something went wrong (' + (err.code || err.message) + '). Please try again.');
+          }
         });
       }
+    }
 
-      function selectSwatch(btn, name){
-        document.querySelectorAll('.hov-swatch').forEach(s=>s.classList.remove('sel'));
-        btn.classList.add('sel');
-        hovData.selectedColour=name;
+    /* ── NEXT & BACK ── */
+    window.next = function(n){
+      if(!validate(n)) return;
+
+      if(n === TOTAL){
+        submitToFirestore();
+        return;
       }
+      goTo(n + 1, false);
+    };
 
-      // ✅ counter display updater — writes to div, not input
-      function updateCountDisplay(cls){
-        const el=document.getElementById('hCountVal');
-        if(el) el.textContent=countVal;
-        // visual feedback on the div
-        el.classList.remove('ok','bad');
-      }
+    window.back = function(n){
+      if(n <= 1) return;
+      goTo(n - 1, true);
+    };
 
-      // ✅ counter buttons wired with both touch and click
-      function wireCountBtn(id, delta){
-        const btn=document.getElementById(id);
-        if(!btn)return;
-        btn.addEventListener('touchstart',function(e){
-          e.preventDefault(); // prevent ghost click
-          countVal=Math.max(0,Math.min(30,countVal+delta));
-          updateCountDisplay();
-          btn.classList.add('hov-cbtn-pressed');
-        },{passive:false});
-        btn.addEventListener('touchend',function(){
-          btn.classList.remove('hov-cbtn-pressed');
-        },{passive:true});
-        btn.addEventListener('click',function(){
-          countVal=Math.max(0,Math.min(30,countVal+delta));
-          updateCountDisplay();
-        });
-      }
-      wireCountBtn('hCountMinus',-1);
-      wireCountBtn('hCountPlus',1);
+    /* ── ENTER KEY SUPPORT ── */
+    document.addEventListener('keydown', e => {
+      if(e.key !== 'Enter') return;
+      if(e.target.tagName === 'TEXTAREA') return;
+      next(current);
+    });
 
-      // ✅ HOV step buttons — addEventListener instead of inline onclick
-      document.getElementById('hMathBtn').addEventListener('click', ()=>hovNextStep(1));
-      document.getElementById('hCountBtn').addEventListener('click', ()=>hovNextStep(2));
-      document.getElementById('hColBtn').addEventListener('click',  ()=>hovNextStep(3));
-
-      // ✅ math input — Enter key support on mobile keyboard
-      document.getElementById('hMathA').addEventListener('keydown',function(e){
-        if(e.key==='Enter'||e.keyCode===13){
-          e.preventDefault();
-          hovNextStep(1);
-        }
-      });
-
-      // ✅ strip non-numeric characters as user types (safety for type="text")
-      document.getElementById('hMathA').addEventListener('input',function(){
-        this.value=this.value.replace(/[^0-9\-]/g,'');
-      });
-
-      function hovErr(s,msg){
-        const e=document.getElementById('hErr'+s),t=document.getElementById('hErr'+s+'Txt');
-        t.textContent=msg; e.classList.add('on'); setTimeout(()=>e.classList.remove('on'),3500);
-      }
-
-      function handleWrong(s,regen){
-        stepTries[s]++; renderTries(s);
-        if(stepTries[s]>=STEP_MAX_TRIES){startLockout();return;}
-        hovErr(s,`Incorrect. ${STEP_MAX_TRIES-stepTries[s]} attempts left.`);
-        if(regen)regen();
-      }
-
-      function renderTries(s){
-        const el=document.getElementById('hTries'+s); el.innerHTML='';
-        for(let i=0;i<STEP_MAX_TRIES;i++) el.innerHTML+=`<div class="hov-try${i<stepTries[s]?' used':''}"></div>`;
-      }
-
-      function updateSteps(c){
-        for(let i=1;i<=3;i++){
-          const e=document.getElementById('hstep'+i); e.classList.remove('active','done');
-          if(i<c)e.classList.add('done'); else if(i===c)e.classList.add('active');
-        }
-      }
-
-      window.hovNextStep=function(s){
-        if(s===1){
-          // ✅ parseInt works on type="text" value too
-          const raw=document.getElementById('hMathA').value.trim();
-          const a=parseInt(raw,10);
-          if(isNaN(a)||a!==hovData.mathAns){
-            document.getElementById('hMathA').className='hov-inp bad';
-            handleWrong(1,genMath); return;
-          }
-          document.getElementById('hMathA').className='hov-inp ok'; goStep(2);
-        } else if(s===2){
-          // ✅ read from JS variable, not from input value
-          if(countVal!==hovData.objCount){
-            document.getElementById('hCountVal').classList.add('bad');
-            handleWrong(2,genObjects); return;
-          }
-          document.getElementById('hCountVal').classList.add('ok'); goStep(3);
-        } else if(s===3){
-          if(!hovData.selectedColour||hovData.selectedColour!==hovData.colourAnswer){
-            handleWrong(3,genColour); return;
-          }
-          hovSuccess();
-        }
-      };
-
-      function goStep(n){
-        [1,2,3].forEach(i=>document.getElementById('hpanel'+i).classList.remove('on'));
-        document.getElementById('hpanel'+n).classList.add('on');
-        hovStep=n; updateSteps(n); stepTries[n]=0; renderTries(n);
-        if(n===2)genObjects();
-        if(n===3)genColour();
-        document.getElementById('hovBox').scrollTop=0;
-
-        // ✅ auto-focus math input on step 1 (helps mobile show keyboard)
-        if(n===1){
-          setTimeout(()=>{
-            const inp=document.getElementById('hMathA');
-            if(inp) inp.focus();
-          },350); // delay after animation
-        }
-      }
-
-      function hovSuccess(){
-        [1,2,3].forEach(i=>document.getElementById('hpanel'+i).classList.remove('on'));
-        document.getElementById('hSuccess').classList.add('on'); updateSteps(4);
-        setTimeout(()=>{closeHov(); if(hovCallback)hovCallback();},1800);
-      }
-
-      function startLockout(){
-        [1,2,3,'Success'].forEach(id=>document.getElementById('hpanel'+id)?.classList.remove('on'));
-        document.getElementById('hLocked').classList.add('on');
-        let rem=LOCK_SECONDS;
-        lockTimer=setInterval(()=>{
-          rem--; document.getElementById('hLockTimer').textContent=rem;
-          if(rem<=0){clearInterval(lockTimer);closeHov();showA('sErr','Lockout expired. Try again.','warn');setLd('sBtn',false);}
-        },1000);
-      }
-
-      window.openHov=function(cb){
-        hovCallback=cb; hovStep=1; stepTries={1:0,2:0,3:0}; countVal=0;
-        ['hpanel2','hpanel3','hSuccess','hLocked','hErr1','hErr2','hErr3'].forEach(id=>document.getElementById(id).classList.remove('on'));
-        document.getElementById('hpanel1').classList.add('on'); updateSteps(1); genMath();
-        [1,2,3].forEach(renderTries);
-        document.getElementById('hovOverlay').classList.add('on');
-        // ✅ focus math input shortly after overlay opens (mobile keyboard trigger)
-        setTimeout(()=>{
-          const inp=document.getElementById('hMathA');
-          if(inp) inp.focus();
-        },500);
-      };
-
-      window.closeHov=function(){
-        const ov=document.getElementById('hovOverlay');
-        ov.style.opacity='0';
-        setTimeout(()=>{ov.classList.remove('on');ov.style.opacity='';},300);
-        if(lockTimer)clearInterval(lockTimer);
-      };
-
-      // Wire Google Signup Button
-      const gsb=document.getElementById('gSignupBtn');
-      if(gsb) gsb.addEventListener('click',()=>{
-        clrA('sErr');
-        openHov(async()=>{ await doGoogle('signup'); });
-      });
-    })();
-
-    /* POPUP CLOSE */
-    (function(){
-      const o=document.getElementById('csPopupOverlay');
-      if(o){
-        const c=()=>{o.classList.add('hiding');setTimeout(()=>o.style.display='none',300);};
-        document.getElementById('csPopupClose').addEventListener('click',c);
-        document.getElementById('csPopupClose').addEventListener('touchend',function(e){e.preventDefault();c();},{passive:false});
-        o.addEventListener('click',e=>e.target===o&&c());
-        document.addEventListener('keydown',e=>e.key==='Escape'&&o.style.display!=='none'&&c());
-      }
-    })();
+    /* ── INIT ── */
+    renderDots();
+    updateProgress(1);
   </script>
 </body>
 </html>
