@@ -1268,16 +1268,15 @@
       try {
         await window._setDoc(window._doc(window._db,'users',uid), data, {merge:true});
 
-        const ts         = window._serverTimestamp ? window._serverTimestamp() : new Date().toISOString();
-        const normNick   = data.nickname.trim().toLowerCase().replace(/\s+/g,'_');
-        const normPhone  = data.phone.trim().replace(/[\s\-().]/g,'');
-        const normBackup = data.emailBackup.trim().toLowerCase();
+        const ts        = window._serverTimestamp ? window._serverTimestamp() : new Date().toISOString();
+        const normNick  = data.nickname.trim().toLowerCase().replace(/\s+/g,'_');
+        const normPhone = data.phone.trim().replace(/[\s\-().]/g,'');
+        const normEmail = data.emailBackup.trim().toLowerCase();
 
-        // ── Write all lookup docs in parallel (doc ID = normalised value = O(1) point reads) ──
         await Promise.all([
-          window._setDoc(window._doc(window._db,'usernames',   normNick),    {uid, nickname:data.nickname, createdAt:ts}),
-          window._setDoc(window._doc(window._db,'phones',      normPhone),   {uid, phone:data.phone, createdAt:ts}),
-          window._setDoc(window._doc(window._db,'backupEmails',normBackup),  {uid, email:normBackup, createdAt:ts}),
+          window._setDoc(window._doc(window._db,'usernames',   normNick),   {uid, nickname:data.nickname, createdAt:ts}),
+          window._setDoc(window._doc(window._db,'phones',      normPhone),  {uid, phone:data.phone, createdAt:ts}),
+          window._setDoc(window._doc(window._db,'backupEmails',normEmail),  {uid, email:data.emailBackup, createdAt:ts}),
         ]);
 
         const elapsed=Date.now()-saveStart, remaining=Math.max(0,2600-elapsed);
@@ -1396,12 +1395,15 @@
 
       // Debounce 300ms — much shorter since point reads are fast
       st.timer=setTimeout(async()=>{
-        if(!window._db||!window._getDoc){ st.timer=setTimeout(()=>_runPrimaryEmailCheck(),800); return; }
         try {
-          // Point read: backupEmails/{normEmail} — same technique as phone/nickname
-          const snap=await window._getDoc(window._doc(window._db,'backupEmails',val));
-          const uid=window._currentUser?window._currentUser.uid:null;
-          const taken=snap.exists()&&snap.data().uid!==uid;
+          const uid   = window._currentUser ? window._currentUser.uid : null;
+          const [snapA, snapB, snapC] = await Promise.all([
+            window._getDocs(window._query(window._collection(window._db,'users'),       window._where('emailPrimary','==',val))),
+            window._getDocs(window._query(window._collection(window._db,'users'),       window._where('emailBackup', '==',val))),
+            window._getDocs(window._query(window._collection(window._db,'backupEmails'),window._where('email',       '==',val))),
+          ]);
+          function takenByOther(snap){ let b=false; snap.forEach(d=>{ if(d.data().uid!==uid) b=true; }); return b; }
+          const taken = takenByOther(snapA)||takenByOther(snapB)||takenByOther(snapC);
           if(!taken){
             st.status='ok';_setIco('icoEmailPrimary','ok');
             _setHint('hintEmailPrimary','✓ Verified — matches your sign-in','ok');
@@ -1420,7 +1422,7 @@
           console.warn('Primary email check failed:',e);
           st.status='idle';_setIco('icoEmailPrimary','idle');_setHint('hintEmailPrimary','','');inp.classList.remove('ok','err');
         }
-      }, 300);
+      }, 600);
     }
     window._onEmailPrimaryInput = _runPrimaryEmailCheck;
 
