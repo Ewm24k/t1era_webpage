@@ -2423,12 +2423,18 @@ const demoFollowers = [
 ];
 
 // ── POPULATE FROM FIREBASE ──
+// Hide page until auth state is known — prevents flash of content for unauthenticated users
+document.body.style.visibility = 'hidden';
+
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
-    // Not signed in — show demo data
-    loadDemoData();
+    // Not authenticated — redirect immediately to home
+    window.location.replace('home.html');
     return;
   }
+
+  // Authenticated — reveal page
+  document.body.style.visibility = '';
 
   try {
     const snap = await getDoc(doc(db, 'users', user.uid));
