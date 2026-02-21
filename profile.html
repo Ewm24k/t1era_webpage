@@ -2109,7 +2109,7 @@ body {
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="module">
 import { initializeApp }    from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-import { getFirestore, doc, getDoc, updateDoc, setDoc, serverTimestamp, collection, addDoc, query, orderBy, limit, getDocs } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import { getFirestore, doc, getDoc, updateDoc, setDoc, serverTimestamp, collection, addDoc, getDocs } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 const firebaseConfig = {
   apiKey:            "AIzaSyBnt9mbb8LdMVeguSHUmS20L6uBHIfxwAs",
@@ -2459,34 +2459,46 @@ async function logActivity(activityData) {
 
 // ── LOAD ACTIVITY HISTORY ──
 async function loadActivityHistory(uid) {
-  try {
-    // Remove any previously injected DB items to avoid duplicates on refresh
-    const feed = document.getElementById('activityFeed');
-    if (!feed) return;
-    feed.querySelectorAll('.db-activity-item').forEach(el => el.remove());
+  const feed = document.getElementById('activityFeed');
+  if (!feed) return;
 
+  // Remove previously injected DB items to avoid duplicates on refresh
+  feed.querySelectorAll('.db-activity-item').forEach(el => el.remove());
+
+  try {
     const activityCol = collection(db, 'users', uid, 'activityHistory');
-    const q = query(activityCol, orderBy('createdAt', 'desc'), limit(20));
-    const snap = await getDocs(q);
+
+    // Fetch WITHOUT orderBy to avoid requiring a Firestore composite index.
+    // We sort client-side after fetch.
+    const snap = await getDocs(activityCol);
+
     if (snap.empty) return;
 
-    // snap is desc (newest first) — insertBefore firstChild each time
-    // so first item inserted = newest, sits at top; subsequent inserts go above it
-    // To preserve newest-at-top order we collect into array and insert in reverse
     const items = [];
     snap.forEach((docSnap) => {
       const a = docSnap.data();
-      const timeStr = typeof a.createdAt?.toDate === 'function'
-        ? a.createdAt.toDate().toLocaleString('en-MY', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' })
+      // createdAt may be null on the first read if serverTimestamp() hasn't resolved yet
+      const ts = typeof a.createdAt?.toDate === 'function' ? a.createdAt.toDate() : null;
+      const timeStr = ts
+        ? ts.toLocaleString('en-MY', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' })
         : 'Just now';
-      items.push({ a, timeStr });
+      items.push({ a, timeStr, ts });
     });
-    // Insert oldest-first so newest ends up at top via insertBefore(firstChild)
+
+    // Sort newest first client-side (nulls go to top as "Just now")
+    items.sort((x, y) => {
+      if (!x.ts && !y.ts) return 0;
+      if (!x.ts) return -1;
+      if (!y.ts) return 1;
+      return y.ts - x.ts;
+    });
+
+    // Insert oldest-first so that insertBefore(firstChild) leaves newest at top
     for (let i = items.length - 1; i >= 0; i--) {
       appendActivityItemToFeed(items[i].a, items[i].timeStr);
     }
   } catch(e) {
-    console.warn('loadActivityHistory error:', e);
+    console.error('loadActivityHistory error:', e);
   }
 }
 window.loadActivityHistory = loadActivityHistory;
