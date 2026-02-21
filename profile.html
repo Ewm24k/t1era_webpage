@@ -194,7 +194,7 @@ body {
 .banner-edit-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0,0,0,0.45);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -209,7 +209,12 @@ body {
   cursor: pointer;
 }
 .banner-edit-overlay i { font-size: 18px; }
-.edit-mode .profile-banner:hover .banner-edit-overlay { opacity: 1; pointer-events: auto; }
+
+/* In edit mode — always visible and clickable, no hover required */
+.edit-mode .banner-edit-overlay {
+  opacity: 1;
+  pointer-events: auto;
+}
 .edit-mode .profile-banner { cursor: pointer; }
 
 /* banner background image layer */
@@ -2682,7 +2687,7 @@ body {
 <!-- ══════════════════════════════════
      BANNER OPTIONS MODAL
 ══════════════════════════════════ -->
-<div class="modal-overlay" id="bannerOptionsOverlay" style="display:none;" onclick="if(event.target===this)closeBannerOptions()">
+<div class="modal-overlay" id="bannerOptionsOverlay" onclick="if(event.target===this)closeBannerOptions()">
   <div class="modal-sheet" style="max-width:400px;">
     <div class="modal-handle"></div>
     <div class="modal-header">
@@ -2735,7 +2740,7 @@ body {
 <!-- ══════════════════════════════════
      BANNER COOLDOWN MODAL
 ══════════════════════════════════ -->
-<div class="modal-overlay" id="bannerCooldownOverlay" style="display:none;" onclick="if(event.target===this)closeBannerCooldown()">
+<div class="modal-overlay" id="bannerCooldownOverlay" onclick="if(event.target===this)closeBannerCooldown()">
   <div class="modal-sheet" style="max-width:380px;">
     <div class="modal-handle"></div>
     <div class="modal-header">
@@ -3080,17 +3085,13 @@ const BANNER_PRESETS = {
 // ── OPEN BANNER OPTIONS MODAL ──
 window.handleBannerClick = function() {
   if (!window._currentUid) return;
-  // Mark currently active preset in the options grid
   _refreshBannerOptionsUI();
   const overlay = document.getElementById('bannerOptionsOverlay');
-  overlay.style.display = 'flex';
-  requestAnimationFrame(() => overlay.classList.add('active'));
+  overlay.classList.add('open');
 };
 
 window.closeBannerOptions = function() {
-  const overlay = document.getElementById('bannerOptionsOverlay');
-  overlay.classList.remove('active');
-  setTimeout(() => { overlay.style.display = 'none'; }, 300);
+  document.getElementById('bannerOptionsOverlay').classList.remove('open');
 };
 
 function _refreshBannerOptionsUI() {
@@ -3128,6 +3129,16 @@ window.selectBannerPreset = async function(preset) {
       bgClass: 'purple-bg',
       text: `<strong>Banner style changed</strong> — ${BANNER_PRESETS[preset].label}`,
     });
+
+    // Live activity tab update
+    const nowStr = new Date().toLocaleString('en-MY', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+    appendActivityItemToFeed({
+      type: 'banner_update',
+      icon: 'ph-paint-brush',
+      iconColor: 'var(--purple)',
+      bgClass: 'purple-bg',
+      text: `<strong>Banner style changed</strong> — ${BANNER_PRESETS[preset].label}`,
+    }, nowStr);
   } catch(e) {
     console.warn('selectBannerPreset save error:', e);
   }
@@ -3215,14 +3226,11 @@ function showBannerCooldownModal(lastUpload, nextAllowed) {
   msgEl.textContent = `You last changed your banner on ${lastStr}. You need to wait ${daysLeft} more day${daysLeft === 1 ? '' : 's'} before you can update it again.`;
   nextDateEl.textContent = nextStr;
 
-  overlay.style.display = 'flex';
-  requestAnimationFrame(() => overlay.classList.add('active'));
+  overlay.classList.add('open');
 }
 
 window.closeBannerCooldown = function() {
-  const overlay = document.getElementById('bannerCooldownOverlay');
-  overlay.classList.remove('active');
-  setTimeout(() => { overlay.style.display = 'none'; }, 300);
+  document.getElementById('bannerCooldownOverlay').classList.remove('open');
 };
 
 // Called when user picks a banner file
