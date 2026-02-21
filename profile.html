@@ -262,8 +262,11 @@ body {
 .xp-bar-wrap {
   position: absolute;
   bottom: 14px;
-  left: 20px;
-  right: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  max-width: 340px;
+  min-width: 200px;
 }
 
 .xp-label {
@@ -372,12 +375,16 @@ body {
 .dots-menu-item:hover i { color: var(--pink-2); }
 
 /* ═══════════════════════════════════════════
-   IDENTITY ROW (avatar + info)
+   IDENTITY ROW (avatar + info) — centered layout
 ═══════════════════════════════════════════ */
 .profile-identity {
   position: relative;
   padding: 0 20px 0;
   margin-top: -48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 
 /* avatar */
@@ -385,7 +392,7 @@ body {
   position: relative;
   width: 90px;
   height: 90px;
-  margin-bottom: 12px;
+  margin: 0 auto 12px;
 }
 
 .avatar-ring {
@@ -478,12 +485,15 @@ body {
 .identity-info {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 4px;
+  width: 100%;
 }
 
 .identity-name-row {
   display: flex;
   align-items: center;
+  justify-content: center;
   flex-wrap: wrap;
   gap: 8px;
 }
@@ -620,6 +630,7 @@ body {
 .identity-email {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   font-size: 12px;
   color: var(--text-3);
@@ -628,10 +639,209 @@ body {
 }
 .identity-email i { font-size: 13px; color: rgba(194,24,91,0.5); }
 
+/* ── BIO ── */
+.bio-wrap {
+  margin-top: 10px;
+  width: 100%;
+  max-width: 420px;
+  position: relative;
+}
+
+.bio-display {
+  font-size: 13px;
+  color: var(--text-3);
+  font-style: italic;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: var(--radius-sm);
+  border: 1px dashed transparent;
+  transition: border-color 0.2s, background 0.2s;
+  text-align: center;
+  line-height: 1.55;
+  word-break: break-word;
+}
+.bio-display.has-content {
+  color: var(--text-2);
+  font-style: normal;
+}
+.bio-display:hover {
+  border-color: rgba(194,24,91,0.25);
+  background: rgba(194,24,91,0.03);
+}
+.bio-links-display {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 6px;
+}
+.bio-link-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--pink-2);
+  background: rgba(194,24,91,0.08);
+  border: 1px solid rgba(194,24,91,0.2);
+  text-decoration: none;
+  transition: background 0.15s;
+  font-family: var(--font-body);
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.bio-link-pill:hover { background: rgba(194,24,91,0.16); }
+.bio-link-pill i { font-size: 11px; flex-shrink: 0; }
+
+.bio-edit-box {
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border-2);
+  border-radius: var(--radius);
+  padding: 12px;
+}
+.bio-edit-box.open { display: flex; }
+
+.bio-textarea {
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--text-2);
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.55;
+  resize: none;
+  width: 100%;
+  min-height: 72px;
+  max-height: 120px;
+}
+.bio-textarea::placeholder { color: var(--text-3); }
+
+.bio-char-count {
+  font-size: 10px;
+  color: var(--text-3);
+  font-family: var(--font-mono);
+  text-align: right;
+}
+.bio-char-count.near-limit { color: var(--orange); }
+.bio-char-count.at-limit   { color: rgba(239,68,68,0.8); }
+
+.bio-links-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bio-link-input-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bio-link-input {
+  flex: 1;
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-2);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 5px 10px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.bio-link-input:focus { border-color: rgba(194,24,91,0.4); }
+.bio-link-input::placeholder { color: var(--text-3); }
+
+.bio-link-remove-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.2);
+  color: rgba(239,68,68,0.7);
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+.bio-link-remove-btn:hover { background: rgba(239,68,68,0.2); color: #ef4444; }
+
+.bio-edit-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.bio-add-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: rgba(139,92,246,0.1);
+  border: 1px solid rgba(139,92,246,0.25);
+  color: var(--purple);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: all 0.15s;
+}
+.bio-add-link-btn:hover { background: rgba(139,92,246,0.2); }
+.bio-add-link-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.bio-add-link-btn i { font-size: 13px; }
+
+.bio-save-btn {
+  padding: 5px 14px;
+  border-radius: 8px;
+  background: var(--pink);
+  border: none;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--font-body);
+  letter-spacing: 0.04em;
+  transition: background 0.2s, opacity 0.2s;
+}
+.bio-save-btn:hover { background: var(--pink-2); }
+.bio-save-btn.saving { background: var(--purple); cursor: wait; }
+.bio-save-btn.saved  { background: var(--green); }
+.bio-save-btn.error  { background: rgba(239,68,68,0.8); }
+
+.bio-toast {
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  padding: 5px 12px;
+  border-radius: 8px;
+  margin-top: 4px;
+  display: none;
+  align-items: center;
+  gap: 6px;
+}
+.bio-toast.show    { display: flex; }
+.bio-toast.success { background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.3); color: var(--green); }
+.bio-toast.fail    { background: rgba(239,68,68,0.08);  border: 1px solid rgba(239,68,68,0.25); color: rgba(239,68,68,0.85); }
+
 /* ── STATUS UPDATE ── */
 .status-wrap {
-  margin-top: 12px;
+  margin-top: 10px;
   position: relative;
+  width: 100%;
+  max-width: 420px;
 }
 
 .status-display {
@@ -1605,6 +1815,9 @@ body {
   .badges-grid { grid-template-columns: repeat(3, 1fr); }
 
   .balance-amount { font-size: 18px; }
+
+  .bio-wrap, .status-wrap { max-width: 100%; }
+  .xp-bar-wrap { width: 75%; }
 }
 
 @media (min-width: 641px) {
@@ -1757,7 +1970,7 @@ body {
       </div>
 
       <!-- Badges row -->
-      <div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-top:4px;">
+      <div style="display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px;margin-top:4px;">
         <span class="acct-type-badge standard" id="acctTypeBadge">
           <i class="ph-fill ph-star" style="font-size:9px;"></i>
           Standard
@@ -1776,6 +1989,43 @@ body {
       <div class="identity-email">
         <i class="ph-bold ph-envelope-simple"></i>
         <span id="displayEmail"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="1c796b712e28775c7b717d7570327f7371">[email&#160;protected]</a></span>
+      </div>
+
+      <!-- Bio -->
+      <div class="bio-wrap" id="bioWrap">
+        <!-- Display mode -->
+        <div class="bio-display" id="bioDisplay" onclick="toggleBioEdit(true)" title="Click to edit bio">
+          Bio
+        </div>
+        <div class="bio-links-display" id="bioLinksDisplay"></div>
+
+        <!-- Edit mode -->
+        <div class="bio-edit-box" id="bioEditBox">
+          <textarea
+            class="bio-textarea"
+            id="bioTextarea"
+            placeholder="Write something about yourself… (max 80 characters, TikTok-style)"
+            maxlength="80"
+            oninput="onBioInput(this)"
+            rows="3"
+          ></textarea>
+          <div class="bio-char-count" id="bioCharCount">0 / 80</div>
+
+          <!-- Link inputs -->
+          <div class="bio-links-editor" id="bioLinksEditor"></div>
+
+          <!-- Footer: add link + save -->
+          <div class="bio-edit-footer">
+            <button class="bio-add-link-btn" id="bioAddLinkBtn" onclick="addBioLink()">
+              <i class="ph-bold ph-plus"></i> Add Link
+            </button>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <button class="bio-save-btn" id="bioSaveBtn" onclick="saveBio()">Save</button>
+              <button onclick="toggleBioEdit(false)" style="background:none;border:none;color:var(--text-3);font-size:11px;cursor:pointer;font-family:var(--font-body);">Cancel</button>
+            </div>
+          </div>
+          <div class="bio-toast" id="bioToast"></div>
+        </div>
       </div>
 
       <!-- Status -->
@@ -2262,6 +2512,7 @@ function applyUserData(d, user) {
   window._currentUid  = user.uid;
   window._userDocRef  = doc(db, 'users', user.uid);
   fetchAndApplyStatus(user.uid);
+  fetchAndApplyBio(user.uid);
   loadActivityHistory(user.uid);
 }
 
@@ -2404,8 +2655,223 @@ window.saveStatus = async function() {
   }
 };
 
-// ── FETCH AND APPLY STATUS ──
-async function fetchAndApplyStatus(uid) {
+// ── FETCH AND APPLY BIO ──
+async function fetchAndApplyBio(uid) {
+  try {
+    const snap = await getDoc(doc(db, 'users', uid));
+    if (snap.exists()) {
+      const d = snap.data();
+      const bioText  = d.userBio       || '';
+      const bioLinks = d.userBioLinks  || [];
+      renderBioDisplay(bioText, bioLinks);
+      // Pre-fill edit box
+      const ta = document.getElementById('bioTextarea');
+      if (ta) {
+        ta.value = bioText;
+        onBioInput(ta);
+      }
+      // Pre-fill link inputs
+      const editor = document.getElementById('bioLinksEditor');
+      if (editor) {
+        editor.innerHTML = '';
+        bioLinks.forEach(url => _addBioLinkRow(url));
+      }
+      _updateAddLinkBtn();
+    }
+  } catch(e) {
+    console.warn('fetchAndApplyBio error:', e);
+  }
+}
+
+// ── RENDER BIO DISPLAY ──
+function renderBioDisplay(text, links) {
+  const display = document.getElementById('bioDisplay');
+  const linksDiv = document.getElementById('bioLinksDisplay');
+  if (!display || !linksDiv) return;
+
+  if (text.trim()) {
+    display.textContent = text;
+    display.classList.add('has-content');
+  } else {
+    display.textContent = 'Bio';
+    display.classList.remove('has-content');
+  }
+
+  linksDiv.innerHTML = '';
+  if (Array.isArray(links)) {
+    links.filter(l => l.trim()).forEach(url => {
+      const href = url.startsWith('http') ? url : 'https://' + url;
+      const a = document.createElement('a');
+      a.className = 'bio-link-pill';
+      a.href = href;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.innerHTML = `<i class="ph-bold ph-link"></i>${url.replace(/^https?:\/\//, '')}`;
+      linksDiv.appendChild(a);
+    });
+  }
+}
+
+// ── TOGGLE BIO EDIT ──
+window.toggleBioEdit = function(open) {
+  const box = document.getElementById('bioEditBox');
+  const display = document.getElementById('bioDisplay');
+  const linksDisplay = document.getElementById('bioLinksDisplay');
+  if (!box) return;
+  if (open) {
+    box.classList.add('open');
+    display.style.display = 'none';
+    linksDisplay.style.display = 'none';
+    document.getElementById('bioTextarea').focus();
+  } else {
+    box.classList.remove('open');
+    display.style.display = '';
+    linksDisplay.style.display = '';
+  }
+};
+
+// ── BIO INPUT HANDLER ──
+window.onBioInput = function(ta) {
+  const len = ta.value.length;
+  const counter = document.getElementById('bioCharCount');
+  if (!counter) return;
+  counter.textContent = `${len} / 80`;
+  counter.classList.remove('near-limit', 'at-limit');
+  if (len >= 80) counter.classList.add('at-limit');
+  else if (len >= 60) counter.classList.add('near-limit');
+};
+
+// ── ADD BIO LINK ROW ──
+function _addBioLinkRow(value) {
+  const editor = document.getElementById('bioLinksEditor');
+  if (!editor) return;
+  const row = document.createElement('div');
+  row.className = 'bio-link-input-row';
+  row.innerHTML = `
+    <input type="url" class="bio-link-input" placeholder="https://yourlink.com" value="${value || ''}" />
+    <button class="bio-link-remove-btn" onclick="removeBioLink(this)" title="Remove">
+      <i class="ph-bold ph-x"></i>
+    </button>
+  `;
+  editor.appendChild(row);
+}
+
+window.addBioLink = function() {
+  const editor = document.getElementById('bioLinksEditor');
+  if (!editor) return;
+  const count = editor.querySelectorAll('.bio-link-input-row').length;
+  if (count >= 3) return;
+  _addBioLinkRow('');
+  _updateAddLinkBtn();
+};
+
+window.removeBioLink = function(btn) {
+  btn.closest('.bio-link-input-row').remove();
+  _updateAddLinkBtn();
+};
+
+function _updateAddLinkBtn() {
+  const editor = document.getElementById('bioLinksEditor');
+  const addBtn = document.getElementById('bioAddLinkBtn');
+  if (!editor || !addBtn) return;
+  const count = editor.querySelectorAll('.bio-link-input-row').length;
+  addBtn.disabled = count >= 3;
+  addBtn.title = count >= 3 ? 'Maximum 3 links allowed' : 'Add a link';
+}
+
+// ── SHOW BIO TOAST ──
+function showBioToast(msg, type) {
+  const toast = document.getElementById('bioToast');
+  if (!toast) return;
+  toast.textContent = msg;
+  toast.className = 'bio-toast show ' + type;
+  clearTimeout(toast._hideTimer);
+  toast._hideTimer = setTimeout(() => { toast.className = 'bio-toast'; }, 3500);
+}
+
+// ── SAVE BIO ──
+window.saveBio = async function() {
+  const btn      = document.getElementById('bioSaveBtn');
+  const ta       = document.getElementById('bioTextarea');
+  const bioText  = ta.value.trim();
+
+  // Collect links — max 3, filter empty
+  const editor = document.getElementById('bioLinksEditor');
+  const bioLinks = Array.from(editor.querySelectorAll('.bio-link-input'))
+    .map(inp => inp.value.trim())
+    .filter(v => v.length > 0)
+    .slice(0, 3);
+
+  if (!window._userDocRef) {
+    showBioToast('✗ Not signed in.', 'fail');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.classList.add('saving');
+  btn.textContent = 'Saving…';
+
+  let saved = false;
+  try {
+    await setDoc(window._userDocRef, { userBio: bioText, userBioLinks: bioLinks }, { merge: true });
+    saved = true;
+  } catch(e) {
+    try {
+      await updateDoc(window._userDocRef, { userBio: bioText, userBioLinks: bioLinks });
+      saved = true;
+    } catch(e2) {
+      console.warn('saveBio error:', e2);
+    }
+  }
+
+  if (saved) {
+    // Log activity
+    try {
+      await logActivity({
+        type: 'bio_update',
+        icon: 'ph-pencil-line',
+        iconColor: 'var(--purple)',
+        bgClass: 'purple-bg',
+        text: `<strong>Bio updated</strong> — "${bioText.slice(0, 40)}${bioText.length > 40 ? '…' : ''}"`,
+      });
+    } catch(e) { console.warn('logActivity bio error:', e); }
+
+    // Live DOM update on activity tab
+    const nowStr = new Date().toLocaleString('en-MY', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+    appendActivityItemToFeed({
+      type: 'bio_update',
+      icon: 'ph-pencil-line',
+      iconColor: 'var(--purple)',
+      bgClass: 'purple-bg',
+      text: `<strong>Bio updated</strong> — "${bioText.slice(0, 40)}${bioText.length > 40 ? '…' : ''}"`,
+    }, nowStr);
+
+    // Update display
+    renderBioDisplay(bioText, bioLinks);
+
+    btn.classList.remove('saving');
+    btn.classList.add('saved');
+    btn.textContent = '✓ Saved';
+    showBioToast('✓ Bio saved successfully.', 'success');
+
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.classList.remove('saved');
+      btn.textContent = 'Save';
+      toggleBioEdit(false);
+    }, 1800);
+  } else {
+    btn.classList.remove('saving');
+    btn.classList.add('error');
+    btn.textContent = '✗ Failed';
+    showBioToast('✗ Failed to save — check your connection.', 'fail');
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.classList.remove('error');
+      btn.textContent = 'Save';
+    }, 3000);
+  }
+};
   try {
     const snap = await getDoc(doc(db, 'users', uid));
     if (snap.exists()) {
