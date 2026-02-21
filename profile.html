@@ -2669,10 +2669,7 @@ window.saveStatus = async function() {
     showStatusToast('✓ Status saved successfully.', 'success');
 
     setTimeout(() => {
-      btn.disabled = false;
-      btn.classList.remove('saved');
-      btn.textContent = 'Save';
-      input.blur();
+      window.location.reload();
     }, 2000);
   } else {
     btn.classList.remove('saving');
@@ -2906,10 +2903,7 @@ window.saveBio = async function() {
     showBioToast('✓ Bio saved successfully.', 'success');
 
     setTimeout(() => {
-      btn.disabled = false;
-      btn.classList.remove('saved');
-      btn.textContent = 'Save';
-      toggleBioEdit(false);
+      window.location.reload();
     }, 1800);
   } else {
     btn.classList.remove('saving');
