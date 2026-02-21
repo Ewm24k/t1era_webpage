@@ -2259,7 +2259,8 @@ function applyUserData(d, user) {
   buildChips(d);
 
   // Status
-  window._userDocRef = doc(db, 'users', user.uid);
+  window._currentUid  = user.uid;
+  window._userDocRef  = doc(db, 'users', user.uid);
   fetchAndApplyStatus(user.uid);
   loadActivityHistory(user.uid);
 }
@@ -2358,18 +2359,25 @@ window.saveStatus = async function() {
   }
 
   if (saved) {
-    // Log activity only after confirmed save
+    // Build activity data
+    const activityData = {
+      type: 'status_update',
+      icon: 'ph-chat-circle-dots',
+      iconColor: 'var(--pink-2)',
+      bgClass: 'pink-bg',
+      text: `<strong>Status updated</strong> — "${val}"`,
+    };
+
+    // Log to Firestore (correct path via _currentUid)
     try {
-      await logActivity(window._userDocRef, {
-        type: 'status_update',
-        icon: 'ph-chat-circle-dots',
-        iconColor: 'var(--pink-2)',
-        bgClass: 'pink-bg',
-        text: `<strong>Status updated</strong> — "${val}"`,
-      });
+      await logActivity(activityData);
     } catch(e) {
       console.warn('logActivity error after save:', e);
     }
+
+    // Immediately update the Activity tab DOM — no refresh needed
+    const nowStr = new Date().toLocaleString('en-MY', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+    appendActivityItemToFeed(activityData, nowStr);
 
     btn.classList.remove('saving');
     btn.classList.add('saved');
@@ -2414,10 +2422,30 @@ async function fetchAndApplyStatus(uid) {
   }
 }
 
+// ── APPEND ACTIVITY ITEM TO FEED (live DOM update) ──
+function appendActivityItemToFeed(a, timeStr) {
+  const feed = document.getElementById('activityFeed');
+  if (!feed) return;
+  const item = document.createElement('div');
+  item.className = 'activity-item';
+  item.innerHTML = `
+    <div class="activity-line"></div>
+    <div class="activity-icon-wrap ${a.bgClass || ''}">
+      <i class="ph-bold ${a.icon || 'ph-activity'}" style="color:${a.iconColor || 'var(--text-3)'};font-size:14px;"></i>
+    </div>
+    <div class="activity-body">
+      <div class="activity-text">${a.text || ''}</div>
+      <div class="activity-time">${timeStr}</div>
+    </div>
+  `;
+  feed.insertBefore(item, feed.firstChild);
+}
+
 // ── LOG ACTIVITY ──
-async function logActivity(userDocRef, activityData) {
+async function logActivity(activityData) {
+  if (!window._currentUid) return;
   try {
-    const activityCol = collection(userDocRef, 'activityHistory');
+    const activityCol = collection(db, 'users', window._currentUid, 'activityHistory');
     await addDoc(activityCol, {
       ...activityData,
       createdAt: serverTimestamp()
@@ -2430,29 +2458,17 @@ async function logActivity(userDocRef, activityData) {
 // ── LOAD ACTIVITY HISTORY ──
 async function loadActivityHistory(uid) {
   try {
-    const activityCol = collection(doc(db, 'users', uid), 'activityHistory');
+    const activityCol = collection(db, 'users', uid, 'activityHistory');
     const q = query(activityCol, orderBy('createdAt', 'desc'), limit(20));
     const snap = await getDocs(q);
     if (snap.empty) return;
     const feed = document.getElementById('activityFeed');
     snap.forEach((docSnap) => {
       const a = docSnap.data();
-      const item = document.createElement('div');
-      item.className = 'activity-item';
-      const timeStr = a.createdAt?.toDate
+      const timeStr = typeof a.createdAt?.toDate === 'function'
         ? a.createdAt.toDate().toLocaleString('en-MY', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' })
         : 'Just now';
-      item.innerHTML = `
-        <div class="activity-line"></div>
-        <div class="activity-icon-wrap ${a.bgClass || ''}">
-          <i class="ph-bold ${a.icon || 'ph-activity'}" style="color:${a.iconColor || 'var(--text-3)'};font-size:14px;"></i>
-        </div>
-        <div class="activity-body">
-          <div class="activity-text">${a.text || ''}</div>
-          <div class="activity-time">${timeStr}</div>
-        </div>
-      `;
-      feed.insertBefore(item, feed.firstChild);
+      appendActivityItemToFeed(a, timeStr);
     });
   } catch(e) {
     console.warn('loadActivityHistory error:', e);
