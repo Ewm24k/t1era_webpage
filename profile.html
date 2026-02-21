@@ -129,6 +129,31 @@ body {
 }
 
 /* ═══════════════════════════════════════════
+   BANNER PRESET THEMES
+═══════════════════════════════════════════ */
+.banner-preset-default {
+  background:
+    linear-gradient(135deg, rgba(194,24,91,0.18) 0%, rgba(139,92,246,0.12) 50%, rgba(0,0,0,0.6) 100%),
+    repeating-linear-gradient(60deg, transparent, transparent 40px, rgba(255,255,255,0.012) 40px, rgba(255,255,255,0.012) 41px);
+  background-color: #0d0009;
+}
+.banner-preset-midnight {
+  background: linear-gradient(135deg, #0f0c29 0%, #1a1a2e 40%, #16213e 70%, #0f3460 100%);
+  background-color: #0f0c29;
+}
+.banner-preset-cyber {
+  background:
+    linear-gradient(135deg, rgba(0,255,136,0.12) 0%, rgba(0,212,255,0.1) 50%, rgba(0,0,0,0.7) 100%),
+    repeating-linear-gradient(90deg, transparent, transparent 60px, rgba(0,255,136,0.03) 60px, rgba(0,255,136,0.03) 61px),
+    repeating-linear-gradient(0deg, transparent, transparent 60px, rgba(0,212,255,0.03) 60px, rgba(0,212,255,0.03) 61px);
+  background-color: #020a12;
+}
+.banner-preset-pinky {
+  background: linear-gradient(135deg, #ff9ec4 0%, #ffd6e8 30%, #fff0f6 55%, #ffc2dd 80%, #ff85b3 100%);
+  background-color: #ffb3d1;
+}
+
+/* ═══════════════════════════════════════════
    BANNER HEADER
 ═══════════════════════════════════════════ */
 .profile-banner {
@@ -180,10 +205,129 @@ body {
   font-weight: 600;
   color: rgba(255,255,255,0.85);
   pointer-events: none;
+  z-index: 2;
+  cursor: pointer;
 }
 .banner-edit-overlay i { font-size: 18px; }
 .edit-mode .profile-banner:hover .banner-edit-overlay { opacity: 1; pointer-events: auto; }
 .edit-mode .profile-banner { cursor: pointer; }
+
+/* banner background image layer */
+.banner-bg-img {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: 0;
+  transition: opacity 0.4s;
+}
+
+/* banner upload spinner */
+.banner-upload-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  background: rgba(0,0,0,0.65);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: rgba(255,255,255,0.8);
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font-body);
+}
+.banner-upload-overlay.active { display: flex; }
+
+.banner-upload-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid rgba(255,255,255,0.2);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: avatarSpin 0.7s linear infinite;
+}
+
+/* ── BANNER OPTIONS MODAL ── */
+.banner-options-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 16px 20px 24px;
+}
+
+.banner-option-card {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: border-color 0.2s, transform 0.15s;
+  position: relative;
+}
+.banner-option-card:hover { transform: scale(1.02); }
+.banner-option-card.active { border-color: var(--pink-2); }
+
+.banner-option-preview {
+  height: 64px;
+  width: 100%;
+  display: block;
+}
+/* preview colours matching the presets */
+.banner-option-preview.prev-default {
+  background: linear-gradient(135deg, rgba(194,24,91,0.6) 0%, rgba(139,92,246,0.5) 50%, #0d0009 100%);
+}
+.banner-option-preview.prev-midnight {
+  background: linear-gradient(135deg, #0f0c29 0%, #1a1a2e 40%, #0f3460 100%);
+}
+.banner-option-preview.prev-cyber {
+  background: linear-gradient(135deg, rgba(0,255,136,0.4) 0%, rgba(0,212,255,0.35) 50%, #020a12 100%);
+}
+.banner-option-preview.prev-pinky {
+  background: linear-gradient(135deg, #ff9ec4 0%, #ffd6e8 40%, #fff0f6 60%, #ff85b3 100%);
+}
+.banner-option-preview.prev-upload {
+  background: var(--bg-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 4px;
+  color: var(--text-3);
+  font-size: 10px;
+  font-family: var(--font-body);
+  height: 64px;
+}
+.banner-option-preview.prev-upload i { font-size: 20px; color: var(--pink); }
+
+.banner-option-label {
+  font-size: 10px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  color: var(--text-2);
+  padding: 6px 8px;
+  background: var(--bg-3);
+  text-align: center;
+  letter-spacing: 0.03em;
+}
+.banner-option-card.active .banner-option-label { color: var(--pink-2); }
+
+.banner-option-active-tick {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--pink-2);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: #fff;
+}
+.banner-option-card.active .banner-option-active-tick { display: flex; }
 
 /* ── RANK BADGE (top-left of banner) ── */
 .rank-badge {
@@ -2039,9 +2183,27 @@ body {
        BANNER
   ══════════════════════════════════ -->
   <div class="profile-banner fade-up" id="profileBanner">
-    <div class="banner-edit-overlay">
+    <!-- Banner background image layer (filled by JS when banner exists) -->
+    <div class="banner-bg-img" id="bannerBgImg"></div>
+
+    <div class="banner-edit-overlay" id="bannerEditOverlay" onclick="handleBannerClick()">
       <i class="ph-bold ph-camera"></i> Change Banner
     </div>
+
+    <!-- Banner upload spinner -->
+    <div class="banner-upload-overlay" id="bannerUploadOverlay">
+      <div class="banner-upload-spinner"></div>
+      <span>Uploading banner…</span>
+    </div>
+
+    <!-- Hidden file input for banner -->
+    <input
+      type="file"
+      id="bannerFileInput"
+      accept="image/*"
+      style="display:none"
+      onchange="handleBannerChange(this)"
+    />
 
     <!-- RANK BADGE -->
     <div class="rank-badge" id="rankBadge">
@@ -2518,6 +2680,83 @@ body {
 </div><!-- end profile-wrap -->
 
 <!-- ══════════════════════════════════
+     BANNER OPTIONS MODAL
+══════════════════════════════════ -->
+<div class="modal-overlay" id="bannerOptionsOverlay" style="display:none;" onclick="if(event.target===this)closeBannerOptions()">
+  <div class="modal-sheet" style="max-width:400px;">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title">Choose Banner Style</span>
+      <button class="modal-close-btn" onclick="closeBannerOptions()"><i class="ph-bold ph-x"></i></button>
+    </div>
+    <div class="banner-options-grid">
+
+      <!-- Option 1: Default -->
+      <div class="banner-option-card" id="bopt-default" onclick="selectBannerPreset('default')">
+        <div class="banner-option-active-tick"><i class="ph-bold ph-check"></i></div>
+        <div class="banner-option-preview prev-default"></div>
+        <div class="banner-option-label">T1ERA Default</div>
+      </div>
+
+      <!-- Option 2: Midnight -->
+      <div class="banner-option-card" id="bopt-midnight" onclick="selectBannerPreset('midnight')">
+        <div class="banner-option-active-tick"><i class="ph-bold ph-check"></i></div>
+        <div class="banner-option-preview prev-midnight"></div>
+        <div class="banner-option-label">Midnight Blue</div>
+      </div>
+
+      <!-- Option 3: Cyber -->
+      <div class="banner-option-card" id="bopt-cyber" onclick="selectBannerPreset('cyber')">
+        <div class="banner-option-active-tick"><i class="ph-bold ph-check"></i></div>
+        <div class="banner-option-preview prev-cyber"></div>
+        <div class="banner-option-label">Cyber Grid</div>
+      </div>
+
+      <!-- Option 4: Pinky -->
+      <div class="banner-option-card" id="bopt-pinky" onclick="selectBannerPreset('pinky')">
+        <div class="banner-option-active-tick"><i class="ph-bold ph-check"></i></div>
+        <div class="banner-option-preview prev-pinky"></div>
+        <div class="banner-option-label">Pinky Vibe</div>
+      </div>
+
+      <!-- Option 5: Upload custom (spans full width) -->
+      <div class="banner-option-card" id="bopt-upload" onclick="triggerBannerUpload()" style="grid-column:1/-1;">
+        <div class="banner-option-preview prev-upload">
+          <i class="ph-bold ph-upload-simple"></i>
+          Upload Your Own Image
+        </div>
+        <div class="banner-option-label">Custom Photo · Max 3MB · Best 1500×500px</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     BANNER COOLDOWN MODAL
+══════════════════════════════════ -->
+<div class="modal-overlay" id="bannerCooldownOverlay" style="display:none;" onclick="if(event.target===this)closeBannerCooldown()">
+  <div class="modal-sheet" style="max-width:380px;">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title">Banner Update Restricted</span>
+      <button class="modal-close-btn" onclick="closeBannerCooldown()"><i class="ph-bold ph-x"></i></button>
+    </div>
+    <div style="padding:20px 20px 28px;text-align:center;">
+      <div style="width:52px;height:52px;border-radius:50%;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+        <i class="ph-bold ph-lock" style="font-size:22px;color:rgba(239,68,68,0.7);"></i>
+      </div>
+      <p style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px;">You can only change your banner once every 30 days.</p>
+      <p style="font-size:12px;color:var(--text-3);line-height:1.6;margin-bottom:16px;" id="cooldownMessage"></p>
+      <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:10px;padding:12px 16px;margin-bottom:4px;">
+        <p style="font-size:10px;color:rgba(245,158,11,0.6);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Next allowed date</p>
+        <p style="font-size:15px;font-weight:700;color:var(--gold);font-family:var(--font-display);" id="cooldownNextDate">—</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
      FOLLOWING / FOLLOWERS MODAL
 ══════════════════════════════════ -->
 <div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
@@ -2619,6 +2858,9 @@ function applyUserData(d, user) {
     fallback.style.display = 'none';
   }
 
+  // Banner image
+  applyBannerImage(d);
+
   // Fallback initial
   const initial = (d.fullName || d.nickname || user.email || 'U')[0].toUpperCase();
   const fallback = document.getElementById('avatarFallback');
@@ -2701,8 +2943,9 @@ function applyUserData(d, user) {
   buildChips(d);
 
   // Status
-  window._currentUid  = user.uid;
-  window._userDocRef  = doc(db, 'users', user.uid);
+  window._currentUid       = user.uid;
+  window._currentUserEmail = user.email || '';
+  window._userDocRef       = doc(db, 'users', user.uid);
   fetchAndApplyStatus(user.uid);
   fetchAndApplyBio(user.uid);
   loadActivityHistory(user.uid);
@@ -2818,6 +3061,264 @@ async function uploadAvatarToCloudinary(file) {
   const data = await res.json();
   if (!data.secure_url) throw new Error('No URL returned from Cloudinary');
   return data.secure_url;
+}
+
+// ══════════════════════════════════════════════════════
+// BANNER UPLOAD — Cloudinary + Firestore + 30-day cooldown
+// ══════════════════════════════════════════════════════
+const BANNER_COOLDOWN_DAYS = 30;
+const DEV_BYPASS_EMAIL     = 'ewm24k@gmail.com'; // no cooldown for this account
+
+// Preset definitions — maps key → CSS class + Firestore value
+const BANNER_PRESETS = {
+  default:  { cls: 'banner-preset-default',  label: 'T1ERA Default' },
+  midnight: { cls: 'banner-preset-midnight', label: 'Midnight Blue'  },
+  cyber:    { cls: 'banner-preset-cyber',    label: 'Cyber Grid'     },
+  pinky:    { cls: 'banner-preset-pinky',    label: 'Pinky Vibe'     },
+};
+
+// ── OPEN BANNER OPTIONS MODAL ──
+window.handleBannerClick = function() {
+  if (!window._currentUid) return;
+  // Mark currently active preset in the options grid
+  _refreshBannerOptionsUI();
+  const overlay = document.getElementById('bannerOptionsOverlay');
+  overlay.style.display = 'flex';
+  requestAnimationFrame(() => overlay.classList.add('active'));
+};
+
+window.closeBannerOptions = function() {
+  const overlay = document.getElementById('bannerOptionsOverlay');
+  overlay.classList.remove('active');
+  setTimeout(() => { overlay.style.display = 'none'; }, 300);
+};
+
+function _refreshBannerOptionsUI() {
+  const current = window._currentBannerPreset || 'default';
+  Object.keys(BANNER_PRESETS).forEach(key => {
+    const card = document.getElementById(`bopt-${key}`);
+    if (card) card.classList.toggle('active', key === current);
+  });
+}
+
+// ── SELECT A PRESET DESIGN ──
+window.selectBannerPreset = async function(preset) {
+  if (!window._userDocRef) return;
+
+  // Apply visually immediately
+  _applyBannerPresetToDOM(preset);
+  window._currentBannerPreset = preset;
+  _refreshBannerOptionsUI();
+
+  // Save to Firestore — presets don't count against cooldown
+  try {
+    await setDoc(window._userDocRef, {
+      bannerImage: {
+        preset: preset,
+        url: null,         // clear any custom image
+        source: 'preset',
+        // no uploadedAt update — presets don't trigger cooldown
+      }
+    }, { merge: true });
+
+    await logActivity({
+      type: 'banner_update',
+      icon: 'ph-paint-brush',
+      iconColor: 'var(--purple)',
+      bgClass: 'purple-bg',
+      text: `<strong>Banner style changed</strong> — ${BANNER_PRESETS[preset].label}`,
+    });
+  } catch(e) {
+    console.warn('selectBannerPreset save error:', e);
+  }
+
+  closeBannerOptions();
+};
+
+function _applyBannerPresetToDOM(preset) {
+  const banner = document.getElementById('profileBanner');
+  const bgImg  = document.getElementById('bannerBgImg');
+  if (!banner) return;
+
+  // Remove all preset classes
+  Object.values(BANNER_PRESETS).forEach(p => banner.classList.remove(p.cls));
+
+  // Clear custom image layer
+  if (bgImg) bgImg.style.backgroundImage = '';
+
+  // Apply new preset class
+  const p = BANNER_PRESETS[preset];
+  if (p) banner.classList.add(p.cls);
+}
+
+// ── TRIGGER CUSTOM UPLOAD (from options modal) ──
+window.triggerBannerUpload = async function() {
+  closeBannerOptions();
+
+  // Dev bypass — no cooldown
+  const isDev = window._currentUserEmail === DEV_BYPASS_EMAIL;
+
+  if (isDev) {
+    document.getElementById('bannerFileInput').click();
+    return;
+  }
+
+  // Normal users — check cooldown
+  const { allowed, lastUpload, nextAllowed } = await checkBannerCooldown();
+  if (allowed) {
+    document.getElementById('bannerFileInput').click();
+  } else {
+    showBannerCooldownModal(lastUpload, nextAllowed);
+  }
+};
+
+// Check Firestore for last banner upload date
+async function checkBannerCooldown() {
+  try {
+    const snap = await getDoc(doc(db, 'users', window._currentUid));
+    if (!snap.exists()) return { allowed: true, lastUpload: null, nextAllowed: null };
+
+    const data = snap.data();
+    const uploadedAt = data.bannerImage?.uploadedAt;
+
+    // Never uploaded a custom photo — allow
+    if (!uploadedAt) return { allowed: true, lastUpload: null, nextAllowed: null };
+
+    const lastUpload = uploadedAt.toDate ? uploadedAt.toDate() : new Date(uploadedAt);
+    const nextAllowed = new Date(lastUpload);
+    nextAllowed.setDate(nextAllowed.getDate() + BANNER_COOLDOWN_DAYS);
+
+    const now = new Date();
+    const allowed = now >= nextAllowed;
+
+    return { allowed, lastUpload, nextAllowed };
+  } catch(e) {
+    console.warn('checkBannerCooldown error:', e);
+    return { allowed: true, lastUpload: null, nextAllowed: null };
+  }
+}
+
+// Show cooldown modal with reason and next allowed date
+function showBannerCooldownModal(lastUpload, nextAllowed) {
+  const msgEl      = document.getElementById('cooldownMessage');
+  const nextDateEl = document.getElementById('cooldownNextDate');
+  const overlay    = document.getElementById('bannerCooldownOverlay');
+
+  const lastStr = lastUpload.toLocaleDateString('en-MY', {
+    day: 'numeric', month: 'long', year: 'numeric'
+  });
+  const nextStr = nextAllowed.toLocaleDateString('en-MY', {
+    day: 'numeric', month: 'long', year: 'numeric'
+  });
+
+  const daysLeft = Math.ceil((nextAllowed - new Date()) / (1000 * 60 * 60 * 24));
+  msgEl.textContent = `You last changed your banner on ${lastStr}. You need to wait ${daysLeft} more day${daysLeft === 1 ? '' : 's'} before you can update it again.`;
+  nextDateEl.textContent = nextStr;
+
+  overlay.style.display = 'flex';
+  requestAnimationFrame(() => overlay.classList.add('active'));
+}
+
+window.closeBannerCooldown = function() {
+  const overlay = document.getElementById('bannerCooldownOverlay');
+  overlay.classList.remove('active');
+  setTimeout(() => { overlay.style.display = 'none'; }, 300);
+};
+
+// Called when user picks a banner file
+window.handleBannerChange = async function(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  if (!file.type.startsWith('image/')) {
+    alert('Please select an image file.');
+    input.value = '';
+    return;
+  }
+
+  if (file.size > 3 * 1024 * 1024) {
+    alert('Banner image must be under 3MB. Please choose a smaller or compressed image.');
+    input.value = '';
+    return;
+  }
+
+  // Dev bypass — skip double-check
+  const isDev = window._currentUserEmail === DEV_BYPASS_EMAIL;
+  if (!isDev) {
+    const { allowed } = await checkBannerCooldown();
+    if (!allowed) { input.value = ''; return; }
+  }
+
+  const uploadOverlay = document.getElementById('bannerUploadOverlay');
+  uploadOverlay.classList.add('active');
+
+  try {
+    const url = await uploadBannerToCloudinary(file);
+
+    await setDoc(window._userDocRef, {
+      bannerImage: {
+        url: url,
+        preset: null,       // clear any preset
+        source: 'cloudinary',
+        uploadedAt: serverTimestamp()   // only custom uploads set this timestamp
+      }
+    }, { merge: true });
+
+    await logActivity({
+      type: 'banner_update',
+      icon: 'ph-image',
+      iconColor: 'var(--pink-2)',
+      bgClass: 'pink-bg',
+      text: '<strong>Banner photo updated</strong>',
+    });
+
+    window.location.reload();
+
+  } catch(e) {
+    console.error('Banner upload error:', e);
+    alert('Banner upload failed — please try again.');
+    uploadOverlay.classList.remove('active');
+    input.value = '';
+  }
+};
+
+async function uploadBannerToCloudinary(file) {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('upload_preset', CLOUDINARY_PRESET);
+  formData.append('folder', `t1era/banners/${window._currentUid}`);
+  formData.append('public_id', 'banner');
+
+  const res = await fetch(
+    `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`,
+    { method: 'POST', body: formData }
+  );
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error?.message || `Cloudinary error ${res.status}`);
+  }
+
+  const data = await res.json();
+  if (!data.secure_url) throw new Error('No URL returned from Cloudinary');
+  return data.secure_url;
+}
+
+// Apply saved banner on page load (called from applyUserData)
+function applyBannerImage(d) {
+  const bannerData = d.bannerImage;
+  if (!bannerData) return;
+
+  if (bannerData.url && bannerData.source === 'cloudinary') {
+    // Custom uploaded photo
+    const layer = document.getElementById('bannerBgImg');
+    if (layer) layer.style.backgroundImage = `url('${bannerData.url}')`;
+    window._currentBannerPreset = null;
+  } else if (bannerData.preset) {
+    // Preset design
+    _applyBannerPresetToDOM(bannerData.preset);
+    window._currentBannerPreset = bannerData.preset;
+  }
 }
 
 // ── STATUS INPUT HANDLER ──
