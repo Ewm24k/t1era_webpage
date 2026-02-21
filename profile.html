@@ -692,6 +692,24 @@ body {
   flex-shrink: 0;
 }
 .status-wrap:focus-within .status-save-btn { opacity: 1; }
+.status-save-btn.saving { opacity: 1 !important; background: var(--purple); cursor: wait; }
+.status-save-btn.saved  { opacity: 1 !important; background: var(--green); }
+.status-save-btn.error  { opacity: 1 !important; background: rgba(239,68,68,0.8); }
+
+.status-toast {
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  padding: 5px 12px;
+  border-radius: 8px;
+  margin-top: 6px;
+  display: none;
+  align-items: center;
+  gap: 6px;
+}
+.status-toast.show { display: flex; }
+.status-toast.success { background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.3); color: var(--green); }
+.status-toast.fail    { background: rgba(239,68,68,0.08);  border: 1px solid rgba(239,68,68,0.25); color: rgba(239,68,68,0.85); }
 
 .status-char-count {
   font-size: 10px;
@@ -1783,6 +1801,7 @@ body {
           <button class="status-pick-btn" onclick="setQuickStatus('📚 Study')">📚 Study</button>
         </div>
         <div class="status-char-count" id="statusCharCount">0 / 60</div>
+        <div class="status-toast" id="statusToast"></div>
       </div>
     </div>
   </div>
@@ -2293,24 +2312,87 @@ window.setQuickStatus = function(text) {
   window.onStatusInput(input);
 };
 
+// ── SHOW STATUS TOAST ──
+function showStatusToast(msg, type) {
+  const toast = document.getElementById('statusToast');
+  if (!toast) return;
+  toast.textContent = msg;
+  toast.className = 'status-toast show ' + type;
+  clearTimeout(toast._hideTimer);
+  toast._hideTimer = setTimeout(() => {
+    toast.className = 'status-toast';
+  }, 3500);
+}
+
 // ── SAVE STATUS ──
 window.saveStatus = async function() {
-  const val = document.getElementById('statusInput').value.trim();
-  document.getElementById('statusInput').blur();
-  if (window._userDocRef) {
+  const input = document.getElementById('statusInput');
+  const btn   = document.querySelector('.status-save-btn');
+  const val   = input.value.trim();
+
+  // Guard: not signed in
+  if (!window._userDocRef) {
+    showStatusToast('✗ Not signed in — please sign in to save your status.', 'fail');
+    return;
+  }
+
+  // Set button to saving state — keep visible while async runs
+  btn.disabled = true;
+  btn.classList.add('saving');
+  btn.textContent = 'Saving…';
+
+  let saved = false;
+
+  try {
+    // Primary: setDoc with merge so it creates field if not existing
+    await setDoc(window._userDocRef, { userStatus: val }, { merge: true });
+    saved = true;
+  } catch(e) {
+    // Fallback: updateDoc
     try {
-      await setDoc(window._userDocRef, { userStatus: val }, { merge: true });
+      await updateDoc(window._userDocRef, { userStatus: val });
+      saved = true;
+    } catch(e2) {
+      console.warn('saveStatus error:', e2);
+    }
+  }
+
+  if (saved) {
+    // Log activity only after confirmed save
+    try {
       await logActivity(window._userDocRef, {
         type: 'status_update',
         icon: 'ph-chat-circle-dots',
         iconColor: 'var(--pink-2)',
         bgClass: 'pink-bg',
         text: `<strong>Status updated</strong> — "${val}"`,
-        timestamp: serverTimestamp()
       });
     } catch(e) {
-      try { await updateDoc(window._userDocRef, { 'userStatus': val }); } catch(e2) {}
+      console.warn('logActivity error after save:', e);
     }
+
+    btn.classList.remove('saving');
+    btn.classList.add('saved');
+    btn.textContent = '✓ Saved';
+    showStatusToast('✓ Status saved successfully.', 'success');
+
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.classList.remove('saved');
+      btn.textContent = 'Save';
+      input.blur();
+    }, 2000);
+  } else {
+    btn.classList.remove('saving');
+    btn.classList.add('error');
+    btn.textContent = '✗ Failed';
+    showStatusToast('✗ Failed to save — check your connection and try again.', 'fail');
+
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.classList.remove('error');
+      btn.textContent = 'Save';
+    }, 3000);
   }
 };
 
