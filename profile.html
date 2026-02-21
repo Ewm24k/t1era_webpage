@@ -693,6 +693,55 @@ body {
 }
 .status-wrap:focus-within .status-save-btn { opacity: 1; }
 
+.status-char-count {
+  font-size: 10px;
+  color: var(--text-3);
+  font-family: var(--font-mono);
+  text-align: right;
+  margin-top: 3px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.status-wrap:focus-within .status-char-count { opacity: 1; }
+.status-char-count.near-limit { color: var(--orange); }
+.status-char-count.at-limit { color: rgba(239,68,68,0.8); }
+
+.status-quick-picks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 7px;
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: opacity 0.2s, max-height 0.25s;
+}
+.status-wrap:focus-within .status-quick-picks {
+  opacity: 1;
+  max-height: 80px;
+}
+.status-pick-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 100px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-3);
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.status-pick-btn:hover {
+  background: rgba(194,24,91,0.1);
+  border-color: rgba(194,24,91,0.3);
+  color: var(--pink-2);
+}
+
 /* ═══════════════════════════════════════════
    SOCIAL STATS ROW
 ═══════════════════════════════════════════ */
@@ -1708,7 +1757,7 @@ body {
       <!-- Email -->
       <div class="identity-email">
         <i class="ph-bold ph-envelope-simple"></i>
-        <span id="displayEmail">ewm24k@gmail.com</span>
+        <span id="displayEmail"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="1c796b712e28775c7b717d7570327f7371">[email&#160;protected]</a></span>
       </div>
 
       <!-- Status -->
@@ -1721,10 +1770,19 @@ body {
             id="statusInput"
             placeholder="What's your status right now…"
             value=""
-            maxlength="80"
+            maxlength="60"
+            oninput="onStatusInput(this)"
           />
           <button class="status-save-btn" onclick="saveStatus()">Save</button>
         </div>
+        <div class="status-quick-picks" id="statusQuickPicks">
+          <button class="status-pick-btn" onclick="setQuickStatus('😊 Happy')">😊 Happy</button>
+          <button class="status-pick-btn" onclick="setQuickStatus('🔴 Busy')">🔴 Busy</button>
+          <button class="status-pick-btn" onclick="setQuickStatus('💼 Working with T1ERA')">💼 Working with T1ERA</button>
+          <button class="status-pick-btn" onclick="setQuickStatus('🔕 Do not disturb')">🔕 Do not disturb</button>
+          <button class="status-pick-btn" onclick="setQuickStatus('📚 Study')">📚 Study</button>
+        </div>
+        <div class="status-char-count" id="statusCharCount">0 / 60</div>
       </div>
     </div>
   </div>
@@ -1815,7 +1873,7 @@ body {
 
     <!-- TAB 1: ACTIVITY -->
     <div class="tab-panel" id="tab-1">
-      <div class="activity-feed">
+      <div class="activity-feed" id="activityFeed">
 
         <div class="activity-item">
           <div class="activity-line"></div>
@@ -2029,10 +2087,10 @@ body {
   <button class="edit-toast-save" onclick="exitEditMode()">Done</button>
 </div>
 
-<script type="module">
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="module">
 import { initializeApp }    from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-import { getFirestore, doc, getDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import { getFirestore, doc, getDoc, updateDoc, setDoc, serverTimestamp, collection, addDoc, query, orderBy, limit, getDocs } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 const firebaseConfig = {
   apiKey:            "AIzaSyBnt9mbb8LdMVeguSHUmS20L6uBHIfxwAs",
@@ -2183,6 +2241,8 @@ function applyUserData(d, user) {
 
   // Status
   window._userDocRef = doc(db, 'users', user.uid);
+  fetchAndApplyStatus(user.uid);
+  loadActivityHistory(user.uid);
 }
 
 function loadDemoData() {
@@ -2215,14 +2275,107 @@ function capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 }
 
+// ── STATUS INPUT HANDLER ──
+window.onStatusInput = function(input) {
+  const len = input.value.length;
+  const counter = document.getElementById('statusCharCount');
+  counter.textContent = `${len} / 60`;
+  counter.classList.remove('near-limit', 'at-limit');
+  if (len >= 60) counter.classList.add('at-limit');
+  else if (len >= 45) counter.classList.add('near-limit');
+};
+
+// ── SET QUICK STATUS ──
+window.setQuickStatus = function(text) {
+  const input = document.getElementById('statusInput');
+  input.value = text.slice(0, 60);
+  input.focus();
+  window.onStatusInput(input);
+};
+
 // ── SAVE STATUS ──
 window.saveStatus = async function() {
   const val = document.getElementById('statusInput').value.trim();
   document.getElementById('statusInput').blur();
   if (window._userDocRef) {
-    try { await updateDoc(window._userDocRef, { 'userStatus': val }); } catch(e) {}
+    try {
+      await setDoc(window._userDocRef, { userStatus: val }, { merge: true });
+      await logActivity(window._userDocRef, {
+        type: 'status_update',
+        icon: 'ph-chat-circle-dots',
+        iconColor: 'var(--pink-2)',
+        bgClass: 'pink-bg',
+        text: `<strong>Status updated</strong> — "${val}"`,
+        timestamp: serverTimestamp()
+      });
+    } catch(e) {
+      try { await updateDoc(window._userDocRef, { 'userStatus': val }); } catch(e2) {}
+    }
   }
 };
+
+// ── FETCH AND APPLY STATUS ──
+async function fetchAndApplyStatus(uid) {
+  try {
+    const snap = await getDoc(doc(db, 'users', uid));
+    if (snap.exists()) {
+      const d = snap.data();
+      const statusVal = d.userStatus || '';
+      const input = document.getElementById('statusInput');
+      if (input) {
+        input.value = statusVal;
+        window.onStatusInput(input);
+      }
+    }
+  } catch(e) {
+    console.warn('fetchAndApplyStatus error:', e);
+  }
+}
+
+// ── LOG ACTIVITY ──
+async function logActivity(userDocRef, activityData) {
+  try {
+    const activityCol = collection(userDocRef, 'activityHistory');
+    await addDoc(activityCol, {
+      ...activityData,
+      createdAt: serverTimestamp()
+    });
+  } catch(e) {
+    console.warn('logActivity error:', e);
+  }
+}
+
+// ── LOAD ACTIVITY HISTORY ──
+async function loadActivityHistory(uid) {
+  try {
+    const activityCol = collection(doc(db, 'users', uid), 'activityHistory');
+    const q = query(activityCol, orderBy('createdAt', 'desc'), limit(20));
+    const snap = await getDocs(q);
+    if (snap.empty) return;
+    const feed = document.getElementById('activityFeed');
+    snap.forEach((docSnap) => {
+      const a = docSnap.data();
+      const item = document.createElement('div');
+      item.className = 'activity-item';
+      const timeStr = a.createdAt?.toDate
+        ? a.createdAt.toDate().toLocaleString('en-MY', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' })
+        : 'Just now';
+      item.innerHTML = `
+        <div class="activity-line"></div>
+        <div class="activity-icon-wrap ${a.bgClass || ''}">
+          <i class="ph-bold ${a.icon || 'ph-activity'}" style="color:${a.iconColor || 'var(--text-3)'};font-size:14px;"></i>
+        </div>
+        <div class="activity-body">
+          <div class="activity-text">${a.text || ''}</div>
+          <div class="activity-time">${timeStr}</div>
+        </div>
+      `;
+      feed.insertBefore(item, feed.firstChild);
+    });
+  } catch(e) {
+    console.warn('loadActivityHistory error:', e);
+  }
+}
 </script>
 
 <script>
@@ -2310,14 +2463,4 @@ window.closeModal = function() {
   document.body.style.overflow = '';
 };
 
-window.handleOverlayClick = function(e) {
-  if (e.target === document.getElementById('modalOverlay')) closeModal();
-};
-
-// ESC closes modal
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') closeModal();
-});
-</script>
-</body>
-</html>
+window.handleOverlayClick = function(e)
