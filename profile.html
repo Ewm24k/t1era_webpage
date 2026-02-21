@@ -2463,4 +2463,9 @@ window.closeModal = function() {
   document.body.style.overflow = '';
 };
 
-window.handleOverlayClick = function(e)
+window.handleOverlayClick = function(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+};
+</script>
+</body>
+</html>
