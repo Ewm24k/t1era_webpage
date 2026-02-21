@@ -134,23 +134,23 @@ body {
 .banner-preset-default {
   background:
     linear-gradient(135deg, rgba(194,24,91,0.18) 0%, rgba(139,92,246,0.12) 50%, rgba(0,0,0,0.6) 100%),
-    repeating-linear-gradient(60deg, transparent, transparent 40px, rgba(255,255,255,0.012) 40px, rgba(255,255,255,0.012) 41px);
-  background-color: #0d0009;
+    repeating-linear-gradient(60deg, transparent, transparent 40px, rgba(255,255,255,0.012) 40px, rgba(255,255,255,0.012) 41px) !important;
+  background-color: #0d0009 !important;
 }
 .banner-preset-midnight {
-  background: linear-gradient(135deg, #0f0c29 0%, #1a1a2e 40%, #16213e 70%, #0f3460 100%);
-  background-color: #0f0c29;
+  background: linear-gradient(135deg, #0f0c29 0%, #1a1a2e 40%, #16213e 70%, #0f3460 100%) !important;
+  background-color: #0f0c29 !important;
 }
 .banner-preset-cyber {
   background:
     linear-gradient(135deg, rgba(0,255,136,0.12) 0%, rgba(0,212,255,0.1) 50%, rgba(0,0,0,0.7) 100%),
     repeating-linear-gradient(90deg, transparent, transparent 60px, rgba(0,255,136,0.03) 60px, rgba(0,255,136,0.03) 61px),
-    repeating-linear-gradient(0deg, transparent, transparent 60px, rgba(0,212,255,0.03) 60px, rgba(0,212,255,0.03) 61px);
-  background-color: #020a12;
+    repeating-linear-gradient(0deg, transparent, transparent 60px, rgba(0,212,255,0.03) 60px, rgba(0,212,255,0.03) 61px) !important;
+  background-color: #020a12 !important;
 }
 .banner-preset-pinky {
-  background: linear-gradient(135deg, #ff9ec4 0%, #ffd6e8 30%, #fff0f6 55%, #ffc2dd 80%, #ff85b3 100%);
-  background-color: #ffb3d1;
+  background: linear-gradient(135deg, #ff9ec4 0%, #ffd6e8 30%, #fff0f6 55%, #ffc2dd 80%, #ff85b3 100%) !important;
+  background-color: #ffb3d1 !important;
 }
 
 /* ═══════════════════════════════════════════
@@ -273,6 +273,7 @@ body {
 }
 .banner-option-card:hover { transform: scale(1.02); }
 .banner-option-card.active { border-color: var(--pink-2); }
+.banner-option-card.pending { border-color: var(--purple); box-shadow: 0 0 0 2px rgba(139,92,246,0.25); }
 
 .banner-option-preview {
   height: 64px;
@@ -2697,34 +2698,34 @@ body {
     <div class="banner-options-grid">
 
       <!-- Option 1: Default -->
-      <div class="banner-option-card" id="bopt-default" onclick="selectBannerPreset('default')">
+      <div class="banner-option-card" id="bopt-default" onclick="pendingBannerSelect('default', this)">
         <div class="banner-option-active-tick"><i class="ph-bold ph-check"></i></div>
         <div class="banner-option-preview prev-default"></div>
         <div class="banner-option-label">T1ERA Default</div>
       </div>
 
       <!-- Option 2: Midnight -->
-      <div class="banner-option-card" id="bopt-midnight" onclick="selectBannerPreset('midnight')">
+      <div class="banner-option-card" id="bopt-midnight" onclick="pendingBannerSelect('midnight', this)">
         <div class="banner-option-active-tick"><i class="ph-bold ph-check"></i></div>
         <div class="banner-option-preview prev-midnight"></div>
         <div class="banner-option-label">Midnight Blue</div>
       </div>
 
       <!-- Option 3: Cyber -->
-      <div class="banner-option-card" id="bopt-cyber" onclick="selectBannerPreset('cyber')">
+      <div class="banner-option-card" id="bopt-cyber" onclick="pendingBannerSelect('cyber', this)">
         <div class="banner-option-active-tick"><i class="ph-bold ph-check"></i></div>
         <div class="banner-option-preview prev-cyber"></div>
         <div class="banner-option-label">Cyber Grid</div>
       </div>
 
       <!-- Option 4: Pinky -->
-      <div class="banner-option-card" id="bopt-pinky" onclick="selectBannerPreset('pinky')">
+      <div class="banner-option-card" id="bopt-pinky" onclick="pendingBannerSelect('pinky', this)">
         <div class="banner-option-active-tick"><i class="ph-bold ph-check"></i></div>
         <div class="banner-option-preview prev-pinky"></div>
         <div class="banner-option-label">Pinky Vibe</div>
       </div>
 
-      <!-- Option 5: Upload custom (spans full width) -->
+      <!-- Option 5: Upload custom -->
       <div class="banner-option-card" id="bopt-upload" onclick="triggerBannerUpload()" style="grid-column:1/-1;">
         <div class="banner-option-preview prev-upload">
           <i class="ph-bold ph-upload-simple"></i>
@@ -2733,6 +2734,20 @@ body {
         <div class="banner-option-label">Custom Photo · Max 3MB · Best 1500×500px</div>
       </div>
 
+    </div>
+
+    <!-- Apply footer -->
+    <div style="padding: 0 20px 8px; display:flex; gap:10px;">
+      <button
+        id="bannerApplyBtn"
+        onclick="applyPendingBanner()"
+        disabled
+        style="flex:1;padding:10px;border-radius:10px;background:var(--pink);border:none;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font-body);letter-spacing:0.03em;opacity:0.4;transition:opacity 0.2s,background 0.2s;"
+      >Apply</button>
+      <button
+        onclick="closeBannerOptions()"
+        style="padding:10px 18px;border-radius:10px;background:var(--bg-3);border:1px solid var(--border);color:var(--text-3);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font-body);"
+      >Cancel</button>
     </div>
   </div>
 </div>
@@ -3085,13 +3100,17 @@ const BANNER_PRESETS = {
 // ── OPEN BANNER OPTIONS MODAL ──
 window.handleBannerClick = function() {
   if (!window._currentUid) return;
+  window._pendingBannerPreset = null; // reset pending
   _refreshBannerOptionsUI();
-  const overlay = document.getElementById('bannerOptionsOverlay');
-  overlay.classList.add('open');
+  // reset apply button
+  const applyBtn = document.getElementById('bannerApplyBtn');
+  if (applyBtn) { applyBtn.disabled = true; applyBtn.style.opacity = '0.4'; }
+  document.getElementById('bannerOptionsOverlay').classList.add('open');
 };
 
 window.closeBannerOptions = function() {
   document.getElementById('bannerOptionsOverlay').classList.remove('open');
+  window._pendingBannerPreset = null;
 };
 
 function _refreshBannerOptionsUI() {
@@ -3102,23 +3121,39 @@ function _refreshBannerOptionsUI() {
   });
 }
 
-// ── SELECT A PRESET DESIGN ──
-window.selectBannerPreset = async function(preset) {
-  if (!window._userDocRef) return;
+// Step 1: user clicks a card — highlight it, enable Apply button
+window.pendingBannerSelect = function(preset, cardEl) {
+  window._pendingBannerPreset = preset;
+
+  // Highlight selected card
+  document.querySelectorAll('.banner-option-card').forEach(c => c.classList.remove('pending'));
+  if (cardEl) cardEl.classList.add('pending');
+
+  // Enable apply button
+  const applyBtn = document.getElementById('bannerApplyBtn');
+  if (applyBtn) { applyBtn.disabled = false; applyBtn.style.opacity = '1'; }
+};
+
+// Step 2: user clicks Apply — save and apply
+window.applyPendingBanner = async function() {
+  const preset = window._pendingBannerPreset;
+  if (!preset || !window._userDocRef) return;
+
+  const applyBtn = document.getElementById('bannerApplyBtn');
+  if (applyBtn) { applyBtn.textContent = 'Applying…'; applyBtn.disabled = true; }
 
   // Apply visually immediately
   _applyBannerPresetToDOM(preset);
   window._currentBannerPreset = preset;
   _refreshBannerOptionsUI();
 
-  // Save to Firestore — presets don't count against cooldown
+  // Save to Firestore
   try {
     await setDoc(window._userDocRef, {
       bannerImage: {
         preset: preset,
-        url: null,         // clear any custom image
+        url: null,
         source: 'preset',
-        // no uploadedAt update — presets don't trigger cooldown
       }
     }, { merge: true });
 
@@ -3139,8 +3174,9 @@ window.selectBannerPreset = async function(preset) {
       bgClass: 'purple-bg',
       text: `<strong>Banner style changed</strong> — ${BANNER_PRESETS[preset].label}`,
     }, nowStr);
+
   } catch(e) {
-    console.warn('selectBannerPreset save error:', e);
+    console.warn('applyPendingBanner save error:', e);
   }
 
   closeBannerOptions();
