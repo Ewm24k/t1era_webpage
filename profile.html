@@ -1894,7 +1894,7 @@ body {
     <div class="tab-panel" id="tab-1">
       <div class="activity-feed" id="activityFeed">
 
-        <div class="activity-item">
+        <div class="activity-item static-activity-item">
           <div class="activity-line"></div>
           <div class="activity-icon-wrap pink-bg"><i class="ph-bold ph-user-circle-plus" style="color:var(--pink-2);font-size:14px;"></i></div>
           <div class="activity-body">
@@ -1903,7 +1903,7 @@ body {
           </div>
         </div>
 
-        <div class="activity-item">
+        <div class="activity-item static-activity-item">
           <div class="activity-line"></div>
           <div class="activity-icon-wrap purple-bg"><i class="ph-bold ph-star" style="color:var(--purple);font-size:14px;"></i></div>
           <div class="activity-body">
@@ -1912,7 +1912,7 @@ body {
           </div>
         </div>
 
-        <div class="activity-item">
+        <div class="activity-item static-activity-item">
           <div class="activity-line"></div>
           <div class="activity-icon-wrap green-bg"><i class="ph-bold ph-check-circle" style="color:var(--green);font-size:14px;"></i></div>
           <div class="activity-body">
@@ -1921,7 +1921,7 @@ body {
           </div>
         </div>
 
-        <div class="activity-item">
+        <div class="activity-item static-activity-item">
           <div class="activity-line"></div>
           <div class="activity-icon-wrap">
             <i class="ph-bold ph-lightning" style="color:var(--gold);font-size:14px;"></i>
@@ -1932,7 +1932,7 @@ body {
           </div>
         </div>
 
-        <div class="activity-item">
+        <div class="activity-item static-activity-item">
           <div class="activity-line"></div>
           <div class="activity-icon-wrap">
             <i class="ph-bold ph-currency-dollar" style="color:var(--orange);font-size:14px;"></i>
@@ -2427,7 +2427,7 @@ function appendActivityItemToFeed(a, timeStr) {
   const feed = document.getElementById('activityFeed');
   if (!feed) return;
   const item = document.createElement('div');
-  item.className = 'activity-item';
+  item.className = 'activity-item db-activity-item';
   item.innerHTML = `
     <div class="activity-line"></div>
     <div class="activity-icon-wrap ${a.bgClass || ''}">
@@ -2438,8 +2438,10 @@ function appendActivityItemToFeed(a, timeStr) {
       <div class="activity-time">${timeStr}</div>
     </div>
   `;
+  // Insert at the very top of the feed, above static items
   feed.insertBefore(item, feed.firstChild);
 }
+window.appendActivityItemToFeed = appendActivityItemToFeed;
 
 // ── LOG ACTIVITY ──
 async function logActivity(activityData) {
@@ -2458,22 +2460,36 @@ async function logActivity(activityData) {
 // ── LOAD ACTIVITY HISTORY ──
 async function loadActivityHistory(uid) {
   try {
+    // Remove any previously injected DB items to avoid duplicates on refresh
+    const feed = document.getElementById('activityFeed');
+    if (!feed) return;
+    feed.querySelectorAll('.db-activity-item').forEach(el => el.remove());
+
     const activityCol = collection(db, 'users', uid, 'activityHistory');
     const q = query(activityCol, orderBy('createdAt', 'desc'), limit(20));
     const snap = await getDocs(q);
     if (snap.empty) return;
-    const feed = document.getElementById('activityFeed');
+
+    // snap is desc (newest first) — insertBefore firstChild each time
+    // so first item inserted = newest, sits at top; subsequent inserts go above it
+    // To preserve newest-at-top order we collect into array and insert in reverse
+    const items = [];
     snap.forEach((docSnap) => {
       const a = docSnap.data();
       const timeStr = typeof a.createdAt?.toDate === 'function'
         ? a.createdAt.toDate().toLocaleString('en-MY', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' })
         : 'Just now';
-      appendActivityItemToFeed(a, timeStr);
+      items.push({ a, timeStr });
     });
+    // Insert oldest-first so newest ends up at top via insertBefore(firstChild)
+    for (let i = items.length - 1; i >= 0; i--) {
+      appendActivityItemToFeed(items[i].a, items[i].timeStr);
+    }
   } catch(e) {
     console.warn('loadActivityHistory error:', e);
   }
 }
+window.loadActivityHistory = loadActivityHistory;
 </script>
 
 <script>
@@ -2516,6 +2532,10 @@ window.switchTab = function(idx, btn) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById(`tab-${idx}`).classList.add('active');
+  // Auto-refresh Activity feed every time the Activity tab is clicked
+  if (idx === 1 && window._currentUid && typeof window.loadActivityHistory === 'function') {
+    window.loadActivityHistory(window._currentUid);
+  }
 };
 
 // ══ FOLLOWING / FOLLOWERS MODAL ══
