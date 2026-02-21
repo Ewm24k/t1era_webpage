@@ -2041,14 +2041,14 @@ body {
             maxlength="60"
             oninput="onStatusInput(this)"
           />
-          <button class="status-save-btn" onclick="saveStatus()">Save</button>
+          <button class="status-save-btn" onmousedown="event.preventDefault()" onclick="saveStatus()">Save</button>
         </div>
         <div class="status-quick-picks" id="statusQuickPicks">
-          <button class="status-pick-btn" onclick="setQuickStatus('😊 Happy')">😊 Happy</button>
-          <button class="status-pick-btn" onclick="setQuickStatus('🔴 Busy')">🔴 Busy</button>
-          <button class="status-pick-btn" onclick="setQuickStatus('💼 Working with T1ERA')">💼 Working with T1ERA</button>
-          <button class="status-pick-btn" onclick="setQuickStatus('🔕 Do not disturb')">🔕 Do not disturb</button>
-          <button class="status-pick-btn" onclick="setQuickStatus('📚 Study')">📚 Study</button>
+          <button class="status-pick-btn" onmousedown="event.preventDefault()" onclick="setQuickStatus('😊 Happy')">😊 Happy</button>
+          <button class="status-pick-btn" onmousedown="event.preventDefault()" onclick="setQuickStatus('🔴 Busy')">🔴 Busy</button>
+          <button class="status-pick-btn" onmousedown="event.preventDefault()" onclick="setQuickStatus('💼 Working with T1ERA')">💼 Working with T1ERA</button>
+          <button class="status-pick-btn" onmousedown="event.preventDefault()" onclick="setQuickStatus('🔕 Do not disturb')">🔕 Do not disturb</button>
+          <button class="status-pick-btn" onmousedown="event.preventDefault()" onclick="setQuickStatus('📚 Study')">📚 Study</button>
         </div>
         <div class="status-char-count" id="statusCharCount">0 / 60</div>
         <div class="status-toast" id="statusToast"></div>
@@ -2655,6 +2655,24 @@ window.saveStatus = async function() {
   }
 };
 
+// ── FETCH AND APPLY STATUS ──
+async function fetchAndApplyStatus(uid) {
+  try {
+    const snap = await getDoc(doc(db, 'users', uid));
+    if (snap.exists()) {
+      const d = snap.data();
+      const statusVal = d.userStatus || '';
+      const input = document.getElementById('statusInput');
+      if (input) {
+        input.value = statusVal;
+        window.onStatusInput(input);
+      }
+    }
+  } catch(e) {
+    console.warn('fetchAndApplyStatus error:', e);
+  }
+}
+
 // ── FETCH AND APPLY BIO ──
 async function fetchAndApplyBio(uid) {
   try {
@@ -2872,21 +2890,6 @@ window.saveBio = async function() {
     }, 3000);
   }
 };
-  try {
-    const snap = await getDoc(doc(db, 'users', uid));
-    if (snap.exists()) {
-      const d = snap.data();
-      const statusVal = d.userStatus || '';
-      const input = document.getElementById('statusInput');
-      if (input) {
-        input.value = statusVal;
-        window.onStatusInput(input);
-      }
-    }
-  } catch(e) {
-    console.warn('fetchAndApplyStatus error:', e);
-  }
-}
 
 // ── APPEND ACTIVITY ITEM TO FEED (live DOM update) ──
 function appendActivityItemToFeed(a, timeStr) {
