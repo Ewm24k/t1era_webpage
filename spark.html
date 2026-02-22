@@ -875,6 +875,72 @@ a{text-decoration:none;color:inherit}
   margin-left:auto;font-size:10px;
   color:var(--text-3);font-family:var(--f-mono);white-space:nowrap;
 }
+
+/* ══════════════════════════════════════════
+   PAGE-LEVEL SKELETON OVERLAY
+══════════════════════════════════════════ */
+.sk-pulse{
+  background:var(--bg-4);border-radius:6px;
+  overflow:hidden;position:relative;
+}
+.sk-pulse::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,0.06) 50%,transparent 100%);
+  animation:shimmer 1.4s infinite;
+}
+.sk-circle{border-radius:50%}
+
+/* left sidebar skeleton */
+.sk-snav-item{
+  height:42px;border-radius:var(--r);margin-bottom:4px;
+}
+.sk-post-btn{
+  height:42px;border-radius:100px;margin-top:14px;
+}
+
+/* center feed skeleton */
+.sk-compose{
+  height:60px;border-radius:0;margin-bottom:0;
+  border-bottom:1px solid var(--border);
+}
+.sk-card{
+  padding:16px 16px 12px;
+  border-bottom:1px solid var(--border);
+}
+.sk-card-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px}
+.sk-card-av{width:42px;height:42px;flex-shrink:0}
+.sk-card-meta{flex:1;display:flex;flex-direction:column;gap:8px;padding-top:4px}
+.sk-line{height:10px;border-radius:6px}
+.sk-line.w60{width:60%}
+.sk-line.w40{width:40%}
+.sk-line.w90{width:90%;height:12px;margin-left:54px}
+.sk-line.w70{width:70%;height:12px;margin-left:54px;margin-top:6px}
+.sk-card-acts{display:flex;gap:18px;margin-left:54px;margin-top:14px}
+.sk-act{width:40px;height:10px;border-radius:6px}
+
+/* right sidebar skeleton */
+.sk-widget{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--r-lg);padding:16px;margin-bottom:18px;
+}
+.sk-widget-title{height:8px;width:40%;border-radius:4px;margin-bottom:14px}
+.sk-wtf-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.sk-wtf-row:last-child{border-bottom:none}
+.sk-wtf-av{width:36px;height:36px;flex-shrink:0}
+.sk-wtf-info{flex:1;display:flex;flex-direction:column;gap:6px}
+.sk-wtf-name{height:10px;width:55%;border-radius:4px}
+.sk-wtf-sub{height:8px;width:35%;border-radius:4px}
+.sk-wtf-btn{width:52px;height:24px;border-radius:100px;flex-shrink:0}
+.sk-trd-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.sk-trd-row:last-child{border-bottom:none}
+.sk-trd-num{width:22px;height:18px;border-radius:4px;flex-shrink:0}
+.sk-trd-tag{height:12px;width:60%;border-radius:4px}
+
+/* hide/show helpers */
+.sk-page-overlay{display:contents}
+.sk-page-overlay.sk-hidden{display:none}
+.real-content{display:contents}
+.real-content.sk-hidden{display:none}
 </style>
 </head>
 <body>
@@ -904,16 +970,28 @@ a{text-decoration:none;color:inherit}
 
   <!-- ── LEFT SIDEBAR ── -->
   <aside class="sidebar-left">
-    <nav class="snav">
-      <a class="snav-item active" href="#"><i class="ph-bold ph-lightning"></i>Sparks Feed</a>
-      <a class="snav-item" href="#"><i class="ph-bold ph-fire"></i>Trending</a>
-      <a class="snav-item" href="#"><i class="ph-bold ph-chat-teardrop-dots"></i>Prompts</a>
-      <a class="snav-item" href="profile.html"><i class="ph-bold ph-user-circle"></i>My Profile</a>
-      <a class="snav-item" href="Pod-Workflow.html"><i class="ph-bold ph-squares-four"></i>Dashboard</a>
-    </nav>
-    <button class="snav-post-btn" onclick="openCompose()">
-      <i class="ph-bold ph-lightning"></i> New Spark
-    </button>
+    <!-- skeleton -->
+    <div class="sk-page-overlay" id="skLeft">
+      <div class="sk-pulse sk-snav-item"></div>
+      <div class="sk-pulse sk-snav-item"></div>
+      <div class="sk-pulse sk-snav-item"></div>
+      <div class="sk-pulse sk-snav-item"></div>
+      <div class="sk-pulse sk-snav-item"></div>
+      <div class="sk-pulse sk-post-btn"></div>
+    </div>
+    <!-- real -->
+    <div class="real-content sk-hidden" id="realLeft">
+      <nav class="snav">
+        <a class="snav-item active" href="#"><i class="ph-bold ph-lightning"></i>Sparks Feed</a>
+        <a class="snav-item" href="#"><i class="ph-bold ph-fire"></i>Trending</a>
+        <a class="snav-item" href="#"><i class="ph-bold ph-chat-teardrop-dots"></i>Prompts</a>
+        <a class="snav-item" href="profile.html"><i class="ph-bold ph-user-circle"></i>My Profile</a>
+        <a class="snav-item" href="Pod-Workflow.html"><i class="ph-bold ph-squares-four"></i>Dashboard</a>
+      </nav>
+      <button class="snav-post-btn" onclick="openCompose()">
+        <i class="ph-bold ph-lightning"></i> New Spark
+      </button>
+    </div>
   </aside>
 
   <!-- ── CENTER FEED ── -->
@@ -930,6 +1008,34 @@ a{text-decoration:none;color:inherit}
          TAB 0 — STANDARD SPARK
     ════════════════════════ -->
     <div class="tab-panel active" id="panel-0">
+
+      <!-- Center feed skeleton (shown until auth+data ready) -->
+      <div class="sk-page-overlay" id="skFeed">
+        <div class="sk-pulse sk-compose" style="margin:0;border-radius:0;height:64px;border-bottom:1px solid var(--border)"></div>
+        <div class="sk-card">
+          <div class="sk-card-head"><div class="sk-pulse sk-circle sk-card-av"></div><div class="sk-card-meta"><div class="sk-pulse sk-line w60"></div><div class="sk-pulse sk-line w40"></div></div></div>
+          <div class="sk-pulse sk-line w90"></div><div class="sk-pulse sk-line w70"></div>
+          <div class="sk-card-acts"><div class="sk-pulse sk-act"></div><div class="sk-pulse sk-act"></div><div class="sk-pulse sk-act"></div><div class="sk-pulse sk-act"></div></div>
+        </div>
+        <div class="sk-card">
+          <div class="sk-card-head"><div class="sk-pulse sk-circle sk-card-av"></div><div class="sk-card-meta"><div class="sk-pulse sk-line w60"></div><div class="sk-pulse sk-line w40"></div></div></div>
+          <div class="sk-pulse sk-line w90"></div><div class="sk-pulse sk-line w70"></div>
+          <div class="sk-card-acts"><div class="sk-pulse sk-act"></div><div class="sk-pulse sk-act"></div><div class="sk-pulse sk-act"></div><div class="sk-pulse sk-act"></div></div>
+        </div>
+        <div class="sk-card">
+          <div class="sk-card-head"><div class="sk-pulse sk-circle sk-card-av"></div><div class="sk-card-meta"><div class="sk-pulse sk-line w60"></div><div class="sk-pulse sk-line w40"></div></div></div>
+          <div class="sk-pulse sk-line w90"></div><div class="sk-pulse sk-line w70"></div>
+          <div class="sk-card-acts"><div class="sk-pulse sk-act"></div><div class="sk-pulse sk-act"></div><div class="sk-pulse sk-act"></div><div class="sk-pulse sk-act"></div></div>
+        </div>
+        <div class="sk-card">
+          <div class="sk-card-head"><div class="sk-pulse sk-circle sk-card-av"></div><div class="sk-card-meta"><div class="sk-pulse sk-line w60"></div><div class="sk-pulse sk-line w40"></div></div></div>
+          <div class="sk-pulse sk-line w90"></div><div class="sk-pulse sk-line w70"></div>
+          <div class="sk-card-acts"><div class="sk-pulse sk-act"></div><div class="sk-pulse sk-act"></div><div class="sk-pulse sk-act"></div><div class="sk-pulse sk-act"></div></div>
+        </div>
+      </div>
+
+      <!-- real feed content (hidden until auth+data ready) -->
+      <div class="real-content sk-hidden" id="realFeed">
 
       <!-- Compose toggle -->
       <div class="compose-toggle" id="composeToggle" onclick="openCompose()">
@@ -1143,6 +1249,8 @@ a{text-decoration:none;color:inherit}
           <button class="act-btn bookmark" onclick="event.stopPropagation();toggleBookmark(this)" style="margin-left:auto"><i class="ph-bold ph-bookmark-simple"></i></button>
         </div>
       </article>
+
+      </div><!-- end realFeed -->
 
     </div><!-- end panel-0 -->
 
@@ -1361,61 +1469,83 @@ a{text-decoration:none;color:inherit}
   <!-- ── RIGHT SIDEBAR ── -->
   <aside class="sidebar-right">
 
-    <!-- Who to Follow -->
-    <div class="widget">
-      <p class="widget-title">Who to Follow</p>
-      <div class="wtf-row">
-        <div class="wtf-av" style="background:linear-gradient(135deg,#8b5cf6,#c2185b)">DL</div>
-        <div class="wtf-info"><div class="wtf-name">Danial L.</div><div class="wtf-sub">@danialL · LV 4</div></div>
-        <button class="wtf-btn" onclick="toggleWtf(this)">+ Follow</button>
+    <!-- skeleton -->
+    <div class="sk-page-overlay" id="skRight">
+      <div class="sk-widget">
+        <div class="sk-pulse sk-widget-title"></div>
+        <div class="sk-wtf-row"><div class="sk-pulse sk-circle sk-wtf-av"></div><div class="sk-wtf-info"><div class="sk-pulse sk-wtf-name"></div><div class="sk-pulse sk-wtf-sub"></div></div><div class="sk-pulse sk-wtf-btn"></div></div>
+        <div class="sk-wtf-row"><div class="sk-pulse sk-circle sk-wtf-av"></div><div class="sk-wtf-info"><div class="sk-pulse sk-wtf-name"></div><div class="sk-pulse sk-wtf-sub"></div></div><div class="sk-pulse sk-wtf-btn"></div></div>
+        <div class="sk-wtf-row"><div class="sk-pulse sk-circle sk-wtf-av"></div><div class="sk-wtf-info"><div class="sk-pulse sk-wtf-name"></div><div class="sk-pulse sk-wtf-sub"></div></div><div class="sk-pulse sk-wtf-btn"></div></div>
       </div>
-      <div class="wtf-row">
-        <div class="wtf-av" style="background:linear-gradient(135deg,#f59e0b,#f97316)">WA</div>
-        <div class="wtf-info"><div class="wtf-name">Wani Aisyah</div><div class="wtf-sub">@waniaisyah · LV 3</div></div>
-        <button class="wtf-btn" onclick="toggleWtf(this)">+ Follow</button>
-      </div>
-      <div class="wtf-row">
-        <div class="wtf-av" style="background:linear-gradient(135deg,#10b981,#0ea5e9)">LF</div>
-        <div class="wtf-info"><div class="wtf-name">Luqman Faiz</div><div class="wtf-sub">@luqmanf · LV 2</div></div>
-        <button class="wtf-btn" onclick="toggleWtf(this)">+ Follow</button>
-      </div>
-      <div class="wtf-row">
-        <div class="wtf-av" style="background:linear-gradient(135deg,#ef4444,#f97316)">AR</div>
-        <div class="wtf-info"><div class="wtf-name">Anis Razali</div><div class="wtf-sub">@anisrazali · LV 1</div></div>
-        <button class="wtf-btn" onclick="toggleWtf(this)">+ Follow</button>
+      <div class="sk-widget">
+        <div class="sk-pulse sk-widget-title"></div>
+        <div class="sk-trd-row"><div class="sk-pulse sk-trd-num"></div><div class="sk-pulse sk-trd-tag"></div></div>
+        <div class="sk-trd-row"><div class="sk-pulse sk-trd-num"></div><div class="sk-pulse sk-trd-tag"></div></div>
+        <div class="sk-trd-row"><div class="sk-pulse sk-trd-num"></div><div class="sk-pulse sk-trd-tag"></div></div>
+        <div class="sk-trd-row"><div class="sk-pulse sk-trd-num"></div><div class="sk-pulse sk-trd-tag"></div></div>
       </div>
     </div>
 
-    <!-- Trending Topics -->
-    <div class="widget">
-      <p class="widget-title">Trending Topics</p>
-      <div class="trd-row"><div class="trd-num hot">1</div><div><div class="trd-tag">#T1ERA 🔥</div><div class="trd-cnt">1,204 Sparks</div></div></div>
-      <div class="trd-row"><div class="trd-num hot">2</div><div><div class="trd-tag">#BuildInPublic 🔥</div><div class="trd-cnt">847 Sparks</div></div></div>
-      <div class="trd-row"><div class="trd-num">3</div><div><div class="trd-tag">#UIDesign</div><div class="trd-cnt">562 Sparks</div></div></div>
-      <div class="trd-row"><div class="trd-num">4</div><div><div class="trd-tag">#AI</div><div class="trd-cnt">489 Sparks</div></div></div>
-      <div class="trd-row"><div class="trd-num">5</div><div><div class="trd-tag">#DarkMode</div><div class="trd-cnt">317 Sparks</div></div></div>
-    </div>
+    <!-- real -->
+    <div class="real-content sk-hidden" id="realRight">
 
-    <!-- Active now -->
-    <div class="widget">
-      <p class="widget-title">Active Now</p>
-      <div style="display:flex;flex-direction:column;gap:10px">
-        <div style="display:flex;align-items:center;gap:10px">
-          <div style="position:relative">
-            <div class="wtf-av" style="background:linear-gradient(135deg,#c2185b,#8b5cf6);width:32px;height:32px;font-size:11px">IB</div>
-            <span style="position:absolute;bottom:0;right:0;width:9px;height:9px;border-radius:50%;background:var(--green);border:2px solid var(--bg-card)"></span>
-          </div>
-          <div><div class="wtf-name" style="font-size:12px">Ikram Basri</div><div class="wtf-sub">Posting now</div></div>
+      <!-- Who to Follow -->
+      <div class="widget">
+        <p class="widget-title">Who to Follow</p>
+        <div class="wtf-row">
+          <div class="wtf-av" style="background:linear-gradient(135deg,#8b5cf6,#c2185b)">DL</div>
+          <div class="wtf-info"><div class="wtf-name">Danial L.</div><div class="wtf-sub">@danialL · LV 4</div></div>
+          <button class="wtf-btn" onclick="toggleWtf(this)">+ Follow</button>
         </div>
-        <div style="display:flex;align-items:center;gap:10px">
-          <div style="position:relative">
-            <div class="wtf-av" style="background:linear-gradient(135deg,#f59e0b,#f97316);width:32px;height:32px;font-size:11px">WA</div>
-            <span style="position:absolute;bottom:0;right:0;width:9px;height:9px;border-radius:50%;background:var(--green);border:2px solid var(--bg-card)"></span>
-          </div>
-          <div><div class="wtf-name" style="font-size:12px">Wani Aisyah</div><div class="wtf-sub">Active 1m ago</div></div>
+        <div class="wtf-row">
+          <div class="wtf-av" style="background:linear-gradient(135deg,#f59e0b,#f97316)">WA</div>
+          <div class="wtf-info"><div class="wtf-name">Wani Aisyah</div><div class="wtf-sub">@waniaisyah · LV 3</div></div>
+          <button class="wtf-btn" onclick="toggleWtf(this)">+ Follow</button>
+        </div>
+        <div class="wtf-row">
+          <div class="wtf-av" style="background:linear-gradient(135deg,#10b981,#0ea5e9)">LF</div>
+          <div class="wtf-info"><div class="wtf-name">Luqman Faiz</div><div class="wtf-sub">@luqmanf · LV 2</div></div>
+          <button class="wtf-btn" onclick="toggleWtf(this)">+ Follow</button>
+        </div>
+        <div class="wtf-row">
+          <div class="wtf-av" style="background:linear-gradient(135deg,#ef4444,#f97316)">AR</div>
+          <div class="wtf-info"><div class="wtf-name">Anis Razali</div><div class="wtf-sub">@anisrazali · LV 1</div></div>
+          <button class="wtf-btn" onclick="toggleWtf(this)">+ Follow</button>
         </div>
       </div>
-    </div>
+
+      <!-- Trending Topics -->
+      <div class="widget">
+        <p class="widget-title">Trending Topics</p>
+        <div class="trd-row"><div class="trd-num hot">1</div><div><div class="trd-tag">#T1ERA 🔥</div><div class="trd-cnt">1,204 Sparks</div></div></div>
+        <div class="trd-row"><div class="trd-num hot">2</div><div><div class="trd-tag">#BuildInPublic 🔥</div><div class="trd-cnt">847 Sparks</div></div></div>
+        <div class="trd-row"><div class="trd-num">3</div><div><div class="trd-tag">#UIDesign</div><div class="trd-cnt">562 Sparks</div></div></div>
+        <div class="trd-row"><div class="trd-num">4</div><div><div class="trd-tag">#AI</div><div class="trd-cnt">489 Sparks</div></div></div>
+        <div class="trd-row"><div class="trd-num">5</div><div><div class="trd-tag">#DarkMode</div><div class="trd-cnt">317 Sparks</div></div></div>
+      </div>
+
+      <!-- Active now -->
+      <div class="widget">
+        <p class="widget-title">Active Now</p>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="position:relative">
+              <div class="wtf-av" style="background:linear-gradient(135deg,#c2185b,#8b5cf6);width:32px;height:32px;font-size:11px">IB</div>
+              <span style="position:absolute;bottom:0;right:0;width:9px;height:9px;border-radius:50%;background:var(--green);border:2px solid var(--bg-card)"></span>
+            </div>
+            <div><div class="wtf-name" style="font-size:12px">Ikram Basri</div><div class="wtf-sub">Posting now</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="position:relative">
+              <div class="wtf-av" style="background:linear-gradient(135deg,#f59e0b,#f97316);width:32px;height:32px;font-size:11px">WA</div>
+              <span style="position:absolute;bottom:0;right:0;width:9px;height:9px;border-radius:50%;background:var(--green);border:2px solid var(--bg-card)"></span>
+            </div>
+            <div><div class="wtf-name" style="font-size:12px">Wani Aisyah</div><div class="wtf-sub">Active 1m ago</div></div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end realRight -->
 
   </aside>
 
@@ -1739,9 +1869,6 @@ const DAILY_LIMIT    = 3;
 const DEV_EMAIL      = 'ewm24k@gmail.com';
 const SPARKS_COL     = 'sparks';
 
-// ── HIDE PAGE UNTIL AUTH KNOWN ──
-document.body.style.visibility = 'hidden';
-
 // ── AUTH STATE ──
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
@@ -1749,7 +1876,6 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
-  document.body.style.visibility = '';
   window._sparkUser = user;
 
   // Load user profile for avatar / name
@@ -1768,9 +1894,24 @@ onAuthStateChanged(auth, async (user) => {
   // Check quota
   await checkQuota(user.uid);
 
+  // Reveal real content, hide skeletons
+  hidePageSkeleton();
+
   // Start live feed — loads existing posts and listens for new ones
   startFeed();
 });
+
+// ── SKELETON SHOW/HIDE ──
+function hidePageSkeleton() {
+  ['skLeft','skFeed','skRight'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.add('sk-hidden');
+  });
+  ['realLeft','realFeed','realRight'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('sk-hidden');
+  });
+}
 
 // ── FEED — fetch all standard sparks, sort client-side ──
 
