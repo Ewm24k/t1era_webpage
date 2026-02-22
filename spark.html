@@ -2349,7 +2349,7 @@ window._sendNotifFn = async function({ type, ownerUid, sparkId, sparkText }) {
       createdAt:  serverTimestamp(),
     });
   } catch(e) {
-    console.error('sendNotif error:', e);
+    console.error('sendNotif error:', e.code, e.message);
   }
 };
 
@@ -2358,30 +2358,22 @@ window._toggleLikeFn = async function({ liked, sparkId, ownerUid, sparkText }) {
   const user = window._sparkUser;
   if (!user || !sparkId) return;
 
-  const likeRef  = doc(db, 'sparks', sparkId, 'likes', user.uid);
-  const sparkRef = doc(db, 'sparks', sparkId);
+  // likes subcollection: sparks/{sparkId}/likes/{uid}
+  // Security rule: allow write if isSignedIn() && request.auth.uid == likeUserId  ✓
+  const likeRef = doc(db, 'sparks', sparkId, 'likes', user.uid);
 
   try {
     if (liked) {
-      // Write like doc
-      await setDoc(likeRef, {
-        uid:       user.uid,
-        createdAt: serverTimestamp(),
-      });
-      // Increment likes count on spark doc
-      await updateDoc(sparkRef, { likes: increment(1) });
+      await setDoc(likeRef, { uid: user.uid, createdAt: serverTimestamp() });
       // Send notification — skip if liking own post
       if (ownerUid && ownerUid !== user.uid && typeof window._sendNotifFn === 'function') {
-        window._sendNotifFn({ type: 'like', ownerUid, sparkId, sparkText });
+        await window._sendNotifFn({ type: 'like', ownerUid, sparkId, sparkText });
       }
     } else {
-      // Remove like doc
       await deleteDoc(likeRef);
-      // Decrement likes count
-      await updateDoc(sparkRef, { likes: increment(-1) });
     }
   } catch(e) {
-    console.error('toggleLike Firestore error:', e);
+    console.error('toggleLike Firestore error:', e.code, e.message);
   }
 };
 
@@ -2643,7 +2635,7 @@ function renderCard(id, d) {
       </div>` : ''}
     </div>
     <div class="action-bar">
-      <button class="act-btn like" id="like-${id}" onclick="event.stopPropagation();toggleLike(this)"><i class="ph-bold ph-heart"></i><span>${d.likes || 0}</span></button>
+      <button class="act-btn like" id="like-${id}" onclick="event.stopPropagation();toggleLike(this)"><i class="ph-bold ph-heart"></i><span id="likecount-${id}">0</span></button>
       <button class="act-btn reply" onclick="event.stopPropagation();openReply('${name}','${initial}','#c2185b','${safeText}')"><i class="ph-bold ph-chat-circle"></i><span>${d.replies || 0}</span></button>
       <button class="act-btn repost" onclick="event.stopPropagation();toggleRepost(this)"><i class="ph-bold ph-repeat"></i><span>${d.reposts || 0}</span></button>
       <button class="act-btn share" onclick="event.stopPropagation();shareSpark()"><i class="ph-bold ph-share-network"></i><span></span></button>
@@ -2659,19 +2651,28 @@ function renderCard(id, d) {
     panel.appendChild(article);
   }
 
-  // Check if current user already liked this spark — apply liked state
+  // Fetch likes subcollection — get real count + check if current user liked
   const currentUid = window._sparkUser?.uid;
-  if (currentUid) {
-    getDoc(doc(db, 'sparks', id, 'likes', currentUid)).then(snap => {
-      if (snap.exists()) {
+  getDocs(collection(db, 'sparks', id, 'likes')).then(likesSnap => {
+    // Real count
+    const countEl = document.getElementById('likecount-' + id);
+    if (countEl) countEl.textContent = likesSnap.size;
+    // Highlight if current user liked
+    if (currentUid) {
+      const alreadyLiked = likesSnap.docs.some(d => d.id === currentUid);
+      if (alreadyLiked) {
         const likeBtn = document.getElementById('like-' + id);
         if (likeBtn) {
           likeBtn.classList.add('liked');
           likeBtn.querySelector('i').className = 'ph-fill ph-heart';
+          likeBtn.querySelector('span').textContent = likesSnap.size;
         }
       }
-    }).catch(() => {});
-  }
+    }
+  }).catch(() => {
+    const countEl = document.getElementById('likecount-' + id);
+    if (countEl) countEl.textContent = '0';
+  });
 }
 
 // ── DELETE SPARK (owner only) ──
