@@ -2547,13 +2547,13 @@
     .sparks-cta-primary {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      padding: 13px 28px;
-      border-radius: 12px;
+      gap: 6px;
+      padding: 9px 18px;
+      border-radius: 10px;
       background: linear-gradient(145deg, #e91e6a, #9c1545);
       border: 1px solid rgba(194, 24, 91, 0.3);
       color: #fff;
-      font-size: 15px;
+      font-size: 13px;
       font-weight: 700;
       text-decoration: none;
       cursor: pointer;
@@ -2590,13 +2590,13 @@
     .sparks-cta-secondary {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      padding: 13px 28px;
-      border-radius: 12px;
+      gap: 6px;
+      padding: 9px 18px;
+      border-radius: 10px;
       background: linear-gradient(145deg, #1a1a1a, #0d0d0d);
       border: 1px solid var(--border-primary);
       color: var(--text-secondary);
-      font-size: 15px;
+      font-size: 13px;
       font-weight: 600;
       text-decoration: none;
       cursor: pointer;
@@ -2654,6 +2654,168 @@
     @media (max-width: 480px) {
       .spark-preview-card { padding: 18px; }
       .spc-text { font-size: 13px; }
+    }
+
+    /* ====== GLOBAL TICKER — fixed on desktop, relative on mobile ====== */
+    .spark-ticker-global {
+      position: fixed;
+      top: 72px;
+      left: 0;
+      right: 0;
+      z-index: 999;
+      overflow: hidden;
+      border-bottom: 1px solid var(--border-primary);
+      background: rgba(0,0,0,0.92);
+      backdrop-filter: blur(16px) saturate(180%);
+      padding: 8px 0;
+    }
+    .spark-ticker-global::before,
+    .spark-ticker-global::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 60px;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .spark-ticker-global::before {
+      left: 0;
+      background: linear-gradient(90deg, rgba(0,0,0,0.92), transparent);
+    }
+    .spark-ticker-global::after {
+      right: 0;
+      background: linear-gradient(270deg, rgba(0,0,0,0.92), transparent);
+    }
+
+    /* ── Fixed badge bar — desktop only, sits below ticker ── */
+    .sparks-fixed-badge-bar {
+      position: fixed;
+      top: 107px;
+      left: 0;
+      right: 0;
+      z-index: 998;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 6px 16px;
+      background: rgba(0,0,0,0.88);
+      border-bottom: 1px solid var(--border-primary);
+      backdrop-filter: blur(12px) saturate(160%);
+    }
+    .sparks-fixed-badge-bar .section-label { margin-bottom: 0; font-size: 11px; }
+    .sparks-fixed-badge-bar .sparks-live-badge { margin-bottom: 0; font-size: 11px; padding: 3px 10px; }
+
+    /* ── On desktop, push hero below header(72)+ticker(35)+badgebar(35) = 142 + original 160 base ── */
+    .hero { padding-top: 185px; padding-bottom: 120px; }
+
+    /* ====== HERO SPARKS BLOCK ====== */
+    .hero-sparks-block {
+      margin-top: 32px;
+      text-align: left;
+    }
+    .hero-sparks-header {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .hero-sparks-title {
+      font-size: clamp(20px, 3vw, 28px);
+      font-weight: 800;
+      font-family: 'Space Grotesk', sans-serif;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+    .hero-sparks-desc {
+      font-size: 14px;
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* ====== SPARKS CAROUSEL ====== */
+    .sparks-carousel-outer {
+      position: relative;
+      margin-bottom: 40px;
+    }
+    .sparks-carousel-wrap {
+      overflow: hidden;
+      border-radius: 20px;
+    }
+    .sparks-carousel-track {
+      display: flex;
+      gap: 20px;
+      transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+      will-change: transform;
+    }
+    .sparks-carousel-track .spark-preview-card {
+      flex: 0 0 calc(33.333% - 14px);
+      min-width: calc(33.333% - 14px);
+    }
+    .sparks-carousel-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(10,8,12,0.92);
+      border: 1px solid rgba(194,24,91,0.4);
+      color: #fff;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 5;
+      transition: all 0.2s ease;
+      box-shadow: 0 0 20px rgba(194,24,91,0.25);
+      backdrop-filter: blur(8px);
+    }
+    .sparks-carousel-nav:hover {
+      background: rgba(194,24,91,0.25);
+      border-color: #c2185b;
+      box-shadow: 0 0 28px rgba(194,24,91,0.45);
+    }
+    .sparks-carousel-nav:disabled {
+      opacity: 0.3;
+      cursor: default;
+      pointer-events: none;
+    }
+    .sparks-carousel-nav.prev { left: -20px; }
+    .sparks-carousel-nav.next { right: -20px; }
+    @media (max-width: 900px) {
+      .sparks-carousel-track .spark-preview-card {
+        flex: 0 0 calc(50% - 10px);
+        min-width: calc(50% - 10px);
+      }
+    }
+    @media (max-width: 768px) {
+      /* Restore ticker to normal page flow on mobile — no overlap */
+      .spark-ticker-global {
+        position: relative;
+        top: auto;
+        z-index: 1;
+      }
+      /* Hide the fixed desktop badge bar on mobile */
+      .sparks-fixed-badge-bar { display: none; }
+      /* Restore original mobile hero padding exactly as original code had it */
+      .hero { padding: 120px 0 80px; }
+      /* Carousel single column on mobile */
+      .sparks-carousel-track .spark-preview-card {
+        flex: 0 0 100%;
+        min-width: 100%;
+      }
+      .sparks-carousel-nav.prev { left: -10px; }
+      .sparks-carousel-nav.next { right: -10px; }
+    }
+    @media (max-width: 480px) {
+      .spark-preview-card { padding: 18px; }
+      .spc-text { font-size: 13px; }
+      .sparks-cta-row { flex-direction: column; align-items: stretch; }
+      .sparks-cta-primary,
+      .sparks-cta-secondary { width: 100%; justify-content: center; }
     }
   </style>
 </head>
@@ -2748,6 +2910,121 @@
         </div>
       </header>
 
+      <!-- ═══════════════════════════════════════════
+           GLOBAL TICKER STRIP — fixed below header
+      ═══════════════════════════════════════════ -->
+      <div class="spark-ticker-global">
+        <div class="spark-ticker-track" id="sparkTickerTrack">
+          <!-- First set -->
+          <div class="spark-ticker-item">
+            <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#c2185b,#8b5cf6);">IB</div>
+            <span>Just pushed T1ERA v2 live 🚀</span>
+            <span class="spark-ticker-ht">#T1ERA</span>
+            <span class="spark-ticker-dot"></span>
+          </div>
+          <div class="spark-ticker-item">
+            <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#f59e0b,#f97316);">WA</div>
+            <span>AI changing workflows in 2025 is insane</span>
+            <span class="spark-ticker-ht">#BuildInPublic</span>
+            <span class="spark-ticker-dot"></span>
+          </div>
+          <div class="spark-ticker-item">
+            <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#10b981,#0ea5e9);">LF</div>
+            <span>Dark mode UI explorations this week 🎨</span>
+            <span class="spark-ticker-ht">#UIDesign</span>
+            <span class="spark-ticker-dot"></span>
+          </div>
+          <div class="spark-ticker-item">
+            <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#8b5cf6,#c2185b);">DL</div>
+            <span>What habit changed your productivity?</span>
+            <span class="spark-ticker-ht">#Prompt</span>
+            <span class="spark-ticker-dot"></span>
+          </div>
+          <div class="spark-ticker-item">
+            <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#e91e8c,#8b5cf6);">AR</div>
+            <span>T1ERA chat mode is unreal for research</span>
+            <span class="spark-ticker-ht">#AI</span>
+            <span class="spark-ticker-dot"></span>
+          </div>
+          <div class="spark-ticker-item">
+            <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#c2185b,#f97316);">MH</div>
+            <span>Generated a full video script in 30 seconds ⚡</span>
+            <span class="spark-ticker-ht">#VTT</span>
+            <span class="spark-ticker-dot"></span>
+          </div>
+          <div class="spark-ticker-item">
+            <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#0ea5e9,#8b5cf6);">NZ</div>
+            <span>1,000 signups in the first week 🎉</span>
+            <span class="spark-ticker-ht">#Milestone</span>
+            <span class="spark-ticker-dot"></span>
+          </div>
+          <div class="spark-ticker-item">
+            <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#f59e0b,#10b981);">SY</div>
+            <span>Vision mode read my handwritten notes perfectly</span>
+            <span class="spark-ticker-ht">#Vision</span>
+            <span class="spark-ticker-dot"></span>
+          </div>
+          <!-- Duplicate set for seamless infinite scroll -->
+          <div class="spark-ticker-item">
+            <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#c2185b,#8b5cf6);">IB</div>
+            <span>Just pushed T1ERA v2 live 🚀</span>
+            <span class="spark-ticker-ht">#T1ERA</span>
+            <span class="spark-ticker-dot"></span>
+          </div>
+          <div class="spark-ticker-item">
+            <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#f59e0b,#f97316);">WA</div>
+            <span>AI changing workflows in 2025 is insane</span>
+            <span class="spark-ticker-ht">#BuildInPublic</span>
+            <span class="spark-ticker-dot"></span>
+          </div>
+          <div class="spark-ticker-item">
+            <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#10b981,#0ea5e9);">LF</div>
+            <span>Dark mode UI explorations this week 🎨</span>
+            <span class="spark-ticker-ht">#UIDesign</span>
+            <span class="spark-ticker-dot"></span>
+          </div>
+          <div class="spark-ticker-item">
+            <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#8b5cf6,#c2185b);">DL</div>
+            <span>What habit changed your productivity?</span>
+            <span class="spark-ticker-ht">#Prompt</span>
+            <span class="spark-ticker-dot"></span>
+          </div>
+          <div class="spark-ticker-item">
+            <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#e91e8c,#8b5cf6);">AR</div>
+            <span>T1ERA chat mode is unreal for research</span>
+            <span class="spark-ticker-ht">#AI</span>
+            <span class="spark-ticker-dot"></span>
+          </div>
+          <div class="spark-ticker-item">
+            <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#c2185b,#f97316);">MH</div>
+            <span>Generated a full video script in 30 seconds ⚡</span>
+            <span class="spark-ticker-ht">#VTT</span>
+            <span class="spark-ticker-dot"></span>
+          </div>
+          <div class="spark-ticker-item">
+            <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#0ea5e9,#8b5cf6);">NZ</div>
+            <span>1,000 signups in the first week 🎉</span>
+            <span class="spark-ticker-ht">#Milestone</span>
+            <span class="spark-ticker-dot"></span>
+          </div>
+          <div class="spark-ticker-item">
+            <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#f59e0b,#10b981);">SY</div>
+            <span>Vision mode read my handwritten notes perfectly</span>
+            <span class="spark-ticker-ht">#Vision</span>
+            <span class="spark-ticker-dot"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fixed desktop-only badge bar below ticker -->
+      <div class="sparks-fixed-badge-bar">
+        <span class="section-label" style="margin-bottom:0;">Community · Sparks</span>
+        <div class="sparks-live-badge" style="margin-bottom:0;">
+          <span class="sparks-live-badge-dot"></span>
+          <span>1,204</span> Sparks Today
+        </div>
+      </div>
+
       <!-- Mobile Nav -->
       <nav class="mobile-nav" id="mobileNav">
         <div class="mobile-nav-section">Quick Access</div>
@@ -2769,7 +3046,7 @@
           <div class="hero-content">
             <div class="hero-badge">
               <span class="hero-badge-dot"></span>
-              Professional AI Suite for Telegram
+              Professional AI Suite for Everyone
             </div>
 
             <h1>
@@ -2825,25 +3102,183 @@
             <!-- ── REMOVED: "Start on Telegram", "Launch WebApp", "View Documentation" buttons ── -->
             <!-- hero-cta section intentionally removed as requested -->
 
-            <!-- AI Showcase Gallery -->
-            <div class="ai-showcase fade-in">
-              <div class="showcase-item">
-                <img src="./assets/new11.jpg" alt="AI Illustration" />
-                <div class="showcase-overlay"><span class="showcase-label">Illustration</span></div>
+            <!-- ══════════════════════════════════════════
+                 COMMUNITY SPARKS — placed here in hero
+                 below the AI Video Generator card
+            ══════════════════════════════════════════ -->
+            <div class="hero-sparks-block fade-in">
+              <div class="hero-sparks-header">
+                <h3 class="hero-sparks-title">See What the Community Is Building</h3>
+                <p class="hero-sparks-desc">Real updates, ideas, and conversations from T1ERA users — live on the Sparks feed.</p>
               </div>
-              <div class="showcase-item">
-                <img src="./assets/new14.jpg" alt="AI Realistic" />
-                <div class="showcase-overlay"><span class="showcase-label">Realistic</span></div>
+
+              <!-- Carousel -->
+              <div class="sparks-carousel-outer">
+                <button class="sparks-carousel-nav prev" id="sparksPrev" aria-label="Previous">&#8249;</button>
+                <button class="sparks-carousel-nav next" id="sparksNext" aria-label="Next">&#8250;</button>
+                <div class="sparks-carousel-wrap">
+                  <div class="sparks-carousel-track" id="sparksCarouselTrack">
+
+                    <!-- Card 1: text + image -->
+                    <div class="spark-preview-card">
+                      <div class="spc-header">
+                        <div class="spc-avatar" style="background:linear-gradient(135deg,#c2185b,#8b5cf6);">IB</div>
+                        <div class="spc-meta">
+                          <div class="spc-author">Ikram Basri</div>
+                          <div class="spc-handle-row">
+                            <span class="spc-handle">@ewm24k</span>
+                            <span class="spc-badge rank">LV 5</span>
+                            <span class="spc-badge verified">✓ Verified</span>
+                            <span class="spc-time">· 2m ago</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="spc-media">
+                        <img src="./assets/new11.jpg" alt="T1ERA build" loading="lazy"/>
+                        <span class="spc-media-label">Photo</span>
+                      </div>
+                      <p class="spc-text">
+                        Just pushed a massive update to T1ERA 🚀 New profile page live — bio, status, banner presets and Cloudinary photo upload. Really proud of this build.
+                        <span class="spc-hashtag">#T1ERA</span> <span class="spc-hashtag">#BuildInPublic</span>
+                      </p>
+                      <div class="spc-actions">
+                        <div class="spc-action-item liked"><i class="ph-fill ph-heart"></i><span>142</span></div>
+                        <div class="spc-action-item has-replies"><i class="ph-bold ph-chat-circle"></i><span>28</span></div>
+                        <div class="spc-action-item reposted"><i class="ph-bold ph-repeat"></i><span>19</span></div>
+                        <div class="spc-actions-spacer"></div>
+                        <div class="spc-action-item"><i class="ph-bold ph-share-network"></i></div>
+                      </div>
+                    </div>
+
+                    <!-- Card 2: text only with repost indicator -->
+                    <div class="spark-preview-card">
+                      <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-tertiary);font-weight:600;margin-bottom:10px;">
+                        <i class="ph-bold ph-repeat" style="font-size:13px;color:#10b981;"></i>
+                        Danial reposted
+                      </div>
+                      <div class="spc-header">
+                        <div class="spc-avatar" style="background:linear-gradient(135deg,#f59e0b,#f97316);">WA</div>
+                        <div class="spc-meta">
+                          <div class="spc-author">Wani Aisyah</div>
+                          <div class="spc-handle-row">
+                            <span class="spc-handle">@waniaisyah</span>
+                            <span class="spc-badge rank">LV 3</span>
+                            <span class="spc-time">· 15m ago</span>
+                          </div>
+                        </div>
+                      </div>
+                      <p class="spc-text">
+                        The way AI is reshaping workflows in 2025 is genuinely insane. Shoutout to everyone building in public — you inspire me more than you know. Keep going 💪
+                        <span class="spc-hashtag">#BuildInPublic</span> <span class="spc-hashtag">#AI</span> <span class="spc-hashtag">#T1ERA</span>
+                      </p>
+                      <div class="spc-actions">
+                        <div class="spc-action-item"><i class="ph-bold ph-heart"></i><span>87</span></div>
+                        <div class="spc-action-item has-replies"><i class="ph-bold ph-chat-circle"></i><span>14</span></div>
+                        <div class="spc-action-item reposted"><i class="ph-bold ph-repeat"></i><span>31</span></div>
+                        <div class="spc-actions-spacer"></div>
+                        <div class="spc-action-item"><i class="ph-bold ph-share-network"></i></div>
+                      </div>
+                    </div>
+
+                    <!-- Card 3: Spark Prompt variant -->
+                    <div class="spark-preview-card spark-prompt-variant">
+                      <div class="spc-header">
+                        <div class="spc-avatar" style="background:linear-gradient(135deg,#8b5cf6,#c2185b);">DL</div>
+                        <div class="spc-meta">
+                          <div class="spc-author">Danial L.</div>
+                          <div class="spc-handle-row">
+                            <span class="spc-handle">@danialL</span>
+                            <span class="spc-badge rank">LV 4</span>
+                            <span class="spc-badge prompt-tag">Prompt</span>
+                            <span class="spc-time">· 3h ago</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="spc-prompt-box">
+                        <div class="spc-prompt-label">Open Prompt</div>
+                        <p class="spc-prompt-q">What is the single habit that completely changed your productivity — and could you ever go back to life without it?</p>
+                        <p class="spc-prompt-replies">💬 47 people replied</p>
+                      </div>
+                      <div class="spc-actions">
+                        <div class="spc-action-item liked"><i class="ph-fill ph-heart"></i><span>203</span></div>
+                        <div class="spc-action-item has-replies"><i class="ph-bold ph-chat-circle"></i><span>47</span></div>
+                        <div class="spc-action-item"><i class="ph-bold ph-repeat"></i><span>61</span></div>
+                        <div class="spc-actions-spacer"></div>
+                        <div class="spc-action-item"><i class="ph-bold ph-share-network"></i></div>
+                      </div>
+                    </div>
+
+                    <!-- Card 4: text with image -->
+                    <div class="spark-preview-card">
+                      <div class="spc-header">
+                        <div class="spc-avatar" style="background:linear-gradient(135deg,#10b981,#0ea5e9);">LF</div>
+                        <div class="spc-meta">
+                          <div class="spc-author">Luqman Faiz</div>
+                          <div class="spc-handle-row">
+                            <span class="spc-handle">@luqmanf</span>
+                            <span class="spc-badge rank">LV 2</span>
+                            <span class="spc-time">· 1h ago</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="spc-media">
+                        <img src="./assets/new14.jpg" alt="UI explorations" loading="lazy"/>
+                        <span class="spc-media-label">Photo</span>
+                      </div>
+                      <p class="spc-text">
+                        UI explorations this week — dark gradient interfaces with pink accent systems. Which direction do you prefer? 👇
+                        <span class="spc-hashtag">#UIDesign</span> <span class="spc-hashtag">#DarkMode</span>
+                      </p>
+                      <div class="spc-actions">
+                        <div class="spc-action-item"><i class="ph-bold ph-heart"></i><span>56</span></div>
+                        <div class="spc-action-item has-replies"><i class="ph-bold ph-chat-circle"></i><span>9</span></div>
+                        <div class="spc-action-item"><i class="ph-bold ph-repeat"></i><span>12</span></div>
+                        <div class="spc-actions-spacer"></div>
+                        <div class="spc-action-item"><i class="ph-bold ph-share-network"></i></div>
+                      </div>
+                    </div>
+
+                    <!-- Card 5: extra card for carousel depth -->
+                    <div class="spark-preview-card">
+                      <div class="spc-header">
+                        <div class="spc-avatar" style="background:linear-gradient(135deg,#e91e8c,#8b5cf6);">AR</div>
+                        <div class="spc-meta">
+                          <div class="spc-author">Amir Rauf</div>
+                          <div class="spc-handle-row">
+                            <span class="spc-handle">@amirR</span>
+                            <span class="spc-badge rank">LV 3</span>
+                            <span class="spc-time">· 5h ago</span>
+                          </div>
+                        </div>
+                      </div>
+                      <p class="spc-text">
+                        T1ERA chat mode is unreal for deep research sessions. Asked it 40 follow-up questions and it never lost context. This is the future of AI tools 🤯
+                        <span class="spc-hashtag">#AI</span> <span class="spc-hashtag">#T1ERA</span> <span class="spc-hashtag">#Research</span>
+                      </p>
+                      <div class="spc-actions">
+                        <div class="spc-action-item liked"><i class="ph-fill ph-heart"></i><span>119</span></div>
+                        <div class="spc-action-item has-replies"><i class="ph-bold ph-chat-circle"></i><span>22</span></div>
+                        <div class="spc-action-item reposted"><i class="ph-bold ph-repeat"></i><span>44</span></div>
+                        <div class="spc-actions-spacer"></div>
+                        <div class="spc-action-item"><i class="ph-bold ph-share-network"></i></div>
+                      </div>
+                    </div>
+
+                  </div><!-- end sparks-carousel-track -->
+                </div><!-- end sparks-carousel-wrap -->
+              </div><!-- end sparks-carousel-outer -->
+
+              <!-- CTA row -->
+              <div class="sparks-cta-row" style="margin-top:24px;">
+                <a href="spark.html" class="sparks-cta-primary">
+                  ⚡ View All Sparks →
+                </a>
+                <a href="spark.html" class="sparks-cta-secondary">
+                  <i class="ph-bold ph-pencil-simple"></i>
+                  Share Your Spark
+                </a>
               </div>
-              <div class="showcase-item">
-                <img src="./assets/new13.jpg" alt="AI 3D Render" />
-                <div class="showcase-overlay"><span class="showcase-label">3D Render</span></div>
-              </div>
-              <div class="showcase-item">
-                <img src="./assets/new12.png" alt="AI Cartoon" />
-                <div class="showcase-overlay"><span class="showcase-label">Cartoon</span></div>
-              </div>
-            </div>
+            </div><!-- end hero-sparks-block -->
 
             <div class="feature-tags fade-in">
               <a href="ChatT1era.html" class="tag" style="text-decoration:none;">
@@ -3058,311 +3493,8 @@
       </section>
 
       <!-- ═══════════════════════════════════════════
-           SPARKS — Community Feed Preview
+           SPARKS content moved into hero section below video banner
       ═══════════════════════════════════════════ -->
-      <section id="sparks">
-        <div class="container">
-
-          <!-- Live ticker strip -->
-          <div class="spark-ticker-wrap">
-            <div class="spark-ticker-track" id="sparkTickerTrack">
-              <!-- First set -->
-              <div class="spark-ticker-item">
-                <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#c2185b,#8b5cf6);">IB</div>
-                <span>Just pushed T1ERA v2 live 🚀</span>
-                <span class="spark-ticker-ht">#T1ERA</span>
-                <span class="spark-ticker-dot"></span>
-              </div>
-              <div class="spark-ticker-item">
-                <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#f59e0b,#f97316);">WA</div>
-                <span>AI changing workflows in 2025 is insane</span>
-                <span class="spark-ticker-ht">#BuildInPublic</span>
-                <span class="spark-ticker-dot"></span>
-              </div>
-              <div class="spark-ticker-item">
-                <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#10b981,#0ea5e9);">LF</div>
-                <span>Dark mode UI explorations this week 🎨</span>
-                <span class="spark-ticker-ht">#UIDesign</span>
-                <span class="spark-ticker-dot"></span>
-              </div>
-              <div class="spark-ticker-item">
-                <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#8b5cf6,#c2185b);">DL</div>
-                <span>What habit changed your productivity?</span>
-                <span class="spark-ticker-ht">#Prompt</span>
-                <span class="spark-ticker-dot"></span>
-              </div>
-              <div class="spark-ticker-item">
-                <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#e91e8c,#8b5cf6);">AR</div>
-                <span>T1ERA chat mode is unreal for research</span>
-                <span class="spark-ticker-ht">#AI</span>
-                <span class="spark-ticker-dot"></span>
-              </div>
-              <div class="spark-ticker-item">
-                <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#c2185b,#f97316);">MH</div>
-                <span>Generated a full video script in 30 seconds ⚡</span>
-                <span class="spark-ticker-ht">#VTT</span>
-                <span class="spark-ticker-dot"></span>
-              </div>
-              <div class="spark-ticker-item">
-                <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#0ea5e9,#8b5cf6);">NZ</div>
-                <span>1,000 signups in the first week 🎉</span>
-                <span class="spark-ticker-ht">#Milestone</span>
-                <span class="spark-ticker-dot"></span>
-              </div>
-              <div class="spark-ticker-item">
-                <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#f59e0b,#10b981);">SY</div>
-                <span>Vision mode read my handwritten notes perfectly</span>
-                <span class="spark-ticker-ht">#Vision</span>
-                <span class="spark-ticker-dot"></span>
-              </div>
-              <!-- Duplicate set for seamless infinite scroll -->
-              <div class="spark-ticker-item">
-                <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#c2185b,#8b5cf6);">IB</div>
-                <span>Just pushed T1ERA v2 live 🚀</span>
-                <span class="spark-ticker-ht">#T1ERA</span>
-                <span class="spark-ticker-dot"></span>
-              </div>
-              <div class="spark-ticker-item">
-                <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#f59e0b,#f97316);">WA</div>
-                <span>AI changing workflows in 2025 is insane</span>
-                <span class="spark-ticker-ht">#BuildInPublic</span>
-                <span class="spark-ticker-dot"></span>
-              </div>
-              <div class="spark-ticker-item">
-                <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#10b981,#0ea5e9);">LF</div>
-                <span>Dark mode UI explorations this week 🎨</span>
-                <span class="spark-ticker-ht">#UIDesign</span>
-                <span class="spark-ticker-dot"></span>
-              </div>
-              <div class="spark-ticker-item">
-                <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#8b5cf6,#c2185b);">DL</div>
-                <span>What habit changed your productivity?</span>
-                <span class="spark-ticker-ht">#Prompt</span>
-                <span class="spark-ticker-dot"></span>
-              </div>
-              <div class="spark-ticker-item">
-                <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#e91e8c,#8b5cf6);">AR</div>
-                <span>T1ERA chat mode is unreal for research</span>
-                <span class="spark-ticker-ht">#AI</span>
-                <span class="spark-ticker-dot"></span>
-              </div>
-              <div class="spark-ticker-item">
-                <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#c2185b,#f97316);">MH</div>
-                <span>Generated a full video script in 30 seconds ⚡</span>
-                <span class="spark-ticker-ht">#VTT</span>
-                <span class="spark-ticker-dot"></span>
-              </div>
-              <div class="spark-ticker-item">
-                <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#0ea5e9,#8b5cf6);">NZ</div>
-                <span>1,000 signups in the first week 🎉</span>
-                <span class="spark-ticker-ht">#Milestone</span>
-                <span class="spark-ticker-dot"></span>
-              </div>
-              <div class="spark-ticker-item">
-                <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#f59e0b,#10b981);">SY</div>
-                <span>Vision mode read my handwritten notes perfectly</span>
-                <span class="spark-ticker-ht">#Vision</span>
-                <span class="spark-ticker-dot"></span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Section header -->
-          <div class="section-header fade-in">
-            <div style="display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;margin-bottom:16px;">
-              <span class="section-label" style="margin-bottom:0;">Community · Sparks</span>
-              <div class="sparks-live-badge">
-                <span class="sparks-live-badge-dot"></span>
-                <span id="sparksLiveCount">1,204</span> Sparks Today
-              </div>
-            </div>
-            <h2 class="section-title">See What the Community Is Building</h2>
-            <p class="section-description">
-              Real updates, ideas, and conversations from T1ERA users — live on the Sparks feed.
-            </p>
-          </div>
-
-          <!-- 4 preview cards -->
-          <div class="sparks-preview-grid fade-in">
-
-            <!-- Card 1: text + image -->
-            <div class="spark-preview-card">
-              <div class="spc-header">
-                <div class="spc-avatar" style="background:linear-gradient(135deg,#c2185b,#8b5cf6);">IB</div>
-                <div class="spc-meta">
-                  <div class="spc-author">Ikram Basri</div>
-                  <div class="spc-handle-row">
-                    <span class="spc-handle">@ewm24k</span>
-                    <span class="spc-badge rank">LV 5</span>
-                    <span class="spc-badge verified">✓ Verified</span>
-                    <span class="spc-time">· 2m ago</span>
-                  </div>
-                </div>
-              </div>
-              <div class="spc-media">
-                <img src="./assets/new11.jpg" alt="T1ERA build" loading="lazy"/>
-                <span class="spc-media-label">Photo</span>
-              </div>
-              <p class="spc-text">
-                Just pushed a massive update to T1ERA 🚀 New profile page live — bio, status, banner presets and Cloudinary photo upload. Really proud of this build.
-                <span class="spc-hashtag">#T1ERA</span> <span class="spc-hashtag">#BuildInPublic</span>
-              </p>
-              <div class="spc-actions">
-                <div class="spc-action-item liked">
-                  <i class="ph-fill ph-heart"></i>
-                  <span>142</span>
-                </div>
-                <div class="spc-action-item has-replies">
-                  <i class="ph-bold ph-chat-circle"></i>
-                  <span>28</span>
-                </div>
-                <div class="spc-action-item reposted">
-                  <i class="ph-bold ph-repeat"></i>
-                  <span>19</span>
-                </div>
-                <div class="spc-actions-spacer"></div>
-                <div class="spc-action-item">
-                  <i class="ph-bold ph-share-network"></i>
-                </div>
-              </div>
-            </div>
-
-            <!-- Card 2: text only with repost indicator -->
-            <div class="spark-preview-card">
-              <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-tertiary);font-weight:600;margin-bottom:10px;">
-                <i class="ph-bold ph-repeat" style="font-size:13px;color:#10b981;"></i>
-                Danial reposted
-              </div>
-              <div class="spc-header">
-                <div class="spc-avatar" style="background:linear-gradient(135deg,#f59e0b,#f97316);">WA</div>
-                <div class="spc-meta">
-                  <div class="spc-author">Wani Aisyah</div>
-                  <div class="spc-handle-row">
-                    <span class="spc-handle">@waniaisyah</span>
-                    <span class="spc-badge rank">LV 3</span>
-                    <span class="spc-time">· 15m ago</span>
-                  </div>
-                </div>
-              </div>
-              <p class="spc-text">
-                The way AI is reshaping workflows in 2025 is genuinely insane. Shoutout to everyone building in public — you inspire me more than you know. Keep going 💪
-                <span class="spc-hashtag">#BuildInPublic</span> <span class="spc-hashtag">#AI</span> <span class="spc-hashtag">#T1ERA</span>
-              </p>
-              <div class="spc-actions">
-                <div class="spc-action-item">
-                  <i class="ph-bold ph-heart"></i>
-                  <span>87</span>
-                </div>
-                <div class="spc-action-item has-replies">
-                  <i class="ph-bold ph-chat-circle"></i>
-                  <span>14</span>
-                </div>
-                <div class="spc-action-item reposted">
-                  <i class="ph-bold ph-repeat"></i>
-                  <span>31</span>
-                </div>
-                <div class="spc-actions-spacer"></div>
-                <div class="spc-action-item">
-                  <i class="ph-bold ph-share-network"></i>
-                </div>
-              </div>
-            </div>
-
-            <!-- Card 3: Spark Prompt variant -->
-            <div class="spark-preview-card spark-prompt-variant">
-              <div class="spc-header">
-                <div class="spc-avatar" style="background:linear-gradient(135deg,#8b5cf6,#c2185b);">DL</div>
-                <div class="spc-meta">
-                  <div class="spc-author">Danial L.</div>
-                  <div class="spc-handle-row">
-                    <span class="spc-handle">@danialL</span>
-                    <span class="spc-badge rank">LV 4</span>
-                    <span class="spc-badge prompt-tag">Prompt</span>
-                    <span class="spc-time">· 3h ago</span>
-                  </div>
-                </div>
-              </div>
-              <div class="spc-prompt-box">
-                <div class="spc-prompt-label">Open Prompt</div>
-                <p class="spc-prompt-q">What is the single habit that completely changed your productivity — and could you ever go back to life without it?</p>
-                <p class="spc-prompt-replies">💬 47 people replied</p>
-              </div>
-              <div class="spc-actions">
-                <div class="spc-action-item liked">
-                  <i class="ph-fill ph-heart"></i>
-                  <span>203</span>
-                </div>
-                <div class="spc-action-item has-replies">
-                  <i class="ph-bold ph-chat-circle"></i>
-                  <span>47</span>
-                </div>
-                <div class="spc-action-item">
-                  <i class="ph-bold ph-repeat"></i>
-                  <span>61</span>
-                </div>
-                <div class="spc-actions-spacer"></div>
-                <div class="spc-action-item">
-                  <i class="ph-bold ph-share-network"></i>
-                </div>
-              </div>
-            </div>
-
-            <!-- Card 4: text with image -->
-            <div class="spark-preview-card">
-              <div class="spc-header">
-                <div class="spc-avatar" style="background:linear-gradient(135deg,#10b981,#0ea5e9);">LF</div>
-                <div class="spc-meta">
-                  <div class="spc-author">Luqman Faiz</div>
-                  <div class="spc-handle-row">
-                    <span class="spc-handle">@luqmanf</span>
-                    <span class="spc-badge rank">LV 2</span>
-                    <span class="spc-time">· 1h ago</span>
-                  </div>
-                </div>
-              </div>
-              <div class="spc-media">
-                <img src="./assets/new14.jpg" alt="UI explorations" loading="lazy"/>
-                <span class="spc-media-label">Photo</span>
-              </div>
-              <p class="spc-text">
-                UI explorations this week — dark gradient interfaces with pink accent systems. Which direction do you prefer? 👇
-                <span class="spc-hashtag">#UIDesign</span> <span class="spc-hashtag">#DarkMode</span>
-              </p>
-              <div class="spc-actions">
-                <div class="spc-action-item">
-                  <i class="ph-bold ph-heart"></i>
-                  <span>56</span>
-                </div>
-                <div class="spc-action-item has-replies">
-                  <i class="ph-bold ph-chat-circle"></i>
-                  <span>9</span>
-                </div>
-                <div class="spc-action-item">
-                  <i class="ph-bold ph-repeat"></i>
-                  <span>12</span>
-                </div>
-                <div class="spc-actions-spacer"></div>
-                <div class="spc-action-item">
-                  <i class="ph-bold ph-share-network"></i>
-                </div>
-              </div>
-            </div>
-
-          </div><!-- end sparks-preview-grid -->
-
-          <!-- CTA row -->
-          <div class="sparks-cta-row fade-in">
-            <a href="sparks.html" class="sparks-cta-primary">
-              ⚡ View All Sparks →
-            </a>
-            <a href="sparks.html" class="sparks-cta-secondary">
-              <i class="ph-bold ph-pencil-simple"></i>
-              Share Your Spark
-            </a>
-          </div>
-
-        </div>
-      </section>
 
       <!-- Roadmap -->
       <section id="roadmap">
@@ -3765,6 +3897,58 @@
         alert("Failed to start generation: " + err.message);
       }
     }
+    // ── SPARKS CAROUSEL ──
+    (function() {
+      const track    = document.getElementById('sparksCarouselTrack');
+      const prevBtn  = document.getElementById('sparksPrev');
+      const nextBtn  = document.getElementById('sparksNext');
+      if (!track || !prevBtn || !nextBtn) return;
+
+      let currentIndex = 0;
+
+      function getVisibleCount() {
+        const w = window.innerWidth;
+        if (w <= 600)  return 1;
+        if (w <= 900)  return 2;
+        return 3;
+      }
+
+      function getTotalCards() {
+        return track.children.length;
+      }
+
+      function getCardWidth() {
+        const card = track.children[0];
+        if (!card) return 0;
+        const style = window.getComputedStyle(card);
+        return card.offsetWidth + parseInt(style.marginRight || 0) + 20; // 20 = gap
+      }
+
+      function updateCarousel() {
+        const visibleCount = getVisibleCount();
+        const totalCards   = getTotalCards();
+        const maxIndex     = Math.max(0, totalCards - visibleCount);
+        if (currentIndex > maxIndex) currentIndex = maxIndex;
+        const cardWidth = getCardWidth();
+        track.style.transform = `translateX(-${currentIndex * cardWidth}px)`;
+        prevBtn.disabled = currentIndex === 0;
+        nextBtn.disabled = currentIndex >= maxIndex;
+      }
+
+      prevBtn.addEventListener('click', function() {
+        if (currentIndex > 0) { currentIndex--; updateCarousel(); }
+      });
+
+      nextBtn.addEventListener('click', function() {
+        const visibleCount = getVisibleCount();
+        const maxIndex     = Math.max(0, getTotalCards() - visibleCount);
+        if (currentIndex < maxIndex) { currentIndex++; updateCarousel(); }
+      });
+
+      window.addEventListener('resize', function() { currentIndex = 0; updateCarousel(); });
+      updateCarousel();
+    })();
+
   </script>
 
   <script type="module">
