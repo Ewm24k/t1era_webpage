@@ -2673,6 +2673,10 @@
       margin-bottom: 0;
       position: relative;
       overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 18px;
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.02);
     }
     .sparks-carousel-track {
       display: flex;
@@ -2700,7 +2704,10 @@
       transition: border-color 0.3s var(--transition), box-shadow 0.3s var(--transition);
       position: relative;
       overflow: hidden;
+      display: flex;
+      flex-direction: column;
     }
+    .sparks-carousel-card .spc-text { flex: 1; }
     .sparks-carousel-card::before {
       content: '';
       position: absolute;
@@ -2732,8 +2739,8 @@
     .sparks-carousel-card .spc-author { font-size: 12px; }
     .sparks-carousel-card .spc-handle { font-size: 10px; }
     .sparks-carousel-card .spc-time { font-size: 9px; }
-    .sparks-carousel-card .spc-text { font-size: 12px; line-height: 1.5; margin-bottom: 8px; }
-    .sparks-carousel-card .spc-actions { padding-top: 8px; }
+    .sparks-carousel-card .spc-text { font-size: 12px; line-height: 1.5; margin-bottom: 0; }
+    .sparks-carousel-card .spc-actions { padding-top: 8px; margin-top: auto; }
     .sparks-carousel-card .spc-action-item { font-size: 11px; padding: 3px 6px; }
     .sparks-carousel-card .spc-action-item i { font-size: 13px; }
     .sparks-carousel-card .spc-prompt-box { padding: 10px; margin-bottom: 8px; }
@@ -2823,7 +2830,7 @@
       .sparks-carousel-card .spc-handle { font-size: 9px; }
       .sparks-carousel-card .spc-time { font-size: 8px; }
       .sparks-carousel-card .spc-badge { font-size: 7px; padding: 1px 4px; }
-      .sparks-carousel-card .spc-text { font-size: 11px; line-height: 1.45; margin-bottom: 6px; }
+      .sparks-carousel-card .spc-text { font-size: 11px; line-height: 1.45; margin-bottom: 0; }
       .sparks-carousel-card .spc-actions { padding-top: 6px; }
       .sparks-carousel-card .spc-action-item { font-size: 10px; padding: 2px 4px; }
       .sparks-carousel-card .spc-action-item i { font-size: 11px; }
