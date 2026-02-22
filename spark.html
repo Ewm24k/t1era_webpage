@@ -803,6 +803,33 @@ a{text-decoration:none;color:inherit}
 
 /* body padding for mobile nav */
 @media(max-width:1079px){body{padding-bottom:60px}}
+
+/* ══════════════════════════════════════════
+   DAILY QUOTA BANNER
+══════════════════════════════════════════ */
+.quota-banner{
+  display:none;
+  align-items:center;gap:10px;
+  padding:10px 16px;
+  font-size:12px;font-weight:600;
+  border-bottom:1px solid var(--border);
+}
+.quota-banner.show{display:flex}
+.quota-banner.warn{
+  background:rgba(245,158,11,0.07);
+  color:#f59e0b;
+  border-color:rgba(245,158,11,0.2);
+}
+.quota-banner.full{
+  background:rgba(239,68,68,0.07);
+  color:#ef4444;
+  border-color:rgba(239,68,68,0.2);
+}
+.quota-banner i{font-size:16px;flex-shrink:0}
+.quota-banner-reset{
+  margin-left:auto;font-size:10px;
+  color:var(--text-3);font-family:var(--f-mono);white-space:nowrap;
+}
 </style>
 </head>
 <body>
@@ -864,6 +891,13 @@ a{text-decoration:none;color:inherit}
         <div class="compose-mini-av" id="miniAv">M</div>
         <span class="compose-placeholder">What's sparking today…</span>
         <button class="compose-plus-btn"><i class="ph-bold ph-plus"></i></button>
+      </div>
+
+      <!-- Daily quota banner -->
+      <div class="quota-banner" id="quotaBanner">
+        <i class="ph-bold ph-warning"></i>
+        <span id="quotaMsg"></span>
+        <span class="quota-banner-reset" id="quotaReset"></span>
       </div>
 
       <!-- Compose box (hidden by default) -->
@@ -1500,10 +1534,8 @@ function attachMedia(input, type) {
 }
 
 function submitSpark() {
-  const txt = document.getElementById('composeTa').value.trim();
-  if (!txt && !document.getElementById('mediaStrip').children.length) return;
-  alert('⚡ Spark posted!\n\n(Firebase integration coming — this demo shows the full UI flow)');
-  closeCompose();
+  // Delegated to Firebase module — window._submitSparkFn is set by the module script below
+  if (typeof window._submitSparkFn === 'function') { window._submitSparkFn(); }
 }
 
 /* ══════════════════════════════════
@@ -1638,7 +1670,7 @@ document.addEventListener('keydown', e => {
 <script type="module">
 import { initializeApp }                        from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getAuth, onAuthStateChanged }          from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-import { getFirestore, doc, getDoc }            from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import { getFirestore, doc, getDoc, collection, addDoc, query, where, getDocs, serverTimestamp, orderBy, limit } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 const firebaseConfig = {
   apiKey:            "AIzaSyBnt9mbb8LdMVeguSHUmS20L6uBHIfxwAs",
@@ -1653,6 +1685,8 @@ const app  = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db   = getFirestore(app);
 
+const DAILY_LIMIT = 2;
+
 // Hide page before auth state is known — prevents flash of content for unauthenticated users
 document.body.style.visibility = 'hidden';
 
@@ -1666,20 +1700,257 @@ onAuthStateChanged(auth, async (user) => {
   // Authenticated — reveal page
   document.body.style.visibility = '';
 
-  // Fetch Firestore profile doc to get profile photo
+  // Cache auth user for submitSpark
+  window._sparkUser = user;
+
+  // Fetch Firestore profile doc to get profile photo + display name
   try {
     const snap = await getDoc(doc(db, 'users', user.uid));
     const d = snap.exists() ? snap.data() : {};
+    window._sparkUserData = d;
     const photoURL = d.profilePicture?.url || user.photoURL || '';
     const initial  = (d.fullName || user.displayName || user.email || 'U')[0].toUpperCase();
     applyComposeAvatar(photoURL, initial);
   } catch (err) {
     console.warn('Sparks: Firestore fetch error:', err);
+    window._sparkUserData = {};
     // Fallback to auth object only
     const initial = (user.displayName || user.email || 'U')[0].toUpperCase();
     applyComposeAvatar('', initial);
   }
+
+  // Check today's quota on page load
+  await checkDailyQuota(user.uid);
+
+  // Load existing sparks from Firestore into the feed
+  await loadSparksFeed();
 });
+
+// ── QUOTA HELPERS ──
+
+function getTodayString() {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  const d = String(now.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+function getMidnightResetText() {
+  const now = new Date();
+  const midnight = new Date(now);
+  midnight.setHours(24, 0, 0, 0);
+  const diffMs = midnight - now;
+  const diffH  = Math.floor(diffMs / 3600000);
+  const diffM  = Math.floor((diffMs % 3600000) / 60000);
+  if (diffH > 0) return `Resets in ${diffH}h ${diffM}m`;
+  return `Resets in ${diffM}m`;
+}
+
+async function checkDailyQuota(uid) {
+  const banner     = document.getElementById('quotaBanner');
+  const quotaMsg   = document.getElementById('quotaMsg');
+  const quotaReset = document.getElementById('quotaReset');
+  const submitBtn  = document.getElementById('submitBtn');
+  const toggle     = document.getElementById('composeToggle');
+
+  try {
+    const today = getTodayString();
+    const q = query(
+      collection(db, 'sparks'),
+      where('uid',       '==', uid),
+      where('dateStr',   '==', today),
+      where('tab',       '==', 'standard')
+    );
+    const snap = await getDocs(q);
+    const count = snap.size;
+
+    banner.classList.remove('show', 'warn', 'full');
+
+    if (count === 0) {
+      // Full quota available — no banner needed
+      if (submitBtn) submitBtn.disabled = document.getElementById('composeTa')?.value.trim().length === 0;
+      if (toggle)    toggle.style.opacity = '1';
+      if (toggle)    toggle.style.pointerEvents = 'auto';
+    } else if (count === 1) {
+      // 1 used, 1 remaining — show amber warning
+      banner.classList.add('show', 'warn');
+      quotaMsg.textContent   = '1 of 2 daily Sparks used — 1 remaining today';
+      quotaReset.textContent = getMidnightResetText();
+      if (submitBtn) submitBtn.disabled = document.getElementById('composeTa')?.value.trim().length === 0;
+      if (toggle)    toggle.style.opacity = '1';
+      if (toggle)    toggle.style.pointerEvents = 'auto';
+    } else {
+      // Limit reached — lock compose
+      banner.classList.add('show', 'full');
+      quotaMsg.textContent   = 'Daily limit reached — 2 Sparks per day maximum';
+      quotaReset.textContent = getMidnightResetText();
+      if (submitBtn) submitBtn.disabled = true;
+      // Lock the compose toggle so it can't be opened
+      if (toggle) {
+        toggle.style.opacity = '0.45';
+        toggle.style.pointerEvents = 'none';
+      }
+      // Close compose box if currently open
+      if (typeof window.closeCompose === 'function') window.closeCompose();
+    }
+
+    // Store count in window so _submitSparkFn can read it synchronously
+    window._todaySparkCount = count;
+
+  } catch (err) {
+    console.warn('Sparks: quota check error:', err);
+    window._todaySparkCount = 0;
+  }
+}
+
+// ── LOAD FEED FROM FIRESTORE ──
+
+async function loadSparksFeed() {
+  try {
+    const q = query(
+      collection(db, 'sparks'),
+      where('tab', '==', 'standard'),
+      orderBy('createdAt', 'desc'),
+      limit(50)
+    );
+    const snap = await getDocs(q);
+    if (snap.empty) return;
+    snap.forEach((docSnap) => {
+      const data = docSnap.data();
+      prependSparkCard(data, docSnap.id, false);
+    });
+  } catch (err) {
+    console.warn('Sparks: loadSparksFeed error:', err);
+  }
+}
+
+// ── SUBMIT SPARK (wired via window._submitSparkFn → submitSpark() stub in main script) ──
+
+window._submitSparkFn = async function() {
+  const user = window._sparkUser;
+  if (!user) return;
+
+  const txt = document.getElementById('composeTa').value.trim();
+  if (!txt) return;
+
+  // Re-check quota just before writing — prevents race condition
+  if ((window._todaySparkCount || 0) >= DAILY_LIMIT) {
+    alert('⚠️ You have reached your daily limit of 2 Sparks. Come back tomorrow!');
+    return;
+  }
+
+  // Disable button immediately to prevent double-tap
+  const submitBtn = document.getElementById('submitBtn');
+  if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Posting…'; }
+
+  const d        = window._sparkUserData || {};
+  const today    = getTodayString();
+  const photoURL = d.profilePicture?.url || user.photoURL || '';
+  const fullName = d.fullName || user.displayName || 'T1ERA User';
+  const handle   = (user.email || 'user').split('@')[0];
+
+  const sparkDoc = {
+    uid:        user.uid,
+    authorName: fullName,
+    authorHandle: handle,
+    authorPhoto: photoURL,
+    text:       txt,
+    tab:        'standard',
+    dateStr:    today,
+    createdAt:  serverTimestamp(),
+    likes:      0,
+    replies:    0,
+    reposts:    0
+  };
+
+  try {
+    const docRef = await addDoc(collection(db, 'sparks'), sparkDoc);
+
+    // Prepend live card to feed immediately (optimistic UI)
+    prependSparkCard(sparkDoc, docRef.id, true);
+
+    // Close compose and clear textarea
+    if (typeof window.closeCompose === 'function') window.closeCompose();
+
+    // Re-check quota and update banner / lock state
+    await checkDailyQuota(user.uid);
+
+  } catch (err) {
+    console.error('Sparks: addDoc error:', err);
+    alert('Failed to post Spark. Please try again.');
+    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Spark ⚡'; }
+  }
+};
+
+// ── PREPEND CARD TO FEED ──
+
+function prependSparkCard(data, docId, isNew) {
+  const panel = document.getElementById('panel-0');
+  if (!panel) return;
+
+  const name    = data.authorName    || 'T1ERA User';
+  const handle  = data.authorHandle  || 'user';
+  const photo   = data.authorPhoto   || '';
+  const txt     = data.text          || '';
+  const initial = name[0].toUpperCase();
+
+  // Build avatar HTML
+  const avBg = 'background:linear-gradient(135deg,var(--pink),var(--purple))';
+  const avInner = photo
+    ? `<img src="${photo}" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;" onerror="this.style.display='none'">`
+    : initial;
+
+  // Linkify hashtags and mentions in text
+  const linkedTxt = txt
+    .replace(/(#\w+)/g, '<span class="ht">$1</span>')
+    .replace(/(@\w+)/g, '<span class="mn">$1</span>');
+
+  const animClass = isNew ? 'fu' : '';
+
+  const article = document.createElement('article');
+  article.className = `spark-card ${animClass}`;
+  article.dataset.sparkId = docId;
+  article.setAttribute('onclick', 'openSparkDetail(this)');
+  article.innerHTML = `
+    <div class="card-head">
+      <div class="av-wrap">
+        <div class="spark-av" style="${avBg}">${avInner}</div>
+      </div>
+      <div class="card-meta">
+        <div class="meta-row-1">
+          <span class="author-name">${name}</span>
+          <span class="author-handle">@${handle}</span>
+          <span class="spark-time">Just now</span>
+        </div>
+        <div class="badges-row">
+          <span class="badge rank">LV 1</span>
+        </div>
+      </div>
+      <button class="dots-btn" onclick="event.stopPropagation()"><i class="ph-bold ph-dots-three-vertical"></i></button>
+    </div>
+    <div class="card-content">
+      <p class="spark-text">${linkedTxt}</p>
+    </div>
+    <div class="action-bar">
+      <button class="act-btn like" onclick="event.stopPropagation();toggleLike(this)"><i class="ph-bold ph-heart"></i><span>0</span></button>
+      <button class="act-btn reply" onclick="event.stopPropagation();openReply('${name}','${initial}','#c2185b','${txt.replace(/'/g,"\'").slice(0,80)}')"><i class="ph-bold ph-chat-circle"></i><span>0</span></button>
+      <button class="act-btn repost" onclick="event.stopPropagation();toggleRepost(this)"><i class="ph-bold ph-repeat"></i><span>0</span></button>
+      <button class="act-btn share" onclick="event.stopPropagation();shareSpark()"><i class="ph-bold ph-share-network"></i><span>0</span></button>
+      <button class="act-btn bookmark" onclick="event.stopPropagation();toggleBookmark(this)" style="margin-left:auto"><i class="ph-bold ph-bookmark-simple"></i></button>
+    </div>
+  `;
+
+  // Insert before first existing spark-card (after compose box area)
+  const firstCard = panel.querySelector('.spark-card');
+  if (firstCard) {
+    panel.insertBefore(article, firstCard);
+  } else {
+    panel.appendChild(article);
+  }
+}
+
+// ── APPLY PROFILE PHOTO TO COMPOSE AVATARS ──
 
 function applyComposeAvatar(photoURL, initial) {
   const miniAv    = document.getElementById('miniAv');
