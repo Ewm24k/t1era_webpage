@@ -1939,19 +1939,12 @@ function buildSkeleton() {
 }
 
 async function startFeed() {
-  const panel = document.getElementById('panel-0');
-  if (!panel) return;
+  // Target realFeed — the revealed content container inside panel-0
+  const container = document.getElementById('realFeed');
+  if (!container) return;
 
-  // Remove any old real cards
-  panel.querySelectorAll('.spark-card[data-spark-id]').forEach(el => el.remove());
-
-  // Show 3 skeleton placeholders above demo cards while loading
-  const skeletons = [buildSkeleton(), buildSkeleton(), buildSkeleton()];
-  const firstDemo = panel.querySelector('.spark-card:not([data-spark-id])');
-  skeletons.forEach(sk => {
-    if (firstDemo) panel.insertBefore(sk, firstDemo);
-    else panel.appendChild(sk);
-  });
+  // Remove any previously rendered Firestore cards
+  container.querySelectorAll('.spark-card[data-spark-id]').forEach(el => el.remove());
 
   try {
     const snap = await getDocs(query(
@@ -1959,15 +1952,12 @@ async function startFeed() {
       where('tab', '==', 'standard')
     ));
 
-    // Remove skeletons
-    skeletons.forEach(sk => sk.remove());
-
     if (snap.empty) return;
 
     const docs = [];
     snap.forEach(d => docs.push({ id: d.id, data: d.data() }));
 
-    // Sort newest-first client-side — handle null createdAt gracefully
+    // Sort newest-first client-side — handles null createdAt gracefully
     docs.sort((a, b) => {
       const ta = a.data.createdAt?.toMillis ? a.data.createdAt.toMillis() : 0;
       const tb = b.data.createdAt?.toMillis ? b.data.createdAt.toMillis() : 0;
@@ -1977,15 +1967,13 @@ async function startFeed() {
     docs.slice(0, 50).forEach(({ id, data }) => renderCard(id, data));
 
   } catch (e) {
-    // Remove skeletons on error too
-    skeletons.forEach(sk => sk.remove());
     console.error('startFeed error:', e);
   }
 }
 
 // ── RENDER ONE CARD INTO FEED ──
 function renderCard(id, d) {
-  const panel = document.getElementById('panel-0');
+  const panel = document.getElementById('realFeed');
   if (!panel) return;
 
   const name    = d.authorName    || 'T1ERA User';
@@ -2045,7 +2033,7 @@ function renderCard(id, d) {
     </div>
   `;
 
-  // Place before the first demo card (demo cards have no data-spark-id)
+  // Place before the first demo card inside realFeed (demo cards have no data-spark-id)
   const firstDemo = panel.querySelector('.spark-card:not([data-spark-id])');
   if (firstDemo) {
     panel.insertBefore(article, firstDemo);
