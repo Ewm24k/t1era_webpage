@@ -295,6 +295,7 @@ a{text-decoration:none;color:inherit}
 
 .compose-body{
   display:flex;gap:12px;padding:14px 16px 8px;
+  min-width:0;
 }
 .compose-av{
   width:40px;height:40px;border-radius:50%;flex-shrink:0;
@@ -308,6 +309,8 @@ a{text-decoration:none;color:inherit}
   color:var(--text);font-family:var(--f-body);font-size:15px;
   line-height:1.65;resize:none;min-height:90px;
   padding-top:2px;
+  width:100%;min-width:0;
+  word-wrap:break-word;overflow-wrap:break-word;white-space:pre-wrap;
 }
 .compose-textarea::placeholder{color:var(--text-3)}
 
@@ -908,7 +911,7 @@ a{text-decoration:none;color:inherit}
         </div>
         <div class="compose-body">
           <div class="compose-av" id="composeAv">M</div>
-          <div style="flex:1">
+          <div style="flex:1;min-width:0">
             <textarea
               class="compose-textarea"
               id="composeTa"
@@ -1685,7 +1688,7 @@ const app  = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db   = getFirestore(app);
 
-const DAILY_LIMIT = 2;
+const DAILY_LIMIT = 3;
 
 // Hide page before auth state is known — prevents flash of content for unauthenticated users
 document.body.style.visibility = 'hidden';
@@ -1753,6 +1756,16 @@ async function checkDailyQuota(uid) {
   const quotaReset = document.getElementById('quotaReset');
   const submitBtn  = document.getElementById('submitBtn');
   const toggle     = document.getElementById('composeToggle');
+
+  // DEV BYPASS — ewm24k@gmail.com has unlimited sparks
+  if (window._sparkUser && window._sparkUser.email === 'ewm24k@gmail.com') {
+    banner.classList.remove('show', 'warn', 'full');
+    if (submitBtn) submitBtn.disabled = document.getElementById('composeTa')?.value.trim().length === 0;
+    if (toggle)    toggle.style.opacity = '1';
+    if (toggle)    toggle.style.pointerEvents = 'auto';
+    window._todaySparkCount = 0;
+    return;
+  }
 
   try {
     const today = getTodayString();
@@ -1827,13 +1840,14 @@ async function loadSparksFeed() {
 
     if (snap.empty) return;
 
-    // docs come back newest-first; append in reverse so DOM order stays newest-first
+    // docs come back newest-first; reverse so we insert oldest-first, leaving newest at top
     const docs = [];
     snap.forEach((docSnap) => docs.push(docSnap));
+    docs.reverse();
     docs.forEach((docSnap, idx) => {
       const data = docSnap.data();
       // Animate only the very first card (most recent) when reloading after a post
-      prependSparkCard(data, docSnap.id, idx === 0);
+      prependSparkCard(data, docSnap.id, idx === docs.length - 1);
     });
   } catch (err) {
     console.warn('Sparks: loadSparksFeed error:', err);
@@ -1850,7 +1864,8 @@ window._submitSparkFn = async function() {
   if (!txt) return;
 
   // Re-check quota just before writing — prevents race condition
-  if ((window._todaySparkCount || 0) >= DAILY_LIMIT) {
+  // DEV BYPASS — ewm24k@gmail.com is unlimited
+  if (window._sparkUser.email !== 'ewm24k@gmail.com' && (window._todaySparkCount || 0) >= DAILY_LIMIT) {
     alert('⚠️ You have reached your daily limit of 2 Sparks. Come back tomorrow!');
     return;
   }
