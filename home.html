@@ -2666,30 +2666,32 @@
     }
 
     /* ── Sparks Inline Carousel (under ai-showcase) ── */
-    /* PC: horizontal drag-scroll, 3 visible, 4th peeks → slide right */
+    /* PC: horizontal scroll, 3 visible, 4th slides right via arrows or drag */
     .sparks-carousel-wrap {
       width: 100%;
       margin-top: 20px;
       margin-bottom: 0;
       position: relative;
-      overflow: visible;
+      overflow: hidden;
     }
     .sparks-carousel-track {
       display: flex;
       flex-direction: row;
       gap: 12px;
-      overflow-x: auto;
-      overflow-y: visible;
+      overflow-x: scroll;
+      overflow-y: hidden;
       scroll-snap-type: x mandatory;
       -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
       cursor: grab;
       padding-bottom: 4px;
+      scroll-behavior: smooth;
     }
     .sparks-carousel-track::-webkit-scrollbar { display: none; }
-    .sparks-carousel-track.dragging { cursor: grabbing; user-select: none; }
+    .sparks-carousel-track.dragging { cursor: grabbing; user-select: none; scroll-behavior: auto; }
     .sparks-carousel-card {
       flex: 0 0 calc((100% - 24px) / 3);
+      min-width: calc((100% - 24px) / 3);
       scroll-snap-align: start;
       background: var(--bg-card);
       border: 1px solid var(--border-primary);
@@ -2698,7 +2700,6 @@
       transition: border-color 0.3s var(--transition), box-shadow 0.3s var(--transition);
       position: relative;
       overflow: hidden;
-      min-width: 0;
     }
     .sparks-carousel-card::before {
       content: '';
@@ -2738,6 +2739,37 @@
     .sparks-carousel-card .spc-prompt-box { padding: 10px; margin-bottom: 8px; }
     .sparks-carousel-card .spc-prompt-q { font-size: 12px; }
     .sparks-carousel-card .spc-prompt-replies { font-size: 10px; }
+    /* ── Arrow buttons ── */
+    .sparks-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 10;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(10, 8, 12, 0.9);
+      border: 1px solid rgba(194, 24, 91, 0.45);
+      color: #fff;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease, background 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 0 16px rgba(194, 24, 91, 0.25);
+    }
+    .sparks-arrow:hover {
+      background: rgba(194, 24, 91, 0.85);
+      box-shadow: 0 0 24px rgba(194, 24, 91, 0.5);
+    }
+    .sparks-arrow-prev { left: 6px; }
+    .sparks-arrow-next { right: 6px; }
+    .sparks-carousel-wrap:hover .sparks-arrow { opacity: 1; pointer-events: auto; }
+    .sparks-arrow.hidden { opacity: 0 !important; pointer-events: none !important; }
+    /* ── CTA row ── */
     .sparks-carousel-cta {
       display: flex;
       align-items: center;
@@ -2748,6 +2780,7 @@
     }
     /* MOBILE: vertical stacked container — 4 cards, ~2 visible, rest scroll inside */
     @media (max-width: 768px) {
+      .sparks-arrow { display: none; }
       .sparks-carousel-wrap {
         overflow: hidden;
         border: 1px solid var(--border-primary);
@@ -2763,6 +2796,7 @@
         cursor: default;
         gap: 0;
         padding-bottom: 0;
+        scroll-behavior: smooth;
         scrollbar-width: thin;
         scrollbar-color: rgba(194,24,91,0.3) transparent;
       }
@@ -2771,6 +2805,7 @@
       .sparks-carousel-track::-webkit-scrollbar-thumb { background: rgba(194,24,91,0.35); border-radius: 10px; }
       .sparks-carousel-card {
         flex: 0 0 auto;
+        min-width: unset;
         width: 100%;
         scroll-snap-align: start;
         padding: 12px 14px;
@@ -2797,21 +2832,11 @@
       .sparks-carousel-card .spc-prompt-replies { font-size: 9px; }
     }
     @media (max-width: 480px) {
-      .sparks-carousel-track {
-        max-height: 340px;
-      }
-      .sparks-carousel-card {
-        padding: 10px 12px;
-      }
-      .sparks-carousel-cta {
-        flex-direction: column;
-        align-items: stretch;
-      }
+      .sparks-carousel-track { max-height: 340px; }
+      .sparks-carousel-card { padding: 10px 12px; }
+      .sparks-carousel-cta { flex-direction: column; align-items: stretch; }
       .sparks-carousel-cta .sparks-cta-primary,
-      .sparks-carousel-cta .sparks-cta-secondary {
-        width: 100%;
-        justify-content: center;
-      }
+      .sparks-carousel-cta .sparks-cta-secondary { width: 100%; justify-content: center; }
     }
   </style>
 </head>
@@ -3102,6 +3127,8 @@
 
             <!-- Sparks Inline Carousel -->
             <div class="sparks-carousel-wrap fade-in">
+              <button class="sparks-arrow sparks-arrow-prev hidden" id="sparksArrowPrev" aria-label="Previous">&#8249;</button>
+              <button class="sparks-arrow sparks-arrow-next" id="sparksArrowNext" aria-label="Next">&#8250;</button>
               <div class="sparks-carousel-track" id="sparksCarouselTrack">
 
                 <!-- Card 1 -->
@@ -3800,10 +3827,39 @@
       closeModal();
     });
 
-    // ── SPARKS CAROUSEL DRAG SCROLL ──
+    // ── SPARKS CAROUSEL: ARROWS + DRAG ──
     (function() {
-      const track = document.getElementById('sparksCarouselTrack');
-      if (!track) return;
+      const track   = document.getElementById('sparksCarouselTrack');
+      const btnPrev = document.getElementById('sparksArrowPrev');
+      const btnNext = document.getElementById('sparksArrowNext');
+      if (!track || !btnPrev || !btnNext) return;
+
+      function cardWidth() {
+        const card = track.querySelector('.sparks-carousel-card');
+        if (!card) return 0;
+        const gap = 12;
+        return card.offsetWidth + gap;
+      }
+
+      function updateArrows() {
+        const atStart = track.scrollLeft <= 4;
+        const atEnd   = track.scrollLeft >= track.scrollWidth - track.clientWidth - 4;
+        btnPrev.classList.toggle('hidden', atStart);
+        btnNext.classList.toggle('hidden', atEnd);
+      }
+
+      btnNext.addEventListener('click', () => {
+        track.scrollLeft += cardWidth();
+      });
+      btnPrev.addEventListener('click', () => {
+        track.scrollLeft -= cardWidth();
+      });
+
+      track.addEventListener('scroll', updateArrows, { passive: true });
+      window.addEventListener('resize', updateArrows);
+      updateArrows();
+
+      // drag-to-scroll
       let isDown = false, startX, scrollLeft;
       track.addEventListener('mousedown', (e) => {
         isDown = true;
@@ -3812,11 +3868,11 @@
         scrollLeft = track.scrollLeft;
       });
       track.addEventListener('mouseleave', () => { isDown = false; track.classList.remove('dragging'); });
-      track.addEventListener('mouseup', () => { isDown = false; track.classList.remove('dragging'); });
-      track.addEventListener('mousemove', (e) => {
+      track.addEventListener('mouseup',    () => { isDown = false; track.classList.remove('dragging'); updateArrows(); });
+      track.addEventListener('mousemove',  (e) => {
         if (!isDown) return;
         e.preventDefault();
-        const x = e.pageX - track.offsetLeft;
+        const x    = e.pageX - track.offsetLeft;
         const walk = (x - startX) * 1.5;
         track.scrollLeft = scrollLeft - walk;
       });
