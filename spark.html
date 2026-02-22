@@ -2415,9 +2415,11 @@ window.showToast = showToast;
 /* ══════════════════════════════════
    REPLY FROM NOTIFICATION
 ══════════════════════════════════ */
-function replyFromNotif(sparkId, ownerUid, fromName, fromHandle, sparkText) {
+function replyFromNotif(sparkId, ownerUid, fromName, fromHandle, sparkText, notifId) {
   closeNotifPanel();
   openReply(fromName, fromName[0].toUpperCase(), '#8b5cf6', sparkText || '', sparkId, ownerUid, fromHandle);
+  // Store notifId so _submitReplyFn can mark it as read on successful reply
+  if (window._replyCtx) window._replyCtx.notifId = notifId || '';
 }
 window.replyFromNotif = replyFromNotif;
 
@@ -2675,7 +2677,7 @@ window._loadNotifsFn = async function() {
         row.className = 'notif-row' + (d.read ? '' : ' unread');
         row.dataset.notifId = id;
         const replyBtn = (key === 'reply' && d.sparkId)
-          ? `<button class="notif-reply-btn" onclick="event.stopPropagation();replyFromNotif('${d.sparkId}','${d.fromUid||''}','${(d.fromName||'').replace(/'/g,"\\'")}','${(d.fromHandle||d.fromName||'').replace(/'/g,"\\'")}','${(d.sparkText||'').replace(/'/g,"\\'").slice(0,60)}')"><i class="ph-bold ph-chat-circle"></i> Reply</button>`
+          ? `<button class="notif-reply-btn" onclick="event.stopPropagation();replyFromNotif('${d.sparkId}','${d.fromUid||''}','${(d.fromName||'').replace(/'/g,"\\'")}','${(d.fromHandle||d.fromName||'').replace(/'/g,"\\'")}','${(d.sparkText||'').replace(/'/g,"\\'").slice(0,60)}','${id}')"><i class="ph-bold ph-chat-circle"></i> Reply</button>`
           : '';
         row.innerHTML = `
           <div class="notif-av">${avInner}</div>
@@ -2779,7 +2781,7 @@ window._submitReplyFn = async function(txt) {
   if (!user || !txt) return;
 
   const ctx = window._replyCtx || {};
-  const { sparkId, ownerUid, ownerHandle, author, mentionedUid, mentionedHandle } = ctx;
+  const { sparkId, ownerUid, ownerHandle, author, mentionedUid, mentionedHandle, notifId } = ctx;
 
   const ud          = window._sparkUserData || {};
   const authorName  = ud.fullName || user.displayName || user.email?.split('@')[0] || 'User';
@@ -2879,6 +2881,10 @@ window._submitReplyFn = async function(txt) {
 
     // 5. Clear textarea — DB write confirmed, show toast and close immediately
     document.getElementById('replyTa').value = '';
+    // Mark the source notification as read if this reply came from the notif panel
+    if (notifId && window._sparkUser?.uid) {
+      markOneRead(window._sparkUser.uid, notifId, document.querySelector(`.notif-row[data-notif-id="${notifId}"]`));
+    }
     if (typeof window.showToast === 'function') window.showToast('Reply posted ⚡');
     if (typeof window.closeReply === 'function') window.closeReply();
 
