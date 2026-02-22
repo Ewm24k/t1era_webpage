@@ -2547,13 +2547,13 @@
     .sparks-cta-primary {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      padding: 13px 28px;
-      border-radius: 12px;
+      gap: 6px;
+      padding: 9px 18px;
+      border-radius: 10px;
       background: linear-gradient(145deg, #e91e6a, #9c1545);
       border: 1px solid rgba(194, 24, 91, 0.3);
       color: #fff;
-      font-size: 15px;
+      font-size: 13px;
       font-weight: 700;
       text-decoration: none;
       cursor: pointer;
@@ -2590,13 +2590,13 @@
     .sparks-cta-secondary {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      padding: 13px 28px;
-      border-radius: 12px;
+      gap: 6px;
+      padding: 9px 18px;
+      border-radius: 10px;
       background: linear-gradient(145deg, #1a1a1a, #0d0d0d);
       border: 1px solid var(--border-primary);
       color: var(--text-secondary);
-      font-size: 15px;
+      font-size: 13px;
       font-weight: 600;
       text-decoration: none;
       cursor: pointer;
@@ -2688,9 +2688,10 @@
       background: linear-gradient(270deg, rgba(0,0,0,0.92), transparent);
     }
 
-    /* Push hero down so content isn't hidden behind header+ticker+badges */
-    .hero { padding-top: 220px; }
-    @media (max-width: 768px) { .hero { padding-top: 190px; } }
+    /* Push hero down on desktop only — clears header(72) + ticker(~35) + badge-bar(~37) */
+    @media (min-width: 769px) {
+      .hero { padding-top: 200px !important; }
+    }
 
     /* ====== SPARKS SECTION BADGES ROW ====== */
     .sparks-section-badges {
@@ -2705,10 +2706,35 @@
     .sparks-section-badges .section-label { margin-bottom: 0; }
     .sparks-section-badges .sparks-live-badge { margin-bottom: 0; }
 
-    /* ── Global badges bar — fixed below ticker ── */
-    .sparks-global-badges {
+    @media (max-width: 768px) {
+      .spark-ticker-global {
+        position: relative;
+        top: auto;
+        z-index: 1;
+        margin-top: 64px; /* push below the fixed header on mobile */
+      }
+    }
+
+    /* ── Sparks inline badge bar — in page flow, below ticker ── */
+    .sparks-inline-badge-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 7px 16px;
+      background: rgba(0,0,0,0.75);
+      border-bottom: 1px solid var(--border-primary);
+      backdrop-filter: blur(8px) saturate(140%);
+    }
+    /* On desktop this bar sits right below the fixed ticker; nudge hero padding to clear header+ticker+badge-bar */
+    @media (min-width: 769px) {
+      .sparks-inline-badge-bar { display: none; }
+    }
+    /* On desktop the badge bar is hidden in-flow; shown via a fixed clone instead */
+    .sparks-fixed-badge-bar {
       position: fixed;
-      top: 107px; /* 72px header + ~35px ticker height */
+      top: 107px;
       left: 0;
       right: 0;
       z-index: 998;
@@ -2717,15 +2743,15 @@
       justify-content: center;
       gap: 12px;
       flex-wrap: wrap;
-      padding: 6px 16px;
+      padding: 7px 16px;
       background: rgba(0,0,0,0.88);
-      backdrop-filter: blur(12px) saturate(160%);
       border-bottom: 1px solid var(--border-primary);
+      backdrop-filter: blur(12px) saturate(160%);
     }
-    .sparks-global-badges .section-label { margin-bottom: 0; font-size: 11px; }
-    .sparks-global-badges .sparks-live-badge { margin-bottom: 0; font-size: 11px; padding: 3px 10px; }
+    .sparks-fixed-badge-bar .section-label { margin-bottom: 0; font-size: 11px; }
+    .sparks-fixed-badge-bar .sparks-live-badge { margin-bottom: 0; font-size: 11px; padding: 3px 10px; }
     @media (max-width: 768px) {
-      .sparks-global-badges { top: 99px; }
+      .sparks-fixed-badge-bar { display: none; }
     }
 
     /* ====== HERO SPARKS BLOCK ====== */
@@ -3015,12 +3041,21 @@
         </div>
       </div>
 
-      <!-- ═══════════════════════════════════════════
-           GLOBAL BADGES BAR — fixed below ticker
-      ═══════════════════════════════════════════ -->
-      <div class="sparks-global-badges">
+      <!-- Fixed desktop-only badge bar below ticker -->
+      <div class="sparks-fixed-badge-bar">
         <span class="section-label" style="margin-bottom:0;">Community · Sparks</span>
-        <div class="sparks-live-badge">
+        <div class="sparks-live-badge" style="margin-bottom:0;">
+          <span class="sparks-live-badge-dot"></span>
+          <span>1,204</span> Sparks Today
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════
+           SPARKS LIVE BADGE BAR — below ticker, in-flow
+      ═══════════════════════════════════════════ -->
+      <div class="sparks-inline-badge-bar">
+        <span class="section-label" style="margin-bottom:0;">Community · Sparks</span>
+        <div class="sparks-live-badge" style="margin-bottom:0;">
           <span class="sparks-live-badge-dot"></span>
           <span>1,204</span> Sparks Today
         </div>
@@ -3047,7 +3082,7 @@
           <div class="hero-content">
             <div class="hero-badge">
               <span class="hero-badge-dot"></span>
-              Professional AI Suite for Telegram
+              Professional AI Suite for Everyone
             </div>
 
             <h1>
