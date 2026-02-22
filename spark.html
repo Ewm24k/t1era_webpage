@@ -418,7 +418,7 @@ a{text-decoration:none;color:inherit}
   display:flex;align-items:center;gap:6px;flex-wrap:wrap;
 }
 .author-name{
-  font-size:13px;font-weight:600;color:var(--text-2);
+  font-size:11px;font-weight:600;color:var(--text-2);
   cursor:pointer;transition:color .15s;white-space:nowrap;
 }
 .author-name:hover{color:var(--pink-2)}
@@ -999,6 +999,28 @@ a{text-decoration:none;color:inherit}
 .notif-type-icon.reply{background:rgba(139,92,246,.12);color:var(--purple)}
 .notif-type-icon.follow{background:rgba(16,185,129,.12);color:var(--green)}
 .notif-type-icon.message{background:rgba(194,24,91,.12);color:var(--pink)}
+
+/* reply button inside notification row */
+.notif-reply-btn{
+  display:inline-flex;align-items:center;gap:4px;
+  margin-top:6px;padding:4px 11px;border-radius:100px;
+  font-size:10px;font-weight:700;letter-spacing:.03em;
+  border:1px solid rgba(139,92,246,.35);color:var(--purple);
+  background:rgba(139,92,246,.07);cursor:pointer;
+  font-family:var(--f-body);transition:all .15s;
+}
+.notif-reply-btn:hover{background:rgba(139,92,246,.18);border-color:var(--purple)}
+
+/* reply button on each reply item inside reply sheet */
+.ri-reply-btn{
+  display:inline-flex;align-items:center;gap:3px;
+  margin-top:5px;padding:3px 9px;border-radius:100px;
+  font-size:10px;font-weight:700;
+  border:1px solid var(--border-2);color:var(--text-3);
+  background:none;cursor:pointer;
+  font-family:var(--f-body);transition:all .15s;
+}
+.ri-reply-btn:hover{border-color:rgba(139,92,246,.4);color:var(--purple);background:rgba(139,92,246,.07)}
 
 /* placeholder */
 .notif-placeholder{
@@ -2389,6 +2411,29 @@ function showToast(msg) {
   t._hideTimer = setTimeout(() => { t.classList.remove('show'); }, 2600);
 }
 window.showToast = showToast;
+
+/* ══════════════════════════════════
+   REPLY FROM NOTIFICATION
+══════════════════════════════════ */
+function replyFromNotif(sparkId, ownerUid, fromName, fromHandle, sparkText) {
+  closeNotifPanel();
+  openReply(fromName, fromName[0].toUpperCase(), '#8b5cf6', sparkText || '', sparkId, ownerUid, fromHandle);
+}
+window.replyFromNotif = replyFromNotif;
+
+/* ══════════════════════════════════
+   REPLY TO A REPLY ITEM (in-sheet)
+══════════════════════════════════ */
+function replyToReplyItem(authorHandle) {
+  const ta = document.getElementById('replyTa');
+  if (!ta) return;
+  const mention = authorHandle ? `@${authorHandle} ` : '';
+  ta.value = mention;
+  ta.focus();
+  ta.selectionStart = ta.selectionEnd = ta.value.length;
+  ta.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+window.replyToReplyItem = replyToReplyItem;
 </script>
 
 
@@ -2449,6 +2494,12 @@ onAuthStateChanged(auth, async (user) => {
 
   // Start live feed — loads existing posts and listens for new ones
   startFeed();
+
+  // Auto-refresh feed every 35 seconds
+  if (window._feedAutoRefreshTimer) clearInterval(window._feedAutoRefreshTimer);
+  window._feedAutoRefreshTimer = setInterval(() => {
+    if (typeof triggerFeedRefresh === 'function') triggerFeedRefresh();
+  }, 35000);
 
   // Start notification listener — live badge count
   startNotifListener(user.uid);
@@ -2618,12 +2669,16 @@ window._loadNotifsFn = async function() {
         const row = document.createElement('div');
         row.className = 'notif-row' + (d.read ? '' : ' unread');
         row.dataset.notifId = id;
+        const replyBtn = (key === 'reply' && d.sparkId)
+          ? `<button class="notif-reply-btn" onclick="event.stopPropagation();replyFromNotif('${d.sparkId}','${d.fromUid||''}','${(d.fromName||'').replace(/'/g,"\\'")}','${(d.fromHandle||d.fromName||'').replace(/'/g,"\\'")}','${(d.sparkText||'').replace(/'/g,"\\'").slice(0,60)}')"><i class="ph-bold ph-chat-circle"></i> Reply</button>`
+          : '';
         row.innerHTML = `
           <div class="notif-av">${avInner}</div>
           <div class="notif-body">
             <div class="notif-text">${d.message || `<strong>${d.fromName}</strong> interacted with your Spark`}</div>
             ${d.sparkText ? `<div class="notif-sub">"${d.sparkText}"</div>` : ''}
             <div class="notif-time">${timeStr}</div>
+            ${replyBtn}
           </div>
           <div class="notif-type-icon ${cls}"><i class="ph-bold ${icon}"></i></div>
         `;
@@ -2701,6 +2756,7 @@ window._loadRepliesFn = async function(sparkId) {
           <span class="ri-author">${r.authorName || 'User'}</span>
           <span class="ri-time">${timeStr}</span>
           <p class="ri-text">${r.text || ''}</p>
+          <button class="ri-reply-btn" onclick="replyToReplyItem('${(r.authorHandle || r.authorName || '').replace(/'/g,"\\'")}')"><i class="ph-bold ph-arrow-bend-up-left"></i> Reply</button>
         </div>
       `;
       list.appendChild(item);
@@ -2774,6 +2830,7 @@ window._submitReplyFn = async function(txt) {
           type:      'reply',
           fromUid:   user.uid,
           fromName:  authorName,
+          fromHandle: handle,
           fromPhoto: authorPhoto,
           sparkId,
           sparkText: txt.slice(0, 80),
