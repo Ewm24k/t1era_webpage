@@ -1773,13 +1773,15 @@ async function checkDailyQuota(uid) {
       if (toggle)    toggle.style.opacity = '1';
       if (toggle)    toggle.style.pointerEvents = 'auto';
     } else if (count === 1) {
-      // 1 used, 1 remaining — show amber warning
+      // 1 used, 1 remaining — show amber warning, auto-dismiss after 2s
       banner.classList.add('show', 'warn');
       quotaMsg.textContent   = '1 of 2 daily Sparks used — 1 remaining today';
       quotaReset.textContent = getMidnightResetText();
       if (submitBtn) submitBtn.disabled = document.getElementById('composeTa')?.value.trim().length === 0;
       if (toggle)    toggle.style.opacity = '1';
       if (toggle)    toggle.style.pointerEvents = 'auto';
+      // Auto-dismiss warn banner after 2 seconds
+      setTimeout(() => { banner.classList.remove('show', 'warn'); }, 2000);
     } else {
       // Limit reached — lock compose
       banner.classList.add('show', 'full');
@@ -1815,10 +1817,23 @@ async function loadSparksFeed() {
       limit(50)
     );
     const snap = await getDocs(q);
+
+    // Clear any previously fetched Firestore cards before re-populating
+    // (cards that have data-spark-id are from Firestore; demo cards do not have this attribute)
+    const panel = document.getElementById('panel-0');
+    if (panel) {
+      panel.querySelectorAll('.spark-card[data-spark-id]').forEach(el => el.remove());
+    }
+
     if (snap.empty) return;
-    snap.forEach((docSnap) => {
+
+    // docs come back newest-first; append in reverse so DOM order stays newest-first
+    const docs = [];
+    snap.forEach((docSnap) => docs.push(docSnap));
+    docs.forEach((docSnap, idx) => {
       const data = docSnap.data();
-      prependSparkCard(data, docSnap.id, false);
+      // Animate only the very first card (most recent) when reloading after a post
+      prependSparkCard(data, docSnap.id, idx === 0);
     });
   } catch (err) {
     console.warn('Sparks: loadSparksFeed error:', err);
@@ -1867,11 +1882,11 @@ window._submitSparkFn = async function() {
   try {
     const docRef = await addDoc(collection(db, 'sparks'), sparkDoc);
 
-    // Prepend live card to feed immediately (optimistic UI)
-    prependSparkCard(sparkDoc, docRef.id, true);
-
     // Close compose and clear textarea
     if (typeof window.closeCompose === 'function') window.closeCompose();
+
+    // Reload full feed from Firestore so the new spark appears correctly
+    await loadSparksFeed();
 
     // Re-check quota and update banner / lock state
     await checkDailyQuota(user.uid);
