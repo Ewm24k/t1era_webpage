@@ -842,6 +842,41 @@ a{text-decoration:none;color:inherit}
   100%{transform:translateX(100%)}
 }
 
+
+/* ══════════════════════════════════════════
+   FEED MINI HEADER
+══════════════════════════════════════════ */
+.feed-mini-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 16px;
+  border-bottom:1px solid var(--border);
+  background:var(--bg-2);
+  position:sticky;top:52px;z-index:100;
+  backdrop-filter:blur(12px);
+}
+.feed-mini-title{
+  font-family:var(--f-display);
+  font-size:11px;font-weight:700;letter-spacing:0.12em;
+  color:var(--text-2);text-transform:uppercase;
+  display:flex;align-items:center;gap:7px;
+}
+.feed-mini-title i{color:var(--pink);font-size:13px}
+.feed-refresh-btn{
+  width:30px;height:30px;border-radius:50%;
+  background:transparent;border:1px solid var(--border);
+  color:var(--text-3);font-size:14px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .2s;
+}
+.feed-refresh-btn:hover{
+  background:rgba(194,24,91,0.12);
+  border-color:rgba(194,24,91,0.4);
+  color:var(--pink);
+}
+.feed-refresh-btn.spinning i{
+  animation:spin .6s linear;
+}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 .fu{opacity:0;transform:translateY(10px);animation:fu .38s var(--ease) forwards}
 @keyframes fu{to{opacity:1;transform:none}}
 .d1{animation-delay:.06s}.d2{animation-delay:.12s}.d3{animation-delay:.18s}
@@ -1121,6 +1156,17 @@ a{text-decoration:none;color:inherit}
 
       <!-- real feed content (hidden until auth+data ready) -->
       <div class="real-content sk-hidden" id="realFeed">
+
+      <!-- Feed Mini Header -->
+      <div class="feed-mini-header">
+        <div class="feed-mini-title">
+          <i class="ph-bold ph-lightning"></i>
+          Sparks Feed
+        </div>
+        <button class="feed-refresh-btn" id="feedRefreshBtn" onclick="triggerFeedRefresh()" title="Refresh feed">
+          <i class="ph-bold ph-arrows-clockwise" id="feedRefreshIcon"></i>
+        </button>
+      </div>
 
       <!-- Compose toggle -->
       <div class="compose-toggle" id="composeToggle" onclick="openCompose()">
@@ -1854,6 +1900,19 @@ function submitSpark() {
   if (typeof window._submitSparkFn === 'function') { window._submitSparkFn(); }
 }
 
+function triggerFeedRefresh() {
+  const btn  = document.getElementById('feedRefreshBtn');
+  const icon = document.getElementById('feedRefreshIcon');
+  if (!btn) return;
+  btn.classList.add('spinning');
+  icon.style.animation = 'spin .6s linear';
+  setTimeout(() => {
+    btn.classList.remove('spinning');
+    icon.style.animation = '';
+  }, 650);
+  if (typeof window._startFeedFn === 'function') window._startFeedFn();
+}
+
 /* ══════════════════════════════════
    LIKE / REPOST / SHARE / BOOKMARK
 ══════════════════════════════════ */
@@ -2041,6 +2100,9 @@ onAuthStateChanged(auth, async (user) => {
   // Start live feed — loads existing posts and listens for new ones
   startFeed();
 });
+
+// ── EXPOSE startFeed to non-module scripts ──
+window._startFeedFn = startFeed;
 
 // ── SKELETON SHOW/HIDE ──
 function hidePageSkeleton() {
