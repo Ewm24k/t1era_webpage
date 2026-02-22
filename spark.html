@@ -1840,14 +1840,13 @@ async function loadSparksFeed() {
 
     if (snap.empty) return;
 
-    // docs come back newest-first; reverse so we insert oldest-first, leaving newest at top
+    // docs come back newest-first from Firestore; insert in that order so newest ends up on top
     const docs = [];
     snap.forEach((docSnap) => docs.push(docSnap));
-    docs.reverse();
     docs.forEach((docSnap, idx) => {
       const data = docSnap.data();
-      // Animate only the very first card (most recent) when reloading after a post
-      prependSparkCard(data, docSnap.id, idx === docs.length - 1);
+      // Animate only the very first card (most recent)
+      prependSparkCard(data, docSnap.id, idx === 0);
     });
   } catch (err) {
     console.warn('Sparks: loadSparksFeed error:', err);
@@ -1866,7 +1865,7 @@ window._submitSparkFn = async function() {
   // Re-check quota just before writing — prevents race condition
   // DEV BYPASS — ewm24k@gmail.com is unlimited
   if (window._sparkUser.email !== 'ewm24k@gmail.com' && (window._todaySparkCount || 0) >= DAILY_LIMIT) {
-    alert('⚠️ You have reached your daily limit of 2 Sparks. Come back tomorrow!');
+    alert('⚠️ You have reached your daily limit of 3 Sparks. Come back tomorrow!');
     return;
   }
 
@@ -1971,8 +1970,8 @@ function prependSparkCard(data, docId, isNew) {
     </div>
   `;
 
-  // Insert before first existing spark-card (after compose box area)
-  const firstCard = panel.querySelector('.spark-card');
+  // Insert before first demo spark-card (non-Firestore card has no data-spark-id)
+  const firstCard = panel.querySelector('.spark-card:not([data-spark-id])');
   if (firstCard) {
     panel.insertBefore(article, firstCard);
   } else {
