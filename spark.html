@@ -2272,49 +2272,76 @@ function closeProfile() {
 /* ══════════════════════════════════
    REPLY MODAL
 ══════════════════════════════════ */
-function openReply(author, initials, color, text) {
+// Global reply context — set when reply sheet opens
+window._replyCtx = {};
+
+function openReply(author, initials, color, text, sparkId, ownerUid, ownerHandle) {
+  // Store context for submitReply
+  window._replyCtx = { sparkId: sparkId || '', ownerUid: ownerUid || '', ownerHandle: ownerHandle || '', author: author || '' };
+
   document.getElementById('origAv').textContent = initials || '?';
   document.getElementById('origAv').style.background = `linear-gradient(135deg,${color||'#c2185b'},#8b5cf6)`;
   document.getElementById('origAuthor').textContent = author || '';
   document.getElementById('origText').textContent = text || '';
-  document.getElementById('replyTa').value = '';
+
+  // Auto-mention the post owner in the textarea
+  const mention = ownerHandle ? `@${ownerHandle} ` : '';
+  document.getElementById('replyTa').value = mention;
+
   document.getElementById('replyOverlay').classList.add('open');
-  setTimeout(() => document.getElementById('replyTa').focus(), 320);
+
+  // Load real replies from Firestore if sparkId present
+  if (sparkId && typeof window._loadRepliesFn === 'function') {
+    window._loadRepliesFn(sparkId);
+  } else {
+    // clear static demo replies for demo cards
+    document.getElementById('repliesList').innerHTML = '';
+  }
+
+  setTimeout(() => {
+    const ta = document.getElementById('replyTa');
+    ta.focus();
+    // Move cursor to end
+    ta.selectionStart = ta.selectionEnd = ta.value.length;
+  }, 320);
 }
+
 function closeReply() {
   document.getElementById('replyOverlay').classList.remove('open');
+  window._replyCtx = {};
 }
+
 function submitReply() {
   const txt = document.getElementById('replyTa').value.trim();
   if (!txt) return;
-  const list = document.getElementById('repliesList');
-  const item = document.createElement('div');
-  item.className = 'reply-item fu';
-  item.innerHTML = `
-    <div class="ri-av" style="background:linear-gradient(135deg,var(--pink),var(--purple))">M</div>
-    <div class="ri-body">
-      <span class="ri-author">You</span>
-      <span class="ri-time">Just now</span>
-      <p class="ri-text">${txt}</p>
-    </div>
-  `;
-  list.insertBefore(item, list.firstChild);
-  document.getElementById('replyTa').value = '';
+  if (typeof window._submitReplyFn === 'function') {
+    window._submitReplyFn(txt);
+  }
 }
 
 /* ══════════════════════════════════
    SPARK DETAIL (click card body)
 ══════════════════════════════════ */
 function openSparkDetail(card) {
-  const nameEl = card.querySelector('.author-name');
-  const textEl = card.querySelector('.spark-text');
-  const avEl   = card.querySelector('.spark-av');
+  const nameEl   = card.querySelector('.author-name');
+  const textEl   = card.querySelector('.spark-text');
+  const avEl     = card.querySelector('.spark-av');
+  const handleEl = card.querySelector('.author-handle');
   if (!nameEl || !textEl) return;
+
+  const sparkId    = card.dataset.sparkId    || '';
+  const ownerUid   = card.dataset.ownerUid   || '';
+  const ownerHandle = handleEl ? handleEl.textContent.trim().replace('@','') : '';
+  const initial    = avEl ? avEl.textContent.trim() : '?';
+
   openReply(
     nameEl.textContent.trim(),
-    avEl ? avEl.textContent.trim() : '?',
+    initial,
     '#c2185b',
-    textEl.textContent.trim().slice(0,120)
+    textEl.textContent.trim().slice(0,120),
+    sparkId,
+    ownerUid,
+    ownerHandle
   );
 }
 
@@ -2420,7 +2447,7 @@ function startNotifListener(uid) {
 }
 
 // ── SEND a notification to another user ──
-window._sendNotifFn = async function({ type, ownerUid, sparkId, sparkText }) {
+window._sendNotifFn = async function({ type, ownerUid, sparkId, sparkText, extraMsg }) {
   const currentUser = window._sparkUser;
   if (!currentUser || !ownerUid) return;
   // Never notify yourself
@@ -2433,6 +2460,7 @@ window._sendNotifFn = async function({ type, ownerUid, sparkId, sparkText }) {
   const messages = {
     like:     `<strong>${fromName}</strong> liked your Spark`,
     bookmark: `<strong>${fromName}</strong> bookmarked your Spark`,
+    reply:    `<strong>${fromName}</strong> replied to your Spark`,
   };
 
   try {
@@ -2443,7 +2471,7 @@ window._sendNotifFn = async function({ type, ownerUid, sparkId, sparkText }) {
       fromPhoto,
       sparkId:    sparkId || '',
       sparkText:  sparkText || '',
-      message:    messages[type] || `<strong>${fromName}</strong> interacted with your Spark`,
+      message:    extraMsg || messages[type] || `<strong>${fromName}</strong> interacted with your Spark`,
       read:       false,
       createdAt:  serverTimestamp(),
     });
@@ -2583,6 +2611,146 @@ async function markOneRead(uid, notifId, rowEl) {
 }
 
 // ── MARK ALL notifications as read ──
+// ══════════════════════════════════════════════════════
+// REPLIES MODULE
+// ══════════════════════════════════════════════════════
+
+// Load replies for a spark into the reply sheet
+window._loadRepliesFn = async function(sparkId) {
+  const list = document.getElementById('repliesList');
+  if (!list) return;
+
+  // Show shimmer skeleton
+  list.innerHTML = `
+    <div class="reply-item" style="opacity:.5">
+      <div class="ri-av" style="background:var(--bg-4);position:relative;overflow:hidden"><div style="position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent);animation:sk-shimmer 1.4s infinite"></div></div>
+      <div class="ri-body" style="flex:1">
+        <div style="height:9px;width:40%;border-radius:4px;background:var(--bg-4);margin-bottom:7px;position:relative;overflow:hidden"><div style="position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent);animation:sk-shimmer 1.4s infinite"></div></div>
+        <div style="height:11px;width:85%;border-radius:4px;background:var(--bg-4);position:relative;overflow:hidden"><div style="position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent);animation:sk-shimmer 1.4s infinite"></div></div>
+      </div>
+    </div>`;
+
+  try {
+    const snap = await getDocs(collection(db, 'sparks', sparkId, 'replies'));
+    list.innerHTML = '';
+
+    if (snap.empty) {
+      list.innerHTML = '<div style="padding:16px 18px;font-size:12px;color:var(--text-3);text-align:center">No replies yet — be the first!</div>';
+      return;
+    }
+
+    const replies = [];
+    snap.forEach(d => replies.push({ id: d.id, data: d.data() }));
+    replies.sort((a,b) => {
+      const ta = a.data.createdAt?.toMillis?.() || 0;
+      const tb = b.data.createdAt?.toMillis?.() || 0;
+      return tb - ta; // newest first
+    });
+
+    replies.forEach(({ id, data: r }) => {
+      const initial  = (r.authorName || 'U')[0].toUpperCase();
+      const photo    = r.authorPhoto || '';
+      const avInner  = photo
+        ? `<img src="${photo}" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.style.display='none'">`
+        : initial;
+      const timeStr  = r.createdAt ? timeAgo(r.createdAt) : 'just now';
+
+      const item = document.createElement('div');
+      item.className = 'reply-item';
+      item.innerHTML = `
+        <div class="ri-av" style="background:linear-gradient(135deg,var(--pink),var(--purple))">${avInner}</div>
+        <div class="ri-body">
+          <span class="ri-author">${r.authorName || 'User'}</span>
+          <span class="ri-time">${timeStr}</span>
+          <p class="ri-text">${r.text || ''}</p>
+        </div>
+      `;
+      list.appendChild(item);
+    });
+
+  } catch(e) {
+    console.error('loadReplies error:', e.code, e.message);
+    list.innerHTML = '<div style="padding:16px 18px;font-size:12px;color:var(--text-3);text-align:center">Could not load replies.</div>';
+  }
+};
+
+// Submit a reply
+window._submitReplyFn = async function(txt) {
+  const user = window._sparkUser;
+  if (!user || !txt) return;
+
+  const ctx = window._replyCtx || {};
+  const { sparkId, ownerUid, ownerHandle, author } = ctx;
+
+  const ud          = window._sparkUserData || {};
+  const authorName  = ud.fullName || user.displayName || user.email?.split('@')[0] || 'User';
+  const authorPhoto = ud.profilePicture?.url || user.photoURL || '';
+  const handle      = ud.nickname || user.email?.split('@')[0] || 'user';
+
+  // Optimistic DOM insert immediately
+  const list    = document.getElementById('repliesList');
+  const initial = authorName[0].toUpperCase();
+  const item    = document.createElement('div');
+  item.className = 'reply-item fu';
+  item.innerHTML = `
+    <div class="ri-av" style="background:linear-gradient(135deg,var(--pink),var(--purple))">${initial}</div>
+    <div class="ri-body">
+      <span class="ri-author">${authorName}</span>
+      <span class="ri-time">just now</span>
+      <p class="ri-text">${txt}</p>
+    </div>
+  `;
+  if (list) list.insertBefore(item, list.firstChild);
+  document.getElementById('replyTa').value = '';
+
+  if (!sparkId) return; // demo card — optimistic only, no Firestore
+
+  try {
+    // 1. Write reply to sparks/{sparkId}/replies subcollection
+    await addDoc(collection(db, 'sparks', sparkId, 'replies'), {
+      uid:          user.uid,
+      authorName,
+      authorHandle: handle,
+      authorPhoto,
+      text:         txt,
+      sparkId,
+      createdAt:    serverTimestamp(),
+    });
+
+    // 2. Update reply count on spark card in the feed
+    const countEl = document.getElementById('replycount-' + sparkId);
+    if (countEl) countEl.textContent = parseInt(countEl.textContent || '0') + 1;
+
+    // 3. Send notification to post owner (skip self)
+    if (ownerUid && ownerUid !== user.uid && typeof window._sendNotifFn === 'function') {
+      await window._sendNotifFn({
+        type:      'reply',
+        ownerUid,
+        sparkId,
+        sparkText: txt.slice(0, 80),
+        extraMsg:  `<strong>${authorName}</strong> replied to your Spark`,
+      });
+    }
+
+    // 4. Log to replier's own activity history
+    if (window._currentUid || user.uid) {
+      try {
+        await addDoc(collection(db, 'users', user.uid, 'activityHistory'), {
+          type:      'reply',
+          icon:      'ph-chat-circle',
+          iconColor: 'var(--purple)',
+          bgClass:   'purple-bg',
+          text:      `<strong>Replied</strong> to @${ownerHandle || author}: "${txt.slice(0,50)}${txt.length>50?'…':''}"`,
+          createdAt: serverTimestamp(),
+        });
+      } catch(e2) { console.warn('logActivity reply:', e2); }
+    }
+
+  } catch(e) {
+    console.error('submitReply error:', e.code, e.message);
+  }
+};
+
 window._markAllReadFn = async function() {
   const uid = window._sparkUser?.uid;
   if (!uid) return;
@@ -2755,7 +2923,7 @@ function renderCard(id, d) {
     </div>
     <div class="action-bar">
       <button class="act-btn like" id="like-${id}" onclick="event.stopPropagation();toggleLike(this)"><i class="ph-bold ph-heart"></i><span id="likecount-${id}">0</span></button>
-      <button class="act-btn reply" onclick="event.stopPropagation();openReply('${name}','${initial}','#c2185b','${safeText}')"><i class="ph-bold ph-chat-circle"></i><span>${d.replies || 0}</span></button>
+      <button class="act-btn reply" onclick="event.stopPropagation();openReply('${name}','${initial}','#c2185b','${safeText}','${id}','${d.uid||''}','${handle}')"><i class="ph-bold ph-chat-circle"></i><span id="replycount-${id}">${d.replies || 0}</span></button>
       <button class="act-btn repost" onclick="event.stopPropagation();toggleRepost(this)"><i class="ph-bold ph-repeat"></i><span>${d.reposts || 0}</span></button>
       <button class="act-btn share" onclick="event.stopPropagation();shareSpark()"><i class="ph-bold ph-share-network"></i><span></span></button>
       <button class="act-btn bookmark" onclick="event.stopPropagation();toggleBookmark(this)" style="margin-left:auto"><i class="ph-bold ph-bookmark-simple"></i></button>
@@ -2999,7 +3167,10 @@ function applyComposeAvatar(photoURL, initial) {
 <div class="notif-panel" id="notifPanel">
   <div class="notif-header">
     <div class="notif-title"><i class="ph-bold ph-bell"></i> Notifications</div>
-    <button class="notif-mark-all" onclick="markAllRead()">Mark all read</button>
+    <div style="display:flex;align-items:center;gap:8px">
+      <button class="notif-mark-all" onclick="markAllRead()">Mark all read</button>
+      <button class="settings-close" onclick="closeNotifPanel()" title="Close" style="width:24px;height:24px;font-size:12px"><i class="ph-bold ph-x"></i></button>
+    </div>
   </div>
   <div class="notif-list" id="notifList">
     <!-- filled dynamically -->
