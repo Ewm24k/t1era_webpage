@@ -1673,7 +1673,7 @@ document.addEventListener('keydown', e => {
 <script type="module">
 import { initializeApp }                        from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getAuth, onAuthStateChanged }          from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-import { getFirestore, doc, getDoc, collection, addDoc, query, where, getDocs, serverTimestamp, orderBy, limit } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import { getFirestore, doc, getDoc, collection, addDoc, query, where, getDocs, serverTimestamp, orderBy, limit, onSnapshot, Timestamp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 const firebaseConfig = {
   apiKey:            "AIzaSyBnt9mbb8LdMVeguSHUmS20L6uBHIfxwAs",
@@ -1725,8 +1725,8 @@ onAuthStateChanged(auth, async (user) => {
   // Check today's quota on page load
   await checkDailyQuota(user.uid);
 
-  // Load existing sparks from Firestore into the feed
-  await loadSparksFeed();
+  // Start real-time listener — feed updates live without any refresh needed
+  startSparksFeedListener();
 });
 
 // ── QUOTA HELPERS ──
@@ -1788,7 +1788,7 @@ async function checkDailyQuota(uid) {
     } else if (count === 1) {
       // 1 used, 1 remaining — show amber warning, auto-dismiss after 2s
       banner.classList.add('show', 'warn');
-      quotaMsg.textContent   = '1 of 2 daily Sparks used — 1 remaining today';
+      quotaMsg.textContent   = '1 of 3 daily Sparks used — 2 remaining today';
       quotaReset.textContent = getMidnightResetText();
       if (submitBtn) submitBtn.disabled = document.getElementById('composeTa')?.value.trim().length === 0;
       if (toggle)    toggle.style.opacity = '1';
@@ -1798,7 +1798,7 @@ async function checkDailyQuota(uid) {
     } else {
       // Limit reached — lock compose
       banner.classList.add('show', 'full');
-      quotaMsg.textContent   = 'Daily limit reached — 2 Sparks per day maximum';
+      quotaMsg.textContent   = 'Daily limit reached — 3 Sparks per day maximum';
       quotaReset.textContent = getMidnightResetText();
       if (submitBtn) submitBtn.disabled = true;
       // Lock the compose toggle so it can't be opened
@@ -1819,38 +1819,42 @@ async function checkDailyQuota(uid) {
   }
 }
 
-// ── LOAD FEED FROM FIRESTORE ──
+// ── REAL-TIME FEED LISTENER ──
 
-async function loadSparksFeed() {
-  try {
-    const q = query(
-      collection(db, 'sparks'),
-      where('tab', '==', 'standard'),
-      orderBy('createdAt', 'desc'),
-      limit(50)
-    );
-    const snap = await getDocs(q);
+let _feedUnsubscribe = null;
 
-    // Clear any previously fetched Firestore cards before re-populating
-    // (cards that have data-spark-id are from Firestore; demo cards do not have this attribute)
-    const panel = document.getElementById('panel-0');
+function startSparksFeedListener() {
+  // Detach any previous listener before starting a new one
+  if (_feedUnsubscribe) { _feedUnsubscribe(); _feedUnsubscribe = null; }
+
+  const panel = document.getElementById('panel-0');
+
+  const q = query(
+    collection(db, 'sparks'),
+    where('tab', '==', 'standard'),
+    orderBy('createdAt', 'desc'),
+    limit(50)
+  );
+
+  _feedUnsubscribe = onSnapshot(q, (snap) => {
+    // Remove all previously rendered Firestore cards
     if (panel) {
       panel.querySelectorAll('.spark-card[data-spark-id]').forEach(el => el.remove());
     }
 
     if (snap.empty) return;
 
-    // docs come back newest-first from Firestore; insert in that order so newest ends up on top
+    // onSnapshot returns newest-first (orderBy createdAt desc)
+    // Insert each doc — prependSparkCard puts them above demo cards
+    // idx===0 is the newest, gets animation
     const docs = [];
     snap.forEach((docSnap) => docs.push(docSnap));
     docs.forEach((docSnap, idx) => {
-      const data = docSnap.data();
-      // Animate only the very first card (most recent)
-      prependSparkCard(data, docSnap.id, idx === 0);
+      prependSparkCard(docSnap.data(), docSnap.id, idx === 0);
     });
-  } catch (err) {
-    console.warn('Sparks: loadSparksFeed error:', err);
-  }
+  }, (err) => {
+    console.warn('Sparks: feed listener error:', err);
+  });
 }
 
 // ── SUBMIT SPARK (wired via window._submitSparkFn → submitSpark() stub in main script) ──
@@ -1887,7 +1891,7 @@ window._submitSparkFn = async function() {
     text:       txt,
     tab:        'standard',
     dateStr:    today,
-    createdAt:  serverTimestamp(),
+    createdAt:  Timestamp.now(),
     likes:      0,
     replies:    0,
     reposts:    0
@@ -1899,8 +1903,7 @@ window._submitSparkFn = async function() {
     // Close compose and clear textarea
     if (typeof window.closeCompose === 'function') window.closeCompose();
 
-    // Reload full feed from Firestore so the new spark appears correctly
-    await loadSparksFeed();
+    // Feed updates automatically via onSnapshot listener — no manual reload needed
 
     // Re-check quota and update banner / lock state
     await checkDailyQuota(user.uid);
