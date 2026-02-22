@@ -2664,6 +2664,104 @@
       .spark-preview-card { padding: 18px; }
       .spc-text { font-size: 13px; }
     }
+
+    /* ── Sparks Inline Carousel (under ai-showcase) ── */
+    .sparks-carousel-wrap {
+      width: 100%;
+      margin-top: 20px;
+      margin-bottom: 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .sparks-carousel-track {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      cursor: grab;
+      padding-bottom: 4px;
+    }
+    .sparks-carousel-track::-webkit-scrollbar { display: none; }
+    .sparks-carousel-track.dragging { cursor: grabbing; user-select: none; }
+    .sparks-carousel-card {
+      flex: 0 0 calc((100% - 24px) / 3);
+      scroll-snap-align: start;
+      background: var(--bg-card);
+      border: 1px solid var(--border-primary);
+      border-radius: 14px;
+      padding: 14px;
+      transition: border-color 0.3s var(--transition), box-shadow 0.3s var(--transition);
+      position: relative;
+      overflow: hidden;
+      min-width: 0;
+    }
+    .sparks-carousel-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #c2185b, #8b5cf6);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.4s var(--transition);
+    }
+    .sparks-carousel-card:hover {
+      border-color: #c2185b;
+      box-shadow: 0 0 20px rgba(194, 24, 91, 0.2), var(--shadow-md);
+    }
+    .sparks-carousel-card:hover::before { transform: scaleX(1); }
+    .sparks-carousel-card.spark-prompt-variant {
+      background: linear-gradient(135deg, rgba(139,92,246,0.06), var(--bg-card));
+      border-color: rgba(139, 92, 246, 0.2);
+    }
+    .sparks-carousel-card.spark-prompt-variant::before {
+      background: linear-gradient(90deg, #8b5cf6, #e91e8c);
+    }
+    .sparks-carousel-card.spark-prompt-variant:hover {
+      border-color: #8b5cf6;
+      box-shadow: 0 0 20px rgba(139, 92, 246, 0.2), var(--shadow-md);
+    }
+    .sparks-carousel-card .spc-header { margin-bottom: 8px; }
+    .sparks-carousel-card .spc-avatar { width: 30px; height: 30px; font-size: 11px; }
+    .sparks-carousel-card .spc-author { font-size: 12px; }
+    .sparks-carousel-card .spc-handle { font-size: 10px; }
+    .sparks-carousel-card .spc-time { font-size: 9px; }
+    .sparks-carousel-card .spc-text { font-size: 12px; line-height: 1.5; margin-bottom: 8px; }
+    .sparks-carousel-card .spc-actions { padding-top: 8px; }
+    .sparks-carousel-card .spc-action-item { font-size: 11px; padding: 3px 6px; }
+    .sparks-carousel-card .spc-action-item i { font-size: 13px; }
+    .sparks-carousel-card .spc-prompt-box { padding: 10px; margin-bottom: 8px; }
+    .sparks-carousel-card .spc-prompt-q { font-size: 12px; }
+    .sparks-carousel-card .spc-prompt-replies { font-size: 10px; }
+    .sparks-carousel-cta {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+    @media (max-width: 768px) {
+      .sparks-carousel-card {
+        flex: 0 0 calc((100% - 12px) / 2);
+      }
+    }
+    @media (max-width: 480px) {
+      .sparks-carousel-card {
+        flex: 0 0 85%;
+      }
+      .sparks-carousel-cta {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .sparks-carousel-cta .sparks-cta-primary,
+      .sparks-carousel-cta .sparks-cta-secondary {
+        width: 100%;
+        justify-content: center;
+      }
+    }
   </style>
 </head>
 <body>
@@ -2961,6 +3059,135 @@
               </div>
             </div>
 
+            <!-- Sparks Inline Carousel -->
+            <div class="sparks-carousel-wrap fade-in">
+              <div class="sparks-carousel-track" id="sparksCarouselTrack">
+
+                <!-- Card 1 -->
+                <div class="sparks-carousel-card">
+                  <div class="spc-header">
+                    <div class="spc-avatar" style="background:linear-gradient(135deg,#c2185b,#8b5cf6);">IB</div>
+                    <div class="spc-meta">
+                      <div class="spc-author">Ikram Basri</div>
+                      <div class="spc-handle-row">
+                        <span class="spc-handle">@ewm24k</span>
+                        <span class="spc-badge rank">LV 5</span>
+                        <span class="spc-badge verified">✓ Verified</span>
+                        <span class="spc-time">· 2m ago</span>
+                      </div>
+                    </div>
+                  </div>
+                  <p class="spc-text">
+                    Just pushed a massive update to T1ERA 🚀 New profile page live — bio, status, banner presets and Cloudinary photo upload. Really proud of this build.
+                    <span class="spc-hashtag">#T1ERA</span> <span class="spc-hashtag">#BuildInPublic</span>
+                  </p>
+                  <div class="spc-actions">
+                    <div class="spc-action-item liked"><i class="ph-fill ph-heart"></i><span>142</span></div>
+                    <div class="spc-action-item has-replies"><i class="ph-bold ph-chat-circle"></i><span>28</span></div>
+                    <div class="spc-action-item reposted"><i class="ph-bold ph-repeat"></i><span>19</span></div>
+                    <div class="spc-actions-spacer"></div>
+                    <div class="spc-action-item"><i class="ph-bold ph-share-network"></i></div>
+                  </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="sparks-carousel-card">
+                  <div style="display:flex;align-items:center;gap:6px;font-size:10px;color:var(--text-tertiary);font-weight:600;margin-bottom:8px;">
+                    <i class="ph-bold ph-repeat" style="font-size:12px;color:#10b981;"></i>
+                    Danial reposted
+                  </div>
+                  <div class="spc-header">
+                    <div class="spc-avatar" style="background:linear-gradient(135deg,#f59e0b,#f97316);">WA</div>
+                    <div class="spc-meta">
+                      <div class="spc-author">Wani Aisyah</div>
+                      <div class="spc-handle-row">
+                        <span class="spc-handle">@waniaisyah</span>
+                        <span class="spc-badge rank">LV 3</span>
+                        <span class="spc-time">· 15m ago</span>
+                      </div>
+                    </div>
+                  </div>
+                  <p class="spc-text">
+                    The way AI is reshaping workflows in 2025 is genuinely insane. Shoutout to everyone building in public — you inspire me more than you know. Keep going 💪
+                    <span class="spc-hashtag">#BuildInPublic</span> <span class="spc-hashtag">#AI</span> <span class="spc-hashtag">#T1ERA</span>
+                  </p>
+                  <div class="spc-actions">
+                    <div class="spc-action-item"><i class="ph-bold ph-heart"></i><span>87</span></div>
+                    <div class="spc-action-item has-replies"><i class="ph-bold ph-chat-circle"></i><span>14</span></div>
+                    <div class="spc-action-item reposted"><i class="ph-bold ph-repeat"></i><span>31</span></div>
+                    <div class="spc-actions-spacer"></div>
+                    <div class="spc-action-item"><i class="ph-bold ph-share-network"></i></div>
+                  </div>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="sparks-carousel-card spark-prompt-variant">
+                  <div class="spc-header">
+                    <div class="spc-avatar" style="background:linear-gradient(135deg,#8b5cf6,#c2185b);">DL</div>
+                    <div class="spc-meta">
+                      <div class="spc-author">Danial L.</div>
+                      <div class="spc-handle-row">
+                        <span class="spc-handle">@danialL</span>
+                        <span class="spc-badge rank">LV 4</span>
+                        <span class="spc-badge prompt-tag">Prompt</span>
+                        <span class="spc-time">· 3h ago</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="spc-prompt-box">
+                    <div class="spc-prompt-label">Open Prompt</div>
+                    <p class="spc-prompt-q">What is the single habit that completely changed your productivity — and could you ever go back to life without it?</p>
+                    <p class="spc-prompt-replies">💬 47 people replied</p>
+                  </div>
+                  <div class="spc-actions">
+                    <div class="spc-action-item liked"><i class="ph-fill ph-heart"></i><span>203</span></div>
+                    <div class="spc-action-item has-replies"><i class="ph-bold ph-chat-circle"></i><span>47</span></div>
+                    <div class="spc-action-item"><i class="ph-bold ph-repeat"></i><span>61</span></div>
+                    <div class="spc-actions-spacer"></div>
+                    <div class="spc-action-item"><i class="ph-bold ph-share-network"></i></div>
+                  </div>
+                </div>
+
+                <!-- Card 4 -->
+                <div class="sparks-carousel-card">
+                  <div class="spc-header">
+                    <div class="spc-avatar" style="background:linear-gradient(135deg,#10b981,#0ea5e9);">LF</div>
+                    <div class="spc-meta">
+                      <div class="spc-author">Luqman Faiz</div>
+                      <div class="spc-handle-row">
+                        <span class="spc-handle">@luqmanf</span>
+                        <span class="spc-badge rank">LV 2</span>
+                        <span class="spc-time">· 1h ago</span>
+                      </div>
+                    </div>
+                  </div>
+                  <p class="spc-text">
+                    UI explorations this week — dark gradient interfaces with pink accent systems. Which direction do you prefer? 👇
+                    <span class="spc-hashtag">#UIDesign</span> <span class="spc-hashtag">#DarkMode</span>
+                  </p>
+                  <div class="spc-actions">
+                    <div class="spc-action-item"><i class="ph-bold ph-heart"></i><span>56</span></div>
+                    <div class="spc-action-item has-replies"><i class="ph-bold ph-chat-circle"></i><span>9</span></div>
+                    <div class="spc-action-item"><i class="ph-bold ph-repeat"></i><span>12</span></div>
+                    <div class="spc-actions-spacer"></div>
+                    <div class="spc-action-item"><i class="ph-bold ph-share-network"></i></div>
+                  </div>
+                </div>
+
+              </div><!-- end sparks-carousel-track -->
+            </div><!-- end sparks-carousel-wrap -->
+
+            <!-- Sparks CTA -->
+            <div class="sparks-carousel-cta fade-in">
+              <a href="spark.html" class="sparks-cta-primary">
+                ⚡ View All Sparks →
+              </a>
+              <a href="spark.html" class="sparks-cta-secondary">
+                <i class="ph-bold ph-pencil-simple"></i>
+                Share Your Spark
+              </a>
+            </div>
+
             <div class="feature-tags fade-in">
               <a href="ChatT1era.html" class="tag" style="text-decoration:none;">
                 <span class="tag-icon"></span>💬 AI Chat
@@ -3170,202 +3397,6 @@
               </div>
             </div>
           </div>
-        </div>
-      </section>
-
-      <!-- ═══════════════════════════════════════════
-           SPARKS — Community Feed Preview
-      ═══════════════════════════════════════════ -->
-      <section id="sparks">
-        <div class="container">
-
-          <!-- Section header -->
-          <div class="section-header fade-in">
-            <h2 class="section-title">See What the Community Is Building</h2>
-            <p class="section-description">
-              Real updates, ideas, and conversations from T1ERA users — live on the Sparks feed.
-            </p>
-          </div>
-
-          <!-- 4 preview cards -->
-          <div class="sparks-preview-grid fade-in">
-
-            <!-- Card 1: text + image -->
-            <div class="spark-preview-card">
-              <div class="spc-header">
-                <div class="spc-avatar" style="background:linear-gradient(135deg,#c2185b,#8b5cf6);">IB</div>
-                <div class="spc-meta">
-                  <div class="spc-author">Ikram Basri</div>
-                  <div class="spc-handle-row">
-                    <span class="spc-handle">@ewm24k</span>
-                    <span class="spc-badge rank">LV 5</span>
-                    <span class="spc-badge verified">✓ Verified</span>
-                    <span class="spc-time">· 2m ago</span>
-                  </div>
-                </div>
-              </div>
-              <div class="spc-media">
-                <img src="./assets/new11.jpg" alt="T1ERA build" loading="lazy"/>
-                <span class="spc-media-label">Photo</span>
-              </div>
-              <p class="spc-text">
-                Just pushed a massive update to T1ERA 🚀 New profile page live — bio, status, banner presets and Cloudinary photo upload. Really proud of this build.
-                <span class="spc-hashtag">#T1ERA</span> <span class="spc-hashtag">#BuildInPublic</span>
-              </p>
-              <div class="spc-actions">
-                <div class="spc-action-item liked">
-                  <i class="ph-fill ph-heart"></i>
-                  <span>142</span>
-                </div>
-                <div class="spc-action-item has-replies">
-                  <i class="ph-bold ph-chat-circle"></i>
-                  <span>28</span>
-                </div>
-                <div class="spc-action-item reposted">
-                  <i class="ph-bold ph-repeat"></i>
-                  <span>19</span>
-                </div>
-                <div class="spc-actions-spacer"></div>
-                <div class="spc-action-item">
-                  <i class="ph-bold ph-share-network"></i>
-                </div>
-              </div>
-            </div>
-
-            <!-- Card 2: text only with repost indicator -->
-            <div class="spark-preview-card">
-              <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-tertiary);font-weight:600;margin-bottom:10px;">
-                <i class="ph-bold ph-repeat" style="font-size:13px;color:#10b981;"></i>
-                Danial reposted
-              </div>
-              <div class="spc-header">
-                <div class="spc-avatar" style="background:linear-gradient(135deg,#f59e0b,#f97316);">WA</div>
-                <div class="spc-meta">
-                  <div class="spc-author">Wani Aisyah</div>
-                  <div class="spc-handle-row">
-                    <span class="spc-handle">@waniaisyah</span>
-                    <span class="spc-badge rank">LV 3</span>
-                    <span class="spc-time">· 15m ago</span>
-                  </div>
-                </div>
-              </div>
-              <p class="spc-text">
-                The way AI is reshaping workflows in 2025 is genuinely insane. Shoutout to everyone building in public — you inspire me more than you know. Keep going 💪
-                <span class="spc-hashtag">#BuildInPublic</span> <span class="spc-hashtag">#AI</span> <span class="spc-hashtag">#T1ERA</span>
-              </p>
-              <div class="spc-actions">
-                <div class="spc-action-item">
-                  <i class="ph-bold ph-heart"></i>
-                  <span>87</span>
-                </div>
-                <div class="spc-action-item has-replies">
-                  <i class="ph-bold ph-chat-circle"></i>
-                  <span>14</span>
-                </div>
-                <div class="spc-action-item reposted">
-                  <i class="ph-bold ph-repeat"></i>
-                  <span>31</span>
-                </div>
-                <div class="spc-actions-spacer"></div>
-                <div class="spc-action-item">
-                  <i class="ph-bold ph-share-network"></i>
-                </div>
-              </div>
-            </div>
-
-            <!-- Card 3: Spark Prompt variant -->
-            <div class="spark-preview-card spark-prompt-variant">
-              <div class="spc-header">
-                <div class="spc-avatar" style="background:linear-gradient(135deg,#8b5cf6,#c2185b);">DL</div>
-                <div class="spc-meta">
-                  <div class="spc-author">Danial L.</div>
-                  <div class="spc-handle-row">
-                    <span class="spc-handle">@danialL</span>
-                    <span class="spc-badge rank">LV 4</span>
-                    <span class="spc-badge prompt-tag">Prompt</span>
-                    <span class="spc-time">· 3h ago</span>
-                  </div>
-                </div>
-              </div>
-              <div class="spc-prompt-box">
-                <div class="spc-prompt-label">Open Prompt</div>
-                <p class="spc-prompt-q">What is the single habit that completely changed your productivity — and could you ever go back to life without it?</p>
-                <p class="spc-prompt-replies">💬 47 people replied</p>
-              </div>
-              <div class="spc-actions">
-                <div class="spc-action-item liked">
-                  <i class="ph-fill ph-heart"></i>
-                  <span>203</span>
-                </div>
-                <div class="spc-action-item has-replies">
-                  <i class="ph-bold ph-chat-circle"></i>
-                  <span>47</span>
-                </div>
-                <div class="spc-action-item">
-                  <i class="ph-bold ph-repeat"></i>
-                  <span>61</span>
-                </div>
-                <div class="spc-actions-spacer"></div>
-                <div class="spc-action-item">
-                  <i class="ph-bold ph-share-network"></i>
-                </div>
-              </div>
-            </div>
-
-            <!-- Card 4: text with image -->
-            <div class="spark-preview-card">
-              <div class="spc-header">
-                <div class="spc-avatar" style="background:linear-gradient(135deg,#10b981,#0ea5e9);">LF</div>
-                <div class="spc-meta">
-                  <div class="spc-author">Luqman Faiz</div>
-                  <div class="spc-handle-row">
-                    <span class="spc-handle">@luqmanf</span>
-                    <span class="spc-badge rank">LV 2</span>
-                    <span class="spc-time">· 1h ago</span>
-                  </div>
-                </div>
-              </div>
-              <div class="spc-media">
-                <img src="./assets/new14.jpg" alt="UI explorations" loading="lazy"/>
-                <span class="spc-media-label">Photo</span>
-              </div>
-              <p class="spc-text">
-                UI explorations this week — dark gradient interfaces with pink accent systems. Which direction do you prefer? 👇
-                <span class="spc-hashtag">#UIDesign</span> <span class="spc-hashtag">#DarkMode</span>
-              </p>
-              <div class="spc-actions">
-                <div class="spc-action-item">
-                  <i class="ph-bold ph-heart"></i>
-                  <span>56</span>
-                </div>
-                <div class="spc-action-item has-replies">
-                  <i class="ph-bold ph-chat-circle"></i>
-                  <span>9</span>
-                </div>
-                <div class="spc-action-item">
-                  <i class="ph-bold ph-repeat"></i>
-                  <span>12</span>
-                </div>
-                <div class="spc-actions-spacer"></div>
-                <div class="spc-action-item">
-                  <i class="ph-bold ph-share-network"></i>
-                </div>
-              </div>
-            </div>
-
-          </div><!-- end sparks-preview-grid -->
-
-          <!-- CTA row -->
-          <div class="sparks-cta-row fade-in">
-            <a href="spark.html" class="sparks-cta-primary">
-              ⚡ View All Sparks →
-            </a>
-            <a href="spark.html" class="sparks-cta-secondary">
-              <i class="ph-bold ph-pencil-simple"></i>
-              Share Your Spark
-            </a>
-          </div>
-
         </div>
       </section>
 
@@ -3727,6 +3758,28 @@
       alert('Great! We\'ll notify you when the WebApp launches in April 2026!\n\nFor now, please use our Telegram bot for the full T1ERA experience.');
       closeModal();
     });
+
+    // ── SPARKS CAROUSEL DRAG SCROLL ──
+    (function() {
+      const track = document.getElementById('sparksCarouselTrack');
+      if (!track) return;
+      let isDown = false, startX, scrollLeft;
+      track.addEventListener('mousedown', (e) => {
+        isDown = true;
+        track.classList.add('dragging');
+        startX = e.pageX - track.offsetLeft;
+        scrollLeft = track.scrollLeft;
+      });
+      track.addEventListener('mouseleave', () => { isDown = false; track.classList.remove('dragging'); });
+      track.addEventListener('mouseup', () => { isDown = false; track.classList.remove('dragging'); });
+      track.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - track.offsetLeft;
+        const walk = (x - startX) * 1.5;
+        track.scrollLeft = scrollLeft - walk;
+      });
+    })();
 
     // ── VIDEO GENERATION ENGINE ──
     async function pollJobStatus(jobId, onUpdate, onDone, onError) {
