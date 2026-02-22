@@ -800,6 +800,48 @@ a{text-decoration:none;color:inherit}
 /* ══════════════════════════════════════════
    FADE IN
 ══════════════════════════════════════════ */
+
+/* ══════════════════════════════════════════
+   SKELETON LOADER
+══════════════════════════════════════════ */
+.skeleton-card{
+  padding:16px 16px 12px;
+  border-bottom:1px solid var(--border);
+}
+.skeleton-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px}
+.skeleton-av{
+  width:42px;height:42px;border-radius:50%;flex-shrink:0;
+  background:var(--bg-4);overflow:hidden;position:relative;
+}
+.skeleton-meta{flex:1;display:flex;flex-direction:column;gap:8px;padding-top:4px}
+.skeleton-line{
+  height:10px;border-radius:6px;
+  background:var(--bg-4);overflow:hidden;position:relative;
+}
+.skeleton-line.w60{width:60%}
+.skeleton-line.w40{width:40%}
+.skeleton-line.w90{width:90%;height:12px;margin-left:54px}
+.skeleton-line.w75{width:75%;height:12px;margin-left:54px;margin-top:6px}
+.skeleton-actions{
+  display:flex;gap:18px;margin-left:54px;margin-top:14px;
+}
+.skeleton-act{
+  width:40px;height:10px;border-radius:6px;
+  background:var(--bg-4);overflow:hidden;position:relative;
+}
+.skeleton-av::after,
+.skeleton-line::after,
+.skeleton-act::after{
+  content:'';
+  position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,0.06) 50%,transparent 100%);
+  animation:shimmer 1.4s infinite;
+}
+@keyframes shimmer{
+  0%{transform:translateX(-100%)}
+  100%{transform:translateX(100%)}
+}
+
 .fu{opacity:0;transform:translateY(10px);animation:fu .38s var(--ease) forwards}
 @keyframes fu{to{opacity:1;transform:none}}
 .d1{animation-delay:.06s}.d2{animation-delay:.12s}.d3{animation-delay:.18s}
@@ -1732,24 +1774,55 @@ onAuthStateChanged(auth, async (user) => {
 
 // ── FEED — fetch all standard sparks, sort client-side ──
 
+function buildSkeleton() {
+  const s = document.createElement('div');
+  s.className = 'skeleton-card';
+  s.innerHTML = `
+    <div class="skeleton-head">
+      <div class="skeleton-av"></div>
+      <div class="skeleton-meta">
+        <div class="skeleton-line w60"></div>
+        <div class="skeleton-line w40"></div>
+      </div>
+    </div>
+    <div class="skeleton-line w90"></div>
+    <div class="skeleton-line w75"></div>
+    <div class="skeleton-actions">
+      <div class="skeleton-act"></div>
+      <div class="skeleton-act"></div>
+      <div class="skeleton-act"></div>
+      <div class="skeleton-act"></div>
+    </div>
+  `;
+  return s;
+}
+
 async function startFeed() {
   const panel = document.getElementById('panel-0');
   if (!panel) return;
 
+  // Remove any old real cards
+  panel.querySelectorAll('.spark-card[data-spark-id]').forEach(el => el.remove());
+
+  // Show 3 skeleton placeholders above demo cards while loading
+  const skeletons = [buildSkeleton(), buildSkeleton(), buildSkeleton()];
+  const firstDemo = panel.querySelector('.spark-card:not([data-spark-id])');
+  skeletons.forEach(sk => {
+    if (firstDemo) panel.insertBefore(sk, firstDemo);
+    else panel.appendChild(sk);
+  });
+
   try {
-    // Only filter by tab — no orderBy so no composite index required
-    // and no null-createdAt exclusion issue
     const snap = await getDocs(query(
       collection(db, SPARKS_COL),
       where('tab', '==', 'standard')
     ));
 
-    // Wipe previously rendered real cards
-    panel.querySelectorAll('.spark-card[data-spark-id]').forEach(el => el.remove());
+    // Remove skeletons
+    skeletons.forEach(sk => sk.remove());
 
     if (snap.empty) return;
 
-    // Collect all docs
     const docs = [];
     snap.forEach(d => docs.push({ id: d.id, data: d.data() }));
 
@@ -1760,10 +1833,11 @@ async function startFeed() {
       return tb - ta;
     });
 
-    // Render top 50
     docs.slice(0, 50).forEach(({ id, data }) => renderCard(id, data));
 
   } catch (e) {
+    // Remove skeletons on error too
+    skeletons.forEach(sk => sk.remove());
     console.error('startFeed error:', e);
   }
 }
