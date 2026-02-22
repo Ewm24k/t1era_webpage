@@ -1676,7 +1676,7 @@ import { initializeApp }        from 'https://www.gstatic.com/firebasejs/10.12.2
 import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import {
   getFirestore, collection, addDoc, query, where,
-  orderBy, limit, onSnapshot, getDocs, doc, getDoc, serverTimestamp
+  getDocs, doc, getDoc, serverTimestamp
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 // ── CONFIG ──
@@ -1730,39 +1730,42 @@ onAuthStateChanged(auth, async (user) => {
   startFeed();
 });
 
-// ── LIVE FEED ──
-let _unsub = null;
+// ── FEED — fetch all standard sparks, sort client-side ──
 
-function startFeed() {
-  if (_unsub) _unsub();
-
+async function startFeed() {
   const panel = document.getElementById('panel-0');
   if (!panel) return;
 
-  const q = query(
-    collection(db, SPARKS_COL),
-    where('tab', '==', 'standard'),
-    orderBy('createdAt', 'desc'),
-    limit(50)
-  );
+  try {
+    // Only filter by tab — no orderBy so no composite index required
+    // and no null-createdAt exclusion issue
+    const snap = await getDocs(query(
+      collection(db, SPARKS_COL),
+      where('tab', '==', 'standard')
+    ));
 
-  _unsub = onSnapshot(q,
-    { includeMetadataChanges: false },
-    (snapshot) => {
-      // Wipe all previously rendered real cards
-      panel.querySelectorAll('.spark-card[data-spark-id]').forEach(el => el.remove());
+    // Wipe previously rendered real cards
+    panel.querySelectorAll('.spark-card[data-spark-id]').forEach(el => el.remove());
 
-      if (snapshot.empty) return;
+    if (snap.empty) return;
 
-      // Firestore returns newest-first — render each one
-      snapshot.forEach((docSnap) => {
-        renderCard(docSnap.id, docSnap.data());
-      });
-    },
-    (err) => {
-      console.error('Feed error:', err);
-    }
-  );
+    // Collect all docs
+    const docs = [];
+    snap.forEach(d => docs.push({ id: d.id, data: d.data() }));
+
+    // Sort newest-first client-side — handle null createdAt gracefully
+    docs.sort((a, b) => {
+      const ta = a.data.createdAt?.toMillis ? a.data.createdAt.toMillis() : 0;
+      const tb = b.data.createdAt?.toMillis ? b.data.createdAt.toMillis() : 0;
+      return tb - ta;
+    });
+
+    // Render top 50
+    docs.slice(0, 50).forEach(({ id, data }) => renderCard(id, data));
+
+  } catch (e) {
+    console.error('startFeed error:', e);
+  }
 }
 
 // ── RENDER ONE CARD INTO FEED ──
@@ -1869,8 +1872,11 @@ window._submitSparkFn = async function () {
       reposts:      0
     });
 
-    // Close compose box — feed updates automatically via onSnapshot
+    // Close compose box
     if (typeof window.closeCompose === 'function') window.closeCompose();
+
+    // Reload feed so new post appears immediately
+    await startFeed();
 
     // Refresh quota count
     if (!isDev) await checkQuota(user.uid);
