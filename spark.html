@@ -2073,21 +2073,34 @@ function triggerFeedRefresh() {
    LIKE / REPOST / SHARE / BOOKMARK
 ══════════════════════════════════ */
 function toggleLike(btn) {
-  const on = btn.classList.toggle('liked');
+  const card = btn.closest('.spark-card[data-spark-id]');
+
+  // Demo cards (no data-spark-id) — local toggle only, no Firestore
+  if (!card) {
+    const on = btn.classList.toggle('liked');
+    const icon = btn.querySelector('i');
+    const cnt = btn.querySelector('span');
+    const n = parseInt(cnt.textContent.replace(/[^0-9]/g,'')) || 0;
+    icon.className = on ? 'ph-fill ph-heart' : 'ph-bold ph-heart';
+    cnt.textContent = on ? n+1 : Math.max(0,n-1);
+    return;
+  }
+
+  const sparkId  = card.dataset.sparkId;
+  const ownerUid = card.dataset.ownerUid;
+  const sparkText = card.querySelector('.spark-text')?.textContent?.slice(0,80) || '';
+
+  // Optimistic UI update immediately
+  const on  = btn.classList.toggle('liked');
   const icon = btn.querySelector('i');
-  const cnt = btn.querySelector('span');
-  const n = parseInt(cnt.textContent.replace(/[^0-9]/g,'')) || 0;
-  icon.className = on ? 'ph-fill ph-heart' : 'ph-bold ph-heart';
-  cnt.textContent = on ? n+1 : Math.max(0,n-1);
-  // Fire notification to post owner on like (not on unlike)
-  if (on && typeof window._sendNotifFn === 'function') {
-    const card = btn.closest('.spark-card[data-spark-id]');
-    if (card) {
-      const sparkId = card.dataset.sparkId;
-      const ownerUid = card.dataset.ownerUid;
-      const sparkText = card.querySelector('.spark-text')?.textContent?.slice(0,80) || '';
-      window._sendNotifFn({ type:'like', ownerUid, sparkId, sparkText });
-    }
+  const cnt  = btn.querySelector('span');
+  const n    = parseInt(cnt.textContent.replace(/[^0-9]/g,'')) || 0;
+  icon.className   = on ? 'ph-fill ph-heart' : 'ph-bold ph-heart';
+  cnt.textContent  = on ? n+1 : Math.max(0,n-1);
+
+  // Persist to Firestore via module
+  if (typeof window._toggleLikeFn === 'function') {
+    window._toggleLikeFn({ liked: on, sparkId, ownerUid, sparkText });
   }
 }
 function toggleRepost(btn) {
@@ -2224,8 +2237,8 @@ import { initializeApp }        from 'https://www.gstatic.com/firebasejs/10.12.2
 import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import {
   getFirestore, collection, addDoc, query, where,
-  getDocs, doc, getDoc, deleteDoc, serverTimestamp,
-  onSnapshot, updateDoc, writeBatch
+  getDocs, doc, getDoc, setDoc, deleteDoc, serverTimestamp,
+  onSnapshot, updateDoc, writeBatch, increment
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 // ── CONFIG ──
@@ -2337,6 +2350,38 @@ window._sendNotifFn = async function({ type, ownerUid, sparkId, sparkText }) {
     });
   } catch(e) {
     console.error('sendNotif error:', e);
+  }
+};
+
+// ── TOGGLE LIKE — write to Firestore ──
+window._toggleLikeFn = async function({ liked, sparkId, ownerUid, sparkText }) {
+  const user = window._sparkUser;
+  if (!user || !sparkId) return;
+
+  const likeRef  = doc(db, 'sparks', sparkId, 'likes', user.uid);
+  const sparkRef = doc(db, 'sparks', sparkId);
+
+  try {
+    if (liked) {
+      // Write like doc
+      await setDoc(likeRef, {
+        uid:       user.uid,
+        createdAt: serverTimestamp(),
+      });
+      // Increment likes count on spark doc
+      await updateDoc(sparkRef, { likes: increment(1) });
+      // Send notification — skip if liking own post
+      if (ownerUid && ownerUid !== user.uid && typeof window._sendNotifFn === 'function') {
+        window._sendNotifFn({ type: 'like', ownerUid, sparkId, sparkText });
+      }
+    } else {
+      // Remove like doc
+      await deleteDoc(likeRef);
+      // Decrement likes count
+      await updateDoc(sparkRef, { likes: increment(-1) });
+    }
+  } catch(e) {
+    console.error('toggleLike Firestore error:', e);
   }
 };
 
@@ -2598,10 +2643,10 @@ function renderCard(id, d) {
       </div>` : ''}
     </div>
     <div class="action-bar">
-      <button class="act-btn like" onclick="event.stopPropagation();toggleLike(this)"><i class="ph-bold ph-heart"></i><span>0</span></button>
-      <button class="act-btn reply" onclick="event.stopPropagation();openReply('${name}','${initial}','#c2185b','${safeText}')"><i class="ph-bold ph-chat-circle"></i><span>0</span></button>
-      <button class="act-btn repost" onclick="event.stopPropagation();toggleRepost(this)"><i class="ph-bold ph-repeat"></i><span>0</span></button>
-      <button class="act-btn share" onclick="event.stopPropagation();shareSpark()"><i class="ph-bold ph-share-network"></i><span>0</span></button>
+      <button class="act-btn like" id="like-${id}" onclick="event.stopPropagation();toggleLike(this)"><i class="ph-bold ph-heart"></i><span>${d.likes || 0}</span></button>
+      <button class="act-btn reply" onclick="event.stopPropagation();openReply('${name}','${initial}','#c2185b','${safeText}')"><i class="ph-bold ph-chat-circle"></i><span>${d.replies || 0}</span></button>
+      <button class="act-btn repost" onclick="event.stopPropagation();toggleRepost(this)"><i class="ph-bold ph-repeat"></i><span>${d.reposts || 0}</span></button>
+      <button class="act-btn share" onclick="event.stopPropagation();shareSpark()"><i class="ph-bold ph-share-network"></i><span></span></button>
       <button class="act-btn bookmark" onclick="event.stopPropagation();toggleBookmark(this)" style="margin-left:auto"><i class="ph-bold ph-bookmark-simple"></i></button>
     </div>
   `;
@@ -2612,6 +2657,20 @@ function renderCard(id, d) {
     panel.insertBefore(article, firstDemo);
   } else {
     panel.appendChild(article);
+  }
+
+  // Check if current user already liked this spark — apply liked state
+  const currentUid = window._sparkUser?.uid;
+  if (currentUid) {
+    getDoc(doc(db, 'sparks', id, 'likes', currentUid)).then(snap => {
+      if (snap.exists()) {
+        const likeBtn = document.getElementById('like-' + id);
+        if (likeBtn) {
+          likeBtn.classList.add('liked');
+          likeBtn.querySelector('i').className = 'ph-fill ph-heart';
+        }
+      }
+    }).catch(() => {});
   }
 }
 
