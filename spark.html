@@ -2310,6 +2310,7 @@ function closeReply() {
   document.getElementById('replyOverlay').classList.remove('open');
   window._replyCtx = {};
 }
+window.closeReply = closeReply; // expose to module script
 
 function submitReply() {
   const txt = document.getElementById('replyTa').value.trim();
@@ -2687,27 +2688,32 @@ window._submitReplyFn = async function(txt) {
   const authorPhoto = ud.profilePicture?.url || user.photoURL || '';
   const handle      = ud.nickname || user.email?.split('@')[0] || 'user';
 
-  // Optimistic DOM insert immediately
-  const list    = document.getElementById('repliesList');
-  const initial = authorName[0].toUpperCase();
-  const item    = document.createElement('div');
-  item.className = 'reply-item fu';
-  item.innerHTML = `
-    <div class="ri-av" style="background:linear-gradient(135deg,var(--pink),var(--purple))">${initial}</div>
-    <div class="ri-body">
-      <span class="ri-author">${authorName}</span>
-      <span class="ri-time">just now</span>
-      <p class="ri-text">${txt}</p>
-    </div>
-  `;
-  if (list) list.insertBefore(item, list.firstChild);
-  document.getElementById('replyTa').value = '';
+  // Disable submit btn to prevent double submit
+  const submitBtn = document.querySelector('.reply-submit');
+  if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Sending…'; }
 
-  if (!sparkId) return; // demo card — optimistic only, no Firestore
+  if (!sparkId) {
+    // Demo card — just show optimistic item and close
+    const list = document.getElementById('repliesList');
+    const item = document.createElement('div');
+    item.className = 'reply-item fu';
+    item.innerHTML = `
+      <div class="ri-av" style="background:linear-gradient(135deg,var(--pink),var(--purple))">${authorName[0].toUpperCase()}</div>
+      <div class="ri-body">
+        <span class="ri-author">${authorName}</span>
+        <span class="ri-time">just now</span>
+        <p class="ri-text">${txt}</p>
+      </div>`;
+    if (list) list.insertBefore(item, list.firstChild);
+    document.getElementById('replyTa').value = '';
+    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Reply ⚡'; }
+    setTimeout(() => { if (typeof window.closeReply === 'function') window.closeReply(); }, 300);
+    return;
+  }
 
   try {
     // 1. Write reply to sparks/{sparkId}/replies subcollection
-    await addDoc(collection(db, 'sparks', sparkId, 'replies'), {
+    const replyData = {
       uid:          user.uid,
       authorName,
       authorHandle: handle,
@@ -2715,40 +2721,58 @@ window._submitReplyFn = async function(txt) {
       text:         txt,
       sparkId,
       createdAt:    serverTimestamp(),
-    });
+    };
+    await addDoc(collection(db, 'sparks', sparkId, 'replies'), replyData);
 
-    // 2. Update reply count on spark card in the feed
+    // 2. Fetch updated reply count for this spark and update feed card counter
+    const repliesSnap = await getDocs(collection(db, 'sparks', sparkId, 'replies'));
+    const newCount = repliesSnap.size;
     const countEl = document.getElementById('replycount-' + sparkId);
-    if (countEl) countEl.textContent = parseInt(countEl.textContent || '0') + 1;
+    if (countEl) countEl.textContent = newCount;
 
-    // 3. Send notification to post owner (skip self)
-    if (ownerUid && ownerUid !== user.uid && typeof window._sendNotifFn === 'function') {
-      await window._sendNotifFn({
-        type:      'reply',
-        ownerUid,
-        sparkId,
-        sparkText: txt.slice(0, 80),
-        extraMsg:  `<strong>${authorName}</strong> replied to your Spark`,
-      });
-    }
-
-    // 4. Log to replier's own activity history
-    if (window._currentUid || user.uid) {
+    // 3. Send notification to post owner (skip self-replies)
+    if (ownerUid && ownerUid !== user.uid) {
       try {
-        await addDoc(collection(db, 'users', user.uid, 'activityHistory'), {
+        await addDoc(collection(db, 'users', ownerUid, 'notifications'), {
           type:      'reply',
-          icon:      'ph-chat-circle',
-          iconColor: 'var(--purple)',
-          bgClass:   'purple-bg',
-          text:      `<strong>Replied</strong> to @${ownerHandle || author}: "${txt.slice(0,50)}${txt.length>50?'…':''}"`,
+          fromUid:   user.uid,
+          fromName:  authorName,
+          fromPhoto: authorPhoto,
+          sparkId,
+          sparkText: txt.slice(0, 80),
+          message:   `<strong>${authorName}</strong> replied to your Spark`,
+          read:      false,
           createdAt: serverTimestamp(),
         });
-      } catch(e2) { console.warn('logActivity reply:', e2); }
+      } catch(ne) { console.warn('reply notif error:', ne.code, ne.message); }
     }
+
+    // 4. Log to replier's activity history
+    try {
+      await addDoc(collection(db, 'users', user.uid, 'activityHistory'), {
+        type:      'reply',
+        icon:      'ph-chat-circle',
+        iconColor: 'var(--purple)',
+        bgClass:   'purple-bg',
+        text:      `<strong>Replied</strong> to @${ownerHandle || author}: "${txt.slice(0,50)}${txt.length>50?'…':''}"`,
+        createdAt: serverTimestamp(),
+      });
+    } catch(ae) { console.warn('activity log error:', ae); }
+
+    // 5. Clear textarea and reload replies in the sheet to show new reply
+    document.getElementById('replyTa').value = '';
+    await window._loadRepliesFn(sparkId);
+
+    // 6. Auto-close the reply panel after short delay so user sees their reply
+    setTimeout(() => { if (typeof window.closeReply === 'function') window.closeReply(); }, 600);
 
   } catch(e) {
     console.error('submitReply error:', e.code, e.message);
+    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Reply ⚡'; }
+    return;
   }
+
+  if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Reply ⚡'; }
 };
 
 window._markAllReadFn = async function() {
@@ -2923,7 +2947,7 @@ function renderCard(id, d) {
     </div>
     <div class="action-bar">
       <button class="act-btn like" id="like-${id}" onclick="event.stopPropagation();toggleLike(this)"><i class="ph-bold ph-heart"></i><span id="likecount-${id}">0</span></button>
-      <button class="act-btn reply" onclick="event.stopPropagation();openReply('${name}','${initial}','#c2185b','${safeText}','${id}','${d.uid||''}','${handle}')"><i class="ph-bold ph-chat-circle"></i><span id="replycount-${id}">${d.replies || 0}</span></button>
+      <button class="act-btn reply" onclick="event.stopPropagation();openReply('${name}','${initial}','#c2185b','${safeText}','${id}','${d.uid||''}','${handle}')"><i class="ph-bold ph-chat-circle"></i><span id="replycount-${id}">0</span></button>
       <button class="act-btn repost" onclick="event.stopPropagation();toggleRepost(this)"><i class="ph-bold ph-repeat"></i><span>${d.reposts || 0}</span></button>
       <button class="act-btn share" onclick="event.stopPropagation();shareSpark()"><i class="ph-bold ph-share-network"></i><span></span></button>
       <button class="act-btn bookmark" onclick="event.stopPropagation();toggleBookmark(this)" style="margin-left:auto"><i class="ph-bold ph-bookmark-simple"></i></button>
@@ -2960,6 +2984,12 @@ function renderCard(id, d) {
     const countEl = document.getElementById('likecount-' + id);
     if (countEl) countEl.textContent = '0';
   });
+
+  // Fetch reply count from subcollection
+  getDocs(collection(db, 'sparks', id, 'replies')).then(repliesSnap => {
+    const el = document.getElementById('replycount-' + id);
+    if (el) el.textContent = repliesSnap.size;
+  }).catch(() => {});
 }
 
 // ── DELETE SPARK (owner only) ──
