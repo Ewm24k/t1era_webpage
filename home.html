@@ -2666,17 +2666,20 @@
     }
 
     /* ── Sparks Inline Carousel (under ai-showcase) ── */
+    /* PC: horizontal drag-scroll, 3 visible, 4th peeks → slide right */
     .sparks-carousel-wrap {
       width: 100%;
       margin-top: 20px;
       margin-bottom: 0;
       position: relative;
-      overflow: hidden;
+      overflow: visible;
     }
     .sparks-carousel-track {
       display: flex;
+      flex-direction: row;
       gap: 12px;
       overflow-x: auto;
+      overflow-y: visible;
       scroll-snap-type: x mandatory;
       -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
@@ -2743,12 +2746,43 @@
       flex-wrap: wrap;
       margin-top: 16px;
     }
+    /* MOBILE: vertical stacked container — 4 cards, ~2 visible, rest scroll inside */
     @media (max-width: 768px) {
-      .sparks-carousel-card {
-        flex: 0 0 calc((100% - 12px) / 2);
-        padding: 10px;
-        border-radius: 10px;
+      .sparks-carousel-wrap {
+        overflow: hidden;
+        border: 1px solid var(--border-primary);
+        border-radius: 14px;
+        background: var(--bg-secondary);
       }
+      .sparks-carousel-track {
+        flex-direction: column;
+        overflow-x: hidden;
+        overflow-y: auto;
+        max-height: 380px;
+        scroll-snap-type: y mandatory;
+        cursor: default;
+        gap: 0;
+        padding-bottom: 0;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(194,24,91,0.3) transparent;
+      }
+      .sparks-carousel-track::-webkit-scrollbar { display: block; width: 3px; }
+      .sparks-carousel-track::-webkit-scrollbar-track { background: transparent; }
+      .sparks-carousel-track::-webkit-scrollbar-thumb { background: rgba(194,24,91,0.35); border-radius: 10px; }
+      .sparks-carousel-card {
+        flex: 0 0 auto;
+        width: 100%;
+        scroll-snap-align: start;
+        padding: 12px 14px;
+        border-radius: 0;
+        border: none;
+        border-bottom: 1px solid var(--border-primary);
+        box-shadow: none;
+      }
+      .sparks-carousel-card:last-child { border-bottom: none; }
+      .sparks-carousel-card::before { display: none; }
+      .sparks-carousel-card:hover { border-color: transparent; box-shadow: none; }
+      .sparks-carousel-card .spc-header { margin-bottom: 6px; gap: 7px; }
       .sparks-carousel-card .spc-avatar { width: 26px; height: 26px; font-size: 10px; }
       .sparks-carousel-card .spc-author { font-size: 11px; }
       .sparks-carousel-card .spc-handle { font-size: 9px; }
@@ -2761,13 +2795,13 @@
       .sparks-carousel-card .spc-prompt-box { padding: 8px; margin-bottom: 6px; }
       .sparks-carousel-card .spc-prompt-q { font-size: 11px; }
       .sparks-carousel-card .spc-prompt-replies { font-size: 9px; }
-      .sparks-carousel-card .spc-header { margin-bottom: 6px; gap: 7px; }
     }
     @media (max-width: 480px) {
+      .sparks-carousel-track {
+        max-height: 340px;
+      }
       .sparks-carousel-card {
-        flex: 0 0 calc((100% - 12px) / 2);
-        padding: 9px;
-        border-radius: 9px;
+        padding: 10px 12px;
       }
       .sparks-carousel-cta {
         flex-direction: column;
