@@ -1005,7 +1005,7 @@
 
     /* ====== HERO SECTION ====== */
     .hero {
-      padding: 160px 0 120px;
+      padding: 201px 0 120px;
       min-height: 100vh;
       display: flex;
       align-items: center;
@@ -1838,7 +1838,7 @@
       .mobile-menu-btn span { width: 16px; height: 2px; }
       .logo { font-size: 18px; }
       .logo-mark { width: 36px; height: 36px; font-size: 14px; }
-      .hero { padding: 120px 0 80px; }
+      .hero { padding: 161px 0 80px; }
       .hero h1 { font-size: 40px; }
       .hero-description { font-size: 16px; }
       .ai-showcase { grid-template-columns: repeat(2, 1fr); gap: 12px; }
@@ -2237,8 +2237,17 @@
       border-bottom: 1px solid var(--border-primary);
       background: var(--bg-secondary);
       padding: 10px 0;
-      margin-bottom: 64px;
-      position: relative;
+      margin-bottom: 0;
+      position: fixed;
+      top: 72px;
+      left: 0;
+      right: 0;
+      z-index: 999;
+    }
+    @media (max-width: 768px) {
+      .spark-ticker-wrap {
+        top: 64px;
+      }
     }
     .spark-ticker-wrap::before,
     .spark-ticker-wrap::after {
@@ -2748,6 +2757,110 @@
         </div>
       </header>
 
+      <!-- Live ticker strip — fixed below header -->
+      <div class="spark-ticker-wrap">
+        <div class="spark-ticker-track" id="sparkTickerTrack">
+          <!-- First set -->
+          <div class="spark-ticker-item">
+            <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#c2185b,#8b5cf6);">IB</div>
+            <span>Just pushed T1ERA v2 live 🚀</span>
+            <span class="spark-ticker-ht">#T1ERA</span>
+            <span class="spark-ticker-dot"></span>
+          </div>
+          <div class="spark-ticker-item">
+            <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#f59e0b,#f97316);">WA</div>
+            <span>AI changing workflows in 2025 is insane</span>
+            <span class="spark-ticker-ht">#BuildInPublic</span>
+            <span class="spark-ticker-dot"></span>
+          </div>
+          <div class="spark-ticker-item">
+            <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#10b981,#0ea5e9);">LF</div>
+            <span>Dark mode UI explorations this week 🎨</span>
+            <span class="spark-ticker-ht">#UIDesign</span>
+            <span class="spark-ticker-dot"></span>
+          </div>
+          <div class="spark-ticker-item">
+            <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#8b5cf6,#c2185b);">DL</div>
+            <span>What habit changed your productivity?</span>
+            <span class="spark-ticker-ht">#Prompt</span>
+            <span class="spark-ticker-dot"></span>
+          </div>
+          <div class="spark-ticker-item">
+            <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#e91e8c,#8b5cf6);">AR</div>
+            <span>T1ERA chat mode is unreal for research</span>
+            <span class="spark-ticker-ht">#AI</span>
+            <span class="spark-ticker-dot"></span>
+          </div>
+          <div class="spark-ticker-item">
+            <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#c2185b,#f97316);">MH</div>
+            <span>Generated a full video script in 30 seconds ⚡</span>
+            <span class="spark-ticker-ht">#VTT</span>
+            <span class="spark-ticker-dot"></span>
+          </div>
+          <div class="spark-ticker-item">
+            <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#0ea5e9,#8b5cf6);">NZ</div>
+            <span>1,000 signups in the first week 🎉</span>
+            <span class="spark-ticker-ht">#Milestone</span>
+            <span class="spark-ticker-dot"></span>
+          </div>
+          <div class="spark-ticker-item">
+            <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#f59e0b,#10b981);">SY</div>
+            <span>Vision mode read my handwritten notes perfectly</span>
+            <span class="spark-ticker-ht">#Vision</span>
+            <span class="spark-ticker-dot"></span>
+          </div>
+          <!-- Duplicate set for seamless infinite scroll -->
+          <div class="spark-ticker-item">
+            <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#c2185b,#8b5cf6);">IB</div>
+            <span>Just pushed T1ERA v2 live 🚀</span>
+            <span class="spark-ticker-ht">#T1ERA</span>
+            <span class="spark-ticker-dot"></span>
+          </div>
+          <div class="spark-ticker-item">
+            <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#f59e0b,#f97316);">WA</div>
+            <span>AI changing workflows in 2025 is insane</span>
+            <span class="spark-ticker-ht">#BuildInPublic</span>
+            <span class="spark-ticker-dot"></span>
+          </div>
+          <div class="spark-ticker-item">
+            <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#10b981,#0ea5e9);">LF</div>
+            <span>Dark mode UI explorations this week 🎨</span>
+            <span class="spark-ticker-ht">#UIDesign</span>
+            <span class="spark-ticker-dot"></span>
+          </div>
+          <div class="spark-ticker-item">
+            <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#8b5cf6,#c2185b);">DL</div>
+            <span>What habit changed your productivity?</span>
+            <span class="spark-ticker-ht">#Prompt</span>
+            <span class="spark-ticker-dot"></span>
+          </div>
+          <div class="spark-ticker-item">
+            <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#e91e8c,#8b5cf6);">AR</div>
+            <span>T1ERA chat mode is unreal for research</span>
+            <span class="spark-ticker-ht">#AI</span>
+            <span class="spark-ticker-dot"></span>
+          </div>
+          <div class="spark-ticker-item">
+            <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#c2185b,#f97316);">MH</div>
+            <span>Generated a full video script in 30 seconds ⚡</span>
+            <span class="spark-ticker-ht">#VTT</span>
+            <span class="spark-ticker-dot"></span>
+          </div>
+          <div class="spark-ticker-item">
+            <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#0ea5e9,#8b5cf6);">NZ</div>
+            <span>1,000 signups in the first week 🎉</span>
+            <span class="spark-ticker-ht">#Milestone</span>
+            <span class="spark-ticker-dot"></span>
+          </div>
+          <div class="spark-ticker-item">
+            <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#f59e0b,#10b981);">SY</div>
+            <span>Vision mode read my handwritten notes perfectly</span>
+            <span class="spark-ticker-ht">#Vision</span>
+            <span class="spark-ticker-dot"></span>
+          </div>
+        </div>
+      </div>
+
       <!-- Mobile Nav -->
       <nav class="mobile-nav" id="mobileNav">
         <div class="mobile-nav-section">Quick Access</div>
@@ -3062,110 +3175,6 @@
       ═══════════════════════════════════════════ -->
       <section id="sparks">
         <div class="container">
-
-          <!-- Live ticker strip -->
-          <div class="spark-ticker-wrap">
-            <div class="spark-ticker-track" id="sparkTickerTrack">
-              <!-- First set -->
-              <div class="spark-ticker-item">
-                <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#c2185b,#8b5cf6);">IB</div>
-                <span>Just pushed T1ERA v2 live 🚀</span>
-                <span class="spark-ticker-ht">#T1ERA</span>
-                <span class="spark-ticker-dot"></span>
-              </div>
-              <div class="spark-ticker-item">
-                <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#f59e0b,#f97316);">WA</div>
-                <span>AI changing workflows in 2025 is insane</span>
-                <span class="spark-ticker-ht">#BuildInPublic</span>
-                <span class="spark-ticker-dot"></span>
-              </div>
-              <div class="spark-ticker-item">
-                <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#10b981,#0ea5e9);">LF</div>
-                <span>Dark mode UI explorations this week 🎨</span>
-                <span class="spark-ticker-ht">#UIDesign</span>
-                <span class="spark-ticker-dot"></span>
-              </div>
-              <div class="spark-ticker-item">
-                <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#8b5cf6,#c2185b);">DL</div>
-                <span>What habit changed your productivity?</span>
-                <span class="spark-ticker-ht">#Prompt</span>
-                <span class="spark-ticker-dot"></span>
-              </div>
-              <div class="spark-ticker-item">
-                <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#e91e8c,#8b5cf6);">AR</div>
-                <span>T1ERA chat mode is unreal for research</span>
-                <span class="spark-ticker-ht">#AI</span>
-                <span class="spark-ticker-dot"></span>
-              </div>
-              <div class="spark-ticker-item">
-                <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#c2185b,#f97316);">MH</div>
-                <span>Generated a full video script in 30 seconds ⚡</span>
-                <span class="spark-ticker-ht">#VTT</span>
-                <span class="spark-ticker-dot"></span>
-              </div>
-              <div class="spark-ticker-item">
-                <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#0ea5e9,#8b5cf6);">NZ</div>
-                <span>1,000 signups in the first week 🎉</span>
-                <span class="spark-ticker-ht">#Milestone</span>
-                <span class="spark-ticker-dot"></span>
-              </div>
-              <div class="spark-ticker-item">
-                <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#f59e0b,#10b981);">SY</div>
-                <span>Vision mode read my handwritten notes perfectly</span>
-                <span class="spark-ticker-ht">#Vision</span>
-                <span class="spark-ticker-dot"></span>
-              </div>
-              <!-- Duplicate set for seamless infinite scroll -->
-              <div class="spark-ticker-item">
-                <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#c2185b,#8b5cf6);">IB</div>
-                <span>Just pushed T1ERA v2 live 🚀</span>
-                <span class="spark-ticker-ht">#T1ERA</span>
-                <span class="spark-ticker-dot"></span>
-              </div>
-              <div class="spark-ticker-item">
-                <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#f59e0b,#f97316);">WA</div>
-                <span>AI changing workflows in 2025 is insane</span>
-                <span class="spark-ticker-ht">#BuildInPublic</span>
-                <span class="spark-ticker-dot"></span>
-              </div>
-              <div class="spark-ticker-item">
-                <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#10b981,#0ea5e9);">LF</div>
-                <span>Dark mode UI explorations this week 🎨</span>
-                <span class="spark-ticker-ht">#UIDesign</span>
-                <span class="spark-ticker-dot"></span>
-              </div>
-              <div class="spark-ticker-item">
-                <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#8b5cf6,#c2185b);">DL</div>
-                <span>What habit changed your productivity?</span>
-                <span class="spark-ticker-ht">#Prompt</span>
-                <span class="spark-ticker-dot"></span>
-              </div>
-              <div class="spark-ticker-item">
-                <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#e91e8c,#8b5cf6);">AR</div>
-                <span>T1ERA chat mode is unreal for research</span>
-                <span class="spark-ticker-ht">#AI</span>
-                <span class="spark-ticker-dot"></span>
-              </div>
-              <div class="spark-ticker-item">
-                <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#c2185b,#f97316);">MH</div>
-                <span>Generated a full video script in 30 seconds ⚡</span>
-                <span class="spark-ticker-ht">#VTT</span>
-                <span class="spark-ticker-dot"></span>
-              </div>
-              <div class="spark-ticker-item">
-                <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#0ea5e9,#8b5cf6);">NZ</div>
-                <span>1,000 signups in the first week 🎉</span>
-                <span class="spark-ticker-ht">#Milestone</span>
-                <span class="spark-ticker-dot"></span>
-              </div>
-              <div class="spark-ticker-item">
-                <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#f59e0b,#10b981);">SY</div>
-                <span>Vision mode read my handwritten notes perfectly</span>
-                <span class="spark-ticker-ht">#Vision</span>
-                <span class="spark-ticker-dot"></span>
-              </div>
-            </div>
-          </div>
 
           <!-- Section header -->
           <div class="section-header fade-in">
