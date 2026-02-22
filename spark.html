@@ -1676,7 +1676,7 @@ import { initializeApp }        from 'https://www.gstatic.com/firebasejs/10.12.2
 import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import {
   getFirestore, collection, addDoc, query, where,
-  getDocs, doc, getDoc, serverTimestamp
+  getDocs, doc, getDoc, deleteDoc, serverTimestamp
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 // ── CONFIG ──
@@ -1790,9 +1790,16 @@ function renderCard(id, d) {
 
   const safeText = txt.replace(/'/g, "\\'").slice(0, 80);
 
+  const isOwner = d.uid && window._sparkUser && d.uid === window._sparkUser.uid;
+
+  const dotsOrDelete = isOwner
+    ? `<button class="dots-btn" onclick="event.stopPropagation();deleteSparkCard(this)" title="Delete Spark" style="color:var(--text-3)"><i class="ph-bold ph-trash"></i></button>`
+    : `<button class="dots-btn" onclick="event.stopPropagation()"><i class="ph-bold ph-dots-three-vertical"></i></button>`;
+
   const article = document.createElement('article');
   article.className       = 'spark-card';
   article.dataset.sparkId = id;
+  article.dataset.ownerUid = d.uid || '';
   article.setAttribute('onclick', 'openSparkDetail(this)');
   article.innerHTML = `
     <div class="card-head">
@@ -1809,7 +1816,7 @@ function renderCard(id, d) {
           <span class="badge rank">LV 1</span>
         </div>
       </div>
-      <button class="dots-btn" onclick="event.stopPropagation()"><i class="ph-bold ph-dots-three-vertical"></i></button>
+      ${dotsOrDelete}
     </div>
     <div class="card-content">
       <p class="spark-text">${linkedTxt}</p>
@@ -1831,6 +1838,25 @@ function renderCard(id, d) {
     panel.appendChild(article);
   }
 }
+
+// ── DELETE SPARK (owner only) ──
+window.deleteSparkCard = async function (btn) {
+  const card   = btn.closest('.spark-card[data-spark-id]');
+  if (!card) return;
+  const sparkId = card.dataset.sparkId;
+  if (!sparkId) return;
+
+  if (!confirm('Delete this Spark? This cannot be undone.')) return;
+
+  try {
+    await deleteDoc(doc(db, SPARKS_COL, sparkId));
+    // Remove card from DOM immediately
+    card.remove();
+  } catch (e) {
+    console.error('Delete failed:', e);
+    alert('Failed to delete. Please try again.');
+  }
+};
 
 // ── POST NEW SPARK ──
 window._submitSparkFn = async function () {
