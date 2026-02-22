@@ -1,0 +1,1638 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>T1ERA — Sparks</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Orbitron:wght@400;500;600;700;800;900&family=Fira+Code:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@phosphor-icons/web@2.1.1/src/index.js"></script>
+<style>
+/* ══════════════════════════════════════════
+   ROOT — T1ERA design system
+══════════════════════════════════════════ */
+:root {
+  --bg:          #000000;
+  --bg-2:        #090909;
+  --bg-3:        #111111;
+  --bg-4:        #181818;
+  --bg-card:     #141414;
+  --border:      rgba(255,255,255,0.08);
+  --border-2:    rgba(255,255,255,0.13);
+  --text:        #ffffff;
+  --text-2:      rgba(255,255,255,0.65);
+  --text-3:      rgba(255,255,255,0.35);
+  --pink:        #c2185b;
+  --pink-2:      #e91e8c;
+  --pink-glow:   rgba(194,24,91,0.25);
+  --purple:      #8b5cf6;
+  --purple-glow: rgba(139,92,246,0.2);
+  --green:       #10b981;
+  --orange:      #f97316;
+  --gold:        #f59e0b;
+  --red:         #ef4444;
+  --r-sm:        8px;
+  --r:           14px;
+  --r-lg:        20px;
+  --f-display:   'Orbitron', sans-serif;
+  --f-body:      'DM Sans', sans-serif;
+  --f-mono:      'Fira Code', monospace;
+  --ease:        cubic-bezier(0.4,0,0.2,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--f-body);
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(194,24,91,0.3);border-radius:4px}
+button{font-family:var(--f-body);cursor:pointer}
+a{text-decoration:none;color:inherit}
+
+/* ══════════════════════════════════════════
+   TOPBAR
+══════════════════════════════════════════ */
+.topbar{
+  position:sticky;top:0;z-index:300;
+  height:52px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 16px;
+  background:rgba(0,0,0,0.88);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+}
+.topbar-logo{
+  display:flex;align-items:center;gap:8px;
+  font-family:var(--f-display);font-size:13px;font-weight:700;
+  color:var(--text);letter-spacing:0.06em;
+}
+.topbar-logo-mark{
+  width:28px;height:28px;border-radius:7px;
+  background:linear-gradient(135deg,var(--pink),var(--purple));
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:900;
+  box-shadow:0 0 12px var(--pink-glow);
+}
+.topbar-back{
+  display:flex;align-items:center;gap:5px;
+  font-size:13px;color:var(--text-2);font-weight:500;
+  transition:color .2s;
+}
+.topbar-back:hover{color:var(--text)}
+.topbar-actions{display:flex;align-items:center;gap:6px}
+.tb-icon-btn{
+  width:34px;height:34px;border-radius:50%;
+  background:none;border:1px solid var(--border);
+  color:var(--text-3);font-size:16px;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .18s;
+}
+.tb-icon-btn:hover{background:var(--pink-glow);border-color:rgba(194,24,91,.3);color:var(--pink-2)}
+
+/* ══════════════════════════════════════════
+   LAYOUT — mobile single column / PC 3-col
+══════════════════════════════════════════ */
+.page-wrap{
+  display:block;
+  max-width:680px;
+  margin:0 auto;
+}
+
+/* PC 3-column */
+@media(min-width:1080px){
+  .page-wrap{
+    display:grid;
+    grid-template-columns:240px 1fr 280px;
+    max-width:1200px;
+    gap:0;
+    align-items:start;
+    padding:0 24px;
+  }
+}
+
+/* ══════════════════════════════════════════
+   LEFT SIDEBAR — desktop only
+══════════════════════════════════════════ */
+.sidebar-left{display:none}
+@media(min-width:1080px){
+  .sidebar-left{
+    display:block;
+    position:sticky;top:68px;
+    padding:20px 16px 20px 0;
+  }
+}
+.snav{display:flex;flex-direction:column;gap:2px}
+.snav-item{
+  display:flex;align-items:center;gap:12px;
+  padding:11px 14px;border-radius:var(--r);
+  font-size:14px;font-weight:600;color:var(--text-2);
+  transition:all .15s;border:1px solid transparent;
+}
+.snav-item:hover{background:rgba(194,24,91,.07);color:var(--text);border-color:rgba(194,24,91,.12)}
+.snav-item.active{background:rgba(194,24,91,.1);color:var(--pink-2);border-color:rgba(194,24,91,.2)}
+.snav-item i{font-size:20px;flex-shrink:0}
+.snav-post-btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;margin-top:14px;padding:12px 20px;border-radius:100px;
+  background:linear-gradient(135deg,var(--pink),var(--pink-2));
+  border:none;color:#fff;font-size:13px;font-weight:700;letter-spacing:.03em;
+  box-shadow:0 0 20px var(--pink-glow);transition:all .2s;
+}
+.snav-post-btn:hover{transform:translateY(-1px);box-shadow:0 4px 24px var(--pink-glow)}
+
+/* ══════════════════════════════════════════
+   CENTER FEED
+══════════════════════════════════════════ */
+.feed-col{
+  width:100%;
+  border-left:1px solid var(--border);
+  border-right:1px solid var(--border);
+  min-height:100vh;
+}
+
+/* ══════════════════════════════════════════
+   RIGHT SIDEBAR — desktop only
+══════════════════════════════════════════ */
+.sidebar-right{display:none}
+@media(min-width:1080px){
+  .sidebar-right{
+    display:block;
+    position:sticky;top:68px;
+    padding:20px 0 20px 16px;
+  }
+}
+.widget{
+  background:var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:var(--r-lg);
+  padding:16px;
+  margin-bottom:18px;
+}
+.widget-title{
+  font-size:10px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.1em;
+  color:var(--text-3);font-family:var(--f-mono);
+  margin-bottom:14px;
+}
+/* WTF row */
+.wtf-row{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 0;border-bottom:1px solid var(--border);
+}
+.wtf-row:last-child{border-bottom:none}
+.wtf-av{
+  width:36px;height:36px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;font-family:var(--f-display);color:#fff;
+}
+.wtf-info{flex:1;min-width:0}
+.wtf-name{font-size:12px;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wtf-sub{font-size:10px;color:var(--text-3);font-family:var(--f-mono)}
+.wtf-btn{
+  padding:4px 12px;border-radius:100px;font-size:10px;font-weight:700;
+  border:1px solid var(--pink-2);color:var(--pink-2);background:transparent;
+  transition:all .15s;white-space:nowrap;
+}
+.wtf-btn:hover{background:var(--pink-2);color:#fff}
+.wtf-btn.on{border-color:var(--border-2);color:var(--text-3);background:var(--bg-3)}
+/* Trending rows */
+.trd-row{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 0;border-bottom:1px solid var(--border);cursor:pointer;
+  transition:background .15s;border-radius:var(--r-sm);padding-inline:6px;
+}
+.trd-row:last-child{border-bottom:none}
+.trd-row:hover{background:rgba(255,255,255,.03)}
+.trd-num{font-family:var(--f-display);font-size:16px;font-weight:900;color:var(--border-2);width:22px;text-align:center;flex-shrink:0}
+.trd-num.hot{color:var(--orange)}
+.trd-tag{font-size:13px;font-weight:700;color:var(--text)}
+.trd-cnt{font-size:10px;color:var(--text-3);font-family:var(--f-mono);margin-top:1px}
+
+/* ══════════════════════════════════════════
+   TABS (sticky under topbar)
+══════════════════════════════════════════ */
+.tabs-bar{
+  position:sticky;top:52px;z-index:200;
+  background:rgba(0,0,0,0.92);
+  backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+  display:flex;
+}
+.tab-btn{
+  flex:1;padding:14px 6px;
+  background:none;border:none;border-bottom:2px solid transparent;
+  color:var(--text-3);font-size:12px;font-weight:700;letter-spacing:.02em;
+  font-family:var(--f-body);transition:all .18s;white-space:nowrap;
+}
+.tab-btn.active{color:var(--text);border-bottom-color:var(--pink-2)}
+.tab-btn:hover:not(.active){color:var(--text-2)}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* ══════════════════════════════════════════
+   CREATE SPARK — TOGGLE BAR
+══════════════════════════════════════════ */
+.compose-toggle{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 16px;border-bottom:1px solid var(--border);
+  cursor:pointer;transition:background .15s;
+}
+.compose-toggle:hover{background:rgba(255,255,255,.015)}
+.compose-mini-av{
+  width:36px;height:36px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,var(--pink),var(--purple));
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:800;font-family:var(--f-display);color:#fff;
+}
+.compose-placeholder{
+  flex:1;font-size:14px;color:var(--text-3);font-style:italic;
+}
+.compose-plus-btn{
+  width:30px;height:30px;border-radius:50%;
+  background:var(--pink);border:none;color:#fff;font-size:17px;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 12px var(--pink-glow);
+  transition:background .18s,transform .18s;
+  flex-shrink:0;
+}
+.compose-toggle:hover .compose-plus-btn{background:var(--pink-2);transform:rotate(45deg)}
+
+/* ══════════════════════════════════════════
+   CREATE SPARK — EXPANDED BOX
+══════════════════════════════════════════ */
+.compose-box{
+  display:none;flex-direction:column;
+  background:var(--bg-2);
+  border-bottom:2px solid rgba(194,24,91,.2);
+}
+.compose-box.open{display:flex}
+
+.compose-top{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 16px 10px;border-bottom:1px solid var(--border);
+}
+.compose-label{
+  font-family:var(--f-display);font-size:11px;font-weight:700;
+  color:var(--pink-2);letter-spacing:.1em;
+  display:flex;align-items:center;gap:6px;
+}
+.compose-label i{font-size:14px}
+.compose-close-btn{
+  width:26px;height:26px;border-radius:50%;
+  background:var(--bg-3);border:1px solid var(--border);
+  color:var(--text-3);font-size:13px;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .15s;
+}
+.compose-close-btn:hover{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.25);color:rgba(239,68,68,.8)}
+
+.compose-body{
+  display:flex;gap:12px;padding:14px 16px 8px;
+}
+.compose-av{
+  width:40px;height:40px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,var(--pink),var(--purple));
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:800;font-family:var(--f-display);color:#fff;
+  border:2px solid rgba(194,24,91,.3);
+}
+.compose-textarea{
+  flex:1;background:none;border:none;outline:none;
+  color:var(--text);font-family:var(--f-body);font-size:15px;
+  line-height:1.65;resize:none;min-height:90px;
+  padding-top:2px;
+}
+.compose-textarea::placeholder{color:var(--text-3)}
+
+/* Media preview */
+.media-strip{
+  display:flex;flex-wrap:wrap;gap:6px;
+  padding:0 16px 10px 68px;
+}
+.media-thumb{
+  position:relative;width:80px;height:80px;border-radius:10px;
+  overflow:hidden;border:1px solid var(--border-2);background:var(--bg-3);
+}
+.media-thumb img,.media-thumb video{width:100%;height:100%;object-fit:cover}
+.media-thumb-remove{
+  position:absolute;top:4px;right:4px;
+  width:20px;height:20px;border-radius:50%;
+  background:rgba(0,0,0,.75);border:none;color:#fff;font-size:10px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:background .15s;
+}
+.media-thumb-remove:hover{background:rgba(239,68,68,.8)}
+.media-type-tag{
+  position:absolute;bottom:4px;left:4px;
+  background:rgba(0,0,0,.7);border-radius:4px;
+  padding:1px 5px;font-size:7px;font-weight:700;
+  color:rgba(255,255,255,.75);font-family:var(--f-mono);text-transform:uppercase;
+}
+
+/* Footer bar */
+.compose-footer{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 16px 14px;border-top:1px solid var(--border);gap:8px;
+}
+.media-btns{display:flex;align-items:center;gap:2px}
+.media-btn{
+  position:relative;width:34px;height:34px;border-radius:var(--r-sm);
+  background:none;border:1px solid transparent;
+  color:var(--text-3);font-size:18px;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .15s;overflow:hidden;
+}
+.media-btn:hover{background:rgba(194,24,91,.1);border-color:rgba(194,24,91,.2);color:var(--pink-2)}
+.media-btn input[type=file]{
+  position:absolute;inset:0;opacity:0;cursor:pointer;font-size:0;
+}
+.compose-right{display:flex;align-items:center;gap:10px}
+.char-count{font-size:11px;color:var(--text-3);font-family:var(--f-mono)}
+.char-count.warn{color:var(--orange)}
+.char-count.over{color:rgba(239,68,68,.8)}
+.spark-submit-btn{
+  padding:8px 22px;border-radius:100px;
+  background:linear-gradient(135deg,var(--pink),var(--pink-2));
+  border:none;color:#fff;font-size:12px;font-weight:700;
+  letter-spacing:.04em;box-shadow:0 0 16px var(--pink-glow);
+  transition:all .2s;
+}
+.spark-submit-btn:hover{transform:translateY(-1px);box-shadow:0 4px 20px var(--pink-glow)}
+.spark-submit-btn:disabled{opacity:.35;cursor:not-allowed;transform:none}
+
+/* ══════════════════════════════════════════
+   SPARK CARD
+══════════════════════════════════════════ */
+.spark-card{
+  padding:16px 16px 0;
+  border-bottom:1px solid var(--border);
+  transition:background .15s;
+  cursor:pointer;
+}
+.spark-card:hover{background:rgba(255,255,255,.012)}
+
+/* Repost header */
+.repost-bar{
+  display:flex;align-items:center;gap:6px;
+  font-size:11px;color:var(--text-3);font-weight:600;
+  margin-bottom:8px;margin-left:52px;
+}
+.repost-bar i{font-size:13px;color:var(--green)}
+
+/* Card header */
+.card-head{
+  display:flex;align-items:flex-start;gap:12px;
+  margin-bottom:8px;
+}
+/* Avatar stack */
+.av-wrap{position:relative;flex-shrink:0}
+.spark-av{
+  width:42px;height:42px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:800;font-family:var(--f-display);color:#fff;
+  border:2px solid var(--border-2);cursor:pointer;
+  transition:border-color .18s,transform .18s;
+  object-fit:cover;
+}
+.spark-av:hover{border-color:var(--pink-2);transform:scale(1.05)}
+.online-dot{
+  position:absolute;bottom:1px;right:1px;
+  width:10px;height:10px;border-radius:50%;
+  background:var(--green);border:2px solid var(--bg);
+  box-shadow:0 0 6px var(--green);
+}
+
+/* Meta */
+.card-meta{flex:1;min-width:0}
+.meta-row-1{
+  display:flex;align-items:center;gap:6px;flex-wrap:wrap;
+}
+.author-name{
+  font-size:14px;font-weight:700;color:var(--text);
+  cursor:pointer;transition:color .15s;white-space:nowrap;
+}
+.author-name:hover{color:var(--pink-2)}
+.author-handle{
+  font-size:11px;color:var(--text-3);font-family:var(--f-mono);white-space:nowrap;
+}
+.spark-time{
+  font-size:11px;color:var(--text-3);white-space:nowrap;margin-left:auto;
+}
+/* Follow inline */
+.follow-pill{
+  display:inline-flex;align-items:center;gap:3px;
+  padding:2px 9px;border-radius:100px;
+  font-size:10px;font-weight:700;letter-spacing:.03em;
+  border:1px solid var(--pink-2);color:var(--pink-2);background:transparent;
+  transition:all .18s;white-space:nowrap;
+}
+.follow-pill:hover{background:var(--pink-2);color:#fff}
+.follow-pill.on{border-color:var(--border-2);color:var(--text-3);background:var(--bg-3)}
+.follow-pill.on:hover{border-color:rgba(239,68,68,.35);color:rgba(239,68,68,.7);background:rgba(239,68,68,.05)}
+
+/* Badges row */
+.badges-row{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-top:3px}
+.badge{
+  display:inline-flex;align-items:center;gap:3px;
+  padding:1px 7px;border-radius:100px;
+  font-size:9px;font-weight:700;letter-spacing:.07em;
+  text-transform:uppercase;font-family:var(--f-mono);
+}
+.badge.rank{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);color:var(--gold)}
+.badge.verified{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);color:var(--green)}
+.badge.prompt-tag{background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.25);color:var(--purple)}
+.badge.hot{background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.25);color:var(--orange)}
+
+/* Dots menu */
+.dots-btn{
+  width:28px;height:28px;border-radius:50%;
+  background:none;border:none;color:var(--text-3);font-size:16px;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .15s;flex-shrink:0;
+}
+.dots-btn:hover{background:rgba(255,255,255,.06);color:var(--text)}
+
+/* Content area */
+.card-content{margin-left:54px;margin-bottom:8px}
+.spark-text{
+  font-size:14px;line-height:1.68;color:var(--text-2);
+  word-break:break-word;white-space:pre-wrap;
+}
+.spark-text .ht{color:var(--pink-2);cursor:pointer}
+.spark-text .ht:hover{text-decoration:underline}
+.spark-text .mn{color:var(--purple);cursor:pointer}
+
+/* Media grid */
+.media-grid{
+  margin-top:10px;border-radius:var(--r);overflow:hidden;
+  display:grid;gap:2px;
+}
+.media-grid.g1{grid-template-columns:1fr}
+.media-grid.g2{grid-template-columns:1fr 1fr}
+.media-grid.g3{grid-template-columns:1fr 1fr}
+.media-grid.g3 .mi:first-child{grid-row:span 2}
+.media-grid.g4{grid-template-columns:1fr 1fr}
+.mi{
+  position:relative;overflow:hidden;
+  background:var(--bg-3);cursor:pointer;
+}
+.media-grid.g1 .mi{height:260px;border-radius:var(--r)}
+.media-grid.g2 .mi{height:170px}
+.media-grid.g3 .mi{height:112px}
+.media-grid.g3 .mi:first-child{height:226px}
+.media-grid.g4 .mi{height:130px}
+.mi img,.mi video{width:100%;height:100%;object-fit:cover;transition:transform .3s}
+.mi:hover img,.mi:hover video{transform:scale(1.04)}
+.mi-play{
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.3);
+}
+.mi-play i{font-size:38px;color:rgba(255,255,255,.9)}
+
+/* Prompt card */
+.prompt-card{
+  margin-top:10px;padding:14px;
+  background:linear-gradient(135deg,rgba(139,92,246,.07),rgba(194,24,91,.05));
+  border:1px solid rgba(139,92,246,.2);border-radius:var(--r);
+}
+.prompt-label{
+  font-size:9px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.1em;color:var(--purple);font-family:var(--f-mono);
+  display:flex;align-items:center;gap:5px;margin-bottom:8px;
+}
+.prompt-q{font-size:14px;font-weight:600;color:var(--text);line-height:1.5}
+.prompt-replies{font-size:11px;color:var(--text-3);margin-top:8px;font-family:var(--f-mono)}
+
+/* Trending badge */
+.trending-pill{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:3px 9px;border-radius:100px;
+  font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+  font-family:var(--f-mono);
+  background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.25);color:var(--orange);
+  margin-bottom:8px;
+}
+
+/* ── ACTION BAR ── */
+.action-bar{
+  display:flex;align-items:center;
+  margin-left:54px;
+  padding:8px 0 12px;
+  gap:2px;
+}
+.act-btn{
+  display:flex;align-items:center;gap:5px;
+  padding:5px 9px;border-radius:var(--r-sm);
+  background:none;border:none;
+  color:var(--text-3);font-size:12px;font-weight:500;
+  transition:all .15s;
+}
+.act-btn i{font-size:17px}
+.act-btn:hover{background:rgba(255,255,255,.04)}
+.act-btn.like:hover,.act-btn.liked{color:rgba(239,68,68,.8)}
+.act-btn.like:hover{background:rgba(239,68,68,.06)}
+.act-btn.liked{background:rgba(239,68,68,.05)}
+.act-btn.reply:hover{color:var(--purple);background:var(--purple-glow)}
+.act-btn.repost:hover,.act-btn.reposted{color:var(--green)}
+.act-btn.repost:hover{background:rgba(16,185,129,.08)}
+.act-btn.reposted{background:rgba(16,185,129,.05)}
+.act-btn.share:hover{color:var(--pink-2);background:var(--pink-glow)}
+.act-btn.bookmark:hover{color:var(--gold);background:rgba(245,158,11,.07)}
+
+/* ══════════════════════════════════════════
+   TRENDING TAB HEADER
+══════════════════════════════════════════ */
+.trend-header{
+  padding:16px 16px 12px;
+  border-bottom:1px solid var(--border);
+}
+.trend-header-label{
+  font-size:10px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.1em;color:var(--text-3);font-family:var(--f-mono);
+  margin-bottom:12px;
+}
+.trend-topic{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 8px;border-radius:var(--r-sm);
+  cursor:pointer;transition:background .15s;
+  border-bottom:1px solid var(--border);
+}
+.trend-topic:last-child{border-bottom:none}
+.trend-topic:hover{background:rgba(255,255,255,.025)}
+.trend-n{
+  font-family:var(--f-display);font-size:20px;font-weight:900;
+  color:var(--border-2);width:32px;text-align:center;flex-shrink:0;
+}
+.trend-n.hot{color:var(--orange)}
+.trend-info{flex:1}
+.trend-tag{font-size:14px;font-weight:700;color:var(--text)}
+.trend-count{font-size:11px;color:var(--text-3);font-family:var(--f-mono);margin-top:1px}
+.trend-icon{font-size:18px}
+
+/* ══════════════════════════════════════════
+   PROFILE POPUP — bottom sheet
+══════════════════════════════════════════ */
+.popup-overlay{
+  position:fixed;inset:0;z-index:500;
+  background:rgba(0,0,0,.75);backdrop-filter:blur(8px);
+  display:flex;align-items:flex-end;justify-content:center;
+  opacity:0;visibility:hidden;
+  transition:opacity .25s,visibility .25s;
+}
+.popup-overlay.open{opacity:1;visibility:visible}
+.popup-sheet{
+  width:100%;max-width:480px;
+  background:rgba(9,6,13,.98);
+  border:1px solid rgba(194,24,91,.15);
+  border-radius:24px 24px 0 0;
+  padding-bottom:40px;
+  transform:translateY(28px);
+  transition:transform .3s cubic-bezier(.34,1.2,.64,1);
+}
+.popup-overlay.open .popup-sheet{transform:translateY(0)}
+.popup-handle{
+  width:36px;height:4px;border-radius:2px;
+  background:var(--border-2);margin:12px auto 0;
+}
+.popup-banner{
+  height:88px;margin-top:8px;
+  background:linear-gradient(135deg,rgba(194,24,91,.35),rgba(139,92,246,.25));
+  position:relative;
+}
+.popup-av{
+  position:absolute;bottom:-24px;left:20px;
+  width:54px;height:54px;border-radius:50%;
+  border:3px solid rgba(9,6,13,.98);
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;font-weight:800;font-family:var(--f-display);color:#fff;
+}
+.popup-follow-btn{
+  position:absolute;bottom:-20px;right:20px;
+  padding:7px 18px;border-radius:100px;
+  font-size:12px;font-weight:700;letter-spacing:.04em;
+  border:1px solid var(--pink-2);color:var(--pink-2);background:transparent;
+  transition:all .18s;
+}
+.popup-follow-btn:hover{background:var(--pink-2);color:#fff}
+.popup-follow-btn.on{border-color:var(--border-2);color:var(--text-3);background:var(--bg-3)}
+.popup-info{padding:34px 20px 16px}
+.popup-name{font-size:17px;font-weight:700;color:var(--text)}
+.popup-handle-text{font-size:12px;color:var(--text-3);font-family:var(--f-mono);margin-top:2px}
+.popup-bio-text{font-size:13px;color:var(--text-2);line-height:1.55;margin-top:8px}
+.popup-stats{display:flex;gap:22px;margin-top:12px}
+.pstat-num{font-size:15px;font-weight:700;color:var(--text)}
+.pstat-label{font-size:10px;color:var(--text-3);font-family:var(--f-mono);margin-top:1px}
+.popup-actions{
+  display:flex;gap:8px;padding:0 20px 4px;
+}
+.popup-act-btn{
+  flex:1;padding:9px;border-radius:var(--r-sm);
+  background:var(--bg-3);border:1px solid var(--border);
+  color:var(--text-2);font-size:12px;font-weight:600;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  transition:all .18s;
+}
+.popup-act-btn i{font-size:15px}
+.popup-act-btn:hover{background:var(--pink-glow);border-color:rgba(194,24,91,.25);color:var(--pink-2)}
+
+@media(min-width:1080px){
+  .popup-overlay{align-items:center}
+  .popup-sheet{border-radius:20px;max-width:400px}
+}
+
+/* ══════════════════════════════════════════
+   REPLY MODAL
+══════════════════════════════════════════ */
+.reply-overlay{
+  position:fixed;inset:0;z-index:510;
+  background:rgba(0,0,0,.82);backdrop-filter:blur(10px);
+  display:flex;align-items:flex-end;justify-content:center;
+  opacity:0;visibility:hidden;
+  transition:opacity .25s,visibility .25s;
+}
+.reply-overlay.open{opacity:1;visibility:visible}
+.reply-sheet{
+  width:100%;max-width:520px;
+  background:rgba(9,6,13,.99);
+  border:1px solid rgba(194,24,91,.15);
+  border-radius:24px 24px 0 0;
+  max-height:82vh;overflow-y:auto;
+  transform:translateY(28px);
+  transition:transform .3s cubic-bezier(.34,1.2,.64,1);
+}
+.reply-overlay.open .reply-sheet{transform:translateY(0)}
+.reply-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 16px 10px;border-bottom:1px solid var(--border);
+  position:sticky;top:0;background:rgba(9,6,13,.99);z-index:2;
+  border-radius:24px 24px 0 0;
+}
+.reply-title{
+  font-family:var(--f-display);font-size:11px;font-weight:700;
+  color:var(--pink-2);letter-spacing:.08em;
+  display:flex;align-items:center;gap:6px;
+}
+.reply-close{
+  width:26px;height:26px;border-radius:50%;
+  background:var(--bg-3);border:1px solid var(--border);
+  color:var(--text-3);font-size:13px;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .15s;
+}
+.reply-close:hover{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.25);color:rgba(239,68,68,.8)}
+
+/* Original spark preview */
+.reply-orig{
+  padding:12px 16px;border-bottom:1px solid var(--border);
+  opacity:.72;
+}
+.reply-orig-head{
+  display:flex;align-items:center;gap:8px;margin-bottom:6px;
+}
+.reply-orig-av{
+  width:28px;height:28px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:800;font-family:var(--f-display);color:#fff;
+}
+.reply-orig-author{font-size:13px;font-weight:600;color:var(--text-2)}
+.reply-orig-tag{font-size:11px;color:var(--text-3);font-family:var(--f-mono)}
+.reply-orig-text{font-size:13px;color:var(--text-3);line-height:1.5;margin-left:36px}
+
+/* Compose area */
+.reply-compose{display:flex;gap:12px;padding:14px 16px}
+.reply-av{
+  width:36px;height:36px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,var(--pink),var(--purple));
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:800;font-family:var(--f-display);color:#fff;
+}
+.reply-textarea{
+  flex:1;background:none;border:none;outline:none;
+  color:var(--text);font-family:var(--f-body);font-size:14px;
+  line-height:1.65;resize:none;min-height:80px;
+}
+.reply-textarea::placeholder{color:var(--text-3)}
+.reply-footer{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 16px 14px;border-top:1px solid var(--border);
+}
+.reply-media-row{display:flex;gap:4px}
+.reply-submit{
+  padding:8px 22px;border-radius:100px;
+  background:linear-gradient(135deg,var(--pink),var(--pink-2));
+  border:none;color:#fff;font-size:12px;font-weight:700;
+  box-shadow:0 0 12px var(--pink-glow);transition:all .18s;
+}
+.reply-submit:hover{transform:translateY(-1px)}
+
+/* Existing replies */
+.replies-list{padding:0 16px 4px}
+.reply-item{
+  display:flex;gap:10px;padding:12px 0;
+  border-bottom:1px solid var(--border);
+}
+.reply-item:last-child{border-bottom:none}
+.ri-av{
+  width:32px;height:32px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:800;font-family:var(--f-display);color:#fff;
+}
+.ri-body{flex:1}
+.ri-author{font-size:13px;font-weight:700;color:var(--text)}
+.ri-time{font-size:10px;color:var(--text-3);font-family:var(--f-mono);margin-left:6px}
+.ri-text{font-size:13px;color:var(--text-2);line-height:1.55;margin-top:3px}
+
+@media(min-width:1080px){
+  .reply-overlay{align-items:center}
+  .reply-sheet{border-radius:20px;max-width:540px}
+}
+
+/* ══════════════════════════════════════════
+   MOBILE BOTTOM NAV
+══════════════════════════════════════════ */
+.mob-nav{
+  position:fixed;bottom:0;left:0;right:0;height:60px;z-index:250;
+  background:rgba(0,0,0,.92);backdrop-filter:blur(20px);
+  border-top:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-around;
+}
+@media(min-width:1080px){.mob-nav{display:none}}
+.mob-btn{
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  color:var(--text-3);font-size:10px;font-family:var(--f-body);
+  padding:6px 12px;border-radius:var(--r-sm);
+  background:none;border:none;transition:color .15s;
+}
+.mob-btn i{font-size:22px}
+.mob-btn.active{color:var(--pink-2)}
+.mob-btn:hover{color:var(--text)}
+.mob-post{
+  width:44px;height:44px;border-radius:50%;
+  background:linear-gradient(135deg,var(--pink),var(--pink-2));
+  border:none;color:#fff;font-size:22px;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 16px var(--pink-glow);
+  transition:transform .18s,box-shadow .18s;
+}
+.mob-post:hover{transform:scale(1.1)}
+
+/* ══════════════════════════════════════════
+   EMPTY STATE
+══════════════════════════════════════════ */
+.empty-state{
+  padding:64px 20px;text-align:center;
+}
+.empty-state i{font-size:44px;color:var(--border-2);display:block;margin-bottom:14px}
+.empty-title{font-size:15px;font-weight:700;color:var(--text-2);margin-bottom:6px}
+.empty-sub{font-size:13px;color:var(--text-3);line-height:1.6}
+
+/* ══════════════════════════════════════════
+   FADE IN
+══════════════════════════════════════════ */
+.fu{opacity:0;transform:translateY(10px);animation:fu .38s var(--ease) forwards}
+@keyframes fu{to{opacity:1;transform:none}}
+.d1{animation-delay:.06s}.d2{animation-delay:.12s}.d3{animation-delay:.18s}
+
+/* body padding for mobile nav */
+@media(max-width:1079px){body{padding-bottom:60px}}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════
+     TOPBAR
+═══════════════════════════ -->
+<nav class="topbar">
+  <a href="profile.html" class="topbar-back">
+    <i class="ph-bold ph-arrow-left"></i>
+    Profile
+  </a>
+  <a href="#" class="topbar-logo">
+    <div class="topbar-logo-mark">T1</div>
+    SPARKS
+  </a>
+  <div class="topbar-actions">
+    <button class="tb-icon-btn" title="Search"><i class="ph-bold ph-magnifying-glass"></i></button>
+    <button class="tb-icon-btn" title="Notifications"><i class="ph-bold ph-bell"></i></button>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════
+     MAIN GRID
+═══════════════════════════ -->
+<div class="page-wrap">
+
+  <!-- ── LEFT SIDEBAR ── -->
+  <aside class="sidebar-left">
+    <nav class="snav">
+      <a class="snav-item active" href="#"><i class="ph-bold ph-lightning"></i>Sparks Feed</a>
+      <a class="snav-item" href="#"><i class="ph-bold ph-fire"></i>Trending</a>
+      <a class="snav-item" href="#"><i class="ph-bold ph-chat-teardrop-dots"></i>Prompts</a>
+      <a class="snav-item" href="profile.html"><i class="ph-bold ph-user-circle"></i>My Profile</a>
+      <a class="snav-item" href="Pod-Workflow.html"><i class="ph-bold ph-squares-four"></i>Dashboard</a>
+    </nav>
+    <button class="snav-post-btn" onclick="openCompose()">
+      <i class="ph-bold ph-lightning"></i> New Spark
+    </button>
+  </aside>
+
+  <!-- ── CENTER FEED ── -->
+  <div class="feed-col">
+
+    <!-- TABS -->
+    <div class="tabs-bar">
+      <button class="tab-btn active" onclick="switchTab(0,this)">⚡ Standard Spark</button>
+      <button class="tab-btn" onclick="switchTab(1,this)">💬 Spark Prompt</button>
+      <button class="tab-btn" onclick="switchTab(2,this)">🔥 Trending</button>
+    </div>
+
+    <!-- ════════════════════════
+         TAB 0 — STANDARD SPARK
+    ════════════════════════ -->
+    <div class="tab-panel active" id="panel-0">
+
+      <!-- Compose toggle -->
+      <div class="compose-toggle" id="composeToggle" onclick="openCompose()">
+        <div class="compose-mini-av" id="miniAv">M</div>
+        <span class="compose-placeholder">What's sparking today…</span>
+        <button class="compose-plus-btn"><i class="ph-bold ph-plus"></i></button>
+      </div>
+
+      <!-- Compose box (hidden by default) -->
+      <div class="compose-box" id="composeBox">
+        <div class="compose-top">
+          <span class="compose-label"><i class="ph-bold ph-lightning"></i> NEW SPARK</span>
+          <button class="compose-close-btn" onclick="closeCompose()"><i class="ph-bold ph-x"></i></button>
+        </div>
+        <div class="compose-body">
+          <div class="compose-av" id="composeAv">M</div>
+          <div style="flex:1">
+            <textarea
+              class="compose-textarea"
+              id="composeTa"
+              placeholder="Share what's on your mind… use #hashtags and @mentions"
+              oninput="onComposeInput(this)"
+              maxlength="500"
+            ></textarea>
+          </div>
+        </div>
+        <!-- Media preview strip -->
+        <div class="media-strip" id="mediaStrip"></div>
+        <!-- Footer -->
+        <div class="compose-footer">
+          <div class="media-btns">
+            <button class="media-btn" title="Photo">
+              <i class="ph-bold ph-image"></i>
+              <input type="file" accept="image/*" multiple onchange="attachMedia(this,'image')">
+            </button>
+            <button class="media-btn" title="Video">
+              <i class="ph-bold ph-video-camera"></i>
+              <input type="file" accept="video/*" onchange="attachMedia(this,'video')">
+            </button>
+            <button class="media-btn" title="GIF" onclick="alert('GIF picker — coming soon')">
+              <i class="ph-bold ph-gif"></i>
+            </button>
+            <button class="media-btn" title="File">
+              <i class="ph-bold ph-paperclip"></i>
+              <input type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar,.txt,.csv" onchange="attachMedia(this,'file')">
+            </button>
+            <button class="media-btn" title="Audio">
+              <i class="ph-bold ph-microphone"></i>
+              <input type="file" accept="audio/*" onchange="attachMedia(this,'audio')">
+            </button>
+            <button class="media-btn" title="Emoji" onclick="alert('Emoji picker — coming soon')">
+              <i class="ph-bold ph-smiley"></i>
+            </button>
+          </div>
+          <div class="compose-right">
+            <span class="char-count" id="charCount">0 / 500</span>
+            <button class="spark-submit-btn" id="submitBtn" disabled onclick="submitSpark()">Spark ⚡</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ DEMO SPARK CARDS ═══ -->
+
+      <!-- Card 1: text + single image, already liked -->
+      <article class="spark-card fu" onclick="openSparkDetail(this)">
+        <div class="card-head">
+          <div class="av-wrap">
+            <div class="spark-av" style="background:linear-gradient(135deg,#c2185b,#8b5cf6)"
+              onclick="event.stopPropagation();showProfile('Ikram Basri','ewm24k','LV 5 · Operative',128,947,'Just shipped T1ERA. Building the future in public 🔥 Founder · Dev · Strategist','#c2185b',true)">IB</div>
+            <span class="online-dot"></span>
+          </div>
+          <div class="card-meta">
+            <div class="meta-row-1">
+              <span class="author-name"
+                onclick="event.stopPropagation();showProfile('Ikram Basri','ewm24k','LV 5 · Operative',128,947,'Just shipped T1ERA. Building the future in public 🔥 Founder · Dev · Strategist','#c2185b',true)">
+                Ikram Basri
+              </span>
+              <span class="author-handle">@ewm24k</span>
+              <button class="follow-pill on" onclick="event.stopPropagation();toggleFollow(this)">Following</button>
+              <span class="spark-time">2m ago</span>
+            </div>
+            <div class="badges-row">
+              <span class="badge rank"><i class="ph-fill ph-shield-star"></i> LV 5</span>
+              <span class="badge verified">✓ Verified</span>
+            </div>
+          </div>
+          <button class="dots-btn" onclick="event.stopPropagation()"><i class="ph-bold ph-dots-three-vertical"></i></button>
+        </div>
+        <div class="card-content">
+          <p class="spark-text">Just pushed a massive update to T1ERA 🚀 New profile page live — bio, status, banner presets, Cloudinary photo upload, and desktop layout. Really proud of this build. <span class="ht">#T1ERA</span> <span class="ht">#BuildInPublic</span> <span class="mn">@team</span> 🔥</p>
+          <div class="media-grid g1">
+            <div class="mi">
+              <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=700&q=80" alt="code" loading="lazy"/>
+            </div>
+          </div>
+        </div>
+        <div class="action-bar">
+          <button class="act-btn like liked" onclick="event.stopPropagation();toggleLike(this)"><i class="ph-fill ph-heart"></i><span>142</span></button>
+          <button class="act-btn reply" onclick="event.stopPropagation();openReply('Ikram Basri','IB','#c2185b','Just pushed a massive update to T1ERA 🚀')"><i class="ph-bold ph-chat-circle"></i><span>28</span></button>
+          <button class="act-btn repost" onclick="event.stopPropagation();toggleRepost(this)"><i class="ph-bold ph-repeat"></i><span>19</span></button>
+          <button class="act-btn share" onclick="event.stopPropagation();shareSpark()"><i class="ph-bold ph-share-network"></i><span>7</span></button>
+          <button class="act-btn bookmark" onclick="event.stopPropagation();toggleBookmark(this)" style="margin-left:auto"><i class="ph-bold ph-bookmark-simple"></i></button>
+        </div>
+      </article>
+
+      <!-- Card 2: reposted, text only -->
+      <article class="spark-card fu d1" onclick="openSparkDetail(this)">
+        <div class="repost-bar"><i class="ph-bold ph-repeat"></i> Danial reposted</div>
+        <div class="card-head">
+          <div class="av-wrap">
+            <div class="spark-av" style="background:linear-gradient(135deg,#f59e0b,#f97316)"
+              onclick="event.stopPropagation();showProfile('Wani Aisyah','waniaisyah','LV 3 · Scout',64,210,'Tech enthusiast & T1ERA early adopter 🌟 Always building something new','#f59e0b',false)">WA</div>
+          </div>
+          <div class="card-meta">
+            <div class="meta-row-1">
+              <span class="author-name" onclick="event.stopPropagation();showProfile('Wani Aisyah','waniaisyah','LV 3 · Scout',64,210,'Tech enthusiast & T1ERA early adopter 🌟','#f59e0b',false)">Wani Aisyah</span>
+              <span class="author-handle">@waniaisyah</span>
+              <button class="follow-pill" onclick="event.stopPropagation();toggleFollow(this)"><i class="ph-bold ph-plus"></i> Follow</button>
+              <span class="spark-time">15m ago</span>
+            </div>
+            <div class="badges-row">
+              <span class="badge rank">LV 3</span>
+            </div>
+          </div>
+          <button class="dots-btn" onclick="event.stopPropagation()"><i class="ph-bold ph-dots-three-vertical"></i></button>
+        </div>
+        <div class="card-content">
+          <p class="spark-text">The way AI is reshaping workflows in 2025 is genuinely insane. Shoutout to everyone building in public — you inspire me more than you know. Keep going 💪 <span class="ht">#BuildInPublic</span> <span class="ht">#AI</span> <span class="ht">#T1ERA</span></p>
+        </div>
+        <div class="action-bar">
+          <button class="act-btn like" onclick="event.stopPropagation();toggleLike(this)"><i class="ph-bold ph-heart"></i><span>87</span></button>
+          <button class="act-btn reply" onclick="event.stopPropagation();openReply('Wani Aisyah','WA','#f59e0b','The way AI is reshaping workflows in 2025...')"><i class="ph-bold ph-chat-circle"></i><span>14</span></button>
+          <button class="act-btn repost reposted" onclick="event.stopPropagation();toggleRepost(this)"><i class="ph-bold ph-repeat"></i><span>31</span></button>
+          <button class="act-btn share" onclick="event.stopPropagation();shareSpark()"><i class="ph-bold ph-share-network"></i><span>4</span></button>
+          <button class="act-btn bookmark" onclick="event.stopPropagation();toggleBookmark(this)" style="margin-left:auto"><i class="ph-bold ph-bookmark-simple"></i></button>
+        </div>
+      </article>
+
+      <!-- Card 3: double image grid -->
+      <article class="spark-card fu d2" onclick="openSparkDetail(this)">
+        <div class="card-head">
+          <div class="av-wrap">
+            <div class="spark-av" style="background:linear-gradient(135deg,#10b981,#0ea5e9)"
+              onclick="event.stopPropagation();showProfile('Luqman Faiz','luqmanf','LV 2 · Recruit',22,89,'Designer × developer. UI obsessed.','#10b981',false)">LF</div>
+          </div>
+          <div class="card-meta">
+            <div class="meta-row-1">
+              <span class="author-name" onclick="event.stopPropagation();showProfile('Luqman Faiz','luqmanf','LV 2 · Recruit',22,89,'Designer × developer. UI obsessed.','#10b981',false)">Luqman Faiz</span>
+              <span class="author-handle">@luqmanf</span>
+              <button class="follow-pill" onclick="event.stopPropagation();toggleFollow(this)"><i class="ph-bold ph-plus"></i> Follow</button>
+              <span class="spark-time">1h ago</span>
+            </div>
+            <div class="badges-row"><span class="badge rank">LV 2</span></div>
+          </div>
+          <button class="dots-btn" onclick="event.stopPropagation()"><i class="ph-bold ph-dots-three-vertical"></i></button>
+        </div>
+        <div class="card-content">
+          <p class="spark-text">UI explorations this week — dark gradient interfaces with pink accent systems. Which direction do you prefer? Drop your thoughts 👇 <span class="ht">#UIDesign</span> <span class="ht">#DarkMode</span></p>
+          <div class="media-grid g2">
+            <div class="mi"><img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&q=80" alt="ui1" loading="lazy"/></div>
+            <div class="mi"><img src="https://images.unsplash.com/photo-1551650975-87deedd944c3?w=400&q=80" alt="ui2" loading="lazy"/></div>
+          </div>
+        </div>
+        <div class="action-bar">
+          <button class="act-btn like" onclick="event.stopPropagation();toggleLike(this)"><i class="ph-bold ph-heart"></i><span>56</span></button>
+          <button class="act-btn reply" onclick="event.stopPropagation();openReply('Luqman Faiz','LF','#10b981','UI explorations this week...')"><i class="ph-bold ph-chat-circle"></i><span>9</span></button>
+          <button class="act-btn repost" onclick="event.stopPropagation();toggleRepost(this)"><i class="ph-bold ph-repeat"></i><span>12</span></button>
+          <button class="act-btn share" onclick="event.stopPropagation();shareSpark()"><i class="ph-bold ph-share-network"></i><span>3</span></button>
+          <button class="act-btn bookmark" onclick="event.stopPropagation();toggleBookmark(this)" style="margin-left:auto"><i class="ph-bold ph-bookmark-simple"></i></button>
+        </div>
+      </article>
+
+      <!-- Card 4: triple image grid -->
+      <article class="spark-card fu d3" onclick="openSparkDetail(this)">
+        <div class="card-head">
+          <div class="av-wrap">
+            <div class="spark-av" style="background:linear-gradient(135deg,#8b5cf6,#c2185b)"
+              onclick="event.stopPropagation();showProfile('Danial L.','danialL','LV 4 · Operative',99,301,'Productivity nerd. Building the future. T1ERA power user.','#8b5cf6',false)">DL</div>
+          </div>
+          <div class="card-meta">
+            <div class="meta-row-1">
+              <span class="author-name" onclick="event.stopPropagation();showProfile('Danial L.','danialL','LV 4 · Operative',99,301,'Productivity nerd. Building the future.','#8b5cf6',false)">Danial L.</span>
+              <span class="author-handle">@danialL</span>
+              <button class="follow-pill" onclick="event.stopPropagation();toggleFollow(this)"><i class="ph-bold ph-plus"></i> Follow</button>
+              <span class="spark-time">3h ago</span>
+            </div>
+            <div class="badges-row"><span class="badge rank">LV 4</span></div>
+          </div>
+          <button class="dots-btn" onclick="event.stopPropagation()"><i class="ph-bold ph-dots-three-vertical"></i></button>
+        </div>
+        <div class="card-content">
+          <p class="spark-text">Workspace setup upgrade complete 🖥️ Three monitors, custom desk, ambient lighting. Focus level: maximum. <span class="ht">#SetupGoals</span> <span class="ht">#WorkFromHome</span></p>
+          <div class="media-grid g3">
+            <div class="mi"><img src="https://images.unsplash.com/photo-1593640408182-31c228f2d2e1?w=500&q=80" alt="desk1" loading="lazy"/></div>
+            <div class="mi"><img src="https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=400&q=80" alt="desk2" loading="lazy"/></div>
+            <div class="mi"><img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&q=80" alt="desk3" loading="lazy"/></div>
+          </div>
+        </div>
+        <div class="action-bar">
+          <button class="act-btn like" onclick="event.stopPropagation();toggleLike(this)"><i class="ph-bold ph-heart"></i><span>203</span></button>
+          <button class="act-btn reply" onclick="event.stopPropagation();openReply('Danial L.','DL','#8b5cf6','Workspace setup upgrade complete 🖥️')"><i class="ph-bold ph-chat-circle"></i><span>41</span></button>
+          <button class="act-btn repost" onclick="event.stopPropagation();toggleRepost(this)"><i class="ph-bold ph-repeat"></i><span>67</span></button>
+          <button class="act-btn share" onclick="event.stopPropagation();shareSpark()"><i class="ph-bold ph-share-network"></i><span>18</span></button>
+          <button class="act-btn bookmark" onclick="event.stopPropagation();toggleBookmark(this)" style="margin-left:auto"><i class="ph-bold ph-bookmark-simple"></i></button>
+        </div>
+      </article>
+
+    </div><!-- end panel-0 -->
+
+    <!-- ════════════════════════
+         TAB 1 — SPARK PROMPT
+    ════════════════════════ -->
+    <div class="tab-panel" id="panel-1">
+      <div style="padding:14px 16px;border-bottom:1px solid var(--border);background:rgba(139,92,246,.04)">
+        <p style="font-size:12px;color:var(--text-3);line-height:1.65;font-family:var(--f-mono)">
+          <span style="color:var(--purple);font-weight:700">// SPARK PROMPTS</span> — Open questions from the community. Tap a prompt to reply. Your answer becomes a Spark on your profile.
+        </p>
+      </div>
+
+      <!-- Prompt 1 -->
+      <article class="spark-card fu" onclick="openReply('Danial L.','DL','#8b5cf6','What single habit completely changed your productivity?')">
+        <div class="card-head">
+          <div class="av-wrap">
+            <div class="spark-av" style="background:linear-gradient(135deg,#8b5cf6,#c2185b)"
+              onclick="event.stopPropagation();showProfile('Danial L.','danialL','LV 4 · Operative',99,301,'Productivity nerd. Building the future.','#8b5cf6',false)">DL</div>
+          </div>
+          <div class="card-meta">
+            <div class="meta-row-1">
+              <span class="author-name">Danial L.</span>
+              <span class="author-handle">@danialL</span>
+              <button class="follow-pill" onclick="event.stopPropagation();toggleFollow(this)"><i class="ph-bold ph-plus"></i> Follow</button>
+              <span class="spark-time">3h ago</span>
+            </div>
+            <div class="badges-row">
+              <span class="badge rank">LV 4</span>
+              <span class="badge prompt-tag"><i class="ph-bold ph-chat-teardrop-dots"></i> Prompt</span>
+            </div>
+          </div>
+          <button class="dots-btn" onclick="event.stopPropagation()"><i class="ph-bold ph-dots-three-vertical"></i></button>
+        </div>
+        <div class="card-content">
+          <div class="prompt-card">
+            <div class="prompt-label"><i class="ph-bold ph-question"></i> Open Prompt</div>
+            <p class="prompt-q">What is the single habit that completely changed your productivity — and could you ever go back to life without it?</p>
+            <p class="prompt-replies">💬 47 people replied · tap to add your spark</p>
+          </div>
+        </div>
+        <div class="action-bar">
+          <button class="act-btn like" onclick="event.stopPropagation();toggleLike(this)"><i class="ph-bold ph-heart"></i><span>203</span></button>
+          <button class="act-btn reply" onclick="event.stopPropagation();openReply('Danial L.','DL','#8b5cf6','What single habit completely changed your productivity?')"><i class="ph-bold ph-chat-circle"></i><span>47</span></button>
+          <button class="act-btn repost" onclick="event.stopPropagation();toggleRepost(this)"><i class="ph-bold ph-repeat"></i><span>61</span></button>
+          <button class="act-btn share" onclick="event.stopPropagation();shareSpark()"><i class="ph-bold ph-share-network"></i><span>15</span></button>
+        </div>
+      </article>
+
+      <!-- Prompt 2 -->
+      <article class="spark-card fu d1" onclick="openReply('Wani Aisyah','WA','#f59e0b','Best underrated tool for remote teams in 2025?')">
+        <div class="card-head">
+          <div class="av-wrap">
+            <div class="spark-av" style="background:linear-gradient(135deg,#f59e0b,#f97316)"
+              onclick="event.stopPropagation();showProfile('Wani Aisyah','waniaisyah','LV 3 · Scout',64,210,'Tech enthusiast & early adopter 🌟','#f59e0b',false)">WA</div>
+          </div>
+          <div class="card-meta">
+            <div class="meta-row-1">
+              <span class="author-name">Wani Aisyah</span>
+              <span class="author-handle">@waniaisyah</span>
+              <button class="follow-pill" onclick="event.stopPropagation();toggleFollow(this)"><i class="ph-bold ph-plus"></i> Follow</button>
+              <span class="spark-time">6h ago</span>
+            </div>
+            <div class="badges-row">
+              <span class="badge rank">LV 3</span>
+              <span class="badge prompt-tag"><i class="ph-bold ph-chat-teardrop-dots"></i> Prompt</span>
+            </div>
+          </div>
+          <button class="dots-btn" onclick="event.stopPropagation()"><i class="ph-bold ph-dots-three-vertical"></i></button>
+        </div>
+        <div class="card-content">
+          <div class="prompt-card">
+            <div class="prompt-label"><i class="ph-bold ph-question"></i> Open Prompt</div>
+            <p class="prompt-q">What is the most underrated tool for remote teams in 2025 that most people still haven't discovered?</p>
+            <p class="prompt-replies">💬 23 people replied · tap to add your spark</p>
+          </div>
+        </div>
+        <div class="action-bar">
+          <button class="act-btn like" onclick="event.stopPropagation();toggleLike(this)"><i class="ph-bold ph-heart"></i><span>88</span></button>
+          <button class="act-btn reply" onclick="event.stopPropagation();openReply('Wani Aisyah','WA','#f59e0b','Best underrated tool for remote teams in 2025?')"><i class="ph-bold ph-chat-circle"></i><span>23</span></button>
+          <button class="act-btn repost" onclick="event.stopPropagation();toggleRepost(this)"><i class="ph-bold ph-repeat"></i><span>17</span></button>
+          <button class="act-btn share" onclick="event.stopPropagation();shareSpark()"><i class="ph-bold ph-share-network"></i><span>5</span></button>
+        </div>
+      </article>
+
+      <!-- Prompt 3 -->
+      <article class="spark-card fu d2" onclick="openReply('Ikram Basri','IB','#c2185b','What does your ideal morning routine look like?')">
+        <div class="card-head">
+          <div class="av-wrap">
+            <div class="spark-av" style="background:linear-gradient(135deg,#c2185b,#8b5cf6)"
+              onclick="event.stopPropagation();showProfile('Ikram Basri','ewm24k','LV 5 · Operative',128,947,'Just shipped T1ERA. Building the future in public 🔥','#c2185b',true)">IB</div>
+            <span class="online-dot"></span>
+          </div>
+          <div class="card-meta">
+            <div class="meta-row-1">
+              <span class="author-name">Ikram Basri</span>
+              <span class="author-handle">@ewm24k</span>
+              <button class="follow-pill on" onclick="event.stopPropagation();toggleFollow(this)">Following</button>
+              <span class="spark-time">Yesterday</span>
+            </div>
+            <div class="badges-row">
+              <span class="badge rank">LV 5</span>
+              <span class="badge verified">✓ Verified</span>
+              <span class="badge prompt-tag"><i class="ph-bold ph-chat-teardrop-dots"></i> Prompt</span>
+            </div>
+          </div>
+          <button class="dots-btn" onclick="event.stopPropagation()"><i class="ph-bold ph-dots-three-vertical"></i></button>
+        </div>
+        <div class="card-content">
+          <div class="prompt-card">
+            <div class="prompt-label"><i class="ph-bold ph-question"></i> Open Prompt</div>
+            <p class="prompt-q">Describe your ideal morning routine in 3 steps — be specific. What time, what actions, and what outcome?</p>
+            <p class="prompt-replies">💬 112 people replied · tap to add your spark</p>
+          </div>
+        </div>
+        <div class="action-bar">
+          <button class="act-btn like liked" onclick="event.stopPropagation();toggleLike(this)"><i class="ph-fill ph-heart"></i><span>318</span></button>
+          <button class="act-btn reply" onclick="event.stopPropagation();openReply('Ikram Basri','IB','#c2185b','Describe your ideal morning routine...')"><i class="ph-bold ph-chat-circle"></i><span>112</span></button>
+          <button class="act-btn repost" onclick="event.stopPropagation();toggleRepost(this)"><i class="ph-bold ph-repeat"></i><span>89</span></button>
+          <button class="act-btn share" onclick="event.stopPropagation();shareSpark()"><i class="ph-bold ph-share-network"></i><span>22</span></button>
+        </div>
+      </article>
+
+    </div><!-- end panel-1 -->
+
+    <!-- ════════════════════════
+         TAB 2 — TRENDING
+    ════════════════════════ -->
+    <div class="tab-panel" id="panel-2">
+
+      <!-- Trending topics header -->
+      <div class="trend-header">
+        <p class="trend-header-label">🔥 Trending in T1ERA · Right Now</p>
+        <div class="trend-topic"><div class="trend-n hot">1</div><div class="trend-info"><div class="trend-tag">#T1ERA</div><div class="trend-count">1,204 Sparks</div></div><span class="trend-icon">🔥</span></div>
+        <div class="trend-topic"><div class="trend-n hot">2</div><div class="trend-info"><div class="trend-tag">#BuildInPublic</div><div class="trend-count">847 Sparks</div></div><span class="trend-icon">🔥</span></div>
+        <div class="trend-topic"><div class="trend-n">3</div><div class="trend-info"><div class="trend-tag">#UIDesign</div><div class="trend-count">562 Sparks</div></div></div>
+        <div class="trend-topic"><div class="trend-n">4</div><div class="trend-info"><div class="trend-tag">#AI</div><div class="trend-count">489 Sparks</div></div></div>
+        <div class="trend-topic"><div class="trend-n">5</div><div class="trend-info"><div class="trend-tag">#DarkMode</div><div class="trend-count">317 Sparks</div></div></div>
+        <div class="trend-topic"><div class="trend-n">6</div><div class="trend-info"><div class="trend-tag">#SetupGoals</div><div class="trend-count">241 Sparks</div></div></div>
+      </div>
+
+      <!-- Top trending spark -->
+      <article class="spark-card fu" onclick="openSparkDetail(this)">
+        <div class="trending-pill"><i class="ph-bold ph-fire"></i> Trending #1 · #T1ERA</div>
+        <div class="card-head">
+          <div class="av-wrap">
+            <div class="spark-av" style="background:linear-gradient(135deg,#c2185b,#8b5cf6)"
+              onclick="event.stopPropagation();showProfile('Ikram Basri','ewm24k','LV 5 · Operative',128,947,'Just shipped T1ERA. Building the future in public 🔥','#c2185b',true)">IB</div>
+            <span class="online-dot"></span>
+          </div>
+          <div class="card-meta">
+            <div class="meta-row-1">
+              <span class="author-name">Ikram Basri</span>
+              <span class="author-handle">@ewm24k</span>
+              <button class="follow-pill on" onclick="event.stopPropagation();toggleFollow(this)">Following</button>
+              <span class="spark-time">2h ago</span>
+            </div>
+            <div class="badges-row">
+              <span class="badge rank">LV 5</span>
+              <span class="badge verified">✓ Verified</span>
+              <span class="badge hot"><i class="ph-bold ph-fire"></i> Trending</span>
+            </div>
+          </div>
+          <button class="dots-btn" onclick="event.stopPropagation()"><i class="ph-bold ph-dots-three-vertical"></i></button>
+        </div>
+        <div class="card-content">
+          <p class="spark-text">T1ERA just crossed <strong>1,000 signups</strong> in the first week of beta 🎉 This is only the beginning. Thank you to everyone who believed before there was anything to believe in. We build together. <span class="ht">#T1ERA</span> <span class="ht">#Milestone</span> 🚀</p>
+        </div>
+        <div class="action-bar">
+          <button class="act-btn like liked" onclick="event.stopPropagation();toggleLike(this)"><i class="ph-fill ph-heart"></i><span>1.2k</span></button>
+          <button class="act-btn reply" onclick="event.stopPropagation();openReply('Ikram Basri','IB','#c2185b','T1ERA just crossed 1,000 signups...')"><i class="ph-bold ph-chat-circle"></i><span>284</span></button>
+          <button class="act-btn repost reposted" onclick="event.stopPropagation();toggleRepost(this)"><i class="ph-bold ph-repeat"></i><span>401</span></button>
+          <button class="act-btn share" onclick="event.stopPropagation();shareSpark()"><i class="ph-bold ph-share-network"></i><span>88</span></button>
+          <button class="act-btn bookmark" onclick="event.stopPropagation();toggleBookmark(this)" style="margin-left:auto"><i class="ph-bold ph-bookmark-simple"></i></button>
+        </div>
+      </article>
+
+      <!-- Trending #2 -->
+      <article class="spark-card fu d1" onclick="openSparkDetail(this)">
+        <div class="trending-pill"><i class="ph-bold ph-fire"></i> Trending #2 · #BuildInPublic</div>
+        <div class="card-head">
+          <div class="av-wrap">
+            <div class="spark-av" style="background:linear-gradient(135deg,#f59e0b,#f97316)"
+              onclick="event.stopPropagation();showProfile('Wani Aisyah','waniaisyah','LV 3 · Scout',64,210,'Tech enthusiast & T1ERA early adopter 🌟','#f59e0b',false)">WA</div>
+          </div>
+          <div class="card-meta">
+            <div class="meta-row-1">
+              <span class="author-name">Wani Aisyah</span>
+              <span class="author-handle">@waniaisyah</span>
+              <button class="follow-pill" onclick="event.stopPropagation();toggleFollow(this)"><i class="ph-bold ph-plus"></i> Follow</button>
+              <span class="spark-time">4h ago</span>
+            </div>
+            <div class="badges-row">
+              <span class="badge rank">LV 3</span>
+              <span class="badge hot"><i class="ph-bold ph-fire"></i> Trending</span>
+            </div>
+          </div>
+          <button class="dots-btn" onclick="event.stopPropagation()"><i class="ph-bold ph-dots-three-vertical"></i></button>
+        </div>
+        <div class="card-content">
+          <p class="spark-text">Building in public taught me more in 3 months than 3 years of building alone ever did. The feedback loop is insane when people are watching. Share your journey — even the ugly parts. <span class="ht">#BuildInPublic</span> <span class="ht">#T1ERA</span></p>
+        </div>
+        <div class="action-bar">
+          <button class="act-btn like" onclick="event.stopPropagation();toggleLike(this)"><i class="ph-bold ph-heart"></i><span>342</span></button>
+          <button class="act-btn reply" onclick="event.stopPropagation();openReply('Wani Aisyah','WA','#f59e0b','Building in public taught me more...')"><i class="ph-bold ph-chat-circle"></i><span>76</span></button>
+          <button class="act-btn repost" onclick="event.stopPropagation();toggleRepost(this)"><i class="ph-bold ph-repeat"></i><span>118</span></button>
+          <button class="act-btn share" onclick="event.stopPropagation();shareSpark()"><i class="ph-bold ph-share-network"></i><span>29</span></button>
+          <button class="act-btn bookmark" onclick="event.stopPropagation();toggleBookmark(this)" style="margin-left:auto"><i class="ph-bold ph-bookmark-simple"></i></button>
+        </div>
+      </article>
+
+    </div><!-- end panel-2 -->
+
+  </div><!-- end feed-col -->
+
+  <!-- ── RIGHT SIDEBAR ── -->
+  <aside class="sidebar-right">
+
+    <!-- Who to Follow -->
+    <div class="widget">
+      <p class="widget-title">Who to Follow</p>
+      <div class="wtf-row">
+        <div class="wtf-av" style="background:linear-gradient(135deg,#8b5cf6,#c2185b)">DL</div>
+        <div class="wtf-info"><div class="wtf-name">Danial L.</div><div class="wtf-sub">@danialL · LV 4</div></div>
+        <button class="wtf-btn" onclick="toggleWtf(this)">+ Follow</button>
+      </div>
+      <div class="wtf-row">
+        <div class="wtf-av" style="background:linear-gradient(135deg,#f59e0b,#f97316)">WA</div>
+        <div class="wtf-info"><div class="wtf-name">Wani Aisyah</div><div class="wtf-sub">@waniaisyah · LV 3</div></div>
+        <button class="wtf-btn" onclick="toggleWtf(this)">+ Follow</button>
+      </div>
+      <div class="wtf-row">
+        <div class="wtf-av" style="background:linear-gradient(135deg,#10b981,#0ea5e9)">LF</div>
+        <div class="wtf-info"><div class="wtf-name">Luqman Faiz</div><div class="wtf-sub">@luqmanf · LV 2</div></div>
+        <button class="wtf-btn" onclick="toggleWtf(this)">+ Follow</button>
+      </div>
+      <div class="wtf-row">
+        <div class="wtf-av" style="background:linear-gradient(135deg,#ef4444,#f97316)">AR</div>
+        <div class="wtf-info"><div class="wtf-name">Anis Razali</div><div class="wtf-sub">@anisrazali · LV 1</div></div>
+        <button class="wtf-btn" onclick="toggleWtf(this)">+ Follow</button>
+      </div>
+    </div>
+
+    <!-- Trending Topics -->
+    <div class="widget">
+      <p class="widget-title">Trending Topics</p>
+      <div class="trd-row"><div class="trd-num hot">1</div><div><div class="trd-tag">#T1ERA 🔥</div><div class="trd-cnt">1,204 Sparks</div></div></div>
+      <div class="trd-row"><div class="trd-num hot">2</div><div><div class="trd-tag">#BuildInPublic 🔥</div><div class="trd-cnt">847 Sparks</div></div></div>
+      <div class="trd-row"><div class="trd-num">3</div><div><div class="trd-tag">#UIDesign</div><div class="trd-cnt">562 Sparks</div></div></div>
+      <div class="trd-row"><div class="trd-num">4</div><div><div class="trd-tag">#AI</div><div class="trd-cnt">489 Sparks</div></div></div>
+      <div class="trd-row"><div class="trd-num">5</div><div><div class="trd-tag">#DarkMode</div><div class="trd-cnt">317 Sparks</div></div></div>
+    </div>
+
+    <!-- Active now -->
+    <div class="widget">
+      <p class="widget-title">Active Now</p>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="position:relative">
+            <div class="wtf-av" style="background:linear-gradient(135deg,#c2185b,#8b5cf6);width:32px;height:32px;font-size:11px">IB</div>
+            <span style="position:absolute;bottom:0;right:0;width:9px;height:9px;border-radius:50%;background:var(--green);border:2px solid var(--bg-card)"></span>
+          </div>
+          <div><div class="wtf-name" style="font-size:12px">Ikram Basri</div><div class="wtf-sub">Posting now</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="position:relative">
+            <div class="wtf-av" style="background:linear-gradient(135deg,#f59e0b,#f97316);width:32px;height:32px;font-size:11px">WA</div>
+            <span style="position:absolute;bottom:0;right:0;width:9px;height:9px;border-radius:50%;background:var(--green);border:2px solid var(--bg-card)"></span>
+          </div>
+          <div><div class="wtf-name" style="font-size:12px">Wani Aisyah</div><div class="wtf-sub">Active 1m ago</div></div>
+        </div>
+      </div>
+    </div>
+
+  </aside>
+
+</div><!-- end page-wrap -->
+
+<!-- ═══════════════════════════
+     MOBILE BOTTOM NAV
+═══════════════════════════ -->
+<nav class="mob-nav">
+  <a href="profile.html" class="mob-btn"><i class="ph-bold ph-house"></i></a>
+  <button class="mob-btn active"><i class="ph-bold ph-lightning"></i></button>
+  <button class="mob-post" onclick="openCompose()"><i class="ph-bold ph-plus"></i></button>
+  <button class="mob-btn"><i class="ph-bold ph-bell"></i></button>
+  <a href="profile.html" class="mob-btn"><i class="ph-bold ph-user-circle"></i></a>
+</nav>
+
+<!-- ═══════════════════════════
+     PROFILE POPUP
+═══════════════════════════ -->
+<div class="popup-overlay" id="popupOverlay" onclick="if(event.target===this)closeProfile()">
+  <div class="popup-sheet">
+    <div class="popup-handle"></div>
+    <div class="popup-banner" id="popupBanner">
+      <div class="popup-av" id="popupAv">U</div>
+      <button class="popup-follow-btn" id="popupFollowBtn" onclick="togglePopupFollow(this)">+ Follow</button>
+    </div>
+    <div class="popup-info">
+      <div class="popup-name" id="popupName">Name</div>
+      <div class="popup-handle-text" id="popupHandle">@handle</div>
+      <div class="popup-bio-text" id="popupBio"></div>
+      <div class="popup-stats" id="popupStats"></div>
+      <div class="badges-row" id="popupBadges" style="margin-top:10px"></div>
+    </div>
+    <div class="popup-actions">
+      <a href="profile.html" class="popup-act-btn"><i class="ph-bold ph-user-circle"></i> View Profile</a>
+      <button class="popup-act-btn" onclick="closeProfile();openReply(_pName,_pAv,_pColor,'')"><i class="ph-bold ph-paper-plane-tilt"></i> Message</button>
+      <button class="popup-act-btn" onclick="closeProfile()"><i class="ph-bold ph-x"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════
+     REPLY MODAL
+═══════════════════════════ -->
+<div class="reply-overlay" id="replyOverlay" onclick="if(event.target===this)closeReply()">
+  <div class="reply-sheet">
+    <div class="reply-header">
+      <span class="reply-title"><i class="ph-bold ph-chat-circle"></i> REPLY SPARK</span>
+      <button class="reply-close" onclick="closeReply()"><i class="ph-bold ph-x"></i></button>
+    </div>
+    <!-- Original spark preview -->
+    <div class="reply-orig">
+      <div class="reply-orig-head">
+        <div class="reply-orig-av" id="origAv" style="background:linear-gradient(135deg,#c2185b,#8b5cf6)">U</div>
+        <span class="reply-orig-author" id="origAuthor">Author</span>
+        <span class="reply-orig-tag">· original spark</span>
+      </div>
+      <p class="reply-orig-text" id="origText"></p>
+    </div>
+    <!-- Compose reply -->
+    <div class="reply-compose">
+      <div class="reply-av">M</div>
+      <textarea class="reply-textarea" id="replyTa" placeholder="Write your reply spark…" maxlength="500"></textarea>
+    </div>
+    <div class="reply-footer">
+      <div class="reply-media-row">
+        <button class="media-btn" title="Image" style="width:30px;height:30px"><i class="ph-bold ph-image"></i><input type="file" accept="image/*"/></button>
+        <button class="media-btn" title="GIF" style="width:30px;height:30px" onclick="alert('GIF picker coming soon')"><i class="ph-bold ph-gif"></i></button>
+        <button class="media-btn" title="Emoji" style="width:30px;height:30px" onclick="alert('Emoji picker coming soon')"><i class="ph-bold ph-smiley"></i></button>
+      </div>
+      <button class="reply-submit" onclick="submitReply()">Reply ⚡</button>
+    </div>
+    <!-- Existing replies -->
+    <div class="replies-list" id="repliesList">
+      <div class="reply-item">
+        <div class="ri-av" style="background:linear-gradient(135deg,#f59e0b,#f97316)">WA</div>
+        <div class="ri-body">
+          <span class="ri-author">Wani Aisyah</span>
+          <span class="ri-time">5m ago</span>
+          <p class="ri-text">This is incredible! So proud of what you've built 🙌 Keep going!!</p>
+        </div>
+      </div>
+      <div class="reply-item">
+        <div class="ri-av" style="background:linear-gradient(135deg,#8b5cf6,#c2185b)">DL</div>
+        <div class="ri-body">
+          <span class="ri-author">Danial L.</span>
+          <span class="ri-time">12m ago</span>
+          <p class="ri-text">Fire 🔥 Clean execution. When does the full app launch?</p>
+        </div>
+      </div>
+      <div class="reply-item">
+        <div class="ri-av" style="background:linear-gradient(135deg,#10b981,#0ea5e9)">LF</div>
+        <div class="ri-body">
+          <span class="ri-author">Luqman Faiz</span>
+          <span class="ri-time">28m ago</span>
+          <p class="ri-text">The design is ✨ — especially the dark mode. Inspired to redo my own profile now.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════
+   TABS
+══════════════════════════════════ */
+function switchTab(i, btn) {
+  document.querySelectorAll('.tab-btn').forEach((b,j) => b.classList.toggle('active', j===i));
+  document.querySelectorAll('.tab-panel').forEach((p,j) => p.classList.toggle('active', j===i));
+}
+
+/* ══════════════════════════════════
+   COMPOSE BOX
+══════════════════════════════════ */
+function openCompose() {
+  document.getElementById('composeBox').classList.add('open');
+  document.getElementById('composeToggle').style.display = 'none';
+  setTimeout(() => document.getElementById('composeTa').focus(), 100);
+}
+function closeCompose() {
+  document.getElementById('composeBox').classList.remove('open');
+  document.getElementById('composeToggle').style.display = 'flex';
+  document.getElementById('composeTa').value = '';
+  document.getElementById('charCount').textContent = '0 / 500';
+  document.getElementById('charCount').className = 'char-count';
+  document.getElementById('submitBtn').disabled = true;
+  document.getElementById('mediaStrip').innerHTML = '';
+}
+function onComposeInput(ta) {
+  const n = ta.value.length;
+  const trim = ta.value.trim().length;
+  const cc = document.getElementById('charCount');
+  cc.textContent = `${n} / 500`;
+  cc.className = 'char-count' + (n >= 500 ? ' over' : n >= 400 ? ' warn' : '');
+  document.getElementById('submitBtn').disabled = trim === 0;
+}
+
+/* ══════════════════════════════════
+   MEDIA ATTACH
+══════════════════════════════════ */
+function attachMedia(input, type) {
+  const strip = document.getElementById('mediaStrip');
+  Array.from(input.files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const d = document.createElement('div');
+      d.className = 'media-thumb';
+      const ext = file.name.split('.').pop().toUpperCase();
+      let inner = '';
+      if (type === 'image') inner = `<img src="${e.target.result}" alt="">`;
+      else if (type === 'video') inner = `<video src="${e.target.result}" muted></video>`;
+      else if (type === 'audio') inner = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-3);font-size:26px;"><i class="ph-bold ph-music-note"></i></div>`;
+      else inner = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-3);font-size:26px;"><i class="ph-bold ph-file-text"></i></div>`;
+      d.innerHTML = inner + `<div class="media-type-tag">${type === 'file' ? ext : type}</div><button class="media-thumb-remove" onclick="this.parentElement.remove()"><i class="ph-bold ph-x"></i></button>`;
+      strip.appendChild(d);
+    };
+    reader.readAsDataURL(file);
+  });
+  document.getElementById('submitBtn').disabled = false;
+  input.value = '';
+}
+
+function submitSpark() {
+  const txt = document.getElementById('composeTa').value.trim();
+  if (!txt && !document.getElementById('mediaStrip').children.length) return;
+  alert('⚡ Spark posted!\n\n(Firebase integration coming — this demo shows the full UI flow)');
+  closeCompose();
+}
+
+/* ══════════════════════════════════
+   LIKE / REPOST / SHARE / BOOKMARK
+══════════════════════════════════ */
+function toggleLike(btn) {
+  const on = btn.classList.toggle('liked');
+  const icon = btn.querySelector('i');
+  const cnt = btn.querySelector('span');
+  const n = parseInt(cnt.textContent.replace(/[^0-9]/g,'')) || 0;
+  icon.className = on ? 'ph-fill ph-heart' : 'ph-bold ph-heart';
+  cnt.textContent = on ? n+1 : Math.max(0,n-1);
+}
+function toggleRepost(btn) {
+  const on = btn.classList.toggle('reposted');
+  const cnt = btn.querySelector('span');
+  const n = parseInt(cnt.textContent.replace(/[^0-9]/g,'')) || 0;
+  cnt.textContent = on ? n+1 : Math.max(0,n-1);
+}
+function toggleBookmark(btn) {
+  const on = btn.classList.toggle('bookmarked');
+  const icon = btn.querySelector('i');
+  icon.className = on ? 'ph-fill ph-bookmark-simple' : 'ph-bold ph-bookmark-simple';
+  if (on) btn.style.color = 'var(--gold)'; else btn.style.color = '';
+}
+function shareSpark() {
+  if (navigator.share) navigator.share({title:'T1ERA Spark',url:location.href});
+  else navigator.clipboard.writeText(location.href).then(()=>alert('Link copied!'));
+}
+
+/* ══════════════════════════════════
+   FOLLOW TOGGLES
+══════════════════════════════════ */
+function toggleFollow(btn) {
+  const on = btn.classList.toggle('on');
+  btn.innerHTML = on ? 'Following' : '<i class="ph-bold ph-plus"></i> Follow';
+}
+function toggleWtf(btn) {
+  const on = btn.classList.toggle('on');
+  btn.textContent = on ? '✓ Following' : '+ Follow';
+}
+function togglePopupFollow(btn) {
+  const on = btn.classList.toggle('on');
+  btn.textContent = on ? '✓ Following' : '+ Follow';
+}
+
+/* ══════════════════════════════════
+   PROFILE POPUP
+══════════════════════════════════ */
+let _pName = '', _pAv = '', _pColor = '';
+function showProfile(name, handle, rank, following, followers, bio, color, verified) {
+  _pName = name; _pAv = handle[0].toUpperCase(); _pColor = color;
+  document.getElementById('popupName').textContent = name;
+  document.getElementById('popupHandle').textContent = '@' + handle;
+  document.getElementById('popupBio').textContent = bio;
+  document.getElementById('popupAv').textContent = name[0].toUpperCase();
+  document.getElementById('popupAv').style.background = `linear-gradient(135deg,${color},#8b5cf6)`;
+  document.getElementById('popupBanner').style.background = `linear-gradient(135deg,${color}66,rgba(139,92,246,.35))`;
+  document.getElementById('popupStats').innerHTML = `
+    <div class="popup-stat"><div class="pstat-num">${following}</div><div class="pstat-label">Following</div></div>
+    <div class="popup-stat"><div class="pstat-num">${followers}</div><div class="pstat-label">Followers</div></div>
+    <div class="popup-stat"><div class="pstat-num">${Math.floor(Math.random()*80+5)}</div><div class="pstat-label">Sparks</div></div>
+  `;
+  document.getElementById('popupBadges').innerHTML = `<span class="badge rank">${rank}</span>` + (verified ? '<span class="badge verified">✓ Verified</span>' : '');
+  // reset follow btn
+  const fb = document.getElementById('popupFollowBtn');
+  fb.classList.remove('on'); fb.textContent = '+ Follow';
+  if (handle === 'ewm24k') { fb.classList.add('on'); fb.textContent = '✓ Following'; }
+  document.getElementById('popupOverlay').classList.add('open');
+}
+function closeProfile() {
+  document.getElementById('popupOverlay').classList.remove('open');
+}
+
+/* ══════════════════════════════════
+   REPLY MODAL
+══════════════════════════════════ */
+function openReply(author, initials, color, text) {
+  document.getElementById('origAv').textContent = initials || '?';
+  document.getElementById('origAv').style.background = `linear-gradient(135deg,${color||'#c2185b'},#8b5cf6)`;
+  document.getElementById('origAuthor').textContent = author || '';
+  document.getElementById('origText').textContent = text || '';
+  document.getElementById('replyTa').value = '';
+  document.getElementById('replyOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('replyTa').focus(), 320);
+}
+function closeReply() {
+  document.getElementById('replyOverlay').classList.remove('open');
+}
+function submitReply() {
+  const txt = document.getElementById('replyTa').value.trim();
+  if (!txt) return;
+  const list = document.getElementById('repliesList');
+  const item = document.createElement('div');
+  item.className = 'reply-item fu';
+  item.innerHTML = `
+    <div class="ri-av" style="background:linear-gradient(135deg,var(--pink),var(--purple))">M</div>
+    <div class="ri-body">
+      <span class="ri-author">You</span>
+      <span class="ri-time">Just now</span>
+      <p class="ri-text">${txt}</p>
+    </div>
+  `;
+  list.insertBefore(item, list.firstChild);
+  document.getElementById('replyTa').value = '';
+}
+
+/* ══════════════════════════════════
+   SPARK DETAIL (click card body)
+══════════════════════════════════ */
+function openSparkDetail(card) {
+  const nameEl = card.querySelector('.author-name');
+  const textEl = card.querySelector('.spark-text');
+  const avEl   = card.querySelector('.spark-av');
+  if (!nameEl || !textEl) return;
+  openReply(
+    nameEl.textContent.trim(),
+    avEl ? avEl.textContent.trim() : '?',
+    '#c2185b',
+    textEl.textContent.trim().slice(0,120)
+  );
+}
+
+/* ══════════════════════════════════
+   KEYBOARD
+══════════════════════════════════ */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeProfile(); closeReply(); closeCompose(); }
+});
+</script>
+</body>
+</html>
