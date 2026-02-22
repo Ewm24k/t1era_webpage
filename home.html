@@ -2226,6 +2226,435 @@
       0%, 100% { opacity: 1; }
       50% { opacity: 0.5; }
     }
+
+    /* ====== SPARKS COMMUNITY SECTION ====== */
+
+    /* ── Live Ticker Strip ── */
+    .spark-ticker-wrap {
+      overflow: hidden;
+      width: 100%;
+      border-top: 1px solid var(--border-primary);
+      border-bottom: 1px solid var(--border-primary);
+      background: var(--bg-secondary);
+      padding: 10px 0;
+      margin-bottom: 64px;
+      position: relative;
+    }
+    .spark-ticker-wrap::before,
+    .spark-ticker-wrap::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 80px;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .spark-ticker-wrap::before {
+      left: 0;
+      background: linear-gradient(90deg, var(--bg-secondary), transparent);
+    }
+    .spark-ticker-wrap::after {
+      right: 0;
+      background: linear-gradient(270deg, var(--bg-secondary), transparent);
+    }
+    .spark-ticker-track {
+      display: flex;
+      gap: 0;
+      animation: tickerScroll 32s linear infinite;
+      width: max-content;
+    }
+    .spark-ticker-track:hover { animation-play-state: paused; }
+    @keyframes tickerScroll {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    .spark-ticker-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 28px;
+      white-space: nowrap;
+      font-size: 13px;
+      color: var(--text-secondary);
+      font-weight: 500;
+      border-right: 1px solid var(--border-primary);
+    }
+    .spark-ticker-avatar {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      font-weight: 800;
+      font-family: 'Space Grotesk', sans-serif;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .spark-ticker-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--accent-primary);
+      flex-shrink: 0;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    .spark-ticker-ht { color: var(--accent-tertiary); font-weight: 600; }
+
+    /* ── Section wrapper ── */
+    #sparks { padding: 100px 0; }
+
+    /* ── Preview grid ── */
+    .sparks-preview-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+
+    /* ── Individual spark preview card ── */
+    .spark-preview-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-primary);
+      border-radius: 20px;
+      padding: 24px;
+      transition: all 0.4s var(--transition);
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .spark-preview-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #c2185b, #8b5cf6);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.4s var(--transition);
+    }
+    .spark-preview-card:hover {
+      transform: translateY(-4px);
+      border-color: #c2185b;
+      box-shadow: 0 0 40px rgba(194, 24, 91, 0.2), var(--shadow-lg);
+    }
+    .spark-preview-card:hover::before { transform: scaleX(1); }
+
+    /* Prompt-style card variant */
+    .spark-preview-card.spark-prompt-variant {
+      background: linear-gradient(135deg, rgba(139,92,246,0.06), var(--bg-card));
+      border-color: rgba(139, 92, 246, 0.2);
+    }
+    .spark-preview-card.spark-prompt-variant::before {
+      background: linear-gradient(90deg, #8b5cf6, #e91e8c);
+    }
+    .spark-preview-card.spark-prompt-variant:hover {
+      border-color: #8b5cf6;
+      box-shadow: 0 0 40px rgba(139, 92, 246, 0.2), var(--shadow-lg);
+    }
+
+    /* ── Card header row ── */
+    .spc-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .spc-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 800;
+      font-family: 'Space Grotesk', sans-serif;
+      color: #fff;
+      border: 2px solid rgba(255,255,255,0.1);
+    }
+    .spc-meta { flex: 1; min-width: 0; }
+    .spc-author {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-primary);
+      font-family: 'Space Grotesk', sans-serif;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .spc-handle-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 2px;
+      flex-wrap: wrap;
+    }
+    .spc-handle {
+      font-size: 11px;
+      color: var(--text-tertiary);
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    .spc-time {
+      font-size: 10px;
+      color: var(--text-tertiary);
+    }
+    .spc-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 1px 6px;
+      border-radius: 100px;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    .spc-badge.rank {
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.25);
+      color: #f59e0b;
+    }
+    .spc-badge.verified {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      color: #10b981;
+    }
+    .spc-badge.prompt-tag {
+      background: rgba(139, 92, 246, 0.1);
+      border: 1px solid rgba(139, 92, 246, 0.25);
+      color: #8b5cf6;
+    }
+
+    /* ── Spark body text ── */
+    .spc-text {
+      font-size: 14px;
+      line-height: 1.65;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+      word-break: break-word;
+    }
+    .spc-hashtag { color: var(--accent-tertiary); font-weight: 600; }
+
+    /* ── Prompt card inner box ── */
+    .spc-prompt-box {
+      background: linear-gradient(135deg, rgba(139,92,246,0.07), rgba(194,24,91,0.05));
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+    .spc-prompt-label {
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #8b5cf6;
+      font-family: 'Space Grotesk', sans-serif;
+      margin-bottom: 6px;
+    }
+    .spc-prompt-q {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      line-height: 1.5;
+    }
+    .spc-prompt-replies {
+      font-size: 11px;
+      color: var(--text-tertiary);
+      margin-top: 6px;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+
+    /* ── Media image preview ── */
+    .spc-media {
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 12px;
+      border: 1px solid var(--border-primary);
+      aspect-ratio: 16/9;
+      background: var(--bg-tertiary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .spc-media img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s var(--transition);
+    }
+    .spark-preview-card:hover .spc-media img { transform: scale(1.04); }
+    .spc-media-label {
+      position: absolute;
+      bottom: 8px;
+      left: 8px;
+      background: rgba(0,0,0,0.75);
+      border: 1px solid rgba(194,24,91,0.3);
+      color: rgba(255,255,255,0.85);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-family: 'Space Grotesk', sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* ── Action bar (display only) ── */
+    .spc-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border-primary);
+    }
+    .spc-action-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 8px;
+      border-radius: 8px;
+      font-size: 12px;
+      color: var(--text-tertiary);
+      font-weight: 500;
+      transition: all 0.2s var(--transition);
+      cursor: default;
+    }
+    .spc-action-item i { font-size: 15px; }
+    .spc-action-item.liked { color: rgba(239, 68, 68, 0.75); }
+    .spc-action-item.reposted { color: #10b981; }
+    .spc-action-item.has-replies { color: var(--accent-secondary); }
+
+    /* Spacer so bookmark sits at far right */
+    .spc-actions-spacer { flex: 1; }
+
+    /* ── CTA row ── */
+    .sparks-cta-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .sparks-cta-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 13px 28px;
+      border-radius: 12px;
+      background: linear-gradient(145deg, #e91e6a, #9c1545);
+      border: 1px solid rgba(194, 24, 91, 0.3);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.3s var(--transition);
+      font-family: 'Space Grotesk', sans-serif;
+      letter-spacing: 0.02em;
+      box-shadow:
+        6px 6px 20px rgba(0, 0, 0, 0.6),
+        -4px -4px 15px rgba(194, 24, 91, 0.1),
+        inset 0 2px 0 rgba(255, 255, 255, 0.2),
+        inset 0 -2px 0 rgba(0, 0, 0, 0.2),
+        0 0 30px rgba(194, 24, 91, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+    .sparks-cta-primary::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 50%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.15), transparent);
+      pointer-events: none;
+    }
+    .sparks-cta-primary:hover {
+      background: linear-gradient(145deg, #f0257a, #c2185b);
+      transform: translateY(-3px);
+      box-shadow:
+        8px 8px 25px rgba(0, 0, 0, 0.7),
+        -6px -6px 20px rgba(194, 24, 91, 0.15),
+        inset 0 2px 0 rgba(255, 255, 255, 0.25),
+        inset 0 -2px 0 rgba(0, 0, 0, 0.25),
+        0 0 40px rgba(194, 24, 91, 0.5);
+    }
+    .sparks-cta-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 13px 28px;
+      border-radius: 12px;
+      background: linear-gradient(145deg, #1a1a1a, #0d0d0d);
+      border: 1px solid var(--border-primary);
+      color: var(--text-secondary);
+      font-size: 15px;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.3s var(--transition);
+      font-family: 'Space Grotesk', sans-serif;
+      box-shadow:
+        5px 5px 15px rgba(0, 0, 0, 0.6),
+        -5px -5px 15px rgba(40, 40, 40, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+    .sparks-cta-secondary:hover {
+      border-color: #c2185b;
+      color: var(--text-primary);
+      transform: translateY(-3px);
+      box-shadow:
+        7px 7px 20px rgba(0, 0, 0, 0.7),
+        -7px -7px 20px rgba(40, 40, 40, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15),
+        0 0 20px rgba(194, 24, 91, 0.2);
+    }
+
+    /* ── Live count badge ── */
+    .sparks-live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      border-radius: 100px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #10b981;
+      font-family: 'Space Grotesk', sans-serif;
+      margin-bottom: 20px;
+    }
+    .sparks-live-badge-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .sparks-preview-grid { grid-template-columns: 1fr; gap: 16px; }
+      #sparks { padding: 60px 0; }
+      .spark-ticker-wrap { margin-bottom: 40px; }
+      .sparks-cta-primary,
+      .sparks-cta-secondary { width: 100%; justify-content: center; }
+      .sparks-cta-row { flex-direction: column; align-items: stretch; }
+    }
+    @media (max-width: 480px) {
+      .spark-preview-card { padding: 18px; }
+      .spc-text { font-size: 13px; }
+    }
   </style>
 </head>
 <body>
@@ -2625,6 +3054,313 @@
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           SPARKS — Community Feed Preview
+      ═══════════════════════════════════════════ -->
+      <section id="sparks">
+        <div class="container">
+
+          <!-- Live ticker strip -->
+          <div class="spark-ticker-wrap">
+            <div class="spark-ticker-track" id="sparkTickerTrack">
+              <!-- First set -->
+              <div class="spark-ticker-item">
+                <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#c2185b,#8b5cf6);">IB</div>
+                <span>Just pushed T1ERA v2 live 🚀</span>
+                <span class="spark-ticker-ht">#T1ERA</span>
+                <span class="spark-ticker-dot"></span>
+              </div>
+              <div class="spark-ticker-item">
+                <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#f59e0b,#f97316);">WA</div>
+                <span>AI changing workflows in 2025 is insane</span>
+                <span class="spark-ticker-ht">#BuildInPublic</span>
+                <span class="spark-ticker-dot"></span>
+              </div>
+              <div class="spark-ticker-item">
+                <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#10b981,#0ea5e9);">LF</div>
+                <span>Dark mode UI explorations this week 🎨</span>
+                <span class="spark-ticker-ht">#UIDesign</span>
+                <span class="spark-ticker-dot"></span>
+              </div>
+              <div class="spark-ticker-item">
+                <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#8b5cf6,#c2185b);">DL</div>
+                <span>What habit changed your productivity?</span>
+                <span class="spark-ticker-ht">#Prompt</span>
+                <span class="spark-ticker-dot"></span>
+              </div>
+              <div class="spark-ticker-item">
+                <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#e91e8c,#8b5cf6);">AR</div>
+                <span>T1ERA chat mode is unreal for research</span>
+                <span class="spark-ticker-ht">#AI</span>
+                <span class="spark-ticker-dot"></span>
+              </div>
+              <div class="spark-ticker-item">
+                <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#c2185b,#f97316);">MH</div>
+                <span>Generated a full video script in 30 seconds ⚡</span>
+                <span class="spark-ticker-ht">#VTT</span>
+                <span class="spark-ticker-dot"></span>
+              </div>
+              <div class="spark-ticker-item">
+                <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#0ea5e9,#8b5cf6);">NZ</div>
+                <span>1,000 signups in the first week 🎉</span>
+                <span class="spark-ticker-ht">#Milestone</span>
+                <span class="spark-ticker-dot"></span>
+              </div>
+              <div class="spark-ticker-item">
+                <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#f59e0b,#10b981);">SY</div>
+                <span>Vision mode read my handwritten notes perfectly</span>
+                <span class="spark-ticker-ht">#Vision</span>
+                <span class="spark-ticker-dot"></span>
+              </div>
+              <!-- Duplicate set for seamless infinite scroll -->
+              <div class="spark-ticker-item">
+                <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#c2185b,#8b5cf6);">IB</div>
+                <span>Just pushed T1ERA v2 live 🚀</span>
+                <span class="spark-ticker-ht">#T1ERA</span>
+                <span class="spark-ticker-dot"></span>
+              </div>
+              <div class="spark-ticker-item">
+                <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#f59e0b,#f97316);">WA</div>
+                <span>AI changing workflows in 2025 is insane</span>
+                <span class="spark-ticker-ht">#BuildInPublic</span>
+                <span class="spark-ticker-dot"></span>
+              </div>
+              <div class="spark-ticker-item">
+                <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#10b981,#0ea5e9);">LF</div>
+                <span>Dark mode UI explorations this week 🎨</span>
+                <span class="spark-ticker-ht">#UIDesign</span>
+                <span class="spark-ticker-dot"></span>
+              </div>
+              <div class="spark-ticker-item">
+                <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#8b5cf6,#c2185b);">DL</div>
+                <span>What habit changed your productivity?</span>
+                <span class="spark-ticker-ht">#Prompt</span>
+                <span class="spark-ticker-dot"></span>
+              </div>
+              <div class="spark-ticker-item">
+                <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#e91e8c,#8b5cf6);">AR</div>
+                <span>T1ERA chat mode is unreal for research</span>
+                <span class="spark-ticker-ht">#AI</span>
+                <span class="spark-ticker-dot"></span>
+              </div>
+              <div class="spark-ticker-item">
+                <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#c2185b,#f97316);">MH</div>
+                <span>Generated a full video script in 30 seconds ⚡</span>
+                <span class="spark-ticker-ht">#VTT</span>
+                <span class="spark-ticker-dot"></span>
+              </div>
+              <div class="spark-ticker-item">
+                <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#0ea5e9,#8b5cf6);">NZ</div>
+                <span>1,000 signups in the first week 🎉</span>
+                <span class="spark-ticker-ht">#Milestone</span>
+                <span class="spark-ticker-dot"></span>
+              </div>
+              <div class="spark-ticker-item">
+                <div class="spark-ticker-avatar" style="background:linear-gradient(135deg,#f59e0b,#10b981);">SY</div>
+                <span>Vision mode read my handwritten notes perfectly</span>
+                <span class="spark-ticker-ht">#Vision</span>
+                <span class="spark-ticker-dot"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section header -->
+          <div class="section-header fade-in">
+            <div style="display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;margin-bottom:16px;">
+              <span class="section-label" style="margin-bottom:0;">Community · Sparks</span>
+              <div class="sparks-live-badge">
+                <span class="sparks-live-badge-dot"></span>
+                <span id="sparksLiveCount">1,204</span> Sparks Today
+              </div>
+            </div>
+            <h2 class="section-title">See What the Community Is Building</h2>
+            <p class="section-description">
+              Real updates, ideas, and conversations from T1ERA users — live on the Sparks feed.
+            </p>
+          </div>
+
+          <!-- 4 preview cards -->
+          <div class="sparks-preview-grid fade-in">
+
+            <!-- Card 1: text + image -->
+            <div class="spark-preview-card">
+              <div class="spc-header">
+                <div class="spc-avatar" style="background:linear-gradient(135deg,#c2185b,#8b5cf6);">IB</div>
+                <div class="spc-meta">
+                  <div class="spc-author">Ikram Basri</div>
+                  <div class="spc-handle-row">
+                    <span class="spc-handle">@ewm24k</span>
+                    <span class="spc-badge rank">LV 5</span>
+                    <span class="spc-badge verified">✓ Verified</span>
+                    <span class="spc-time">· 2m ago</span>
+                  </div>
+                </div>
+              </div>
+              <div class="spc-media">
+                <img src="./assets/new11.jpg" alt="T1ERA build" loading="lazy"/>
+                <span class="spc-media-label">Photo</span>
+              </div>
+              <p class="spc-text">
+                Just pushed a massive update to T1ERA 🚀 New profile page live — bio, status, banner presets and Cloudinary photo upload. Really proud of this build.
+                <span class="spc-hashtag">#T1ERA</span> <span class="spc-hashtag">#BuildInPublic</span>
+              </p>
+              <div class="spc-actions">
+                <div class="spc-action-item liked">
+                  <i class="ph-fill ph-heart"></i>
+                  <span>142</span>
+                </div>
+                <div class="spc-action-item has-replies">
+                  <i class="ph-bold ph-chat-circle"></i>
+                  <span>28</span>
+                </div>
+                <div class="spc-action-item reposted">
+                  <i class="ph-bold ph-repeat"></i>
+                  <span>19</span>
+                </div>
+                <div class="spc-actions-spacer"></div>
+                <div class="spc-action-item">
+                  <i class="ph-bold ph-share-network"></i>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 2: text only with repost indicator -->
+            <div class="spark-preview-card">
+              <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-tertiary);font-weight:600;margin-bottom:10px;">
+                <i class="ph-bold ph-repeat" style="font-size:13px;color:#10b981;"></i>
+                Danial reposted
+              </div>
+              <div class="spc-header">
+                <div class="spc-avatar" style="background:linear-gradient(135deg,#f59e0b,#f97316);">WA</div>
+                <div class="spc-meta">
+                  <div class="spc-author">Wani Aisyah</div>
+                  <div class="spc-handle-row">
+                    <span class="spc-handle">@waniaisyah</span>
+                    <span class="spc-badge rank">LV 3</span>
+                    <span class="spc-time">· 15m ago</span>
+                  </div>
+                </div>
+              </div>
+              <p class="spc-text">
+                The way AI is reshaping workflows in 2025 is genuinely insane. Shoutout to everyone building in public — you inspire me more than you know. Keep going 💪
+                <span class="spc-hashtag">#BuildInPublic</span> <span class="spc-hashtag">#AI</span> <span class="spc-hashtag">#T1ERA</span>
+              </p>
+              <div class="spc-actions">
+                <div class="spc-action-item">
+                  <i class="ph-bold ph-heart"></i>
+                  <span>87</span>
+                </div>
+                <div class="spc-action-item has-replies">
+                  <i class="ph-bold ph-chat-circle"></i>
+                  <span>14</span>
+                </div>
+                <div class="spc-action-item reposted">
+                  <i class="ph-bold ph-repeat"></i>
+                  <span>31</span>
+                </div>
+                <div class="spc-actions-spacer"></div>
+                <div class="spc-action-item">
+                  <i class="ph-bold ph-share-network"></i>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 3: Spark Prompt variant -->
+            <div class="spark-preview-card spark-prompt-variant">
+              <div class="spc-header">
+                <div class="spc-avatar" style="background:linear-gradient(135deg,#8b5cf6,#c2185b);">DL</div>
+                <div class="spc-meta">
+                  <div class="spc-author">Danial L.</div>
+                  <div class="spc-handle-row">
+                    <span class="spc-handle">@danialL</span>
+                    <span class="spc-badge rank">LV 4</span>
+                    <span class="spc-badge prompt-tag">Prompt</span>
+                    <span class="spc-time">· 3h ago</span>
+                  </div>
+                </div>
+              </div>
+              <div class="spc-prompt-box">
+                <div class="spc-prompt-label">Open Prompt</div>
+                <p class="spc-prompt-q">What is the single habit that completely changed your productivity — and could you ever go back to life without it?</p>
+                <p class="spc-prompt-replies">💬 47 people replied</p>
+              </div>
+              <div class="spc-actions">
+                <div class="spc-action-item liked">
+                  <i class="ph-fill ph-heart"></i>
+                  <span>203</span>
+                </div>
+                <div class="spc-action-item has-replies">
+                  <i class="ph-bold ph-chat-circle"></i>
+                  <span>47</span>
+                </div>
+                <div class="spc-action-item">
+                  <i class="ph-bold ph-repeat"></i>
+                  <span>61</span>
+                </div>
+                <div class="spc-actions-spacer"></div>
+                <div class="spc-action-item">
+                  <i class="ph-bold ph-share-network"></i>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 4: text with image -->
+            <div class="spark-preview-card">
+              <div class="spc-header">
+                <div class="spc-avatar" style="background:linear-gradient(135deg,#10b981,#0ea5e9);">LF</div>
+                <div class="spc-meta">
+                  <div class="spc-author">Luqman Faiz</div>
+                  <div class="spc-handle-row">
+                    <span class="spc-handle">@luqmanf</span>
+                    <span class="spc-badge rank">LV 2</span>
+                    <span class="spc-time">· 1h ago</span>
+                  </div>
+                </div>
+              </div>
+              <div class="spc-media">
+                <img src="./assets/new14.jpg" alt="UI explorations" loading="lazy"/>
+                <span class="spc-media-label">Photo</span>
+              </div>
+              <p class="spc-text">
+                UI explorations this week — dark gradient interfaces with pink accent systems. Which direction do you prefer? 👇
+                <span class="spc-hashtag">#UIDesign</span> <span class="spc-hashtag">#DarkMode</span>
+              </p>
+              <div class="spc-actions">
+                <div class="spc-action-item">
+                  <i class="ph-bold ph-heart"></i>
+                  <span>56</span>
+                </div>
+                <div class="spc-action-item has-replies">
+                  <i class="ph-bold ph-chat-circle"></i>
+                  <span>9</span>
+                </div>
+                <div class="spc-action-item">
+                  <i class="ph-bold ph-repeat"></i>
+                  <span>12</span>
+                </div>
+                <div class="spc-actions-spacer"></div>
+                <div class="spc-action-item">
+                  <i class="ph-bold ph-share-network"></i>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- end sparks-preview-grid -->
+
+          <!-- CTA row -->
+          <div class="sparks-cta-row fade-in">
+            <a href="sparks.html" class="sparks-cta-primary">
+              ⚡ View All Sparks →
+            </a>
+            <a href="sparks.html" class="sparks-cta-secondary">
+              <i class="ph-bold ph-pencil-simple"></i>
+              Share Your Spark
+            </a>
+          </div>
+
         </div>
       </section>
 
