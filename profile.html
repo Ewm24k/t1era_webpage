@@ -1306,12 +1306,40 @@ body {
 /* ── TAB 1: SPARKS (posts) ── */
 
 /* profile sparks skeleton sweep */
+.profile-loading .tabs-wrap,
+.profile-loading .stats-row,
+.profile-loading .chips-row,
+.profile-loading .profile-identity .display-name-row,
+.profile-loading .profile-identity .badges-strip,
+.profile-loading .profile-identity .bio-section {
+  opacity: 0;
+  transition: opacity .3s;
+}
+.profile-loading .profile-identity .display-name-row::after,
+.profile-loading .stats-row::after {
+  content: '';
+}
 .sk-sweep{
   position:absolute;inset:0;
   background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,0.06) 50%,transparent 100%);
   animation:sk-shimmer 1.4s infinite;
 }
 @keyframes sk-shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.sk-item{position:relative;overflow:hidden}
+.sk-profile-card{pointer-events:none;opacity:.7}
+/* page skeleton overlays — banner, identity, stats */
+.profile-sk-overlay{
+  position:absolute;inset:0;
+  background:var(--bg-3);
+  border-radius:inherit;
+  z-index:2;
+  overflow:hidden;
+}
+.profile-sk-overlay .sk-sweep{
+  position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,0.06) 50%,transparent 100%);
+  animation:sk-shimmer 1.4s infinite;
+}
 .sparks-grid {
   display: flex;
   flex-direction: column;
@@ -2452,50 +2480,34 @@ body {
 
     <!-- TAB 0: SPARKS -->
     <div class="tab-panel active" id="tab-0">
-      <div class="sparks-grid">
-
-        <!-- Demo Spark 1 -->
-        <div class="spark-card">
+      <div class="sparks-grid" id="profileSparksGrid">
+        <!-- Skeleton placeholder shown until Firebase loads -->
+        <div class="spark-card sk-profile-card" id="profileSparkSk1">
           <div class="spark-header">
-            <div class="spark-avatar-fallback">M</div>
+            <div class="spark-avatar-fallback sk-item" style="background:var(--bg-4)"><div class="sk-sweep"></div></div>
             <div class="spark-meta">
-              <div class="spark-name">Muhammad Ikram <span class="spark-rank-chip">LV1 · Recruit</span></div>
-              <div class="spark-time">2h ago</div>
+              <div class="sk-item" style="height:10px;width:50%;border-radius:4px;background:var(--bg-4);margin-bottom:7px"><div class="sk-sweep"></div></div>
+              <div class="sk-item" style="height:8px;width:30%;border-radius:4px;background:var(--bg-4)"><div class="sk-sweep"></div></div>
             </div>
           </div>
           <div class="spark-body">
-            Just started my journey on T1ERA 🚀 The AI modes are next level —
-            <span class="spark-tag">#AIChat</span> changed how I work completely.
-          </div>
-          <div class="spark-actions">
-            <button class="spark-action"><i class="ph-bold ph-heart"></i> 12</button>
-            <button class="spark-action"><i class="ph-bold ph-chat-circle"></i> 4</button>
-            <button class="spark-action"><i class="ph-bold ph-arrows-clockwise"></i> 2</button>
-            <button class="spark-action" style="margin-left:auto;"><i class="ph-bold ph-share-fat"></i></button>
+            <div class="sk-item" style="height:11px;width:90%;border-radius:4px;background:var(--bg-4);margin-bottom:8px"><div class="sk-sweep"></div></div>
+            <div class="sk-item" style="height:11px;width:65%;border-radius:4px;background:var(--bg-4)"><div class="sk-sweep"></div></div>
           </div>
         </div>
-
-        <!-- Demo Spark 2 -->
-        <div class="spark-card">
+        <div class="spark-card sk-profile-card" id="profileSparkSk2">
           <div class="spark-header">
-            <div class="spark-avatar-fallback">M</div>
+            <div class="spark-avatar-fallback sk-item" style="background:var(--bg-4)"><div class="sk-sweep"></div></div>
             <div class="spark-meta">
-              <div class="spark-name">Muhammad Ikram <span class="spark-rank-chip">LV1 · Recruit</span></div>
-              <div class="spark-time">1d ago</div>
+              <div class="sk-item" style="height:10px;width:55%;border-radius:4px;background:var(--bg-4);margin-bottom:7px"><div class="sk-sweep"></div></div>
+              <div class="sk-item" style="height:8px;width:35%;border-radius:4px;background:var(--bg-4)"><div class="sk-sweep"></div></div>
             </div>
           </div>
           <div class="spark-body">
-            Working on something in the <span class="spark-tag">#tech</span> space.
-            T1ERA's Vision mode helped me analyze 3 competitor decks in under 10 mins. Wild.
-          </div>
-          <div class="spark-actions">
-            <button class="spark-action"><i class="ph-bold ph-heart"></i> 8</button>
-            <button class="spark-action"><i class="ph-bold ph-chat-circle"></i> 1</button>
-            <button class="spark-action"><i class="ph-bold ph-arrows-clockwise"></i> 3</button>
-            <button class="spark-action" style="margin-left:auto;"><i class="ph-bold ph-share-fat"></i></button>
+            <div class="sk-item" style="height:11px;width:80%;border-radius:4px;background:var(--bg-4);margin-bottom:8px"><div class="sk-sweep"></div></div>
+            <div class="sk-item" style="height:11px;width:50%;border-radius:4px;background:var(--bg-4)"><div class="sk-sweep"></div></div>
           </div>
         </div>
-
       </div>
     </div>
 
@@ -2844,7 +2856,8 @@ const demoFollowers = [
 
 // ── POPULATE FROM FIREBASE ──
 // Hide page until auth state is known — prevents flash of content for unauthenticated users
-document.body.style.visibility = 'hidden';
+// Show page immediately with skeleton state — no invisible flash
+document.documentElement.classList.add('profile-loading');
 
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
@@ -2854,7 +2867,7 @@ onAuthStateChanged(auth, async (user) => {
   }
 
   // Authenticated — reveal page
-  document.body.style.visibility = '';
+  document.documentElement.classList.remove('profile-loading');
 
   try {
     const snap = await getDoc(doc(db, 'users', user.uid));
@@ -3798,34 +3811,13 @@ window.loadActivityHistory = loadActivityHistory;
 // PROFILE SPARKS TAB — load user's sparks from Firebase
 // ══════════════════════════════════════════════════════
 async function loadProfileSparks(uid) {
-  const grid = document.querySelector('#tab-0 .sparks-grid');
+  const grid = document.getElementById('profileSparksGrid');
   if (!grid) return;
 
   // Remove previously loaded Firebase spark cards to avoid duplicates
   grid.querySelectorAll('.spark-card[data-spark-id]').forEach(el => el.remove());
-
-  // Show skeleton placeholders
-  const skels = [];
-  for (let i = 0; i < 3; i++) {
-    const sk = document.createElement('div');
-    sk.className = 'spark-card sk-profile-spark';
-    sk.innerHTML = `
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-        <div style="width:34px;height:34px;border-radius:50%;background:var(--bg-4);position:relative;overflow:hidden;flex-shrink:0"><div class="sk-sweep"></div></div>
-        <div style="flex:1;display:flex;flex-direction:column;gap:7px">
-          <div style="height:10px;width:55%;border-radius:5px;background:var(--bg-4);position:relative;overflow:hidden"><div class="sk-sweep"></div></div>
-          <div style="height:8px;width:35%;border-radius:5px;background:var(--bg-4);position:relative;overflow:hidden"><div class="sk-sweep"></div></div>
-        </div>
-      </div>
-      <div style="height:11px;width:90%;border-radius:5px;background:var(--bg-4);margin-bottom:8px;position:relative;overflow:hidden"><div class="sk-sweep"></div></div>
-      <div style="height:11px;width:70%;border-radius:5px;background:var(--bg-4);position:relative;overflow:hidden"><div class="sk-sweep"></div></div>
-    `;
-    // Insert before first demo card
-    const firstDemo = grid.querySelector('.spark-card:not([data-spark-id])');
-    if (firstDemo) grid.insertBefore(sk, firstDemo);
-    else grid.appendChild(sk);
-    skels.push(sk);
-  }
+  // Keep HTML skeleton cards visible while loading
+  const skels = Array.from(grid.querySelectorAll('.sk-profile-card'));
 
   try {
     const snap = await getDocs(query(
@@ -3837,7 +3829,10 @@ async function loadProfileSparks(uid) {
     // Remove skeletons
     skels.forEach(s => s.remove());
 
-    if (snap.empty) return;
+    if (snap.empty) {
+      grid.innerHTML = '<div style="padding:32px 16px;text-align:center;font-size:13px;color:var(--text-3)">No sparks posted yet</div>';
+      return;
+    }
 
     const docs = [];
     snap.forEach(d => docs.push({ id: d.id, data: d.data() }));
@@ -3906,15 +3901,12 @@ async function loadProfileSparks(uid) {
         </div>
       `;
 
-      // Insert before first demo card
-      const firstDemo = grid.querySelector('.spark-card:not([data-spark-id])');
-      if (firstDemo) grid.insertBefore(card, firstDemo);
-      else grid.appendChild(card);
+      grid.appendChild(card);
     });
 
   } catch(e) {
     skels.forEach(s => s.remove());
-    console.error('loadProfileSparks error:', e);
+    console.error('loadProfileSparks error:', e.code, e.message);
   }
 }
 window.loadProfileSparks = loadProfileSparks;
