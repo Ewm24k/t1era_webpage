@@ -1634,5 +1634,108 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') { closeProfile(); closeReply(); closeCompose(); }
 });
 </script>
+
+<script type="module">
+import { initializeApp }                        from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getAuth, onAuthStateChanged }          from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import { getFirestore, doc, getDoc }            from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+const firebaseConfig = {
+  apiKey:            "AIzaSyBnt9mbb8LdMVeguSHUmS20L6uBHIfxwAs",
+  authDomain:        "t1era-v2.firebaseapp.com",
+  projectId:         "t1era-v2",
+  storageBucket:     "t1era-v2.firebasestorage.app",
+  messagingSenderId: "279266491659",
+  appId:             "1:279266491659:web:28a03c7b7300fcb152b60e"
+};
+
+const app  = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+
+// Hide page before auth state is known — prevents flash of content for unauthenticated users
+document.body.style.visibility = 'hidden';
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    // Not authenticated — redirect immediately to home
+    window.location.replace('home.html');
+    return;
+  }
+
+  // Authenticated — reveal page
+  document.body.style.visibility = '';
+
+  // Fetch Firestore profile doc to get profile photo
+  try {
+    const snap = await getDoc(doc(db, 'users', user.uid));
+    const d = snap.exists() ? snap.data() : {};
+    const photoURL = d.profilePicture?.url || user.photoURL || '';
+    const initial  = (d.fullName || user.displayName || user.email || 'U')[0].toUpperCase();
+    applyComposeAvatar(photoURL, initial);
+  } catch (err) {
+    console.warn('Sparks: Firestore fetch error:', err);
+    // Fallback to auth object only
+    const initial = (user.displayName || user.email || 'U')[0].toUpperCase();
+    applyComposeAvatar('', initial);
+  }
+});
+
+function applyComposeAvatar(photoURL, initial) {
+  const miniAv    = document.getElementById('miniAv');
+  const composeAv = document.getElementById('composeAv');
+  const replyAvs  = document.querySelectorAll('.reply-av');
+
+  if (photoURL) {
+    // ── miniAv (compose toggle bar) ──
+    if (miniAv) {
+      miniAv.textContent = '';
+      miniAv.style.background = 'none';
+      miniAv.style.padding = '0';
+      const img1 = document.createElement('img');
+      img1.src = photoURL;
+      img1.alt = 'avatar';
+      img1.referrerPolicy = 'no-referrer';
+      img1.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;';
+      img1.onerror = () => { miniAv.textContent = initial; miniAv.style.background = ''; };
+      miniAv.appendChild(img1);
+    }
+
+    // ── composeAv (expanded compose box) ──
+    if (composeAv) {
+      composeAv.textContent = '';
+      composeAv.style.background = 'none';
+      composeAv.style.padding = '0';
+      const img2 = document.createElement('img');
+      img2.src = photoURL;
+      img2.alt = 'avatar';
+      img2.referrerPolicy = 'no-referrer';
+      img2.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;';
+      img2.onerror = () => { composeAv.textContent = initial; composeAv.style.background = ''; };
+      composeAv.appendChild(img2);
+    }
+
+    // ── .reply-av (reply modal compose avatar) ──
+    replyAvs.forEach((el) => {
+      el.textContent = '';
+      el.style.background = 'none';
+      el.style.padding = '0';
+      const img3 = document.createElement('img');
+      img3.src = photoURL;
+      img3.alt = 'avatar';
+      img3.referrerPolicy = 'no-referrer';
+      img3.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;';
+      img3.onerror = () => { el.textContent = initial; el.style.background = ''; };
+      el.appendChild(img3);
+    });
+
+  } else {
+    // No photo — set initial letter on all three compose avatar targets
+    if (miniAv)    miniAv.textContent    = initial;
+    if (composeAv) composeAv.textContent = initial;
+    replyAvs.forEach((el) => { el.textContent = initial; });
+  }
+}
+</script>
 </body>
 </html>
