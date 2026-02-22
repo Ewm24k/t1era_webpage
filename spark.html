@@ -1670,11 +1670,16 @@ document.addEventListener('keydown', e => {
 });
 </script>
 
-<script type="module">
-import { initializeApp }                        from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-import { getAuth, onAuthStateChanged }          from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-import { getFirestore, doc, getDoc, collection, addDoc, query, where, getDocs, serverTimestamp, orderBy, limit, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
+<script type="module">
+import { initializeApp }        from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import {
+  getFirestore, collection, addDoc, query, where,
+  orderBy, limit, onSnapshot, getDocs, doc, getDoc, serverTimestamp
+} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+// ── CONFIG ──
 const firebaseConfig = {
   apiKey:            "AIzaSyBnt9mbb8LdMVeguSHUmS20L6uBHIfxwAs",
   authDomain:        "t1era-v2.firebaseapp.com",
@@ -1688,25 +1693,24 @@ const app  = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db   = getFirestore(app);
 
-const DAILY_LIMIT = 3;
+const DAILY_LIMIT    = 3;
+const DEV_EMAIL      = 'ewm24k@gmail.com';
+const SPARKS_COL     = 'sparks';
 
-// Hide page before auth state is known — prevents flash of content for unauthenticated users
+// ── HIDE PAGE UNTIL AUTH KNOWN ──
 document.body.style.visibility = 'hidden';
 
+// ── AUTH STATE ──
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
-    // Not authenticated — redirect immediately to home
     window.location.replace('home.html');
     return;
   }
 
-  // Authenticated — reveal page
   document.body.style.visibility = '';
-
-  // Cache auth user for submitSpark
   window._sparkUser = user;
 
-  // Fetch Firestore profile doc to get profile photo + display name
+  // Load user profile for avatar / name
   try {
     const snap = await getDoc(doc(db, 'users', user.uid));
     const d = snap.exists() ? snap.data() : {};
@@ -1714,230 +1718,78 @@ onAuthStateChanged(auth, async (user) => {
     const photoURL = d.profilePicture?.url || user.photoURL || '';
     const initial  = (d.fullName || user.displayName || user.email || 'U')[0].toUpperCase();
     applyComposeAvatar(photoURL, initial);
-  } catch (err) {
-    console.warn('Sparks: Firestore fetch error:', err);
+  } catch (e) {
     window._sparkUserData = {};
-    // Fallback to auth object only
-    const initial = (user.displayName || user.email || 'U')[0].toUpperCase();
-    applyComposeAvatar('', initial);
+    applyComposeAvatar('', (user.displayName || user.email || 'U')[0].toUpperCase());
   }
 
-  // Check today's quota on page load
-  await checkDailyQuota(user.uid);
+  // Check quota
+  await checkQuota(user.uid);
 
-  // Start real-time listener — feed updates live without any refresh needed
-  startSparksFeedListener();
+  // Start live feed — loads existing posts and listens for new ones
+  startFeed();
 });
 
-// ── QUOTA HELPERS ──
+// ── LIVE FEED ──
+let _unsub = null;
 
-function getTodayString() {
-  const now = new Date();
-  const y = now.getFullYear();
-  const m = String(now.getMonth() + 1).padStart(2, '0');
-  const d = String(now.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
-}
-
-function getMidnightResetText() {
-  const now = new Date();
-  const midnight = new Date(now);
-  midnight.setHours(24, 0, 0, 0);
-  const diffMs = midnight - now;
-  const diffH  = Math.floor(diffMs / 3600000);
-  const diffM  = Math.floor((diffMs % 3600000) / 60000);
-  if (diffH > 0) return `Resets in ${diffH}h ${diffM}m`;
-  return `Resets in ${diffM}m`;
-}
-
-async function checkDailyQuota(uid) {
-  const banner     = document.getElementById('quotaBanner');
-  const quotaMsg   = document.getElementById('quotaMsg');
-  const quotaReset = document.getElementById('quotaReset');
-  const submitBtn  = document.getElementById('submitBtn');
-  const toggle     = document.getElementById('composeToggle');
-
-  // DEV BYPASS — ewm24k@gmail.com has unlimited sparks
-  if (window._sparkUser && window._sparkUser.email === 'ewm24k@gmail.com') {
-    banner.classList.remove('show', 'warn', 'full');
-    if (submitBtn) submitBtn.disabled = document.getElementById('composeTa')?.value.trim().length === 0;
-    if (toggle)    toggle.style.opacity = '1';
-    if (toggle)    toggle.style.pointerEvents = 'auto';
-    window._todaySparkCount = 0;
-    return;
-  }
-
-  try {
-    const today = getTodayString();
-    const q = query(
-      collection(db, 'sparks'),
-      where('uid',       '==', uid),
-      where('dateStr',   '==', today),
-      where('tab',       '==', 'standard')
-    );
-    const snap = await getDocs(q);
-    const count = snap.size;
-
-    banner.classList.remove('show', 'warn', 'full');
-
-    if (count === 0) {
-      // Full quota available — no banner needed
-      if (submitBtn) submitBtn.disabled = document.getElementById('composeTa')?.value.trim().length === 0;
-      if (toggle)    toggle.style.opacity = '1';
-      if (toggle)    toggle.style.pointerEvents = 'auto';
-    } else if (count === 1) {
-      // 1 used, 1 remaining — show amber warning, auto-dismiss after 2s
-      banner.classList.add('show', 'warn');
-      quotaMsg.textContent   = '1 of 3 daily Sparks used — 2 remaining today';
-      quotaReset.textContent = getMidnightResetText();
-      if (submitBtn) submitBtn.disabled = document.getElementById('composeTa')?.value.trim().length === 0;
-      if (toggle)    toggle.style.opacity = '1';
-      if (toggle)    toggle.style.pointerEvents = 'auto';
-      // Auto-dismiss warn banner after 2 seconds
-      setTimeout(() => { banner.classList.remove('show', 'warn'); }, 2000);
-    } else {
-      // Limit reached — lock compose
-      banner.classList.add('show', 'full');
-      quotaMsg.textContent   = 'Daily limit reached — 3 Sparks per day maximum';
-      quotaReset.textContent = getMidnightResetText();
-      if (submitBtn) submitBtn.disabled = true;
-      // Lock the compose toggle so it can't be opened
-      if (toggle) {
-        toggle.style.opacity = '0.45';
-        toggle.style.pointerEvents = 'none';
-      }
-      // Close compose box if currently open
-      if (typeof window.closeCompose === 'function') window.closeCompose();
-    }
-
-    // Store count in window so _submitSparkFn can read it synchronously
-    window._todaySparkCount = count;
-
-  } catch (err) {
-    console.warn('Sparks: quota check error:', err);
-    window._todaySparkCount = 0;
-  }
-}
-
-// ── REAL-TIME FEED LISTENER ──
-
-let _feedUnsubscribe = null;
-
-function startSparksFeedListener() {
-  if (_feedUnsubscribe) { _feedUnsubscribe(); _feedUnsubscribe = null; }
+function startFeed() {
+  if (_unsub) _unsub();
 
   const panel = document.getElementById('panel-0');
+  if (!panel) return;
 
   const q = query(
-    collection(db, 'sparks'),
+    collection(db, SPARKS_COL),
     where('tab', '==', 'standard'),
     orderBy('createdAt', 'desc'),
     limit(50)
   );
 
-  _feedUnsubscribe = onSnapshot(q, (snap) => {
-    if (panel) {
+  _unsub = onSnapshot(q,
+    { includeMetadataChanges: false },
+    (snapshot) => {
+      // Wipe all previously rendered real cards
       panel.querySelectorAll('.spark-card[data-spark-id]').forEach(el => el.remove());
+
+      if (snapshot.empty) return;
+
+      // Firestore returns newest-first — render each one
+      snapshot.forEach((docSnap) => {
+        renderCard(docSnap.id, docSnap.data());
+      });
+    },
+    (err) => {
+      console.error('Feed error:', err);
     }
-    if (snap.empty) return;
-    const docs = [];
-    snap.forEach((docSnap) => docs.push(docSnap));
-    docs.forEach((docSnap, idx) => {
-      // serverTimestamps:'estimate' ensures pending writes show immediately
-      // instead of returning null for createdAt before server confirms
-      prependSparkCard(docSnap.data({ serverTimestamps: 'estimate' }), docSnap.id, idx === 0);
-    });
-  }, (err) => {
-    console.error('Sparks: feed listener error:', err.code, err.message);
-  });
+  );
 }
 
-// ── SUBMIT SPARK (wired via window._submitSparkFn → submitSpark() stub in main script) ──
-
-window._submitSparkFn = async function() {
-  const user = window._sparkUser;
-  if (!user) return;
-
-  const txt = document.getElementById('composeTa').value.trim();
-  if (!txt) return;
-
-  // Re-check quota just before writing — prevents race condition
-  // DEV BYPASS — ewm24k@gmail.com is unlimited
-  if (window._sparkUser.email !== 'ewm24k@gmail.com' && (window._todaySparkCount || 0) >= DAILY_LIMIT) {
-    alert('⚠️ You have reached your daily limit of 3 Sparks. Come back tomorrow!');
-    return;
-  }
-
-  // Disable button immediately to prevent double-tap
-  const submitBtn = document.getElementById('submitBtn');
-  if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Posting…'; }
-
-  const d        = window._sparkUserData || {};
-  const today    = getTodayString();
-  const photoURL = d.profilePicture?.url || user.photoURL || '';
-  const fullName = d.fullName || user.displayName || 'T1ERA User';
-  const handle   = (user.email || 'user').split('@')[0];
-
-  const sparkDoc = {
-    uid:        user.uid,
-    authorName: fullName,
-    authorHandle: handle,
-    authorPhoto: photoURL,
-    text:       txt,
-    tab:        'standard',
-    dateStr:    today,
-    createdAt:  serverTimestamp(),
-    likes:      0,
-    replies:    0,
-    reposts:    0
-  };
-
-  try {
-    const docRef = await addDoc(collection(db, 'sparks'), sparkDoc);
-
-    // Close compose and clear textarea
-    if (typeof window.closeCompose === 'function') window.closeCompose();
-
-    // Feed updates automatically via onSnapshot listener — no manual reload needed
-
-    // Re-check quota and update banner / lock state
-    await checkDailyQuota(user.uid);
-
-  } catch (err) {
-    console.error('Sparks: addDoc error:', err);
-    alert('Failed to post Spark. Please try again.');
-    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Spark ⚡'; }
-  }
-};
-
-// ── PREPEND CARD TO FEED ──
-
-function prependSparkCard(data, docId, isNew) {
+// ── RENDER ONE CARD INTO FEED ──
+function renderCard(id, d) {
   const panel = document.getElementById('panel-0');
   if (!panel) return;
 
-  const name    = data.authorName    || 'T1ERA User';
-  const handle  = data.authorHandle  || 'user';
-  const photo   = data.authorPhoto   || '';
-  const txt     = data.text          || '';
+  const name    = d.authorName    || 'T1ERA User';
+  const handle  = d.authorHandle  || 'user';
+  const photo   = d.authorPhoto   || '';
+  const txt     = d.text          || '';
   const initial = name[0].toUpperCase();
 
-  // Build avatar HTML
-  const avBg = 'background:linear-gradient(135deg,var(--pink),var(--purple))';
+  const avBg    = 'background:linear-gradient(135deg,var(--pink),var(--purple))';
   const avInner = photo
     ? `<img src="${photo}" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;" onerror="this.style.display='none'">`
     : initial;
 
-  // Linkify hashtags and mentions in text
   const linkedTxt = txt
     .replace(/(#\w+)/g, '<span class="ht">$1</span>')
-    .replace(/(@\w+)/g, '<span class="mn">$1</span>');
+    .replace(/(@\w+)/g,  '<span class="mn">$1</span>');
 
-  const animClass = isNew ? 'fu' : '';
+  const safeText = txt.replace(/'/g, "\\'").slice(0, 80);
 
   const article = document.createElement('article');
-  article.className = `spark-card ${animClass}`;
-  article.dataset.sparkId = docId;
+  article.className       = 'spark-card';
+  article.dataset.sparkId = id;
   article.setAttribute('onclick', 'openSparkDetail(this)');
   article.innerHTML = `
     <div class="card-head">
@@ -1961,77 +1813,174 @@ function prependSparkCard(data, docId, isNew) {
     </div>
     <div class="action-bar">
       <button class="act-btn like" onclick="event.stopPropagation();toggleLike(this)"><i class="ph-bold ph-heart"></i><span>0</span></button>
-      <button class="act-btn reply" onclick="event.stopPropagation();openReply('${name}','${initial}','#c2185b','${txt.replace(/'/g,"\'").slice(0,80)}')"><i class="ph-bold ph-chat-circle"></i><span>0</span></button>
+      <button class="act-btn reply" onclick="event.stopPropagation();openReply('${name}','${initial}','#c2185b','${safeText}')"><i class="ph-bold ph-chat-circle"></i><span>0</span></button>
       <button class="act-btn repost" onclick="event.stopPropagation();toggleRepost(this)"><i class="ph-bold ph-repeat"></i><span>0</span></button>
       <button class="act-btn share" onclick="event.stopPropagation();shareSpark()"><i class="ph-bold ph-share-network"></i><span>0</span></button>
       <button class="act-btn bookmark" onclick="event.stopPropagation();toggleBookmark(this)" style="margin-left:auto"><i class="ph-bold ph-bookmark-simple"></i></button>
     </div>
   `;
 
-  // Insert before first demo spark-card (non-Firestore card has no data-spark-id)
-  const firstCard = panel.querySelector('.spark-card:not([data-spark-id])');
-  if (firstCard) {
-    panel.insertBefore(article, firstCard);
+  // Place before the first demo card (demo cards have no data-spark-id)
+  const firstDemo = panel.querySelector('.spark-card:not([data-spark-id])');
+  if (firstDemo) {
+    panel.insertBefore(article, firstDemo);
   } else {
     panel.appendChild(article);
   }
 }
 
-// ── APPLY PROFILE PHOTO TO COMPOSE AVATARS ──
+// ── POST NEW SPARK ──
+window._submitSparkFn = async function () {
+  const user = window._sparkUser;
+  if (!user) return;
 
+  const txt = document.getElementById('composeTa').value.trim();
+  if (!txt) return;
+
+  // Dev bypass — ewm24k@gmail.com unlimited
+  const isDev = user.email === DEV_EMAIL;
+
+  if (!isDev && (window._todayCount || 0) >= DAILY_LIMIT) {
+    alert(`You have reached your daily limit of ${DAILY_LIMIT} Sparks. Come back tomorrow!`);
+    return;
+  }
+
+  const btn = document.getElementById('submitBtn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Posting…'; }
+
+  const ud      = window._sparkUserData || {};
+  const name    = ud.fullName    || user.displayName || 'T1ERA User';
+  const handle  = (user.email || 'user').split('@')[0];
+  const photo   = ud.profilePicture?.url || user.photoURL || '';
+  const today   = getToday();
+
+  try {
+    await addDoc(collection(db, SPARKS_COL), {
+      uid:          user.uid,
+      authorName:   name,
+      authorHandle: handle,
+      authorPhoto:  photo,
+      text:         txt,
+      tab:          'standard',
+      dateStr:      today,
+      createdAt:    serverTimestamp(),
+      likes:        0,
+      replies:      0,
+      reposts:      0
+    });
+
+    // Close compose box — feed updates automatically via onSnapshot
+    if (typeof window.closeCompose === 'function') window.closeCompose();
+
+    // Refresh quota count
+    if (!isDev) await checkQuota(user.uid);
+
+  } catch (e) {
+    console.error('Post failed:', e);
+    alert('Failed to post. Please try again.');
+    if (btn) { btn.disabled = false; btn.textContent = 'Spark ⚡'; }
+  }
+};
+
+// ── DAILY QUOTA ──
+async function checkQuota(uid) {
+  const banner    = document.getElementById('quotaBanner');
+  const quotaMsg  = document.getElementById('quotaMsg');
+  const quotaReset= document.getElementById('quotaReset');
+  const btn       = document.getElementById('submitBtn');
+  const toggle    = document.getElementById('composeToggle');
+
+  // Dev = unlimited
+  if (window._sparkUser && window._sparkUser.email === DEV_EMAIL) {
+    banner.classList.remove('show','warn','full');
+    if (btn)    btn.disabled = (document.getElementById('composeTa')?.value.trim().length === 0);
+    if (toggle) { toggle.style.opacity = '1'; toggle.style.pointerEvents = 'auto'; }
+    window._todayCount = 0;
+    return;
+  }
+
+  try {
+    const today = getToday();
+    const snap  = await getDocs(query(
+      collection(db, SPARKS_COL),
+      where('uid',     '==', uid),
+      where('dateStr', '==', today),
+      where('tab',     '==', 'standard')
+    ));
+    const count = snap.size;
+    window._todayCount = count;
+
+    banner.classList.remove('show','warn','full');
+
+    if (count === 0) {
+      if (btn)    btn.disabled = (document.getElementById('composeTa')?.value.trim().length === 0);
+      if (toggle) { toggle.style.opacity = '1'; toggle.style.pointerEvents = 'auto'; }
+    } else if (count < DAILY_LIMIT) {
+      const remaining = DAILY_LIMIT - count;
+      banner.classList.add('show','warn');
+      quotaMsg.textContent  = `${count} of ${DAILY_LIMIT} daily Sparks used — ${remaining} remaining`;
+      quotaReset.textContent = getMidnightText();
+      if (btn)    btn.disabled = (document.getElementById('composeTa')?.value.trim().length === 0);
+      if (toggle) { toggle.style.opacity = '1'; toggle.style.pointerEvents = 'auto'; }
+      setTimeout(() => banner.classList.remove('show','warn'), 2000);
+    } else {
+      banner.classList.add('show','full');
+      quotaMsg.textContent  = `Daily limit reached — ${DAILY_LIMIT} Sparks per day maximum`;
+      quotaReset.textContent = getMidnightText();
+      if (btn) btn.disabled = true;
+      if (toggle) { toggle.style.opacity = '0.45'; toggle.style.pointerEvents = 'none'; }
+      if (typeof window.closeCompose === 'function') window.closeCompose();
+    }
+  } catch (e) {
+    window._todayCount = 0;
+  }
+}
+
+// ── HELPERS ──
+function getToday() {
+  const n = new Date();
+  return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;
+}
+
+function getMidnightText() {
+  const now = new Date();
+  const mid = new Date(now); mid.setHours(24,0,0,0);
+  const ms  = mid - now;
+  const h   = Math.floor(ms/3600000);
+  const m   = Math.floor((ms%3600000)/60000);
+  return h > 0 ? `Resets in ${h}h ${m}m` : `Resets in ${m}m`;
+}
+
+// ── APPLY AVATAR TO COMPOSE BOXES ──
 function applyComposeAvatar(photoURL, initial) {
   const miniAv    = document.getElementById('miniAv');
   const composeAv = document.getElementById('composeAv');
   const replyAvs  = document.querySelectorAll('.reply-av');
 
   if (photoURL) {
-    // ── miniAv (compose toggle bar) ──
-    if (miniAv) {
-      miniAv.textContent = '';
-      miniAv.style.background = 'none';
-      miniAv.style.padding = '0';
-      const img1 = document.createElement('img');
-      img1.src = photoURL;
-      img1.alt = 'avatar';
-      img1.referrerPolicy = 'no-referrer';
-      img1.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;';
-      img1.onerror = () => { miniAv.textContent = initial; miniAv.style.background = ''; };
-      miniAv.appendChild(img1);
-    }
-
-    // ── composeAv (expanded compose box) ──
-    if (composeAv) {
-      composeAv.textContent = '';
-      composeAv.style.background = 'none';
-      composeAv.style.padding = '0';
-      const img2 = document.createElement('img');
-      img2.src = photoURL;
-      img2.alt = 'avatar';
-      img2.referrerPolicy = 'no-referrer';
-      img2.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;';
-      img2.onerror = () => { composeAv.textContent = initial; composeAv.style.background = ''; };
-      composeAv.appendChild(img2);
-    }
-
-    // ── .reply-av (reply modal compose avatar) ──
-    replyAvs.forEach((el) => {
+    [miniAv, composeAv].forEach(el => {
+      if (!el) return;
       el.textContent = '';
       el.style.background = 'none';
       el.style.padding = '0';
-      const img3 = document.createElement('img');
-      img3.src = photoURL;
-      img3.alt = 'avatar';
-      img3.referrerPolicy = 'no-referrer';
-      img3.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;';
-      img3.onerror = () => { el.textContent = initial; el.style.background = ''; };
-      el.appendChild(img3);
+      const img = document.createElement('img');
+      img.src = photoURL; img.alt = 'avatar'; img.referrerPolicy = 'no-referrer';
+      img.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;';
+      img.onerror = () => { el.textContent = initial; el.style.background = ''; };
+      el.appendChild(img);
     });
-
+    replyAvs.forEach(el => {
+      el.textContent = ''; el.style.background = 'none'; el.style.padding = '0';
+      const img = document.createElement('img');
+      img.src = photoURL; img.alt = 'avatar'; img.referrerPolicy = 'no-referrer';
+      img.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;';
+      img.onerror = () => { el.textContent = initial; el.style.background = ''; };
+      el.appendChild(img);
+    });
   } else {
-    // No photo — set initial letter on all three compose avatar targets
     if (miniAv)    miniAv.textContent    = initial;
     if (composeAv) composeAv.textContent = initial;
-    replyAvs.forEach((el) => { el.textContent = initial; });
+    replyAvs.forEach(el => { el.textContent = initial; });
   }
 }
 </script>
