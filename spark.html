@@ -1275,6 +1275,25 @@ a{text-decoration:none;color:inherit}
   background:#000;
 }
 .yt-modal-iframe-wrap iframe{width:100%;height:100%;border:none;display:block}
+
+/* ══════════════════════════════════════════
+   TOAST NOTIFICATION
+══════════════════════════════════════════ */
+.toast-msg{
+  position:fixed;bottom:80px;left:50%;
+  transform:translateX(-50%) translateY(16px);
+  background:rgba(16,185,129,0.92);
+  color:#fff;font-size:13px;font-weight:700;
+  padding:10px 22px;border-radius:100px;
+  box-shadow:0 4px 24px rgba(0,0,0,0.45);
+  opacity:0;pointer-events:none;
+  transition:opacity .22s,transform .22s;
+  z-index:700;white-space:nowrap;
+  font-family:var(--f-body);
+}
+.toast-msg.show{
+  opacity:1;transform:translateX(-50%) translateY(0);
+}
 </style>
 </head>
 <body>
@@ -2352,6 +2371,24 @@ function openSparkDetail(card) {
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') { closeProfile(); closeReply(); closeCompose(); }
 });
+
+/* ══════════════════════════════════
+   TOAST
+══════════════════════════════════ */
+function showToast(msg) {
+  let t = document.getElementById('globalToast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'globalToast';
+    t.className = 'toast-msg';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._hideTimer);
+  t._hideTimer = setTimeout(() => { t.classList.remove('show'); }, 2600);
+}
+window.showToast = showToast;
 </script>
 
 
@@ -2632,7 +2669,7 @@ window._loadRepliesFn = async function(sparkId) {
     </div>`;
 
   try {
-    const snap = await getDocs(collection(db, 'sparks', sparkId, 'replies'));
+    const snap = await getDocs(collection(db, 'sparks', sparkId, 'comments'));
     list.innerHTML = '';
 
     if (snap.empty) {
@@ -2712,7 +2749,7 @@ window._submitReplyFn = async function(txt) {
   }
 
   try {
-    // 1. Write reply to sparks/{sparkId}/replies subcollection
+    // 1. Write reply to sparks/{sparkId}/comments subcollection
     const replyData = {
       uid:          user.uid,
       authorName,
@@ -2722,10 +2759,10 @@ window._submitReplyFn = async function(txt) {
       sparkId,
       createdAt:    serverTimestamp(),
     };
-    await addDoc(collection(db, 'sparks', sparkId, 'replies'), replyData);
+    await addDoc(collection(db, 'sparks', sparkId, 'comments'), replyData);
 
     // 2. Fetch updated reply count for this spark and update feed card counter
-    const repliesSnap = await getDocs(collection(db, 'sparks', sparkId, 'replies'));
+    const repliesSnap = await getDocs(collection(db, 'sparks', sparkId, 'comments'));
     const newCount = repliesSnap.size;
     const countEl = document.getElementById('replycount-' + sparkId);
     if (countEl) countEl.textContent = newCount;
@@ -2759,12 +2796,13 @@ window._submitReplyFn = async function(txt) {
       });
     } catch(ae) { console.warn('activity log error:', ae); }
 
-    // 5. Clear textarea and reload replies in the sheet to show new reply
+    // 5. Clear textarea — DB write confirmed, show toast and close immediately
     document.getElementById('replyTa').value = '';
-    await window._loadRepliesFn(sparkId);
+    if (typeof window.showToast === 'function') window.showToast('Reply posted ⚡');
+    if (typeof window.closeReply === 'function') window.closeReply();
 
-    // 6. Auto-close the reply panel after short delay so user sees their reply
-    setTimeout(() => { if (typeof window.closeReply === 'function') window.closeReply(); }, 600);
+    // 6. Reload replies in the sheet (fire-and-forget, panel may already be closing)
+    window._loadRepliesFn(sparkId);
 
   } catch(e) {
     console.error('submitReply error:', e.code, e.message);
@@ -2986,7 +3024,7 @@ function renderCard(id, d) {
   });
 
   // Fetch reply count from subcollection
-  getDocs(collection(db, 'sparks', id, 'replies')).then(repliesSnap => {
+  getDocs(collection(db, 'sparks', id, 'comments')).then(repliesSnap => {
     const el = document.getElementById('replycount-' + id);
     if (el) el.textContent = repliesSnap.size;
   }).catch(() => {});
