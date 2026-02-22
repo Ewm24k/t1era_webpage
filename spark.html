@@ -1673,7 +1673,7 @@ document.addEventListener('keydown', e => {
 <script type="module">
 import { initializeApp }                        from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getAuth, onAuthStateChanged }          from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-import { getFirestore, doc, getDoc, collection, addDoc, query, where, getDocs, serverTimestamp, orderBy, limit, onSnapshot, Timestamp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import { getFirestore, doc, getDoc, collection, addDoc, query, where, getDocs, serverTimestamp, orderBy, limit, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 const firebaseConfig = {
   apiKey:            "AIzaSyBnt9mbb8LdMVeguSHUmS20L6uBHIfxwAs",
@@ -1824,7 +1824,6 @@ async function checkDailyQuota(uid) {
 let _feedUnsubscribe = null;
 
 function startSparksFeedListener() {
-  // Detach any previous listener before starting a new one
   if (_feedUnsubscribe) { _feedUnsubscribe(); _feedUnsubscribe = null; }
 
   const panel = document.getElementById('panel-0');
@@ -1837,23 +1836,19 @@ function startSparksFeedListener() {
   );
 
   _feedUnsubscribe = onSnapshot(q, (snap) => {
-    // Remove all previously rendered Firestore cards
     if (panel) {
       panel.querySelectorAll('.spark-card[data-spark-id]').forEach(el => el.remove());
     }
-
     if (snap.empty) return;
-
-    // onSnapshot returns newest-first (orderBy createdAt desc)
-    // Insert each doc — prependSparkCard puts them above demo cards
-    // idx===0 is the newest, gets animation
     const docs = [];
     snap.forEach((docSnap) => docs.push(docSnap));
     docs.forEach((docSnap, idx) => {
-      prependSparkCard(docSnap.data(), docSnap.id, idx === 0);
+      // serverTimestamps:'estimate' ensures pending writes show immediately
+      // instead of returning null for createdAt before server confirms
+      prependSparkCard(docSnap.data({ serverTimestamps: 'estimate' }), docSnap.id, idx === 0);
     });
   }, (err) => {
-    console.warn('Sparks: feed listener error:', err);
+    console.error('Sparks: feed listener error:', err.code, err.message);
   });
 }
 
@@ -1891,7 +1886,7 @@ window._submitSparkFn = async function() {
     text:       txt,
     tab:        'standard',
     dateStr:    today,
-    createdAt:  Timestamp.now(),
+    createdAt:  serverTimestamp(),
     likes:      0,
     replies:    0,
     reposts:    0
