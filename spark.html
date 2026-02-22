@@ -941,6 +941,91 @@ a{text-decoration:none;color:inherit}
 .sk-page-overlay.sk-hidden{display:none}
 .real-content{display:contents}
 .real-content.sk-hidden{display:none}
+
+/* ══════════════════════════════════════════
+   YOUTUBE LINK PREVIEW & CARD
+══════════════════════════════════════════ */
+.yt-preview-wrap{
+  margin:0 16px 10px 68px;
+  border-radius:var(--r);overflow:hidden;
+  border:1px solid var(--border-2);
+  background:var(--bg-3);position:relative;
+  cursor:pointer;
+}
+.yt-thumb-wrap{position:relative;width:100%;aspect-ratio:16/9;overflow:hidden}
+.yt-thumb-wrap img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s}
+.yt-preview-wrap:hover .yt-thumb-wrap img{transform:scale(1.03)}
+.yt-play-btn{
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(0,0,0,0.35);
+  transition:background .2s;
+}
+.yt-preview-wrap:hover .yt-play-btn{background:rgba(0,0,0,0.55)}
+.yt-play-icon{
+  width:56px;height:56px;border-radius:50%;
+  background:rgba(255,0,0,0.92);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 2px 16px rgba(0,0,0,0.5);
+  transition:transform .2s;
+}
+.yt-preview-wrap:hover .yt-play-icon{transform:scale(1.1)}
+.yt-play-icon svg{width:22px;height:22px;fill:#fff;margin-left:3px}
+.yt-label{
+  display:flex;align-items:center;gap:8px;
+  padding:10px 12px;
+  border-top:1px solid var(--border);
+}
+.yt-logo{
+  width:20px;height:14px;background:#ff0000;border-radius:3px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.yt-logo svg{width:12px;height:12px;fill:#fff}
+.yt-url-text{font-size:11px;color:var(--text-3);font-family:var(--f-mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1}
+.yt-remove-btn{
+  width:20px;height:20px;border-radius:50%;border:none;
+  background:var(--bg-4);color:var(--text-3);font-size:11px;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;
+}
+.yt-remove-btn:hover{background:rgba(239,68,68,.2);color:var(--red)}
+
+/* in-feed YouTube card */
+.yt-card{
+  margin-top:10px;border-radius:var(--r);overflow:hidden;
+  border:1px solid var(--border-2);background:var(--bg-3);
+  cursor:pointer;
+}
+.yt-card:hover .yt-thumb-wrap img{transform:scale(1.03)}
+.yt-card:hover .yt-play-btn{background:rgba(0,0,0,0.55)}
+.yt-card:hover .yt-play-icon{transform:scale(1.1)}
+.yt-card .yt-label{font-size:11px;color:var(--text-3);font-family:var(--f-mono)}
+
+/* YouTube fullscreen modal */
+.yt-modal-overlay{
+  position:fixed;inset:0;z-index:600;
+  background:rgba(0,0,0,0.92);backdrop-filter:blur(12px);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;visibility:hidden;transition:opacity .25s,visibility .25s;
+}
+.yt-modal-overlay.open{opacity:1;visibility:visible}
+.yt-modal-inner{
+  width:90vw;max-width:900px;
+  position:relative;
+}
+.yt-modal-close{
+  position:absolute;top:-40px;right:0;
+  width:32px;height:32px;border-radius:50%;
+  background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);
+  color:#fff;font-size:16px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .15s;
+}
+.yt-modal-close:hover{background:rgba(239,68,68,0.4)}
+.yt-modal-iframe-wrap{
+  width:100%;aspect-ratio:16/9;border-radius:var(--r-lg);overflow:hidden;
+  background:#000;
+}
+.yt-modal-iframe-wrap iframe{width:100%;height:100%;border:none;display:block}
 </style>
 </head>
 <body>
@@ -1673,7 +1758,16 @@ function closeCompose() {
   document.getElementById('charCount').className = 'char-count';
   document.getElementById('submitBtn').disabled = true;
   document.getElementById('mediaStrip').innerHTML = '';
+  // Clear any YouTube preview
+  window._pendingYtId = null;
+  const ytPrev = document.getElementById('ytComposePreview');
+  if (ytPrev) ytPrev.remove();
 }
+function getYtId(text) {
+  const m = text.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/|v\/))([a-zA-Z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
+
 function onComposeInput(ta) {
   const n = ta.value.length;
   const trim = ta.value.trim().length;
@@ -1681,6 +1775,53 @@ function onComposeInput(ta) {
   cc.textContent = `${n} / 500`;
   cc.className = 'char-count' + (n >= 500 ? ' over' : n >= 400 ? ' warn' : '');
   document.getElementById('submitBtn').disabled = trim === 0;
+
+  // Detect YouTube URL in compose text
+  const ytId = getYtId(ta.value);
+  const existing = document.getElementById('ytComposePreview');
+
+  if (ytId) {
+    window._pendingYtId = ytId;
+    if (!existing) {
+      // Insert preview above the compose footer
+      const footer = document.querySelector('.compose-footer');
+      const wrap = document.createElement('div');
+      wrap.id = 'ytComposePreview';
+      wrap.className = 'yt-preview-wrap';
+      wrap.innerHTML = `
+        <div class="yt-thumb-wrap" onclick="openYtModal('${ytId}')">
+          <img src="https://i.ytimg.com/vi/${ytId}/hqdefault.jpg" alt="YouTube preview">
+          <div class="yt-play-btn"><div class="yt-play-icon"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div></div>
+        </div>
+        <div class="yt-label">
+          <div class="yt-logo"><svg viewBox="0 0 24 24"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31.4 31.4 0 0 0 0 12a31.4 31.4 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31.4 31.4 0 0 0 24 12a31.4 31.4 0 0 0-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg></div>
+          <span class="yt-url-text">youtube.com/watch?v=${ytId}</span>
+          <button class="yt-remove-btn" onclick="event.stopPropagation();removeYtPreview()"><i class="ph-bold ph-x"></i></button>
+        </div>
+      `;
+      footer.parentNode.insertBefore(wrap, footer);
+    }
+  } else {
+    window._pendingYtId = null;
+    if (existing) existing.remove();
+  }
+}
+
+function removeYtPreview() {
+  window._pendingYtId = null;
+  const el = document.getElementById('ytComposePreview');
+  if (el) el.remove();
+}
+
+function openYtModal(videoId) {
+  const wrap = document.getElementById('ytModalIframeWrap');
+  wrap.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>`;
+  document.getElementById('ytModalOverlay').classList.add('open');
+}
+
+function closeYtModal() {
+  document.getElementById('ytModalOverlay').classList.remove('open');
+  document.getElementById('ytModalIframeWrap').innerHTML = '';
 }
 
 /* ══════════════════════════════════
@@ -2023,6 +2164,17 @@ function renderCard(id, d) {
     </div>
     <div class="card-content">
       <p class="spark-text">${linkedTxt}</p>
+      ${d.youtubeId ? `<div class="yt-card" onclick="event.stopPropagation();openYtModal('` + d.youtubeId + `')">
+        <div class="yt-thumb-wrap">
+          <img src="https://i.ytimg.com/vi/` + d.youtubeId + `/hqdefault.jpg" alt="YouTube video">
+          <div class="yt-play-btn"><div class="yt-play-icon"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div></div>
+        </div>
+        <div class="yt-label">
+          <div class="yt-logo"><svg viewBox="0 0 24 24" fill="#fff"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31.4 31.4 0 0 0 0 12a31.4 31.4 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31.4 31.4 0 0 0 24 12a31.4 31.4 0 0 0-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg></div>
+          <span class="yt-url-text">youtube.com/watch?v=` + d.youtubeId + `</span>
+          <span style="font-size:10px;color:var(--text-3);margin-left:auto;flex-shrink:0;padding-right:4px">▶ Play</span>
+        </div>
+      </div>` : ''}
     </div>
     <div class="action-bar">
       <button class="act-btn like" onclick="event.stopPropagation();toggleLike(this)"><i class="ph-bold ph-heart"></i><span>0</span></button>
@@ -2087,7 +2239,7 @@ window._submitSparkFn = async function () {
   const today   = getToday();
 
   try {
-    await addDoc(collection(db, SPARKS_COL), {
+    const sparkData = {
       uid:          user.uid,
       authorName:   name,
       authorHandle: handle,
@@ -2099,7 +2251,12 @@ window._submitSparkFn = async function () {
       likes:        0,
       replies:      0,
       reposts:      0
-    });
+    };
+    // Attach YouTube video ID if user pasted a YouTube link
+    if (window._pendingYtId) {
+      sparkData.youtubeId = window._pendingYtId;
+    }
+    await addDoc(collection(db, SPARKS_COL), sparkData);
 
     // Close compose box
     if (typeof window.closeCompose === 'function') window.closeCompose();
@@ -2219,5 +2376,16 @@ function applyComposeAvatar(photoURL, initial) {
   }
 }
 </script>
+
+<!-- ═══════════════════════════
+     YOUTUBE VIDEO MODAL
+═══════════════════════════ -->
+<div class="yt-modal-overlay" id="ytModalOverlay" onclick="if(event.target===this)closeYtModal()">
+  <div class="yt-modal-inner">
+    <button class="yt-modal-close" onclick="closeYtModal()"><i class="ph-bold ph-x"></i></button>
+    <div class="yt-modal-iframe-wrap" id="ytModalIframeWrap"></div>
+  </div>
+</div>
+
 </body>
 </html>
