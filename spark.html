@@ -1322,6 +1322,86 @@ a{text-decoration:none;color:inherit}
 .toast-msg.show{
   opacity:1;transform:translateX(-50%) translateY(0);
 }
+
+/* ══════════════════════════════════════════
+   EMOJI PICKER POPUP
+══════════════════════════════════════════ */
+.emoji-picker-overlay{
+  position:fixed;inset:0;z-index:800;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(0,0,0,0.55);backdrop-filter:blur(6px);
+  opacity:0;visibility:hidden;
+  transition:opacity .22s,visibility .22s;
+}
+.emoji-picker-overlay.open{opacity:1;visibility:visible}
+.emoji-picker-popup{
+  background:var(--bg-2);
+  border:1px solid var(--border-2);
+  border-radius:var(--r-lg);
+  padding:16px;
+  width:320px;
+  max-width:92vw;
+  box-shadow:0 8px 40px rgba(0,0,0,0.6);
+  transform:scale(0.93) translateY(10px);
+  transition:transform .22s var(--ease);
+}
+.emoji-picker-overlay.open .emoji-picker-popup{transform:scale(1) translateY(0)}
+.emoji-picker-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:12px;
+}
+.emoji-picker-title{
+  font-family:var(--f-display);font-size:10px;font-weight:700;
+  letter-spacing:.1em;color:var(--text-3);text-transform:uppercase;
+}
+.emoji-picker-close{
+  width:24px;height:24px;border-radius:50%;
+  background:none;border:1px solid var(--border);
+  color:var(--text-3);font-size:12px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .15s;
+}
+.emoji-picker-close:hover{background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.3);color:var(--red)}
+.emoji-picker-grid{
+  display:grid;
+  grid-template-columns:repeat(8,1fr);
+  gap:4px;
+}
+.emoji-picker-grid button{
+  width:100%;aspect-ratio:1;
+  background:none;border:none;
+  font-size:22px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:background .15s,transform .12s;
+  line-height:1;
+}
+.emoji-picker-grid button:hover{
+  background:rgba(194,24,91,.12);
+  transform:scale(1.18);
+}
+
+/* ══════════════════════════════════════════
+   QUOTE BLOCK (in-feed)
+══════════════════════════════════════════ */
+.quote-block{
+  margin-top:10px;
+  padding:12px 16px;
+  background:rgba(139,92,246,.07);
+  border-left:3px solid var(--purple);
+  border-radius:0 var(--r-sm) var(--r-sm) 0;
+  font-family:var(--f-mono);
+  font-size:13px;
+  color:var(--text-2);
+  line-height:1.65;
+  word-break:break-word;
+  white-space:pre-wrap;
+}
+.quote-block-label{
+  font-size:9px;font-weight:700;letter-spacing:.1em;
+  color:var(--purple);text-transform:uppercase;
+  margin-bottom:6px;font-family:var(--f-display);
+  display:flex;align-items:center;gap:5px;
+}
 </style>
 </head>
 <body>
@@ -1490,8 +1570,11 @@ a{text-decoration:none;color:inherit}
               <i class="ph-bold ph-microphone"></i>
               <input type="file" accept="audio/*" onchange="attachMedia(this,'audio')">
             </button>
-            <button class="media-btn" title="Emoji" onclick="alert('Emoji picker — coming soon')">
+            <button class="media-btn" title="Emoji" onclick="openEmojiPicker('composeTa')">
               <i class="ph-bold ph-smiley"></i>
+            </button>
+            <button class="media-btn" title="Quote" onclick="insertQuoteFormat('composeTa')">
+              <i class="ph-bold ph-quotes"></i>
             </button>
           </div>
           <div class="compose-right">
@@ -2014,7 +2097,7 @@ a{text-decoration:none;color:inherit}
       <div class="reply-media-row">
         <button class="media-btn" title="Image" style="width:30px;height:30px"><i class="ph-bold ph-image"></i><input type="file" accept="image/*"/></button>
         <button class="media-btn" title="GIF" style="width:30px;height:30px" onclick="alert('GIF picker coming soon')"><i class="ph-bold ph-gif"></i></button>
-        <button class="media-btn" title="Emoji" style="width:30px;height:30px" onclick="alert('Emoji picker coming soon')"><i class="ph-bold ph-smiley"></i></button>
+        <button class="media-btn" title="Emoji" style="width:30px;height:30px" onclick="openEmojiPicker('replyTa')"><i class="ph-bold ph-smiley"></i></button>
       </div>
       <button class="reply-submit" onclick="submitReply()">Reply ⚡</button>
     </div>
@@ -2055,6 +2138,69 @@ a{text-decoration:none;color:inherit}
 function switchTab(i, btn) {
   document.querySelectorAll('.tab-btn').forEach((b,j) => b.classList.toggle('active', j===i));
   document.querySelectorAll('.tab-panel').forEach((p,j) => p.classList.toggle('active', j===i));
+}
+
+/* ══════════════════════════════════
+   EMOJI PICKER
+══════════════════════════════════ */
+const _EMOJIS = [
+  '🪩','🫧','🌊','🫠','🥹','🫶','🦋','🌸',
+  '✨','🔮','🪄','🫐','🍄','🦄','🐉','🌙',
+  '⚡','🔥','💎','🎯','🫴','🤌','🫣','🥷',
+  '🌀','🎪','🪐','🫀','🧬','🪬','🛸','🎭',
+];
+let _emojiTargetId = '';
+
+function openEmojiPicker(targetId) {
+  _emojiTargetId = targetId;
+  const overlay = document.getElementById('emojiPickerOverlay');
+  if (!overlay) return;
+  const grid = document.getElementById('emojiPickerGrid');
+  if (grid && grid.childElementCount === 0) {
+    _EMOJIS.forEach(em => {
+      const btn = document.createElement('button');
+      btn.textContent = em;
+      btn.setAttribute('type', 'button');
+      btn.onclick = () => insertEmoji(em);
+      grid.appendChild(btn);
+    });
+  }
+  overlay.classList.add('open');
+}
+
+function closeEmojiPicker() {
+  const overlay = document.getElementById('emojiPickerOverlay');
+  if (overlay) overlay.classList.remove('open');
+}
+
+function insertEmoji(em) {
+  const ta = document.getElementById(_emojiTargetId);
+  if (!ta) { closeEmojiPicker(); return; }
+  const start = ta.selectionStart;
+  const end   = ta.selectionEnd;
+  ta.value = ta.value.slice(0, start) + em + ta.value.slice(end);
+  ta.selectionStart = ta.selectionEnd = start + em.length;
+  ta.focus();
+  // Trigger compose input update if it's the main compose box
+  if (_emojiTargetId === 'composeTa') onComposeInput(ta);
+  closeEmojiPicker();
+}
+
+/* ══════════════════════════════════
+   QUOTE FORMAT
+══════════════════════════════════ */
+function insertQuoteFormat(targetId) {
+  const ta = document.getElementById(targetId);
+  if (!ta) return;
+  const start = ta.selectionStart;
+  const end   = ta.selectionEnd;
+  const selected = ta.value.slice(start, end);
+  const quoteText = selected.length > 0 ? selected : 'Your quote here';
+  const insert = `\`\`\`quote\n${quoteText}\n\`\`\``;
+  ta.value = ta.value.slice(0, start) + insert + ta.value.slice(end);
+  ta.selectionStart = ta.selectionEnd = start + insert.length;
+  ta.focus();
+  if (targetId === 'composeTa') onComposeInput(ta);
 }
 
 /* ══════════════════════════════════
@@ -3137,6 +3283,17 @@ function renderCard(id, d) {
     .replace(/(#\w+)/g, '<span class="ht">$1</span>')
     .replace(/(@\w+)/g,  '<span class="mn">$1</span>');
 
+  // Detect ```quote ... ``` blocks and extract quote content
+  const quoteMatch = txt.match(/```quote\n([\s\S]*?)\n```/);
+  const quoteContent = quoteMatch ? quoteMatch[1] : null;
+  const displayTxt = quoteContent
+    ? linkedTxt.replace(/```quote\n[\s\S]*?\n```/, '').trim()
+    : linkedTxt;
+
+  const quoteBlockHtml = quoteContent
+    ? `<div class="quote-block"><div class="quote-block-label"><i class="ph-bold ph-quotes"></i> Quote</div>${quoteContent.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>`
+    : (d.quoteText ? `<div class="quote-block"><div class="quote-block-label"><i class="ph-bold ph-quotes"></i> Quote</div>${String(d.quoteText).replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>` : '');
+
   const safeText  = txt.replace(/'/g, "\\'").slice(0, 80);
   const safePhoto = photo.replace(/'/g, "\\'");
 
@@ -3169,7 +3326,8 @@ function renderCard(id, d) {
       ${dotsOrDelete}
     </div>
     <div class="card-content">
-      <p class="spark-text">${linkedTxt}</p>
+      <p class="spark-text">${displayTxt}</p>
+      ${quoteBlockHtml}
       ${d.youtubeId ? `<div class="yt-card" onclick="event.stopPropagation();openYtModal('` + d.youtubeId + `')">
         <div class="yt-thumb-wrap">
           <img src="https://i.ytimg.com/vi/` + d.youtubeId + `/hqdefault.jpg" alt="YouTube video">
@@ -3290,6 +3448,11 @@ window._submitSparkFn = async function () {
     // Attach YouTube video ID if user pasted a YouTube link
     if (window._pendingYtId) {
       sparkData.youtubeId = window._pendingYtId;
+    }
+    // Attach quoteText if user inserted a ```quote block
+    const quoteMatch = txt.match(/```quote\n([\s\S]*?)\n```/);
+    if (quoteMatch) {
+      sparkData.quoteText = quoteMatch[1];
     }
     await addDoc(collection(db, SPARKS_COL), sparkData);
 
@@ -3422,6 +3585,19 @@ function applyComposeAvatar(photoURL, initial) {
   }
 }
 </script>
+
+<!-- ═══════════════════════════
+     EMOJI PICKER OVERLAY
+═══════════════════════════ -->
+<div class="emoji-picker-overlay" id="emojiPickerOverlay" onclick="if(event.target===this)closeEmojiPicker()">
+  <div class="emoji-picker-popup">
+    <div class="emoji-picker-header">
+      <span class="emoji-picker-title"><i class="ph-bold ph-smiley"></i> Pick an Emoji</span>
+      <button class="emoji-picker-close" onclick="closeEmojiPicker()"><i class="ph-bold ph-x"></i></button>
+    </div>
+    <div class="emoji-picker-grid" id="emojiPickerGrid"></div>
+  </div>
+</div>
 
 <!-- ═══════════════════════════
      YOUTUBE VIDEO MODAL
