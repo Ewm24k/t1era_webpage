@@ -1964,7 +1964,6 @@
         font-family: var(--font-mono);
         font-size: 10px;
         color: var(--pink-2);
-        opacity: 0.8;
       }
 
       .rank-xp-section {
@@ -1986,7 +1985,7 @@
 
       .xp-next {
         font-size: 10px;
-        color: var(--text-3);
+        color: #ffffff;
         font-family: var(--font-mono);
       }
 
@@ -3448,10 +3447,12 @@
                         style="
                           font-family: var(--font-display);
                           font-size: 11px;
-                          color: rgba(245, 158, 11, 0.5);
+                          color: #f59e0b;
+                          text-shadow: 0 0 8px rgba(245,158,11,0.8);
                           margin-top: 2px;
                           letter-spacing: 0.04em;
                         "
+                        id="intelNextRankName"
                       >
                         OPERATIVE
                       </div>
@@ -3460,7 +3461,9 @@
                   <div class="rank-xp-section">
                     <div class="rank-xp-nums">
                       <span class="xp-current" id="intelXpCurrent">0 XP</span>
-                      <span class="xp-next" id="intelXpNext">1000 XP to Operative</span>
+                      <span class="xp-next" id="intelXpNext"
+                        >1000 XP to Operative</span
+                      >
                     </div>
                     <div class="rank-xp-bar">
                       <div class="rank-xp-fill" id="rankXpFill"></div>
@@ -4074,25 +4077,57 @@
 
         // Compute total XP from point sub-fields (spark=20, like=10, reply=40)
         const pt = d.point || {};
-        const totalXP = ((pt.spark || 0) * 20) + ((pt.like || 0) * 10) + ((pt.reply || 0) * 40);
+        const totalXP =
+          (pt.spark || 0) * 20 + (pt.like || 0) * 10 + (pt.reply || 0) * 40;
 
-        // Level thresholds: LV1=0, LV2=1000, LV3=2500, LV4=5000, LV5=10000
-        const XP_THRESHOLDS = [0, 1000, 2500, 5000, 10000];
-        const RANK_TITLES   = ["Recruit","Operative","Scout","Guardian","Striker"];
+        // Level thresholds: LV1=0, LV2=1000, LV3=2500, LV4=5000, LV5=10000,
+        // LV6-9 continue scaling, LV10-30 same title "Legend"
+        const XP_THRESHOLDS = [
+          0, 1000, 2500, 5000, 10000,
+          18000, 28000, 40000, 55000,
+          // LV10-30: each +8000
+          70000, 78000, 86000, 94000, 102000, 110000,
+          118000, 126000, 134000, 142000, 150000,
+          158000, 166000, 174000, 182000, 190000,
+          198000, 206000, 214000, 222000, 230000
+        ];
+        const RANK_TITLES = [
+          "Recruit",    // LV1
+          "Operative",  // LV2
+          "Scout",      // LV3
+          "Guardian",   // LV4
+          "Striker",    // LV5
+          "Ranger",     // LV6
+          "Vanguard",   // LV7
+          "Phantom",    // LV8
+          "Warlord",    // LV9
+          "Legend",     // LV10-30 (same title)
+          "Legend","Legend","Legend","Legend","Legend",
+          "Legend","Legend","Legend","Legend","Legend",
+          "Legend","Legend","Legend","Legend","Legend",
+          "Legend","Legend","Legend","Legend","Legend"
+        ];
         let computedLevel = 1;
         for (let i = XP_THRESHOLDS.length - 1; i >= 0; i--) {
-          if (totalXP >= XP_THRESHOLDS[i]) { computedLevel = i + 1; break; }
+          if (totalXP >= XP_THRESHOLDS[i]) {
+            computedLevel = i + 1;
+            break;
+          }
         }
-        const computedTitle    = RANK_TITLES[computedLevel - 1] || title;
-        const nextThreshold    = XP_THRESHOLDS[computedLevel] || XP_THRESHOLDS[XP_THRESHOLDS.length - 1];
-        const prevThreshold    = XP_THRESHOLDS[computedLevel - 1] || 0;
-        const xpIntoLevel      = totalXP - prevThreshold;
+        const computedTitle = RANK_TITLES[computedLevel - 1] || title;
+        const nextThreshold =
+          XP_THRESHOLDS[computedLevel] ||
+          XP_THRESHOLDS[XP_THRESHOLDS.length - 1];
+        const prevThreshold = XP_THRESHOLDS[computedLevel - 1] || 0;
+        const xpIntoLevel = totalXP - prevThreshold;
         const xpNeededForLevel = nextThreshold - prevThreshold;
-        const xpPct            = computedLevel >= XP_THRESHOLDS.length
-          ? 100
-          : Math.min(100, (xpIntoLevel / xpNeededForLevel) * 100);
+        const xpPct =
+          computedLevel >= XP_THRESHOLDS.length
+            ? 100
+            : Math.min(100, (xpIntoLevel / xpNeededForLevel) * 100);
 
-        document.getElementById("rankLevelNum").textContent = `LV ${computedLevel}`;
+        document.getElementById("rankLevelNum").textContent =
+          `LV ${computedLevel}`;
         document.getElementById("rankLevelSvg").textContent = computedLevel;
         document.getElementById("rankTitleText").textContent = computedTitle;
         document.getElementById("callsignText").textContent =
@@ -4111,17 +4146,28 @@
         const intelXpCurrentEl = document.getElementById("intelXpCurrent");
         if (intelXpCurrentEl) intelXpCurrentEl.textContent = `${totalXP} XP`;
         const intelXpNextEl = document.getElementById("intelXpNext");
+        const nextRankName = RANK_TITLES[computedLevel] || "Legend";
         if (intelXpNextEl) {
           if (computedLevel >= XP_THRESHOLDS.length) {
             intelXpNextEl.textContent = "Max Level Reached";
           } else {
             const xpToNext = nextThreshold - totalXP;
-            intelXpNextEl.textContent = `${xpToNext} XP to ${RANK_TITLES[computedLevel] || "next rank"}`;
+            intelXpNextEl.textContent = `${xpToNext} XP to ${nextRankName}`;
+          }
+        }
+        // Update NEXT RANK name (top-right of rank card)
+        const intelNextRankNameEl = document.getElementById("intelNextRankName");
+        if (intelNextRankNameEl) {
+          if (computedLevel >= XP_THRESHOLDS.length) {
+            intelNextRankNameEl.textContent = "MAX";
+          } else {
+            intelNextRankNameEl.textContent = nextRankName.toUpperCase();
           }
         }
         // Also update the rank-level-label span in Intel card
         const intelLevelLabel = document.querySelector(".rank-level-label");
-        if (intelLevelLabel) intelLevelLabel.innerHTML = `Level <span id="intelLevel">${computedLevel}</span> · ${totalXP} / ${nextThreshold} XP`;
+        if (intelLevelLabel)
+          intelLevelLabel.innerHTML = `Level <span id="intelLevel">${computedLevel}</span> · ${totalXP} / ${nextThreshold} XP`;
 
         // Account status
         const acctStatus = d.accountStatus || {};
@@ -5211,14 +5257,12 @@
             const photo = d.authorPhoto || "";
             const txt = d.text || "";
             const time = d.createdAt?.toDate
-              ? d.createdAt
-                  .toDate()
-                  .toLocaleString("en-MY", {
-                    day: "numeric",
-                    month: "short",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })
+              ? d.createdAt.toDate().toLocaleString("en-MY", {
+                  day: "numeric",
+                  month: "short",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
               : "Just now";
 
             const avHtml = photo
