@@ -2594,10 +2594,19 @@
 
       /* Dashboard pod button — icon only on small screens */
       @media (max-width: 480px) {
-        .dashboard-pod-btn .pod-label { display: none; }
+        .dashboard-pod-btn .pod-label { display: inline; font-size: 9px; }
         .dashboard-pod-btn {
-          padding: 0 10px;
-          gap: 0;
+          padding: 0 8px;
+          gap: 4px;
+        }
+
+        /* Widen XP bar — stretch left & right so "/ 1000" clears the avatar */
+        .xp-bar-wrap {
+          left: 10px;
+          right: 10px;
+          width: auto;
+          max-width: none;
+          transform: none;
         }
       }
 
@@ -2620,9 +2629,11 @@
         .rank-level-chip { padding: 3px 7px 3px 6px; }
 
         .xp-bar-wrap {
-          width: 55%;
-          min-width: 0;
-          /* keep base: left:50% + translateX(-50%) — centered */
+          left: 8px;
+          right: 8px;
+          width: auto;
+          max-width: none;
+          transform: none;
         }
         .xp-label { font-size: 8px; }
 
@@ -2664,10 +2675,13 @@
         .rank-title-text { font-size: 8px; }
         .callsign-text { font-size: 8px; }
 
-        /* XP bar: remove fixed min-width that causes horizontal overflow */
+        /* XP bar: stretch edge-to-edge so "/ 1000" doesn't hide behind avatar */
         .xp-bar-wrap {
-          min-width: 0;
-          width: 55%;
+          left: 12px;
+          right: 12px;
+          width: auto;
+          max-width: none;
+          transform: none;
         }
 
         .profile-identity {
