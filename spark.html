@@ -465,6 +465,16 @@ a{text-decoration:none;color:inherit}
   border-color:rgba(16,185,129,.55);
   color:#fff;
 }
+.badge.follow-badge.following{
+  background:rgba(16,185,129,.15);
+  border-color:rgba(16,185,129,.45);
+  color:var(--green);
+}
+.badge.follow-badge.following:hover{
+  background:rgba(239,68,68,.08);
+  border-color:rgba(239,68,68,.35);
+  color:rgba(239,68,68,.75);
+}
 
 /* Dots menu */
 .dots-btn{
@@ -2436,8 +2446,16 @@ function shareSpark() {
    FOLLOW TOGGLES
 ══════════════════════════════════ */
 function toggleFollow(btn) {
-  const on = btn.classList.toggle('on');
-  btn.innerHTML = on ? 'Following' : '<i class="ph-bold ph-plus"></i> Follow';
+  // pill buttons on demo cards (no data-spark-id on parent) — delegate to _followFn if ownerUid available
+  const card = btn.closest('.spark-card');
+  const ownerUid = card ? card.dataset.ownerUid : '';
+  if (ownerUid && typeof window._followFn === 'function') {
+    window._followFn({ ownerUid, btn, type: 'pill' });
+  } else {
+    // fallback UI-only for demo static cards
+    const on = btn.classList.toggle('on');
+    btn.innerHTML = on ? 'Following' : '<i class="ph-bold ph-plus"></i> Follow';
+  }
 }
 function toggleWtf(btn) {
   const on = btn.classList.toggle('on');
@@ -2447,15 +2465,13 @@ function togglePopupFollow(btn) {
   const on = btn.classList.toggle('on');
   btn.textContent = on ? '✓ Following' : '+ Follow';
 }
-// Follow badge on feed cards — shows Follow only for now (unfollow logic added later)
+// Follow badge on feed cards — wired to Firestore
 function toggleFollowBadge(btn) {
-  // For now: clicking Follow confirms the action visually but stays as Follow (no unfollow state)
-  btn.innerHTML = '<i class="ph-bold ph-check"></i> Following';
-  btn.style.background = 'rgba(16,185,129,.18)';
-  btn.style.borderColor = 'rgba(16,185,129,.5)';
-  btn.style.color = 'var(--green)';
-  btn.style.cursor = 'default';
-  btn.onclick = null; // disable further clicks until logic is wired up
+  const card = btn.closest('.spark-card');
+  const ownerUid = card ? card.dataset.ownerUid : '';
+  if (ownerUid && typeof window._followFn === 'function') {
+    window._followFn({ ownerUid, btn, type: 'badge' });
+  }
 }
 
 /* ══════════════════════════════════
@@ -2627,7 +2643,26 @@ function replyToReplyItem(authorHandle, mentionedUid) {
   }
 }
 window.replyToReplyItem = replyToReplyItem;
-</script>
+
+/* ══════════════════════════════════
+   FOLLOW BACK FROM NOTIFICATION
+══════════════════════════════════ */
+function notifFollowBack(btn, targetUid, notifId) {
+  if (!targetUid || typeof window._followFn !== 'function') return;
+  // Mark notification as read
+  if (notifId && window._sparkUser?.uid) {
+    const row = btn.closest('.notif-row');
+    markOneRead(window._sparkUser.uid, notifId, row);
+  }
+  // Delegate to the same _followFn used everywhere else
+  window._followFn({ ownerUid: targetUid, btn, type: 'followback' });
+}
+window.notifFollowBack = notifFollowBack;
+
+// Internal markOneRead reference exposed so notifFollowBack can call it
+function markOneRead(uid, notifId, rowEl) {
+  if (typeof window._markOneReadFn === 'function') window._markOneReadFn(uid, notifId, rowEl);
+}
 
 
 <script type="module">
@@ -2699,6 +2734,9 @@ onAuthStateChanged(auth, async (user) => {
 
   // Start notification listener — live badge count
   startNotifListener(user.uid);
+
+  // Load the set of UIDs the current user is following (used to hydrate follow buttons)
+  await loadFollowingSet(user.uid);
 });
 
 // ── ENSURE point map fields exist on first load ──
@@ -2739,8 +2777,172 @@ async function ensurePointMap(uid) {
 window._startFeedFn = startFeed;
 
 // ══════════════════════════════════════════════════════
-// NOTIFICATIONS MODULE
+// FOLLOW MODULE
 // ══════════════════════════════════════════════════════
+
+// In-memory set of UIDs the current user follows — loaded once on auth
+window._followingSet = new Set();
+
+// Load who the current user is following into memory
+async function loadFollowingSet(uid) {
+  try {
+    const snap = await getDocs(collection(db, 'users', uid, 'following'));
+    window._followingSet = new Set(snap.docs.map(d => d.id));
+  } catch(e) {
+    console.warn('loadFollowingSet error:', e);
+    window._followingSet = new Set();
+  }
+}
+
+// Core follow/unfollow toggle — called by both pill and badge buttons
+window._followFn = async function({ ownerUid, btn, type }) {
+  const user = window._sparkUser;
+  if (!user || !ownerUid || ownerUid === user.uid) return;
+
+  const isFollowing = window._followingSet.has(ownerUid);
+  const willFollow  = !isFollowing;
+
+  // ── Optimistic UI update immediately ──
+  if (type === 'badge') {
+    if (willFollow) {
+      btn.classList.add('following');
+      btn.innerHTML = '<i class="ph-bold ph-check"></i> Following';
+    } else {
+      btn.classList.remove('following');
+      btn.innerHTML = '<i class="ph-bold ph-user-plus"></i> Follow';
+    }
+  } else if (type === 'followback') {
+    // Follow Back button inside notification panel
+    if (willFollow) {
+      btn.innerHTML = '<i class="ph-bold ph-check"></i> Following';
+      btn.style.borderColor = 'rgba(16,185,129,.4)';
+      btn.style.color = 'var(--green)';
+      btn.style.background = 'rgba(16,185,129,.08)';
+    } else {
+      btn.innerHTML = '<i class="ph-bold ph-user-plus"></i> Follow Back';
+      btn.style.borderColor = '';
+      btn.style.color = '';
+      btn.style.background = '';
+    }
+  } else {
+    // pill style
+    if (willFollow) {
+      btn.classList.add('on');
+      btn.innerHTML = 'Following';
+    } else {
+      btn.classList.remove('on');
+      btn.innerHTML = '<i class="ph-bold ph-plus"></i> Follow';
+    }
+  }
+
+  // ── Update in-memory set ──
+  if (willFollow) {
+    window._followingSet.add(ownerUid);
+  } else {
+    window._followingSet.delete(ownerUid);
+  }
+
+  // ── Sync all other buttons on page for the same user ──
+  document.querySelectorAll('.spark-card').forEach(card => {
+    if (card.dataset.ownerUid !== ownerUid) return;
+    // badge buttons
+    card.querySelectorAll('.badge.follow-badge').forEach(b => {
+      if (b === btn) return;
+      if (willFollow) {
+        b.classList.add('following');
+        b.innerHTML = '<i class="ph-bold ph-check"></i> Following';
+      } else {
+        b.classList.remove('following');
+        b.innerHTML = '<i class="ph-bold ph-user-plus"></i> Follow';
+      }
+    });
+    // pill buttons
+    card.querySelectorAll('.follow-pill').forEach(b => {
+      if (b === btn) return;
+      if (willFollow) {
+        b.classList.add('on');
+        b.innerHTML = 'Following';
+      } else {
+        b.classList.remove('on');
+        b.innerHTML = '<i class="ph-bold ph-plus"></i> Follow';
+      }
+    });
+  });
+
+  // ── Persist to Firestore ──
+  const ud         = window._sparkUserData || {};
+  const fromName   = ud.fullName || user.displayName || user.email?.split('@')[0] || 'Someone';
+  const fromHandle = ud.nickname || user.email?.split('@')[0] || 'user';
+  const fromPhoto  = ud.profilePicture?.url || user.photoURL || '';
+
+  try {
+    if (willFollow) {
+      // Write to both subcollections atomically via batch
+      const batch = writeBatch(db);
+      batch.set(doc(db, 'users', user.uid, 'following', ownerUid), {
+        uid:       ownerUid,
+        createdAt: serverTimestamp(),
+      });
+      batch.set(doc(db, 'users', ownerUid, 'followers', user.uid), {
+        uid:         user.uid,
+        fromName,
+        fromHandle,
+        fromPhoto,
+        createdAt:   serverTimestamp(),
+      });
+      await batch.commit();
+
+      // Send follow notification to the target user
+      try {
+        await addDoc(collection(db, 'users', ownerUid, 'notifications'), {
+          type:       'follow',
+          fromUid:    user.uid,
+          fromName,
+          fromHandle,
+          fromPhoto,
+          sparkId:    '',
+          sparkText:  '',
+          message:    `<strong>${fromName}</strong> started following you`,
+          read:       false,
+          createdAt:  serverTimestamp(),
+        });
+      } catch(ne) { console.warn('follow notif error:', ne); }
+
+      // Log to current user's activity history
+      try {
+        await addDoc(collection(db, 'users', user.uid, 'activityHistory'), {
+          type:      'follow',
+          icon:      'ph-user-plus',
+          iconColor: 'var(--green)',
+          bgClass:   'green-bg',
+          text:      `<strong>Followed</strong> @${fromHandle}`,
+          createdAt: serverTimestamp(),
+        });
+      } catch(ae) { console.warn('follow activity log error:', ae); }
+
+    } else {
+      // Unfollow — delete both subcollection docs
+      const batch = writeBatch(db);
+      batch.delete(doc(db, 'users', user.uid, 'following', ownerUid));
+      batch.delete(doc(db, 'users', ownerUid, 'followers', user.uid));
+      await batch.commit();
+    }
+  } catch(e) {
+    console.error('_followFn Firestore error:', e.code, e.message);
+    // Rollback optimistic UI on failure
+    if (willFollow) {
+      window._followingSet.delete(ownerUid);
+      if (type === 'badge') { btn.classList.remove('following'); btn.innerHTML = '<i class="ph-bold ph-user-plus"></i> Follow'; }
+      else if (type === 'followback') { btn.innerHTML = '<i class="ph-bold ph-user-plus"></i> Follow Back'; btn.style.borderColor=''; btn.style.color=''; btn.style.background=''; }
+      else { btn.classList.remove('on'); btn.innerHTML = '<i class="ph-bold ph-plus"></i> Follow'; }
+    } else {
+      window._followingSet.add(ownerUid);
+      if (type === 'badge') { btn.classList.add('following'); btn.innerHTML = '<i class="ph-bold ph-check"></i> Following'; }
+      else if (type === 'followback') { btn.innerHTML = '<i class="ph-bold ph-check"></i> Following'; btn.style.borderColor='rgba(16,185,129,.4)'; btn.style.color='var(--green)'; btn.style.background='rgba(16,185,129,.08)'; }
+      else { btn.classList.add('on'); btn.innerHTML = 'Following'; }
+    }
+  }
+};
 
 // ── LISTEN for current user's unread notifications ──
 let _notifUnsub = null;
@@ -2760,6 +2962,11 @@ function startNotifListener(uid) {
       // Mobile badge
       const mobBadge = document.getElementById('mobNotifBadge');
       if (mobBadge) { mobBadge.textContent = label; mobBadge.classList.toggle('visible', visible); }
+      // If the panel is currently open, refresh its list live so new follow notifs appear instantly
+      const panel = document.getElementById('notifPanel');
+      if (panel && panel.classList.contains('open') && typeof window._loadNotifsFn === 'function') {
+        window._loadNotifsFn();
+      }
     },
     (err) => console.error('notif listener:', err)
   );
@@ -2955,13 +3162,18 @@ window._loadNotifsFn = async function() {
         const replyBtn = (key === 'reply' && d.sparkId)
           ? `<button class="notif-reply-btn" onclick="event.stopPropagation();replyFromNotif('${d.sparkId}','${d.fromUid||''}','${(d.fromName||'').replace(/'/g,"\\'")}','${(d.fromHandle||d.fromName||'').replace(/'/g,"\\'")}','${(d.sparkText||'').replace(/'/g,"\\'").slice(0,60)}','${id}','${(d.fromPhoto||'').replace(/'/g,"\\'")}')"><i class="ph-bold ph-chat-circle"></i> Reply</button>`
           : '';
+        // Follow Back button — shown on follow notifications, reflects current follow state
+        const alreadyFollowingBack = window._followingSet && window._followingSet.has(d.fromUid || '');
+        const followBackBtn = (key === 'follow' && d.fromUid && d.fromUid !== window._sparkUser?.uid)
+          ? `<button class="notif-reply-btn notif-follow-back-btn" data-target-uid="${d.fromUid}" style="${alreadyFollowingBack ? 'border-color:rgba(16,185,129,.4);color:var(--green);background:rgba(16,185,129,.08)' : ''}" onclick="event.stopPropagation();notifFollowBack(this,'${d.fromUid}','${id}')"><i class="ph-bold ${alreadyFollowingBack ? 'ph-check' : 'ph-user-plus'}"></i> ${alreadyFollowingBack ? 'Following' : 'Follow Back'}</button>`
+          : '';
         row.innerHTML = `
           <div class="notif-av">${avInner}</div>
           <div class="notif-body">
             <div class="notif-text">${d.message || `<strong>${d.fromName}</strong> interacted with your Spark`}</div>
             ${d.sparkText ? `<div class="notif-sub">"${d.sparkText}"</div>` : ''}
             <div class="notif-time">${timeStr}</div>
-            ${replyBtn}
+            ${replyBtn}${followBackBtn}
           </div>
           <div class="notif-type-icon ${cls}"><i class="ph-bold ${icon}"></i></div>
         `;
@@ -2985,6 +3197,7 @@ async function markOneRead(uid, notifId, rowEl) {
     if (rowEl) rowEl.classList.remove('unread');
   } catch(e) { console.error('markOneRead:', e); }
 }
+window._markOneReadFn = markOneRead;
 
 // ── MARK ALL notifications as read ──
 // ══════════════════════════════════════════════════════
@@ -3345,7 +3558,12 @@ function renderCard(id, d) {
         </div>
         <div class="badges-row">
           <span class="badge rank">LV 1</span>
-          ${!isOwner ? `<button class="badge follow-badge" onclick="event.stopPropagation();toggleFollowBadge(this)"><i class="ph-bold ph-user-plus"></i> Follow</button>` : ''}
+          ${!isOwner ? (() => {
+            const isFollowing = window._followingSet && window._followingSet.has(d.uid || '');
+            return isFollowing
+              ? `<button class="badge follow-badge following" onclick="event.stopPropagation();toggleFollowBadge(this)"><i class="ph-bold ph-check"></i> Following</button>`
+              : `<button class="badge follow-badge" onclick="event.stopPropagation();toggleFollowBadge(this)"><i class="ph-bold ph-user-plus"></i> Follow</button>`;
+          })() : ''}
         </div>
       </div>
       ${dotsOrDelete}
