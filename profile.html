@@ -3175,6 +3175,364 @@
         gap: 10px;
       }
       .modal-empty i { font-size: 28px; opacity: .3; }
+
+      /* ══════════════════════════════════════════════
+         USER PEEK CARD
+      ══════════════════════════════════════════════ */
+      .peek-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.78);
+        backdrop-filter: blur(10px);
+        z-index: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.25s, visibility 0.25s;
+      }
+      .peek-overlay.open {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .peek-card {
+        width: 100%;
+        max-width: 360px;
+        background: rgba(10,6,16,0.98);
+        border: 1px solid rgba(194,24,91,0.22);
+        border-radius: 22px;
+        overflow: hidden;
+        position: relative;
+        transform: translateY(24px) scale(0.96);
+        transition: transform 0.3s cubic-bezier(0.34,1.15,0.64,1);
+        box-shadow: 0 24px 80px rgba(0,0,0,0.8), 0 0 0 1px rgba(194,24,91,0.08);
+      }
+      .peek-overlay.open .peek-card {
+        transform: translateY(0) scale(1);
+      }
+
+      .peek-close-btn {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        z-index: 10;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: rgba(0,0,0,0.55);
+        border: 1px solid rgba(255,255,255,0.12);
+        color: rgba(255,255,255,0.75);
+        font-size: 14px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(8px);
+        transition: all 0.18s;
+      }
+      .peek-close-btn:hover {
+        background: rgba(194,24,91,0.3);
+        border-color: rgba(194,24,91,0.5);
+        color: #fff;
+      }
+
+      /* Banner */
+      .peek-banner {
+        height: 90px;
+        position: relative;
+        background: linear-gradient(135deg, rgba(194,24,91,0.25) 0%, rgba(139,92,246,0.18) 60%, #0d0009 100%);
+        overflow: hidden;
+      }
+      .peek-banner-bg {
+        position: absolute;
+        inset: 0;
+        background-size: cover;
+        background-position: center;
+        opacity: 0.85;
+      }
+      .peek-banner::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0; right: 0;
+        height: 40px;
+        background: linear-gradient(to bottom, transparent, rgba(10,6,16,0.9));
+      }
+
+      /* Avatar */
+      .peek-avatar-wrap {
+        position: relative;
+        width: 68px;
+        height: 68px;
+        margin: -34px auto 0;
+        z-index: 2;
+      }
+      .peek-avatar {
+        width: 68px;
+        height: 68px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--pink), var(--purple));
+        border: 3px solid rgba(10,6,16,0.98);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        font-weight: 700;
+        font-family: var(--font-display);
+        color: #fff;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(194,24,91,0.3);
+      }
+      .peek-avatar img {
+        width: 100%; height: 100%; object-fit: cover; border-radius: 50%;
+      }
+      .peek-online-dot {
+        position: absolute;
+        bottom: 3px;
+        right: 3px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--green);
+        border: 2px solid rgba(10,6,16,0.98);
+        display: none;
+      }
+      .peek-online-dot.visible { display: block; }
+
+      /* Identity */
+      .peek-identity {
+        text-align: center;
+        padding: 10px 20px 0;
+      }
+      .peek-name {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--text);
+        font-family: var(--font-body);
+        line-height: 1.2;
+      }
+      .peek-handle {
+        font-size: 11px;
+        color: var(--text-3);
+        font-family: var(--font-mono);
+        margin-top: 2px;
+      }
+      .peek-badges-row {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 5px;
+        margin-top: 7px;
+      }
+      .peek-rank-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-family: var(--font-display);
+        font-size: 8px;
+        color: rgba(245,158,11,0.8);
+        background: rgba(245,158,11,0.08);
+        border: 1px solid rgba(245,158,11,0.2);
+        padding: 3px 8px;
+        border-radius: 100px;
+        letter-spacing: 0.06em;
+      }
+      .peek-plan-badge {
+        font-size: 8.5px;
+        font-weight: 600;
+        color: var(--text-3);
+        background: var(--bg-3);
+        border: 1px solid var(--border);
+        padding: 3px 8px;
+        border-radius: 100px;
+        font-family: var(--font-body);
+        letter-spacing: 0.04em;
+      }
+      .peek-verified-badge {
+        font-size: 8.5px;
+        font-weight: 600;
+        color: var(--green);
+        background: rgba(16,185,129,0.08);
+        border: 1px solid rgba(16,185,129,0.25);
+        padding: 3px 8px;
+        border-radius: 100px;
+        font-family: var(--font-body);
+      }
+      .peek-status {
+        font-size: 11.5px;
+        color: var(--text-3);
+        font-style: italic;
+        margin-top: 7px;
+        min-height: 0;
+        font-family: var(--font-body);
+        line-height: 1.4;
+      }
+      .peek-status:not(:empty)::before {
+        content: '"';
+        color: var(--pink);
+        font-style: normal;
+        margin-right: 1px;
+      }
+      .peek-status:not(:empty)::after {
+        content: '"';
+        color: var(--pink);
+        font-style: normal;
+        margin-left: 1px;
+      }
+      .peek-bio {
+        font-size: 11.5px;
+        color: var(--text-2);
+        margin-top: 5px;
+        line-height: 1.5;
+        font-family: var(--font-body);
+      }
+
+      /* Stats strip */
+      .peek-stats {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0;
+        margin: 14px 20px 0;
+        background: var(--bg-3);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 10px 0;
+      }
+      .peek-stat {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+      }
+      .peek-stat-divider {
+        width: 1px;
+        height: 28px;
+        background: var(--border);
+        flex-shrink: 0;
+      }
+      .peek-stat-num {
+        font-family: var(--font-display);
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--text);
+        letter-spacing: -0.02em;
+      }
+      .peek-stat-label {
+        font-size: 9px;
+        color: var(--text-3);
+        font-family: var(--font-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+
+      /* Chips */
+      .peek-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        padding: 10px 18px 0;
+        justify-content: center;
+      }
+
+      /* Footer */
+      .peek-footer {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 14px 18px 18px;
+      }
+      .peek-follow-btn {
+        flex: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 10px 0;
+        border-radius: 10px;
+        background: var(--pink);
+        border: none;
+        color: #fff;
+        font-size: 12px;
+        font-weight: 700;
+        font-family: var(--font-body);
+        letter-spacing: 0.03em;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      .peek-follow-btn:hover { background: var(--pink-2); }
+      .peek-follow-btn.following {
+        background: rgba(255,255,255,0.06);
+        border: 1px solid var(--border-2);
+        color: var(--text-2);
+      }
+      .peek-follow-btn.following:hover {
+        background: rgba(239,68,68,0.08);
+        border-color: rgba(239,68,68,0.3);
+        color: rgba(239,68,68,0.8);
+      }
+      .peek-follow-btn.friends {
+        background: rgba(16,185,129,0.1);
+        border: 1px solid rgba(16,185,129,0.3);
+        color: var(--green);
+      }
+      .peek-follow-btn.self-view {
+        background: var(--bg-3);
+        border: 1px solid var(--border);
+        color: var(--text-3);
+        cursor: default;
+        pointer-events: none;
+      }
+      .peek-visit-btn {
+        flex: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 10px 0;
+        border-radius: 10px;
+        background: rgba(139,92,246,0.12);
+        border: 1px solid rgba(139,92,246,0.3);
+        color: var(--purple);
+        font-size: 12px;
+        font-weight: 700;
+        font-family: var(--font-body);
+        letter-spacing: 0.03em;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .peek-visit-btn:hover {
+        background: rgba(139,92,246,0.22);
+        border-color: rgba(139,92,246,0.5);
+        color: #d4b8ff;
+      }
+
+      /* Peek loading state */
+      .peek-loading {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        padding: 48px 20px;
+        color: var(--text-3);
+        font-size: 12px;
+        font-family: var(--font-body);
+      }
+      .peek-spinner {
+        width: 28px;
+        height: 28px;
+        border: 2px solid rgba(194,24,91,0.2);
+        border-top-color: var(--pink);
+        border-radius: 50%;
+        animation: avatarSpin 0.7s linear infinite;
+      }
     </style>
   </head>
   <body>
@@ -3523,7 +3881,7 @@
               <!-- Status -->
               <div class="status-wrap">
                 <div class="status-display">
-                  <span class="status-emoji">💬</span>
+                  <span style="font-size:9px;font-weight:700;letter-spacing:0.12em;color:var(--text-3);font-family:var(--font-mono);white-space:nowrap;text-transform:uppercase;flex-shrink:0;">STATUS :</span>
                   <input
                     type="text"
                     class="status-text-input"
@@ -3532,6 +3890,7 @@
                     value=""
                     maxlength="60"
                     oninput="onStatusInput(this)"
+                    style="text-align:center;"
                   />
                   <button
                     class="status-save-btn"
@@ -4493,6 +4852,10 @@
       const app = initializeApp(firebaseConfig);
       const auth = getAuth(app);
       const db = getFirestore(app);
+
+      // ── Expose for user-peek.js ──
+      window._t1db = db;
+      window._t1FirestoreFns = { doc, getDoc, collection, getDocs, query, where, orderBy, limit, setDoc, deleteDoc, serverTimestamp, addDoc, updateDoc };
 
       // ── POPULATE FROM FIREBASE ──
       // Hide page until auth state is known — prevents flash of content for unauthenticated users
@@ -5864,47 +6227,60 @@
       // ══════════════════════════════════════════════════════
 
       // Cache: raw follow docs + built profiles
-      window._followCache   = { following: null, followers: null };
-      window._profileCache  = {};   // uid → profile object
-      window._modalType     = null; // 'following' | 'followers'
-      window._allProfiles   = [];   // full list for current open modal (for search)
+      window._followCache        = { following: null, followers: null };
+      window._profileCache       = {};   // uid → profile object
+      window._modalType          = null; // 'following' | 'followers'
+      window._allProfiles        = [];   // full list for current open modal (for search)
+      window._followStatsPromise = null; // in-flight loadFollowStats promise — prevents race condition
 
       // ── Load counts + cache raw follow lists ──
       async function loadFollowStats(uid) {
-        try {
-          const [followingSnap, followersSnap] = await Promise.all([
-            getDocs(query(collection(db, 'follows'), where('followerId', '==', uid))),
-            getDocs(query(collection(db, 'follows'), where('followedId', '==', uid))),
-          ]);
+        // If already in-flight, return the same promise so callers share the result
+        if (window._followStatsPromise) return window._followStatsPromise;
 
-          const followingDocs = [];
-          followingSnap.forEach(d => followingDocs.push({ id: d.id, ...d.data() }));
-          const followersDocs = [];
-          followersSnap.forEach(d => followersDocs.push({ id: d.id, ...d.data() }));
+        window._followStatsPromise = (async () => {
+          try {
+            const [followingSnap, followersSnap] = await Promise.all([
+              getDocs(query(collection(db, 'follows'), where('followerId', '==', uid))),
+              getDocs(query(collection(db, 'follows'), where('followedId', '==', uid))),
+            ]);
 
-          window._followCache.following = followingDocs;
-          window._followCache.followers = followersDocs;
+            const followingDocs = [];
+            followingSnap.forEach(d => followingDocs.push({ id: d.id, ...d.data() }));
+            const followersDocs = [];
+            followersSnap.forEach(d => followersDocs.push({ id: d.id, ...d.data() }));
 
-          // Build in-memory set of who current user follows (for button states)
-          window._myFollowingSet = new Set(followingDocs.map(d => d.followedId).filter(Boolean));
+            window._followCache.following = followingDocs;
+            window._followCache.followers = followersDocs;
 
-          const felEl = document.getElementById('followingCount');
-          const ferEl = document.getElementById('followersCount');
-          if (felEl) felEl.textContent = followingDocs.length;
-          if (ferEl) ferEl.textContent = followersDocs.length;
+            // Build in-memory set of who current user follows (for button states)
+            window._myFollowingSet = new Set(followingDocs.map(d => d.followedId).filter(Boolean));
 
-        } catch(e) {
-          console.warn('loadFollowStats error:', e.code, e.message);
-          const felEl = document.getElementById('followingCount');
-          const ferEl = document.getElementById('followersCount');
-          if (felEl) felEl.textContent = '—';
-          if (ferEl) ferEl.textContent = '—';
-        }
+            const felEl = document.getElementById('followingCount');
+            const ferEl = document.getElementById('followersCount');
+            if (felEl) felEl.textContent = followingDocs.length;
+            if (ferEl) ferEl.textContent = followersDocs.length;
+
+          } catch(e) {
+            console.warn('loadFollowStats error:', e.code, e.message);
+            const felEl = document.getElementById('followingCount');
+            const ferEl = document.getElementById('followersCount');
+            if (felEl) felEl.textContent = '—';
+            if (ferEl) ferEl.textContent = '—';
+          } finally {
+            // Clear so a manual refresh later can re-fetch
+            window._followStatsPromise = null;
+          }
+        })();
+
+        return window._followStatsPromise;
       }
       window.loadFollowStats = loadFollowStats;
 
       // ── Fetch a single user profile doc (with cache) ──
       async function fetchUserProfile(uid) {
+        // Never cache or return own profile in this context
+        if (uid === window._currentUid) return null;
         if (window._profileCache[uid]) return window._profileCache[uid];
         try {
           const snap = await getDoc(doc(db, 'users', uid));
@@ -5930,6 +6306,8 @@
       async function resolveProfile(entry, uidField) {
         const targetUid = entry[uidField];
         if (!targetUid) return null;
+        // Never resolve own profile into the follow list
+        if (targetUid === window._currentUid) return null;
         if (window._profileCache[targetUid]) return window._profileCache[targetUid];
 
         // Fast path: follow doc already carries name/photo
@@ -5991,7 +6369,9 @@
           <div class="user-list-item" data-uid="${profile.uid}"
                data-name="${(profile.name||'').toLowerCase()}"
                data-handle="${(profile.handle||'').toLowerCase()}"
-               data-email="${(profile.email||'').toLowerCase()}">
+               data-email="${(profile.email||'').toLowerCase()}"
+               onclick="window.openPeekCard('${profile.uid}')"
+               style="cursor:pointer;">
             <div class="user-list-avatar"
                  style="background:linear-gradient(135deg,rgba(194,24,91,.7),rgba(139,92,246,.6))">
               ${avHtml}
@@ -6043,19 +6423,24 @@
           return;
         }
 
-        // Re-fetch if cache is cold
-        if (!window._followCache[type]) {
+        // Always wait for any in-flight loadFollowStats, or fetch fresh if cache is cold
+        if (window._followStatsPromise) {
+          await window._followStatsPromise;
+        } else if (!window._followCache[type]) {
           await loadFollowStats(uid);
         }
 
         const list = window._followCache[type] || [];
         const uidField = type === 'following' ? 'followedId' : 'followerId';
 
+        // Filter out own UID — never show yourself in following/followers list
+        const filteredList = list.filter(entry => entry[uidField] !== uid);
+
         // Update count in title
         const countEl = document.getElementById('modalTitleCount');
-        if (countEl) countEl.textContent = list.length;
+        if (countEl) countEl.textContent = filteredList.length;
 
-        if (list.length === 0) {
+        if (filteredList.length === 0) {
           const emptyMsg = type === 'following' ? "You're not following anyone yet" : "No followers yet";
           bodyEl.innerHTML = `<div class="modal-empty"><i class="ph-bold ph-users"></i>${emptyMsg}</div>`;
           window._allProfiles = [];
@@ -6064,8 +6449,8 @@
 
         // Resolve all profiles in parallel
         const profiles = (await Promise.all(
-          list.map(entry => resolveProfile(entry, uidField))
-        )).filter(Boolean);
+          filteredList.map(entry => resolveProfile(entry, uidField))
+        )).filter(Boolean).filter(p => p.uid !== uid); // double-guard: strip self from resolved list too
 
         window._allProfiles = profiles;
 
@@ -6221,7 +6606,7 @@
         }
 
         return `
-          <div class="search-result-item" data-uid="${profile.uid}">
+          <div class="search-result-item" data-uid="${profile.uid}" onclick="window.openPeekCard('${profile.uid}')">
             <div class="search-result-avatar">${avHtml}</div>
             <div class="search-result-info">
               <div class="search-result-name">${nameHl}</div>
@@ -6321,8 +6706,71 @@
       };
 
     </script>
-    <script>
-      const dotsBtn = document.getElementById("dotsBtn");
+    <!-- ══════════════════════════════════
+     USER PEEK CARD (mini profile preview)
+══════════════════════════════════ -->
+    <div class="peek-overlay" id="peekOverlay" onclick="if(event.target===this)window.closePeekCard()">
+      <div class="peek-card" id="peekCard">
+        <button class="peek-close-btn" onclick="window.closePeekCard()">
+          <i class="ph-bold ph-x"></i>
+        </button>
+
+        <!-- Banner strip -->
+        <div class="peek-banner" id="peekBanner">
+          <div class="peek-banner-bg" id="peekBannerBg"></div>
+        </div>
+
+        <!-- Avatar -->
+        <div class="peek-avatar-wrap">
+          <div class="peek-avatar" id="peekAvatar"></div>
+          <span class="peek-online-dot" id="peekOnlineDot"></span>
+        </div>
+
+        <!-- Identity -->
+        <div class="peek-identity">
+          <div class="peek-name" id="peekName">—</div>
+          <div class="peek-handle" id="peekHandle"></div>
+          <div class="peek-badges-row" id="peekBadgesRow"></div>
+          <div class="peek-status" id="peekStatus"></div>
+          <div class="peek-bio" id="peekBio"></div>
+        </div>
+
+        <!-- Stats strip -->
+        <div class="peek-stats">
+          <div class="peek-stat">
+            <span class="peek-stat-num" id="peekSparks">—</span>
+            <span class="peek-stat-label">Sparks</span>
+          </div>
+          <div class="peek-stat-divider"></div>
+          <div class="peek-stat">
+            <span class="peek-stat-num" id="peekFollowers">—</span>
+            <span class="peek-stat-label">Followers</span>
+          </div>
+          <div class="peek-stat-divider"></div>
+          <div class="peek-stat">
+            <span class="peek-stat-num" id="peekFollowing">—</span>
+            <span class="peek-stat-label">Following</span>
+          </div>
+        </div>
+
+        <!-- Chips -->
+        <div class="peek-chips" id="peekChips"></div>
+
+        <!-- Action footer -->
+        <div class="peek-footer">
+          <button class="peek-follow-btn" id="peekFollowBtn" onclick="window.peekToggleFollow()">
+            <i class="ph-bold ph-user-plus"></i> Follow
+          </button>
+          <a class="peek-visit-btn" id="peekVisitBtn" href="#">
+            <i class="ph-bold ph-arrow-square-out"></i> Visit Profile
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <script src="user-peek.js"></script>
+
+
       const dotsMenu = document.getElementById("dotsMenu");
 
       dotsBtn.addEventListener("click", (e) => {
