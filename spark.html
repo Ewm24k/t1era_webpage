@@ -2534,9 +2534,15 @@ onAuthStateChanged(auth, async (user) => {
 // ── ENSURE point map fields exist on first load ──
 async function ensurePointMap(uid) {
   try {
-    await setDoc(doc(db, 'users', uid), {
-      point: { spark: 0, like: 0, reply: 0 }
-    }, { merge: true });
+    const snap = await getDoc(doc(db, 'users', uid));
+    const existing = snap.exists() ? (snap.data().point || {}) : {};
+    const patch = {};
+    if (existing.spark === undefined) patch['point.spark'] = 0;
+    if (existing.like  === undefined) patch['point.like']  = 0;
+    if (existing.reply === undefined) patch['point.reply'] = 0;
+    if (Object.keys(patch).length > 0) {
+      await updateDoc(doc(db, 'users', uid), patch);
+    }
   } catch(e) { console.warn('ensurePointMap error:', e); }
 }
 
