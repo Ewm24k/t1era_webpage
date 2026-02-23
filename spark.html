@@ -2604,6 +2604,10 @@ window._toggleLikeFn = async function({ liked, sparkId, ownerUid, sparkText }) {
   try {
     if (liked) {
       await setDoc(likeRef, { uid: user.uid, createdAt: serverTimestamp() });
+      // Award +10 XP for liking a spark
+      try {
+        await updateDoc(doc(db, 'users', user.uid), { 'point.like': increment(10) });
+      } catch(xpe) { console.warn('XP like award error:', xpe); }
       // Send notification — skip if liking own post
       if (ownerUid && ownerUid !== user.uid && typeof window._sendNotifFn === 'function') {
         await window._sendNotifFn({ type: 'like', ownerUid, sparkId, sparkText });
@@ -2894,6 +2898,11 @@ window._submitReplyFn = async function(txt) {
         createdAt: serverTimestamp(),
       });
     } catch(ae) { console.warn('activity log error:', ae); }
+
+    // 4b. Award +40 XP for replying to a spark
+    try {
+      await updateDoc(doc(db, 'users', user.uid), { 'point.reply': increment(40) });
+    } catch(xpe) { console.warn('XP reply award error:', xpe); }
 
     // 5. Clear textarea — DB write confirmed, show toast and close immediately
     document.getElementById('replyTa').value = '';
@@ -3197,6 +3206,11 @@ window._submitSparkFn = async function () {
       sparkData.youtubeId = window._pendingYtId;
     }
     await addDoc(collection(db, SPARKS_COL), sparkData);
+
+    // Award +20 XP for posting a spark
+    try {
+      await updateDoc(doc(db, 'users', user.uid), { 'point.spark': increment(20) });
+    } catch(xpe) { console.warn('XP spark award error:', xpe); }
 
     // Close compose box
     if (typeof window.closeCompose === 'function') window.closeCompose();
