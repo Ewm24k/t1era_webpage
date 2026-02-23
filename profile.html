@@ -2352,6 +2352,206 @@
       }
       .modal-no-results i { font-size: 24px; opacity: .3; }
 
+      /* ── Search dropdown results ── */
+      .modal-search-wrap {
+        position: relative;
+      }
+      .modal-search-dropdown {
+        position: absolute;
+        top: calc(100% - 2px);
+        left: 14px;
+        right: 14px;
+        background: rgba(12, 8, 18, 0.99);
+        border: 1px solid rgba(194, 24, 91, 0.3);
+        border-top: none;
+        border-radius: 0 0 14px 14px;
+        z-index: 20;
+        overflow: hidden;
+        box-shadow: 0 16px 40px rgba(0,0,0,0.7), 0 0 0 1px rgba(194,24,91,0.08);
+        animation: dropdownIn 0.18s cubic-bezier(0.34, 1.2, 0.64, 1) both;
+      }
+      .modal-search-dropdown.hidden { display: none; }
+
+      @keyframes dropdownIn {
+        from { opacity: 0; transform: translateY(-6px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+
+      /* active search: round bottom of search bar to connect with dropdown */
+      .modal-search-inner.has-dropdown {
+        border-radius: 10px 10px 0 0;
+        border-bottom-color: transparent;
+        border-color: rgba(194, 24, 91, 0.45);
+      }
+
+      .search-dropdown-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 7px 12px 5px;
+        border-bottom: 1px solid var(--border);
+      }
+      .search-dropdown-label {
+        font-size: 9px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--text-3);
+        font-family: var(--font-mono);
+      }
+      .search-dropdown-count {
+        font-size: 9px;
+        color: var(--pink-2);
+        font-family: var(--font-mono);
+        font-weight: 600;
+      }
+
+      .search-dropdown-list {
+        max-height: 260px;
+        overflow-y: auto;
+        padding: 4px 8px 8px;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(194,24,91,0.2) transparent;
+      }
+      .search-dropdown-list::-webkit-scrollbar { width: 3px; }
+      .search-dropdown-list::-webkit-scrollbar-thumb {
+        background: rgba(194,24,91,0.2); border-radius: 3px;
+      }
+
+      .search-result-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 6px;
+        border-radius: 9px;
+        cursor: pointer;
+        transition: background 0.13s;
+      }
+      .search-result-item:hover {
+        background: rgba(194, 24, 91, 0.07);
+      }
+
+      .search-result-avatar {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, rgba(194,24,91,.7), rgba(139,92,246,.6));
+        border: 1.5px solid rgba(194,24,91,0.25);
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        font-weight: 700;
+        font-family: var(--font-display);
+        color: #fff;
+        overflow: hidden;
+        position: relative;
+      }
+      .search-result-avatar img {
+        width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 50%;
+      }
+
+      .search-result-info {
+        flex: 1;
+        min-width: 0;
+      }
+      .search-result-name {
+        font-size: 12.5px;
+        font-weight: 600;
+        color: var(--text);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .search-result-name mark {
+        background: rgba(194,24,91,0.25);
+        color: var(--pink-2);
+        border-radius: 3px;
+        padding: 0 1px;
+        font-style: normal;
+      }
+      .search-result-handle {
+        font-size: 10px;
+        color: var(--text-3);
+        font-family: var(--font-mono);
+        margin-top: 1px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .search-result-handle mark {
+        background: rgba(139,92,246,0.2);
+        color: var(--purple);
+        border-radius: 3px;
+        padding: 0 1px;
+        font-style: normal;
+      }
+
+      .search-result-badge {
+        font-family: var(--font-display);
+        font-size: 8px;
+        color: rgba(245,158,11,0.7);
+        background: rgba(245,158,11,0.07);
+        border: 1px solid rgba(245,158,11,0.15);
+        padding: 2px 6px;
+        border-radius: 100px;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+
+      .search-result-btn {
+        flex-shrink: 0;
+        padding: 4px 11px;
+        border-radius: 100px;
+        font-size: 10px;
+        font-weight: 700;
+        font-family: var(--font-body);
+        letter-spacing: 0.03em;
+        cursor: pointer;
+        transition: all 0.18s;
+        white-space: nowrap;
+      }
+      .search-result-btn.follow {
+        background: var(--pink);
+        border: 1px solid var(--pink);
+        color: #fff;
+      }
+      .search-result-btn.follow:hover { background: var(--pink-2); border-color: var(--pink-2); }
+      .search-result-btn.unfollow {
+        background: rgba(255,255,255,0.06);
+        border: 1px solid var(--border-2);
+        color: var(--text-2);
+      }
+      .search-result-btn.unfollow:hover {
+        background: rgba(239,68,68,0.08);
+        border-color: rgba(239,68,68,0.35);
+        color: rgba(239,68,68,0.8);
+      }
+      .search-result-btn.friends {
+        background: rgba(16,185,129,0.1);
+        border: 1px solid rgba(16,185,129,0.35);
+        color: var(--green);
+      }
+      .search-result-btn.friends:hover {
+        background: rgba(239,68,68,0.08);
+        border-color: rgba(239,68,68,0.3);
+        color: rgba(239,68,68,0.8);
+      }
+
+      .search-no-results {
+        padding: 20px 12px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        color: var(--text-3);
+        font-size: 12px;
+      }
+      .search-no-results i { font-size: 22px; opacity: 0.3; }
+      .search-no-results strong { color: var(--text-2); }
+
       .user-list {
         padding: 2px 10px;
       }
@@ -4216,13 +4416,13 @@
           </div>
           <!-- Search bar -->
           <div class="modal-search-wrap">
-            <div class="modal-search-inner">
+            <div class="modal-search-inner" id="modalSearchInner">
               <i class="ph-bold ph-magnifying-glass"></i>
               <input
                 type="text"
                 class="modal-search-input"
                 id="modalSearchInput"
-                placeholder="Search by name, @handle or email…"
+                placeholder="Search by name or @handle…"
                 autocomplete="off"
                 oninput="window.onModalSearch(this.value)"
               />
@@ -4230,6 +4430,8 @@
                 <i class="ph-bold ph-x-circle"></i>
               </button>
             </div>
+            <!-- Search results dropdown -->
+            <div class="modal-search-dropdown hidden" id="modalSearchDropdown"></div>
           </div>
         </div>
 
@@ -5972,52 +6174,150 @@
         }
       };
 
+      // ── Highlight matching text ──
+      function _highlightMatch(text, query) {
+        if (!query || !text) return _escHtml(text);
+        const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const re = new RegExp(`(${escaped})`, 'gi');
+        return _escHtml(text).replace(re, '<mark>$1</mark>');
+      }
+
+      function _escHtml(str) {
+        return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+      }
+
+      // ── Render one dropdown result card ──
+      function _renderDropdownItem(profile, q) {
+        const myUid  = window._currentUid;
+        const isSelf = profile.uid === myUid;
+
+        // Avatar
+        const avHtml = profile.photo
+          ? `<img src="${profile.photo}" referrerpolicy="no-referrer" onerror="this.style.display='none'">`
+          : `${(profile.name[0]||'?').toUpperCase()}`;
+
+        // Highlighted name & handle
+        const nameHl   = _highlightMatch(profile.name,   q);
+        const handleHl = profile.handle ? _highlightMatch('@' + profile.handle, q) : '';
+
+        // Action button
+        let btnHtml = '';
+        if (!isSelf) {
+          const modalType = window._modalType;
+          const iFollow   = window._myFollowingSet && window._myFollowingSet.has(profile.uid);
+          if (modalType === 'following') {
+            btnHtml = `<button class="search-result-btn unfollow"
+              onclick="event.stopPropagation();window.modalToggleFollow(this,'${profile.uid}','unfollow');_syncMainListBtn('${profile.uid}','unfollow')">Unfollow</button>`;
+          } else {
+            if (iFollow) {
+              btnHtml = `<button class="search-result-btn friends"
+                onclick="event.stopPropagation();window.modalToggleFollow(this,'${profile.uid}','unfollow');_syncMainListBtn('${profile.uid}','unfollow')">
+                <i class="ph-bold ph-check" style="margin-right:2px;font-size:8px"></i>Friends</button>`;
+            } else {
+              btnHtml = `<button class="search-result-btn follow"
+                onclick="event.stopPropagation();window.modalToggleFollow(this,'${profile.uid}','follow');_syncMainListBtn('${profile.uid}','follow')">Follow</button>`;
+            }
+          }
+        }
+
+        return `
+          <div class="search-result-item" data-uid="${profile.uid}">
+            <div class="search-result-avatar">${avHtml}</div>
+            <div class="search-result-info">
+              <div class="search-result-name">${nameHl}</div>
+              ${handleHl ? `<div class="search-result-handle">${handleHl}</div>` : ''}
+            </div>
+            <span class="search-result-badge">LV${profile.level} · ${profile.rank}</span>
+            ${btnHtml}
+          </div>`;
+      }
+
+      // ── Keep main list button in sync after action in dropdown ──
+      window._syncMainListBtn = function(targetUid, action) {
+        const rows = document.querySelectorAll(`#modalUserList .user-list-item[data-uid="${targetUid}"]`);
+        rows.forEach(row => {
+          const btn = row.querySelector('.modal-action-btn');
+          if (!btn) return;
+          if (window._modalType === 'following' && action === 'unfollow') {
+            // row will be removed by modalToggleFollow already
+          } else if (action === 'follow') {
+            btn.className = 'modal-action-btn friends';
+            btn.innerHTML = '<i class="ph-bold ph-check" style="margin-right:3px;font-size:9px"></i>Friends';
+            btn.setAttribute('onclick', `window.modalToggleFollow(this,'${targetUid}','unfollow')`);
+          } else if (action === 'unfollow') {
+            btn.className = 'modal-action-btn follow';
+            btn.innerHTML = 'Follow';
+            btn.setAttribute('onclick', `window.modalToggleFollow(this,'${targetUid}','follow')`);
+          }
+        });
+      };
+
       // ── Search ──
       window.onModalSearch = function(query) {
-        const clearBtn = document.getElementById('modalSearchClear');
+        const clearBtn  = document.getElementById('modalSearchClear');
+        const dropdown  = document.getElementById('modalSearchDropdown');
+        const searchInner = document.getElementById('modalSearchInner');
         if (clearBtn) clearBtn.classList.toggle('visible', query.length > 0);
 
         const q = query.trim().toLowerCase();
-        const items = document.querySelectorAll('#modalUserList .user-list-item');
 
+        // No query — close dropdown, show full list
         if (!q) {
+          if (dropdown) { dropdown.innerHTML = ''; dropdown.classList.add('hidden'); }
+          if (searchInner) searchInner.classList.remove('has-dropdown');
+          const items = document.querySelectorAll('#modalUserList .user-list-item');
           items.forEach(el => el.style.display = '');
-          const noRes = document.getElementById('modalNoResults');
-          if (noRes) noRes.remove();
           return;
         }
 
-        let visibleCount = 0;
-        items.forEach(el => {
-          const name   = el.dataset.name   || '';
-          const handle = el.dataset.handle || '';
-          const email  = el.dataset.email  || '';
-          const match  = name.includes(q) || handle.includes(q) || email.includes(q);
-          el.style.display = match ? '' : 'none';
-          if (match) visibleCount++;
+        // Hide main list items (dropdown takes over display)
+        const items = document.querySelectorAll('#modalUserList .user-list-item');
+        items.forEach(el => el.style.display = 'none');
+
+        // Filter from in-memory profile list
+        const profiles = window._allProfiles || [];
+        const matched = profiles.filter(p => {
+          const name   = (p.name   || '').toLowerCase();
+          const handle = (p.handle || '').toLowerCase();
+          const email  = (p.email  || '').toLowerCase();
+          return name.includes(q) || handle.includes(q) || email.includes(q);
         });
 
-        // Show/hide no-results message
-        let noRes = document.getElementById('modalNoResults');
-        if (visibleCount === 0) {
-          if (!noRes) {
-            noRes = document.createElement('div');
-            noRes.id = 'modalNoResults';
-            noRes.className = 'modal-no-results';
-            noRes.innerHTML = `<i class="ph-bold ph-magnifying-glass"></i>No results for "<strong>${query}</strong>"`;
-            document.getElementById('modalBody').appendChild(noRes);
+        // Build dropdown
+        if (dropdown) {
+          dropdown.classList.remove('hidden');
+          searchInner && searchInner.classList.add('has-dropdown');
+
+          if (matched.length === 0) {
+            dropdown.innerHTML = `
+              <div class="search-no-results">
+                <i class="ph-bold ph-magnifying-glass"></i>
+                No results for "<strong>${_escHtml(query)}</strong>"
+              </div>`;
+          } else {
+            dropdown.innerHTML = `
+              <div class="search-dropdown-header">
+                <span class="search-dropdown-label">Results</span>
+                <span class="search-dropdown-count">${matched.length} found</span>
+              </div>
+              <div class="search-dropdown-list">
+                ${matched.map(p => _renderDropdownItem(p, q)).join('')}
+              </div>`;
           }
-        } else {
-          if (noRes) noRes.remove();
         }
       };
 
       window.clearModalSearch = function() {
-        const searchEl = document.getElementById('modalSearchInput');
-        const clearBtn = document.getElementById('modalSearchClear');
+        const searchEl   = document.getElementById('modalSearchInput');
+        const clearBtn   = document.getElementById('modalSearchClear');
+        const dropdown   = document.getElementById('modalSearchDropdown');
+        const searchInner = document.getElementById('modalSearchInner');
         if (searchEl) { searchEl.value = ''; searchEl.focus(); }
         if (clearBtn) clearBtn.classList.remove('visible');
-        window.onModalSearch('');
+        if (dropdown) { dropdown.innerHTML = ''; dropdown.classList.add('hidden'); }
+        if (searchInner) searchInner.classList.remove('has-dropdown');
+        const items = document.querySelectorAll('#modalUserList .user-list-item');
+        items.forEach(el => el.style.display = '');
       };
 
     </script>
@@ -6086,6 +6386,17 @@
       window.closeModal = function () {
         document.getElementById("modalOverlay").classList.remove("open");
         document.body.style.overflow = "";
+        // Reset search & dropdown
+        const searchEl = document.getElementById('modalSearchInput');
+        const clearBtn = document.getElementById('modalSearchClear');
+        const dropdown = document.getElementById('modalSearchDropdown');
+        const searchInner = document.getElementById('modalSearchInner');
+        if (searchEl) searchEl.value = '';
+        if (clearBtn) clearBtn.classList.remove('visible');
+        if (dropdown) { dropdown.innerHTML = ''; dropdown.classList.add('hidden'); }
+        if (searchInner) searchInner.classList.remove('has-dropdown');
+        const items = document.querySelectorAll('#modalUserList .user-list-item');
+        items.forEach(el => el.style.display = '');
       };
 
       window.handleOverlayClick = function (e) {
