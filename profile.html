@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,viewport-fit=cover" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <title>T1ERA — Profile</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -57,8 +60,22 @@
         padding: 0;
       }
 
+      /* Remove 300ms tap delay on all interactive elements */
+      a, button, [onclick], input, textarea, select, label {
+        touch-action: manipulation;
+      }
+
+      /* Prevent images / SVGs from overflowing their containers */
+      img, svg, video {
+        max-width: 100%;
+        height: auto;
+      }
+
       html {
         scroll-behavior: smooth;
+        overflow-x: hidden;
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
       }
 
       body {
@@ -147,7 +164,9 @@
       .profile-wrap {
         max-width: 720px;
         margin: 0 auto;
-        padding: 0 0 80px;
+        padding: 0 0 calc(80px + env(safe-area-inset-bottom));
+        overflow-x: clip;   /* prevents absolutely-positioned children from causing scroll */
+        width: 100%;
       }
 
       /* ═══════════════════════════════════════════
@@ -538,7 +557,7 @@
         transform: translateX(-50%);
         width: 60%;
         max-width: 340px;
-        min-width: 200px;
+        min-width: 0;   /* removed 200px min — was causing horizontal overflow on small phones */
       }
 
       .xp-label {
@@ -2311,7 +2330,7 @@
         flex: 1;
         overflow-y: auto;
         overscroll-behavior: contain;
-        padding: 4px 0 32px;
+        padding: 4px 0 calc(32px + env(safe-area-inset-bottom));
         scrollbar-width: thin;
         scrollbar-color: rgba(194, 24, 91, 0.18) transparent;
       }
@@ -2547,25 +2566,119 @@
       }
 
       /* ═══════════════════════════════════════════
-   RESPONSIVE
+   RESPONSIVE — MOBILE FIRST
 ═══════════════════════════════════════════ */
-      @media (max-width: 640px) {
-        .profile-banner {
-          height: 160px;
-        }
 
-        .rank-badge {
-          top: 12px;
-          left: 14px;
+      /* ── Base mobile fixes (applied always, not just at breakpoint) ── */
+
+      /* Safe-area padding for iPhone notch / Dynamic Island */
+      .topbar {
+        padding-left:  max(16px, env(safe-area-inset-left));
+        padding-right: max(16px, env(safe-area-inset-right));
+      }
+
+      body {
+        overflow-x: hidden;          /* double-lock at body too */
+        width: 100%;
+        position: relative;
+      }
+
+      /* Ensure nothing escapes the viewport width */
+      .profile-wrap,
+      .stats-row,
+      .chips-row,
+      .tabs-wrap,
+      .profile-identity,
+      .profile-banner,
+      .intel-section,
+      .rank-progress-card,
+      .points-card,
+      .balance-card,
+      .badges-grid,
+      .sparks-grid {
+        max-width: 100%;
+        box-sizing: border-box;
+      }
+
+      /* Dashboard pod button — icon only on small screens */
+      @media (max-width: 480px) {
+        .dashboard-pod-btn .pod-label { display: none; }
+        .dashboard-pod-btn {
+          padding: 0 10px;
+          gap: 0;
         }
-        .rank-level-num {
-          font-size: 10px;
+      }
+
+      /* ── Small mobile ≤ 390px (iPhone SE, older Androids) ── */
+      @media (max-width: 390px) {
+        .topbar {
+          padding-left:  max(12px, env(safe-area-inset-left));
+          padding-right: max(12px, env(safe-area-inset-right));
+          height: 48px;
         }
-        .rank-title-text {
-          font-size: 8px;
+        .topbar-logo { font-size: 12px; }
+        .topbar-logo-mark { width: 24px; height: 24px; font-size: 10px; }
+        .topbar-back { font-size: 12px; gap: 4px; }
+
+        .profile-banner { height: 140px; }
+        .rank-badge { top: 10px; left: 10px; gap: 2px; }
+        .rank-level-num { font-size: 9px; }
+        .rank-title-text { font-size: 7px; }
+        .callsign-text { font-size: 7px; }
+        .rank-level-chip { padding: 3px 7px 3px 6px; }
+
+        .xp-bar-wrap {
+          width: calc(100% - 100px); /* clear rank badge */
+          min-width: 0;              /* REMOVE the 200px min that overflows */
+          max-width: none;
+          left: auto;
+          right: 10px;
+          transform: none;
         }
-        .callsign-text {
-          font-size: 8px;
+        .xp-label { font-size: 8px; }
+
+        .profile-identity {
+          padding: 0 10px;
+          margin-top: -38px;
+        }
+        .avatar-wrap { width: 68px; height: 68px; }
+        .avatar-img, .avatar-fallback { width: 68px; height: 68px; font-size: 20px; }
+        .identity-fullname { font-size: 14px; }
+        .identity-email { font-size: 10px; }
+
+        .stats-row { padding: 10px 10px; }
+        .stat-num { font-size: 15px; }
+        .stat-label { font-size: 8px; }
+
+        .chips-row { padding: 10px 10px; gap: 5px; }
+        .chip { font-size: 9.5px; padding: 3px 8px; }
+
+        .tabs-wrap { padding: 0 10px; }
+        .tab-btn { font-size: 10px; padding: 9px 4px; }
+
+        .intel-section { margin-bottom: 16px; }
+        .rank-progress-card,
+        .points-card,
+        .balance-card { padding: 12px; }
+        .rank-current-title { font-size: 12px; }
+        .rank-big-shield { width: 34px; height: 34px; }
+        .balance-amount { font-size: 16px; }
+        .topup-btn { font-size: 10px; padding: 6px 10px; }
+      }
+
+      /* ── Standard mobile ≤ 640px ── */
+      @media (max-width: 640px) {
+        .profile-banner { height: 160px; }
+
+        .rank-badge { top: 12px; left: 14px; }
+        .rank-level-num { font-size: 10px; }
+        .rank-title-text { font-size: 8px; }
+        .callsign-text { font-size: 8px; }
+
+        /* XP bar: remove fixed min-width that causes horizontal overflow */
+        .xp-bar-wrap {
+          min-width: 0;
+          width: 55%;
         }
 
         .profile-identity {
@@ -2573,59 +2686,41 @@
           margin-top: -42px;
         }
 
-        .avatar-wrap {
-          width: 76px;
-          height: 76px;
-        }
-        .avatar-img,
-        .avatar-fallback {
-          width: 76px;
-          height: 76px;
-          font-size: 22px;
-        }
+        .avatar-wrap { width: 76px; height: 76px; }
+        .avatar-img, .avatar-fallback { width: 76px; height: 76px; font-size: 22px; }
 
-        .identity-fullname {
-          font-size: 15px;
-        }
+        .identity-fullname { font-size: 15px; }
 
-        .stat-num {
-          font-size: 16px;
-        }
-        .stat-label {
-          font-size: 9px;
-        }
+        .stat-num { font-size: 16px; }
+        .stat-label { font-size: 9px; }
 
-        .chips-row {
-          padding: 12px 14px;
-        }
-        .tabs-wrap {
-          padding: 0 14px;
-        }
+        .chips-row { padding: 12px 14px; }
+        .tabs-wrap { padding: 0 14px; }
+        .stats-row { padding: 12px 14px; }
 
-        .stats-row {
-          padding: 12px 14px;
-        }
-
+        /* Modal on mobile: keep 90vh height, don't override */
         .modal-sheet {
-          max-height: 80vh;
-          border-radius: 20px 20px 0 0;
+          border-radius: 22px 22px 0 0;
+          /* height is already 90vh from base — do NOT override here */
         }
 
-        .badges-grid {
-          grid-template-columns: repeat(3, 1fr);
-        }
-
-        .balance-amount {
-          font-size: 18px;
-        }
+        .badges-grid { grid-template-columns: repeat(3, 1fr); }
+        .balance-amount { font-size: 18px; }
 
         .bio-wrap,
-        .status-wrap {
-          max-width: 100%;
-        }
-        .xp-bar-wrap {
-          width: 75%;
-        }
+        .status-wrap { max-width: 100%; }
+
+        /* Intel tab padding on mobile */
+        .tabs-wrap .tab-panel { padding-top: 14px; }
+        .intel-section { margin-bottom: 18px; }
+        .rank-progress-card,
+        .points-card,
+        .balance-card { padding: 14px; }
+      }
+
+      /* ── Medium screens 641–1023px (tablets, large phones landscape) ── */
+      @media (min-width: 641px) and (max-width: 1023px) {
+        .profile-wrap { max-width: 680px; padding: 0 20px 60px; }
       }
 
       /* ── Desktop: centered dialog instead of bottom sheet ── */
@@ -2988,7 +3083,7 @@
             title="Dashboard Pod"
           >
             <i class="ph-bold ph-squares-four"></i>
-            Dashboard Pod
+            <span class="pod-label">Dashboard Pod</span>
           </a>
           <button
             class="dots-btn"
