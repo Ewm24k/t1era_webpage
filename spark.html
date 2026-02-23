@@ -475,6 +475,13 @@ a{text-decoration:none;color:inherit}
   border-color:rgba(239,68,68,.35);
   color:rgba(239,68,68,.75);
 }
+.badge.follow-badge.loading{
+  opacity:.6;cursor:not-allowed;pointer-events:none;
+}
+.follow-pill.loading{
+  opacity:.6;cursor:not-allowed;pointer-events:none;
+}
+@keyframes follow-pulse{0%,100%{opacity:.5}50%{opacity:1}}
 
 /* Dots menu */
 .dots-btn{
@@ -2803,72 +2810,26 @@ window._followFn = async function({ ownerUid, btn, type }) {
   const isFollowing = window._followingSet.has(ownerUid);
   const willFollow  = !isFollowing;
 
-  // ── Optimistic UI update immediately ──
+  // ── Show loading state immediately on the clicked button ──
+  btn.disabled = true;
   if (type === 'badge') {
-    if (willFollow) {
-      btn.classList.add('following');
-      btn.innerHTML = '<i class="ph-bold ph-check"></i> Following';
-    } else {
-      btn.classList.remove('following');
-      btn.innerHTML = '<i class="ph-bold ph-user-plus"></i> Follow';
-    }
+    btn.classList.add('loading');
+    btn.innerHTML = '<i class="ph-bold ph-circle-dashed" style="animation:follow-pulse .8s ease infinite"></i> …';
   } else if (type === 'followback') {
-    // Follow Back button inside notification panel
-    if (willFollow) {
-      btn.innerHTML = '<i class="ph-bold ph-check"></i> Following';
-      btn.style.borderColor = 'rgba(16,185,129,.4)';
-      btn.style.color = 'var(--green)';
-      btn.style.background = 'rgba(16,185,129,.08)';
-    } else {
-      btn.innerHTML = '<i class="ph-bold ph-user-plus"></i> Follow Back';
-      btn.style.borderColor = '';
-      btn.style.color = '';
-      btn.style.background = '';
-    }
+    btn.style.opacity = '0.6';
+    btn.style.pointerEvents = 'none';
+    btn.innerHTML = '<i class="ph-bold ph-circle-dashed" style="animation:follow-pulse .8s ease infinite"></i> …';
   } else {
-    // pill style
-    if (willFollow) {
-      btn.classList.add('on');
-      btn.innerHTML = 'Following';
-    } else {
-      btn.classList.remove('on');
-      btn.innerHTML = '<i class="ph-bold ph-plus"></i> Follow';
-    }
+    btn.classList.add('loading');
+    btn.innerHTML = '<i class="ph-bold ph-circle-dashed" style="animation:follow-pulse .8s ease infinite"></i> …';
   }
 
-  // ── Update in-memory set ──
+  // ── Update in-memory set immediately (optimistic) ──
   if (willFollow) {
     window._followingSet.add(ownerUid);
   } else {
     window._followingSet.delete(ownerUid);
   }
-
-  // ── Sync all other buttons on page for the same user ──
-  document.querySelectorAll('.spark-card').forEach(card => {
-    if (card.dataset.ownerUid !== ownerUid) return;
-    // badge buttons
-    card.querySelectorAll('.badge.follow-badge').forEach(b => {
-      if (b === btn) return;
-      if (willFollow) {
-        b.classList.add('following');
-        b.innerHTML = '<i class="ph-bold ph-check"></i> Following';
-      } else {
-        b.classList.remove('following');
-        b.innerHTML = '<i class="ph-bold ph-user-plus"></i> Follow';
-      }
-    });
-    // pill buttons
-    card.querySelectorAll('.follow-pill').forEach(b => {
-      if (b === btn) return;
-      if (willFollow) {
-        b.classList.add('on');
-        b.innerHTML = 'Following';
-      } else {
-        b.classList.remove('on');
-        b.innerHTML = '<i class="ph-bold ph-plus"></i> Follow';
-      }
-    });
-  });
 
   // ── Persist to Firestore ──
   const ud         = window._sparkUserData || {};
@@ -2893,9 +2854,10 @@ window._followFn = async function({ ownerUid, btn, type }) {
       });
       await batch.commit();
 
-      // Send follow notification to the target user
+      // Send follow notification — deterministic ID prevents duplicates on re-follow
+      const notifId = `follow_${user.uid}_${ownerUid}`;
       try {
-        await addDoc(collection(db, 'users', ownerUid, 'notifications'), {
+        await setDoc(doc(db, 'users', ownerUid, 'notifications', notifId), {
           type:       'follow',
           fromUid:    user.uid,
           fromName,
@@ -2921,27 +2883,105 @@ window._followFn = async function({ ownerUid, btn, type }) {
         });
       } catch(ae) { console.warn('follow activity log error:', ae); }
 
+      // Toast confirmation
+      if (typeof window.showToast === 'function') window.showToast('Now following! 🤝');
+
     } else {
       // Unfollow — delete both subcollection docs
       const batch = writeBatch(db);
       batch.delete(doc(db, 'users', user.uid, 'following', ownerUid));
       batch.delete(doc(db, 'users', ownerUid, 'followers', user.uid));
       await batch.commit();
+
+      // Toast confirmation
+      if (typeof window.showToast === 'function') window.showToast('Unfollowed');
     }
+
+    // ── Settle button into final state after Firestore confirms ──
+    btn.disabled = false;
+    if (type === 'badge') {
+      btn.classList.remove('loading');
+      if (willFollow) {
+        btn.classList.add('following');
+        btn.innerHTML = '<i class="ph-bold ph-check"></i> Following';
+      } else {
+        btn.classList.remove('following');
+        btn.innerHTML = '<i class="ph-bold ph-user-plus"></i> Follow';
+      }
+    } else if (type === 'followback') {
+      btn.style.opacity = '';
+      btn.style.pointerEvents = '';
+      if (willFollow) {
+        btn.innerHTML = '<i class="ph-bold ph-check"></i> Following';
+        btn.style.borderColor = 'rgba(16,185,129,.4)';
+        btn.style.color = 'var(--green)';
+        btn.style.background = 'rgba(16,185,129,.08)';
+      } else {
+        btn.innerHTML = '<i class="ph-bold ph-user-plus"></i> Follow Back';
+        btn.style.borderColor = '';
+        btn.style.color = '';
+        btn.style.background = '';
+      }
+    } else {
+      btn.classList.remove('loading');
+      if (willFollow) {
+        btn.classList.add('on');
+        btn.innerHTML = 'Following';
+      } else {
+        btn.classList.remove('on');
+        btn.innerHTML = '<i class="ph-bold ph-plus"></i> Follow';
+      }
+    }
+
+    // ── Sync all other buttons on page for the same user ──
+    document.querySelectorAll('.spark-card').forEach(card => {
+      if (card.dataset.ownerUid !== ownerUid) return;
+      card.querySelectorAll('.badge.follow-badge').forEach(b => {
+        if (b === btn) return;
+        if (willFollow) {
+          b.classList.add('following');
+          b.innerHTML = '<i class="ph-bold ph-check"></i> Following';
+        } else {
+          b.classList.remove('following');
+          b.innerHTML = '<i class="ph-bold ph-user-plus"></i> Follow';
+        }
+      });
+      card.querySelectorAll('.follow-pill').forEach(b => {
+        if (b === btn) return;
+        if (willFollow) {
+          b.classList.add('on');
+          b.innerHTML = 'Following';
+        } else {
+          b.classList.remove('on');
+          b.innerHTML = '<i class="ph-bold ph-plus"></i> Follow';
+        }
+      });
+    });
+
   } catch(e) {
     console.error('_followFn Firestore error:', e.code, e.message);
-    // Rollback optimistic UI on failure
+    // Rollback in-memory set
     if (willFollow) {
       window._followingSet.delete(ownerUid);
-      if (type === 'badge') { btn.classList.remove('following'); btn.innerHTML = '<i class="ph-bold ph-user-plus"></i> Follow'; }
-      else if (type === 'followback') { btn.innerHTML = '<i class="ph-bold ph-user-plus"></i> Follow Back'; btn.style.borderColor=''; btn.style.color=''; btn.style.background=''; }
-      else { btn.classList.remove('on'); btn.innerHTML = '<i class="ph-bold ph-plus"></i> Follow'; }
     } else {
       window._followingSet.add(ownerUid);
-      if (type === 'badge') { btn.classList.add('following'); btn.innerHTML = '<i class="ph-bold ph-check"></i> Following'; }
-      else if (type === 'followback') { btn.innerHTML = '<i class="ph-bold ph-check"></i> Following'; btn.style.borderColor='rgba(16,185,129,.4)'; btn.style.color='var(--green)'; btn.style.background='rgba(16,185,129,.08)'; }
-      else { btn.classList.add('on'); btn.innerHTML = 'Following'; }
     }
+    // Rollback button UI
+    btn.disabled = false;
+    if (type === 'badge') {
+      btn.classList.remove('loading');
+      if (!willFollow) { btn.classList.add('following'); btn.innerHTML = '<i class="ph-bold ph-check"></i> Following'; }
+      else { btn.classList.remove('following'); btn.innerHTML = '<i class="ph-bold ph-user-plus"></i> Follow'; }
+    } else if (type === 'followback') {
+      btn.style.opacity = ''; btn.style.pointerEvents = '';
+      if (!willFollow) { btn.innerHTML = '<i class="ph-bold ph-check"></i> Following'; btn.style.borderColor='rgba(16,185,129,.4)'; btn.style.color='var(--green)'; btn.style.background='rgba(16,185,129,.08)'; }
+      else { btn.innerHTML = '<i class="ph-bold ph-user-plus"></i> Follow Back'; btn.style.borderColor=''; btn.style.color=''; btn.style.background=''; }
+    } else {
+      btn.classList.remove('loading');
+      if (!willFollow) { btn.classList.add('on'); btn.innerHTML = 'Following'; }
+      else { btn.classList.remove('on'); btn.innerHTML = '<i class="ph-bold ph-plus"></i> Follow'; }
+    }
+    if (typeof window.showToast === 'function') window.showToast('Action failed — try again');
   }
 };
 
