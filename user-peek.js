@@ -38,18 +38,18 @@
     const card    = document.getElementById('peekCard');
     if (!overlay || !card) return;
 
-    // Show overlay with loading state
+    // Show loading spinner while fetching
     card.innerHTML = _loadingHtml();
     overlay.classList.add('open');
     document.body.style.overflow = 'hidden';
 
-    // Restore full card structure (loading replaced it)
-    card.innerHTML = _cardShellHtml();
-
-    // Try cache first, else fetch
+    // Only use cache if it has the full stat fields — otherwise always fetch fresh
     let profile = (window._profileCache && window._profileCache[uid]) || null;
+    const hasStats = profile && profile.sparkCount !== undefined
+                             && profile.followersCount !== undefined
+                             && profile.followingCount !== undefined;
 
-    if (!profile) {
+    if (!hasStats) {
       profile = await _fetchProfile(uid);
     }
 
@@ -220,10 +220,10 @@
       if (el) el.style.display = 'none';
     }
 
-    // Stats
-    _setText('peekSparks',    String(p.sparkCount));
-    _setText('peekFollowers', String(p.followersCount));
-    _setText('peekFollowing', String(p.followingCount));
+    // Stats — show '—' if value is missing
+    _setText('peekSparks',    p.sparkCount    != null ? String(p.sparkCount)    : '—');
+    _setText('peekFollowers', p.followersCount != null ? String(p.followersCount) : '—');
+    _setText('peekFollowing', p.followingCount != null ? String(p.followingCount) : '—');
 
     // Chips
     const chipsEl = document.getElementById('peekChips');
