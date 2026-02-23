@@ -2649,10 +2649,12 @@ window._toggleLikeFn = async function({ liked, sparkId, ownerUid, sparkText }) {
       // 1. Record the like
       await setDoc(likeRef, { uid: user.uid, createdAt: serverTimestamp() });
 
-      // 2. Award +10 XP (count by 1; profile.html multiplies by 10)
-      try {
-        await updateDoc(doc(db, 'users', user.uid), { 'point.like': increment(1) });
-      } catch(xpe) { console.warn('XP like award error:', xpe); }
+      // 2. Award +10 XP only if liking someone else's post (not own post)
+      if (ownerUid !== user.uid) {
+        try {
+          await updateDoc(doc(db, 'users', user.uid), { 'point.like': increment(1) });
+        } catch(xpe) { console.warn('XP like award error:', xpe); }
+      }
 
       // 3. Write like notification with deterministic ID (overwrites if already exists)
       if (notifRef) {
@@ -2678,14 +2680,16 @@ window._toggleLikeFn = async function({ liked, sparkId, ownerUid, sparkText }) {
       // 1. Remove the like record
       await deleteDoc(likeRef);
 
-      // 2. Deduct XP (never go below 0)
-      try {
-        const userSnap = await getDoc(doc(db, 'users', user.uid));
-        const currentLike = userSnap.exists() ? (userSnap.data().point?.like || 0) : 0;
-        await updateDoc(doc(db, 'users', user.uid), {
-          'point.like': increment(currentLike > 0 ? -1 : 0)
-        });
-      } catch(xpe) { console.warn('XP unlike deduct error:', xpe); }
+      // 2. Deduct XP only if unliking someone else's post (never go below 0)
+      if (ownerUid !== user.uid) {
+        try {
+          const userSnap = await getDoc(doc(db, 'users', user.uid));
+          const currentLike = userSnap.exists() ? (userSnap.data().point?.like || 0) : 0;
+          await updateDoc(doc(db, 'users', user.uid), {
+            'point.like': increment(currentLike > 0 ? -1 : 0)
+          });
+        } catch(xpe) { console.warn('XP unlike deduct error:', xpe); }
+      }
 
       // 3. Delete the like notification from post owner (if it exists and unread)
       if (notifRef) {
