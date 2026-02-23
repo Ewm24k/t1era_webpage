@@ -2663,6 +2663,55 @@
       .shield-gold {
         color: var(--gold);
       }
+
+      /* ── STAT COUNT SKELETON ── */
+      .stat-skeleton {
+        display: inline-block;
+        width: 32px;
+        height: 18px;
+        border-radius: 5px;
+        background: linear-gradient(90deg,var(--bg-3) 25%,rgba(255,255,255,0.05) 50%,var(--bg-3) 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.4s infinite;
+        vertical-align: middle;
+      }
+
+      /* ── MODAL LOADING STATE ── */
+      .modal-loading-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 6px;
+      }
+      .modal-loading-av {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: var(--bg-3);
+        flex-shrink: 0;
+        animation: shimmer 1.4s infinite;
+        background: linear-gradient(90deg,var(--bg-3) 25%,rgba(255,255,255,0.05) 50%,var(--bg-3) 75%);
+        background-size: 200% 100%;
+      }
+      .modal-loading-lines { flex: 1; display: flex; flex-direction: column; gap: 7px; }
+      .modal-loading-line {
+        height: 10px;
+        border-radius: 5px;
+        background: linear-gradient(90deg,var(--bg-3) 25%,rgba(255,255,255,0.05) 50%,var(--bg-3) 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.4s infinite;
+      }
+      .modal-empty {
+        padding: 40px 20px;
+        text-align: center;
+        color: var(--text-3);
+        font-size: 13px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+      }
+      .modal-empty i { font-size: 28px; opacity: .3; }
     </style>
   </head>
   <body>
@@ -3077,11 +3126,11 @@
   ══════════════════════════════════ -->
           <div class="stats-row fade-up delay-2">
             <div class="stat-block" onclick="openModal('following')">
-              <span class="stat-num">128</span>
+              <span class="stat-num" id="followingCount"><span class="stat-skeleton"></span></span>
               <span class="stat-label">Following</span>
             </div>
             <div class="stat-block" onclick="openModal('followers')">
-              <span class="stat-num">47</span>
+              <span class="stat-num" id="followersCount"><span class="stat-skeleton"></span></span>
               <span class="stat-label">Followers</span>
             </div>
             <div class="stat-block">
@@ -3933,6 +3982,8 @@
         getDocs,
         query,
         where,
+        orderBy,
+        limit,
       } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
       const firebaseConfig = {
@@ -3947,61 +3998,6 @@
       const app = initializeApp(firebaseConfig);
       const auth = getAuth(app);
       const db = getFirestore(app);
-
-      // ── DEMO USERS for modal ──
-      const demoFollowing = [
-        {
-          name: "Azrul Hakim",
-          rank: "LV3 · Operative",
-          color: "#8b5cf6",
-          initials: "AH",
-        },
-        {
-          name: "Siti Nora",
-          rank: "LV2 · Scout",
-          color: "#e91e8c",
-          initials: "SN",
-        },
-        {
-          name: "Farid M.",
-          rank: "LV5 · Guardian",
-          color: "#f59e0b",
-          initials: "FM",
-        },
-        {
-          name: "Rayyan K.",
-          rank: "LV1 · Recruit",
-          color: "#10b981",
-          initials: "RK",
-        },
-        {
-          name: "Hafiz Z.",
-          rank: "LV4 · Striker",
-          color: "#f97316",
-          initials: "HZ",
-        },
-      ];
-
-      const demoFollowers = [
-        {
-          name: "Wani Aisyah",
-          rank: "LV2 · Scout",
-          color: "#c2185b",
-          initials: "WA",
-        },
-        {
-          name: "Danial L.",
-          rank: "LV3 · Operative",
-          color: "#8b5cf6",
-          initials: "DL",
-        },
-        {
-          name: "Luqman F.",
-          rank: "LV1 · Recruit",
-          color: "#10b981",
-          initials: "LF",
-        },
-      ];
 
       // ── POPULATE FROM FIREBASE ──
       // Hide page until auth state is known — prevents flash of content for unauthenticated users
@@ -4236,6 +4232,7 @@
         fetchAndApplyBio(user.uid);
         loadActivityHistory(user.uid);
         loadProfileSparks(user.uid);
+        loadFollowStats(user.uid);
 
         // Remove skeleton overlays and reveal page now that data is applied
         const nsk = document.getElementById("nameSkeleton");
@@ -5368,10 +5365,165 @@
     </div>
   `;
       };
-    </script>
+      // ══════════════════════════════════════════════════════
+      // FOLLOWING / FOLLOWERS — real Firestore data
+      // ══════════════════════════════════════════════════════
 
-    <script>
-      // ══ DOTS MENU ══
+      // Cache so we don't re-fetch on every modal open
+      window._followCache = { following: null, followers: null };
+
+      // ── Load counts + cache lists ──
+      async function loadFollowStats(uid) {
+        try {
+          // Following: docs in /follows where followerId == uid
+          const followingSnap = await getDocs(query(
+            collection(db, 'follows'),
+            where('followerId', '==', uid)
+          ));
+          // Followers: docs in /follows where followedId == uid
+          const followersSnap = await getDocs(query(
+            collection(db, 'follows'),
+            where('followedId', '==', uid)
+          ));
+
+          const followingDocs = [];
+          followingSnap.forEach(d => followingDocs.push(d.data()));
+          const followersDocs = [];
+          followersSnap.forEach(d => followersDocs.push(d.data()));
+
+          // Update stat counts
+          const felEl = document.getElementById('followingCount');
+          const ferEl = document.getElementById('followersCount');
+          if (felEl) felEl.textContent = followingDocs.length;
+          if (ferEl) ferEl.textContent = followersDocs.length;
+
+          // Cache raw docs for modal use
+          window._followCache.following = followingDocs;   // each has followedId, fromName, fromPhoto, fromHandle
+          window._followCache.followers = followersDocs;   // each has followerId, fromName, fromPhoto, fromHandle
+
+        } catch(e) {
+          console.warn('loadFollowStats error:', e.code, e.message);
+          const felEl = document.getElementById('followingCount');
+          const ferEl = document.getElementById('followersCount');
+          if (felEl) felEl.textContent = '—';
+          if (ferEl) ferEl.textContent = '—';
+        }
+      }
+      window.loadFollowStats = loadFollowStats;
+
+      // ── Fetch a user profile by uid (name, photo, handle, rank) ──
+      async function fetchUserProfile(uid) {
+        try {
+          const snap = await getDoc(doc(db, 'users', uid));
+          if (!snap.exists()) return null;
+          const d = snap.data();
+          return {
+            uid,
+            name:   d.fullName || d.nickname || 'T1ERA User',
+            handle: d.nickname || uid.slice(0, 8),
+            photo:  d.profilePicture?.url || '',
+            rank:   d.rank?.title || 'Recruit',
+            level:  d.rank?.level || 1,
+          };
+        } catch(e) {
+          return null;
+        }
+      }
+
+      // ── Render one user row in the modal ──
+      function renderUserRow(profile) {
+        if (!profile) return '';
+        const avStyle = `background:linear-gradient(135deg,var(--pink)60,var(--purple)100)`;
+        const avContent = profile.photo
+          ? `<img src="${profile.photo}" referrerpolicy="no-referrer" style="width:42px;height:42px;border-radius:50%;object-fit:cover;display:block" onerror="this.style.display='none'">`
+          : `<span style="font-size:15px;font-weight:700;font-family:var(--font-display);color:#fff">${(profile.name[0] || '?').toUpperCase()}</span>`;
+
+        return `
+          <div class="user-list-item">
+            <div class="user-list-avatar" style="${avStyle};display:flex;align-items:center;justify-content:center;overflow:hidden;">
+              ${avContent}
+            </div>
+            <div class="user-list-info">
+              <div class="user-list-name">${profile.name}</div>
+              <div class="user-list-meta">@${profile.handle}</div>
+            </div>
+            <span class="user-list-badge">LV${profile.level} · ${profile.rank}</span>
+          </div>`;
+      }
+
+      // ── Skeleton rows while loading ──
+      function renderModalSkeletons(count) {
+        return Array.from({length: count}, () => `
+          <div class="modal-loading-row">
+            <div class="modal-loading-av"></div>
+            <div class="modal-loading-lines">
+              <div class="modal-loading-line" style="width:55%"></div>
+              <div class="modal-loading-line" style="width:35%"></div>
+            </div>
+          </div>`).join('');
+      }
+
+      // ── Real openModal — replaces the non-module demo version ──
+      window.openModal = async function(type) {
+        const title = type === 'following' ? 'Following' : 'Followers';
+        document.getElementById('modalTitle').textContent = title;
+        document.getElementById('modalOverlay').classList.add('open');
+        document.body.style.overflow = 'hidden';
+
+        const container = document.getElementById('modalUserList');
+        const cachedList = window._followCache[type];
+
+        // Determine how many rows to show as skeleton
+        const skeletonCount = cachedList ? Math.min(cachedList.length, 5) : 3;
+        container.innerHTML = renderModalSkeletons(skeletonCount || 3);
+
+        // If cache is empty or stale, re-fetch counts first
+        if (!cachedList) {
+          const uid = window._currentUid;
+          if (!uid) { container.innerHTML = '<div class="modal-empty"><i class="ph-bold ph-wifi-slash"></i>Not signed in</div>'; return; }
+          await loadFollowStats(uid);
+        }
+
+        const list = window._followCache[type] || [];
+
+        if (list.length === 0) {
+          const emptyMsg = type === 'following'
+            ? "You're not following anyone yet"
+            : "No followers yet";
+          container.innerHTML = `<div class="modal-empty"><i class="ph-bold ph-users"></i>${emptyMsg}</div>`;
+          return;
+        }
+
+        // Determine which uid field to look up for each entry
+        // following docs: followedId = the person being followed
+        // followers docs: followerId = the person who followed you
+        const uidField = type === 'following' ? 'followedId' : 'followerId';
+
+        // Build profiles — use cached fromName/fromPhoto when available, fetch full doc for the rest
+        const profiles = await Promise.all(list.map(async (entry) => {
+          const targetUid = entry[uidField];
+          if (!targetUid) return null;
+
+          // Try to build profile from follow doc fields first (fast path)
+          if (entry.fromName || entry.fromHandle) {
+            return {
+              uid: targetUid,
+              name:   entry.fromName   || 'T1ERA User',
+              handle: entry.fromHandle || targetUid.slice(0, 8),
+              photo:  entry.fromPhoto  || '',
+              rank:   'Recruit',
+              level:  1,
+            };
+          }
+          // Slow path: fetch full user doc
+          return fetchUserProfile(targetUid);
+        }));
+
+        const html = profiles.map(renderUserRow).join('');
+        container.innerHTML = html || `<div class="modal-empty"><i class="ph-bold ph-users"></i>No users found</div>`;
+      };
+
+    </script>
       const dotsBtn = document.getElementById("dotsBtn");
       const dotsMenu = document.getElementById("dotsMenu");
 
@@ -5432,88 +5584,7 @@
         }
       };
 
-      // ══ FOLLOWING / FOLLOWERS MODAL ══
-      const demoFollowing = [
-        {
-          name: "Azrul Hakim",
-          rank: "LV3 · Operative",
-          color: "#8b5cf6",
-          initials: "AH",
-        },
-        {
-          name: "Siti Nora",
-          rank: "LV2 · Scout",
-          color: "#e91e8c",
-          initials: "SN",
-        },
-        {
-          name: "Farid M.",
-          rank: "LV5 · Guardian",
-          color: "#f59e0b",
-          initials: "FM",
-        },
-        {
-          name: "Rayyan K.",
-          rank: "LV1 · Recruit",
-          color: "#10b981",
-          initials: "RK",
-        },
-        {
-          name: "Hafiz Z.",
-          rank: "LV4 · Striker",
-          color: "#f97316",
-          initials: "HZ",
-        },
-      ];
-
-      const demoFollowers = [
-        {
-          name: "Wani Aisyah",
-          rank: "LV2 · Scout",
-          color: "#c2185b",
-          initials: "WA",
-        },
-        {
-          name: "Danial L.",
-          rank: "LV3 · Operative",
-          color: "#8b5cf6",
-          initials: "DL",
-        },
-        {
-          name: "Luqman F.",
-          rank: "LV1 · Recruit",
-          color: "#10b981",
-          initials: "LF",
-        },
-      ];
-
-      window.openModal = function (type) {
-        const list = type === "following" ? demoFollowing : demoFollowers;
-        const title = type === "following" ? "Following" : "Followers";
-        document.getElementById("modalTitle").textContent = title;
-
-        const container = document.getElementById("modalUserList");
-        container.innerHTML = list
-          .map(
-            (u) => `
-    <div class="user-list-item">
-      <div class="user-list-avatar" style="background:linear-gradient(135deg,${u.color}80,${u.color}40);">
-        ${u.initials}
-      </div>
-      <div class="user-list-info">
-        <div class="user-list-name">${u.name}</div>
-        <div class="user-list-meta">${u.rank}</div>
-      </div>
-      <span class="user-list-badge">${u.rank.split("·")[0].trim()}</span>
-    </div>
-  `,
-          )
-          .join("");
-
-        document.getElementById("modalOverlay").classList.add("open");
-        document.body.style.overflow = "hidden";
-      };
-
+      // ══ FOLLOWING / FOLLOWERS MODAL — close helpers ══
       window.closeModal = function () {
         document.getElementById("modalOverlay").classList.remove("open");
         document.body.style.overflow = "";
