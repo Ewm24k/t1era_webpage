@@ -2207,11 +2207,11 @@ body {
 
 <!-- TOP NAR -->
 <nav class="topbar">
-  <a href="#" class="topbar-back">
+  <a href="#" class="topbar-back" onclick="event.preventDefault();history.back()">
     <i class="ph-bold ph-arrow-left"></i>
     Back
   </a>
-  <a href="#" class="topbar-logo">
+  <a href="home.html" class="topbar-logo">
     <div class="topbar-logo-mark">T1</div>
     T1ERA
   </a>
@@ -2279,6 +2279,9 @@ body {
         <i class="ph-bold ph-squares-four"></i>
         Dashboard Pod
       </a>
+      <button class="dots-btn" id="settingsBtn" title="Settings" onclick="window.location.href='settings.html'">
+        <i class="ph-bold ph-gear"></i>
+      </button>
       <button class="dots-btn" id="dotsBtn" title="Options">
         <i class="ph-bold ph-dots-three"></i>
       </button>
@@ -2321,7 +2324,8 @@ body {
       <div class="avatar-ring"></div>
       <div id="avatarContainer">
         <!-- filled by Firebase -->
-        <div class="avatar-fallback" id="avatarFallback">M</div>
+        <div class="avatar-fallback" id="avatarFallback"></div>
+        <div class="profile-sk-overlay" id="avatarSkeleton"><div class="sk-sweep"></div></div>
       </div>
       <span class="avatar-online" title="Online"></span>
       <!-- Upload progress overlay -->
@@ -2344,11 +2348,15 @@ body {
     <!-- Name row -->
     <div class="identity-info">
       <div class="identity-name-row">
+        <div id="nameSkeleton" style="display:flex;flex-direction:column;gap:7px;align-items:center;width:200px;margin-bottom:2px;">
+          <div class="sk-item" style="height:14px;width:80%;border-radius:6px;background:var(--bg-4);"><div class="sk-sweep"></div></div>
+          <div class="sk-item" style="height:10px;width:40%;border-radius:6px;background:var(--bg-4);"><div class="sk-sweep"></div></div>
+        </div>
         <div class="editable-field">
-          <span class="identity-fullname" id="displayFullName">MUHAMMAD IKRAM BASRI</span>
+          <span class="identity-fullname" id="displayFullName"></span>
           <button class="edit-pencil" title="Edit name"><i class="ph-bold ph-pencil-simple"></i></button>
         </div>
-        <span class="identity-nickname" id="displayNickname">(Tam)</span>
+        <span class="identity-nickname" id="displayNickname"></span>
       </div>
 
       <!-- Badges row -->
@@ -2480,6 +2488,15 @@ body {
 
     <!-- TAB 0: SPARKS -->
     <div class="tab-panel active" id="tab-0">
+      <!-- Mini header -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0 14px;border-bottom:1px solid var(--border);margin-bottom:16px;">
+        <span style="font-size:11px;font-weight:700;color:var(--text-3);letter-spacing:0.08em;text-transform:uppercase;font-family:var(--font-mono);">
+          <i class="ph-bold ph-lightning" style="color:var(--pink);margin-right:5px;"></i>My Sparks
+        </span>
+        <a href="spark.html" style="display:inline-flex;align-items:center;gap:5px;padding:5px 13px;border-radius:100px;background:linear-gradient(135deg,var(--pink),var(--pink-2));color:#fff;font-size:11px;font-weight:700;font-family:var(--font-body);letter-spacing:0.03em;text-decoration:none;box-shadow:0 0 10px var(--pink-glow);transition:opacity 0.18s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+          <i class="ph-bold ph-lightning"></i> Spark Hub
+        </a>
+      </div>
       <div class="sparks-grid" id="profileSparksGrid">
         <!-- Skeleton placeholder shown until Firebase loads -->
         <div class="spark-card sk-profile-card" id="profileSparkSk1">
@@ -2866,9 +2883,7 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
-  // Authenticated — reveal page
-  document.documentElement.classList.remove('profile-loading');
-
+  // Authenticated — fetch data (skeleton stays visible until applyUserData finishes)
   try {
     const snap = await getDoc(doc(db, 'users', user.uid));
     if (snap.exists()) {
@@ -2991,6 +3006,13 @@ function applyUserData(d, user) {
   fetchAndApplyBio(user.uid);
   loadActivityHistory(user.uid);
   loadProfileSparks(user.uid);
+
+  // Remove skeleton overlays and reveal page now that data is applied
+  const nsk = document.getElementById('nameSkeleton');
+  if (nsk) nsk.remove();
+  const ask = document.getElementById('avatarSkeleton');
+  if (ask) ask.remove();
+  document.documentElement.classList.remove('profile-loading');
 }
 
 function loadDemoData() {
@@ -3000,6 +3022,11 @@ function loadDemoData() {
     language: 'en', aiLevel: 'beginner', contactPref: 'whatsapp',
     plan: { type: 'free' }
   });
+  const nsk = document.getElementById('nameSkeleton');
+  if (nsk) nsk.remove();
+  const ask = document.getElementById('avatarSkeleton');
+  if (ask) ask.remove();
+  document.documentElement.classList.remove('profile-loading');
 }
 
 function buildChips(d) {
