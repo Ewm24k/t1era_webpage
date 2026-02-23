@@ -2509,6 +2509,9 @@ onAuthStateChanged(auth, async (user) => {
     applyComposeAvatar('', (user.displayName || user.email || 'U')[0].toUpperCase());
   }
 
+  // Ensure point map fields exist (initializes to 0 if missing, no-op if already set)
+  ensurePointMap(user.uid);
+
   // Check quota
   await checkQuota(user.uid);
 
@@ -2527,6 +2530,15 @@ onAuthStateChanged(auth, async (user) => {
   // Start notification listener — live badge count
   startNotifListener(user.uid);
 });
+
+// ── ENSURE point map fields exist on first load ──
+async function ensurePointMap(uid) {
+  try {
+    await setDoc(doc(db, 'users', uid), {
+      point: { spark: 0, like: 0, reply: 0 }
+    }, { merge: true });
+  } catch(e) { console.warn('ensurePointMap error:', e); }
+}
 
 // ── EXPOSE startFeed to non-module scripts ──
 window._startFeedFn = startFeed;
@@ -2604,9 +2616,9 @@ window._toggleLikeFn = async function({ liked, sparkId, ownerUid, sparkText }) {
   try {
     if (liked) {
       await setDoc(likeRef, { uid: user.uid, createdAt: serverTimestamp() });
-      // Award +10 XP for liking a spark
+      // Award +10 XP for liking a spark (increment count by 1; profile.html multiplies by 10)
       try {
-        await updateDoc(doc(db, 'users', user.uid), { 'point.like': increment(10) });
+        await updateDoc(doc(db, 'users', user.uid), { 'point.like': increment(1) });
       } catch(xpe) { console.warn('XP like award error:', xpe); }
       // Send notification — skip if liking own post
       if (ownerUid && ownerUid !== user.uid && typeof window._sendNotifFn === 'function') {
@@ -2899,9 +2911,9 @@ window._submitReplyFn = async function(txt) {
       });
     } catch(ae) { console.warn('activity log error:', ae); }
 
-    // 4b. Award +40 XP for replying to a spark
+    // 4b. Award +40 XP for replying to a spark (increment count by 1; profile.html multiplies by 40)
     try {
-      await updateDoc(doc(db, 'users', user.uid), { 'point.reply': increment(40) });
+      await updateDoc(doc(db, 'users', user.uid), { 'point.reply': increment(1) });
     } catch(xpe) { console.warn('XP reply award error:', xpe); }
 
     // 5. Clear textarea — DB write confirmed, show toast and close immediately
@@ -3207,9 +3219,9 @@ window._submitSparkFn = async function () {
     }
     await addDoc(collection(db, SPARKS_COL), sparkData);
 
-    // Award +20 XP for posting a spark
+    // Award +20 XP for posting a spark (increment count by 1; profile.html multiplies by 20)
     try {
-      await updateDoc(doc(db, 'users', user.uid), { 'point.spark': increment(20) });
+      await updateDoc(doc(db, 'users', user.uid), { 'point.spark': increment(1) });
     } catch(xpe) { console.warn('XP spark award error:', xpe); }
 
     // Close compose box
