@@ -2538,27 +2538,25 @@ async function ensurePointMap(uid) {
     const existing = snap.exists() ? (snap.data().point || {}) : {};
     const patch = {};
 
-    // Only backfill spark and reply if missing (no reliable way to count past posts/replies here)
+    // spark and reply: only initialize if missing (no reliable backfill source)
     if (existing.spark === undefined) patch['point.spark'] = 0;
     if (existing.reply === undefined) patch['point.reply'] = 0;
 
-    // Backfill like count from actual likes subcollections if missing
-    if (existing.like === undefined) {
-      try {
-        // Count all sparks this user has liked by checking likes subcollection across all sparks
-        // Efficient approach: query sparks collection and check likes/{uid} per spark
-        const sparksSnap = await getDocs(query(collection(db, SPARKS_COL), where('tab', '==', 'standard')));
-        let likeCount = 0;
-        const likeChecks = sparksSnap.docs.map(sparkDoc =>
-          getDoc(doc(db, SPARKS_COL, sparkDoc.id, 'likes', uid))
-            .then(l => { if (l.exists()) likeCount++; })
-            .catch(() => {})
-        );
-        await Promise.all(likeChecks);
-        patch['point.like'] = likeCount;
-      } catch(le) {
-        patch['point.like'] = 0;
-      }
+    // like: ALWAYS recalculate from actual sparks/{sparkId}/likes/{uid} subcollection
+    // This is the source of truth — fixes any dirty/wrong values from previous bugs
+    try {
+      const sparksSnap = await getDocs(query(collection(db, SPARKS_COL), where('tab', '==', 'standard')));
+      let likeCount = 0;
+      const likeChecks = sparksSnap.docs.map(sparkDoc =>
+        getDoc(doc(db, SPARKS_COL, sparkDoc.id, 'likes', uid))
+          .then(l => { if (l.exists()) likeCount++; })
+          .catch(() => {})
+      );
+      await Promise.all(likeChecks);
+      patch['point.like'] = likeCount;
+    } catch(le) {
+      console.warn('like backfill error:', le);
+      if (existing.like === undefined) patch['point.like'] = 0;
     }
 
     if (Object.keys(patch).length > 0) {
@@ -2637,22 +2635,67 @@ window._toggleLikeFn = async function({ liked, sparkId, ownerUid, sparkText }) {
   if (!user || !sparkId) return;
 
   // likes subcollection: sparks/{sparkId}/likes/{uid}
-  // Security rule: allow write if isSignedIn() && request.auth.uid == likeUserId  ✓
   const likeRef = doc(db, 'sparks', sparkId, 'likes', user.uid);
+
+  // Deterministic notification ID so we can delete it on unlike
+  // Pattern: like_{likerUid}_{sparkId}
+  const notifId  = `like_${user.uid}_${sparkId}`;
+  const notifRef = ownerUid && ownerUid !== user.uid
+    ? doc(db, 'users', ownerUid, 'notifications', notifId)
+    : null;
 
   try {
     if (liked) {
+      // 1. Record the like
       await setDoc(likeRef, { uid: user.uid, createdAt: serverTimestamp() });
-      // Award +10 XP for liking a spark (increment count by 1; profile.html multiplies by 10)
+
+      // 2. Award +10 XP (count by 1; profile.html multiplies by 10)
       try {
         await updateDoc(doc(db, 'users', user.uid), { 'point.like': increment(1) });
       } catch(xpe) { console.warn('XP like award error:', xpe); }
-      // Send notification — skip if liking own post
-      if (ownerUid && ownerUid !== user.uid && typeof window._sendNotifFn === 'function') {
-        await window._sendNotifFn({ type: 'like', ownerUid, sparkId, sparkText });
+
+      // 3. Write like notification with deterministic ID (overwrites if already exists)
+      if (notifRef) {
+        const ud = window._sparkUserData || {};
+        const fromName  = ud.fullName || user.displayName || user.email?.split('@')[0] || 'Someone';
+        const fromPhoto = ud.profilePicture?.url || user.photoURL || '';
+        try {
+          await setDoc(notifRef, {
+            type:      'like',
+            fromUid:   user.uid,
+            fromName,
+            fromPhoto,
+            sparkId:   sparkId || '',
+            sparkText: sparkText || '',
+            message:   `<strong>${fromName}</strong> liked your Spark`,
+            read:      false,
+            createdAt: serverTimestamp(),
+          });
+        } catch(ne) { console.warn('like notif error:', ne); }
       }
+
     } else {
+      // 1. Remove the like record
       await deleteDoc(likeRef);
+
+      // 2. Deduct XP (never go below 0)
+      try {
+        const userSnap = await getDoc(doc(db, 'users', user.uid));
+        const currentLike = userSnap.exists() ? (userSnap.data().point?.like || 0) : 0;
+        await updateDoc(doc(db, 'users', user.uid), {
+          'point.like': increment(currentLike > 0 ? -1 : 0)
+        });
+      } catch(xpe) { console.warn('XP unlike deduct error:', xpe); }
+
+      // 3. Delete the like notification from post owner (if it exists and unread)
+      if (notifRef) {
+        try {
+          const notifSnap = await getDoc(notifRef);
+          if (notifSnap.exists() && !notifSnap.data().read) {
+            await deleteDoc(notifRef);
+          }
+        } catch(ne) { console.warn('unlike notif cleanup error:', ne); }
+      }
     }
   } catch(e) {
     console.error('toggleLike Firestore error:', e.code, e.message);
