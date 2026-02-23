@@ -68,12 +68,6 @@
     .callsign-chip { display:inline-flex; align-items:center; gap:4px; padding:2px 8px; background:rgba(194,24,91,.2); border:1px solid rgba(194,24,91,.3); border-radius:100px; }
     .callsign-text { font-family:var(--font-mono); font-size:9px; font-weight:500; color:var(--pink-2); letter-spacing:.06em; }
 
-    /* XP bar */
-    .xp-bar-wrap { position:absolute; bottom:14px; left:12px; right:12px; }
-    .xp-label { font-family:var(--font-mono); font-size:9px; color:rgba(255,255,255,.4); margin-bottom:4px; letter-spacing:.08em; }
-    .xp-track { height:3px; background:rgba(255,255,255,.1); border-radius:100px; overflow:hidden; }
-    .xp-fill { height:100%; width:0; background:linear-gradient(90deg,var(--pink),var(--purple)); border-radius:100px; box-shadow:0 0 8px rgba(194,24,91,.6); }
-
     /* ── IDENTITY ── */
     .profile-identity { padding:0 20px; margin-top:-50px; position:relative; z-index:3; }
     .avatar-wrap { width:88px; height:88px; position:relative; margin-bottom:14px; }
@@ -190,7 +184,6 @@
     }
     @media (max-width:390px) {
       .profile-banner { height:140px; }
-      .xp-bar-wrap { left:8px; right:8px; }
     }
   </style>
 </head>
@@ -247,12 +240,6 @@
           <span style="font-size:8px;color:rgba(194,24,91,.5)">⬡</span>
           <span class="callsign-text" id="callsignText">—</span>
         </div>
-      </div>
-
-      <!-- XP bar -->
-      <div class="xp-bar-wrap">
-        <div class="xp-label">XP — <span id="xpVal">0</span> / <span id="xpNext">1000</span></div>
-        <div class="xp-track"><div class="xp-fill" id="xpFill"></div></div>
       </div>
 
       <!-- Follow button (top-right) -->
@@ -443,27 +430,14 @@
       const nick = d.nickname ? `@${d.nickname}` : '';
       document.getElementById('displayNickname').textContent = nick;
 
-      // Rank / XP
-      const pt = d.point || {};
-      const totalXP = (pt.spark||0)*20 + (pt.like||0)*10 + (pt.reply||0)*40;
-      const XP_THRESHOLDS = [0,1000,2500,5000,10000,18000,28000,40000,55000,70000,78000,86000,94000,102000,110000,118000,126000,134000,142000,150000,158000,166000,174000,182000,190000,198000,206000,214000,222000,230000];
-      const RANK_TITLES   = ["Recruit","Operative","Scout","Guardian","Striker","Ranger","Vanguard","Phantom","Warlord","Legend","Legend","Legend","Legend","Legend","Legend","Legend","Legend","Legend","Legend","Legend","Legend","Legend","Legend","Legend","Legend","Legend","Legend","Legend","Legend","Legend"];
-      let lvl = 1;
-      for (let i = XP_THRESHOLDS.length-1; i>=0; i--) {
-        if (totalXP >= XP_THRESHOLDS[i]) { lvl = i+1; break; }
-      }
-      const rankTitle   = RANK_TITLES[lvl-1] || 'Legend';
-      const nextThr     = XP_THRESHOLDS[lvl] || XP_THRESHOLDS[XP_THRESHOLDS.length-1];
-      const prevThr     = XP_THRESHOLDS[lvl-1] || 0;
-      const xpPct       = lvl >= XP_THRESHOLDS.length ? 100 : Math.min(100, ((totalXP-prevThr)/(nextThr-prevThr))*100);
+      // Rank — read directly from stored fields, same pattern as user-peek.js
+      const lvl       = d.rank?.level   || 1;
+      const rankTitle = d.rank?.title   || 'Recruit';
 
-      document.getElementById('rankLevelSvg').textContent = lvl;
-      document.getElementById('rankLevelNum').textContent = `LV ${lvl}`;
+      document.getElementById('rankLevelSvg').textContent  = lvl;
+      document.getElementById('rankLevelNum').textContent  = `LV ${lvl}`;
       document.getElementById('rankTitleText').textContent = rankTitle;
-      document.getElementById('callsignText').textContent = (d.callsign||'—').toUpperCase();
-      document.getElementById('xpVal').textContent = totalXP;
-      document.getElementById('xpNext').textContent = nextThr;
-      document.getElementById('xpFill').style.width = `${xpPct}%`;
+      document.getElementById('callsignText').textContent  = (d.callsign || '—').toUpperCase();
 
       // Account badges
       const badgesStrip = document.getElementById('badgesStrip');
