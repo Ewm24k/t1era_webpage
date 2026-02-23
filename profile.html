@@ -6410,64 +6410,108 @@
           + `</div>`;
       }
 
-      // ── Main openModal ──
+      // ── Main openModal — always fetches fresh, never relies on cache ──
       window.openModal = async function(type) {
         window._modalType = type;
+        const myUid = window._currentUid;
+
+        // Set title
         const title = type === 'following' ? 'Following' : 'Followers';
         document.getElementById('modalTitle').childNodes[0].textContent = title + ' ';
         document.getElementById('modalTitleCount').textContent = '';
-        document.getElementById('modalOverlay').classList.add('open');
-        document.body.style.overflow = 'hidden';
 
         // Reset search
         const searchEl = document.getElementById('modalSearchInput');
         const clearBtn = document.getElementById('modalSearchClear');
+        const dropdown = document.getElementById('modalSearchDropdown');
+        const searchInner = document.getElementById('modalSearchInner');
         if (searchEl) searchEl.value = '';
         if (clearBtn) clearBtn.classList.remove('visible');
+        if (dropdown) { dropdown.innerHTML = ''; dropdown.classList.add('hidden'); }
+        if (searchInner) searchInner.classList.remove('has-dropdown');
+
+        // Open overlay — skeleton is already visible
+        document.getElementById('modalOverlay').classList.add('open');
+        document.body.style.overflow = 'hidden';
 
         const bodyEl = document.getElementById('modalBody');
-        bodyEl.innerHTML = renderModalSkeletons(4);
 
-        const uid = window._currentUid;
-        if (!uid) {
+        // Show skeleton FIRST — nothing else renders until Firebase returns
+        bodyEl.innerHTML = renderModalSkeletons(5);
+
+        if (!myUid) {
           bodyEl.innerHTML = '<div class="modal-empty"><i class="ph-bold ph-wifi-slash"></i>Not signed in</div>';
           return;
         }
 
-        // Wait for any in-flight fetch, or trigger one if cache is cold
-        if (window._followStatsPromise) {
-          await window._followStatsPromise;
+        try {
+          // ── STEP 1: Fetch follow docs fresh from Firestore ──
+          const fieldFilter = type === 'following'
+            ? where('followerId', '==', myUid)
+            : where('followedId', '==', myUid);
+          const uidField = type === 'following' ? 'followedId' : 'followerId';
+
+          const snap = await getDocs(query(collection(db, 'follows'), fieldFilter));
+
+          // Build list of target UIDs — strictly exclude own UID
+          const entries = [];
+          snap.forEach(d => {
+            const data = d.data();
+            const targetUid = data[uidField];
+            if (targetUid && targetUid !== myUid) {
+              entries.push({ id: d.id, ...data });
+            }
+          });
+
+          // Update title count
+          document.getElementById('modalTitleCount').textContent = entries.length;
+
+          if (entries.length === 0) {
+            const emptyMsg = type === 'following'
+              ? "You're not following anyone yet"
+              : "No followers yet";
+            bodyEl.innerHTML = `<div class="modal-empty"><i class="ph-bold ph-users"></i>${emptyMsg}</div>`;
+            window._allProfiles = [];
+            return;
+          }
+
+          // ── STEP 2: Fetch each user profile from Firestore ──
+          const profiles = (await Promise.all(
+            entries.map(async entry => {
+              const targetUid = entry[uidField];
+              try {
+                // Try cache first to avoid redundant reads
+                if (window._profileCache[targetUid]) return window._profileCache[targetUid];
+                const uSnap = await getDoc(doc(db, 'users', targetUid));
+                if (!uSnap.exists()) return null;
+                const d = uSnap.data();
+                const p = {
+                  uid:    targetUid,
+                  name:   d.fullName || d.nickname || 'T1ERA User',
+                  handle: d.nickname || '',
+                  email:  d.emailPrimary || '',
+                  photo:  d.profilePicture?.url || '',
+                  rank:   d.rank?.title || 'Recruit',
+                  level:  d.rank?.level || 1,
+                };
+                window._profileCache[targetUid] = p;
+                return p;
+              } catch(_) { return null; }
+            })
+          )).filter(p => p && p.uid !== myUid); // final safety: strip any self entry
+
+          window._allProfiles = profiles;
+
+          // ── STEP 3: Render — only NOW after all data is ready ──
+          const html = '<div class="user-list">'
+            + profiles.map(p => renderUserRow(p, type)).join('')
+            + '</div>';
+          bodyEl.innerHTML = html;
+
+        } catch(e) {
+          console.error('openModal error:', e);
+          bodyEl.innerHTML = `<div class="modal-empty"><i class="ph-bold ph-warning"></i>Failed to load. Please try again.</div>`;
         }
-        if (!window._followCache[type]) {
-          await loadFollowStats(uid);
-        }
-
-        const uidField = type === 'following' ? 'followedId' : 'followerId';
-
-        // Always filter self out — belt-and-suspenders regardless of cache state
-        const myUid = window._currentUid; // re-read after awaits
-        const list = (window._followCache[type] || []).filter(entry => entry[uidField] !== myUid);
-
-        // Update count in title
-        const countEl = document.getElementById('modalTitleCount');
-        if (countEl) countEl.textContent = list.length;
-
-        if (list.length === 0) {
-          const emptyMsg = type === 'following' ? "You're not following anyone yet" : "No followers yet";
-          bodyEl.innerHTML = `<div class="modal-empty"><i class="ph-bold ph-users"></i>${emptyMsg}</div>`;
-          window._allProfiles = [];
-          return;
-        }
-
-        // Resolve all profiles in parallel, strip nulls and self
-        const profiles = (await Promise.all(
-          list.map(entry => resolveProfile(entry, uidField))
-        )).filter(p => p && p.uid !== myUid);
-
-        window._allProfiles = profiles;
-
-        const html = '<div class="user-list">' + profiles.map(p => renderUserRow(p, type)).join('') + '</div>';
-        bodyEl.innerHTML = html;
       };
 
       // ── Follow / Unfollow from inside modal ──
