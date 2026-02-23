@@ -371,8 +371,162 @@ a{text-decoration:none;color:inherit}
 .spark-submit-btn:disabled{opacity:.35;cursor:not-allowed;transform:none}
 
 /* ══════════════════════════════════════════
-   SPARK CARD
+   EMOJI PICKER
 ══════════════════════════════════════════ */
+.emoji-picker-wrap{
+  position:absolute;bottom:calc(100% + 8px);left:0;
+  width:300px;
+  background:rgba(12,8,18,0.97);
+  border:1px solid var(--border-2);border-radius:var(--r-lg);
+  padding:10px;
+  box-shadow:0 16px 48px rgba(0,0,0,0.85);
+  backdrop-filter:blur(20px);
+  z-index:400;
+  display:none;
+}
+.emoji-picker-wrap.open{display:block}
+.emoji-picker-search{
+  width:100%;padding:6px 10px;border-radius:var(--r-sm);
+  background:var(--bg-3);border:1px solid var(--border);
+  color:var(--text);font-size:12px;font-family:var(--f-body);
+  outline:none;margin-bottom:8px;
+}
+.emoji-picker-search::placeholder{color:var(--text-3)}
+.emoji-grid{
+  display:grid;grid-template-columns:repeat(8,1fr);
+  gap:2px;max-height:180px;overflow-y:auto;
+}
+.emoji-grid button{
+  background:none;border:none;font-size:20px;
+  cursor:pointer;padding:4px;border-radius:6px;
+  transition:background .12s;line-height:1;
+}
+.emoji-grid button:hover{background:rgba(194,24,91,.15)}
+
+/* ══════════════════════════════════════════
+   MIC LOCKED TOOLTIP
+══════════════════════════════════════════ */
+.mic-locked-tip{
+  position:absolute;bottom:calc(100% + 8px);left:50%;
+  transform:translateX(-50%);
+  background:rgba(12,8,18,0.97);
+  border:1px solid rgba(239,68,68,.25);
+  border-radius:var(--r);padding:10px 14px;
+  width:200px;text-align:center;
+  box-shadow:0 8px 32px rgba(0,0,0,0.7);
+  backdrop-filter:blur(16px);
+  display:none;z-index:400;
+}
+.mic-locked-tip.open{display:block}
+.mic-locked-tip .mlk-icon{font-size:22px;margin-bottom:4px}
+.mic-locked-tip .mlk-title{
+  font-size:11px;font-weight:700;
+  color:rgba(239,68,68,.9);font-family:var(--f-display);
+  letter-spacing:.04em;margin-bottom:3px;
+}
+.mic-locked-tip .mlk-sub{
+  font-size:10px;color:var(--text-3);font-family:var(--f-body);line-height:1.4;
+}
+
+/* ══════════════════════════════════════════
+   LANG PICKER (code block)
+══════════════════════════════════════════ */
+.lang-picker-wrap{
+  position:absolute;bottom:calc(100% + 8px);left:0;
+  background:rgba(12,8,18,0.97);
+  border:1px solid var(--border-2);border-radius:var(--r-lg);
+  padding:8px;
+  box-shadow:0 16px 48px rgba(0,0,0,0.85);
+  backdrop-filter:blur(20px);
+  z-index:400;display:none;
+  min-width:160px;
+}
+.lang-picker-wrap.open{display:block}
+.lang-picker-title{
+  font-size:9px;font-weight:700;letter-spacing:.1em;
+  color:var(--text-3);font-family:var(--f-mono);
+  padding:2px 6px 6px;text-transform:uppercase;
+}
+.lang-option{
+  display:flex;align-items:center;gap:8px;
+  padding:7px 10px;border-radius:var(--r-sm);
+  font-size:12px;font-weight:600;color:var(--text-2);
+  cursor:pointer;transition:background .12s;
+  border:none;background:none;width:100%;text-align:left;
+  font-family:var(--f-body);
+}
+.lang-option:hover{background:rgba(139,92,246,.12);color:var(--text)}
+.lang-option .lang-dot{
+  width:8px;height:8px;border-radius:50%;flex-shrink:0;
+}
+
+/* ══════════════════════════════════════════
+   QUOTE PREVIEW (inside compose)
+══════════════════════════════════════════ */
+.compose-quote-preview{
+  margin:0 16px 8px 68px;
+  border-left:3px solid var(--purple);
+  background:rgba(139,92,246,.06);
+  border-radius:0 var(--r-sm) var(--r-sm) 0;
+  padding:8px 12px;
+  font-size:13px;color:var(--text-2);
+  font-style:italic;line-height:1.5;
+  position:relative;
+}
+.compose-quote-remove{
+  position:absolute;top:6px;right:8px;
+  background:none;border:none;color:var(--text-3);
+  font-size:12px;cursor:pointer;
+}
+.compose-quote-remove:hover{color:var(--red)}
+
+/* ══════════════════════════════════════════
+   FEED — QUOTE BLOCK
+══════════════════════════════════════════ */
+.spark-quote{
+  border-left:3px solid var(--purple);
+  background:rgba(139,92,246,.06);
+  border-radius:0 var(--r-sm) var(--r-sm) 0;
+  padding:8px 12px;margin-top:8px;
+  font-size:13px;color:var(--text-2);
+  font-style:italic;line-height:1.55;
+}
+
+/* ══════════════════════════════════════════
+   FEED — CODE BLOCK
+══════════════════════════════════════════ */
+.spark-code-wrap{
+  margin-top:10px;border-radius:var(--r);
+  border:1px solid var(--border-2);
+  background:#0d0d14;overflow:hidden;
+}
+.spark-code-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:6px 12px;
+  background:rgba(255,255,255,.04);
+  border-bottom:1px solid var(--border);
+}
+.spark-code-lang{
+  font-size:10px;font-weight:700;
+  font-family:var(--f-mono);color:var(--purple);
+  letter-spacing:.08em;text-transform:uppercase;
+}
+.spark-code-copy{
+  background:none;border:none;color:var(--text-3);
+  font-size:11px;cursor:pointer;
+  display:flex;align-items:center;gap:4px;
+  font-family:var(--f-body);padding:2px 6px;
+  border-radius:4px;transition:all .15s;
+}
+.spark-code-copy:hover{background:rgba(139,92,246,.15);color:var(--purple)}
+.spark-code-body{
+  padding:12px 14px;overflow-x:auto;
+  font-family:var(--f-mono);font-size:12px;
+  color:rgba(255,255,255,.82);line-height:1.65;
+  white-space:pre;
+}
+.spark-code-body::-webkit-scrollbar{height:3px}
+.spark-code-body::-webkit-scrollbar-thumb{background:rgba(139,92,246,.3);border-radius:3px}
 .spark-card{
   padding:16px 16px 0;
   border-bottom:1px solid var(--border);
@@ -1486,12 +1640,41 @@ a{text-decoration:none;color:inherit}
               <i class="ph-bold ph-paperclip"></i>
               <input type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar,.txt,.csv" onchange="attachMedia(this,'file')">
             </button>
-            <button class="media-btn" title="Audio">
+            <!-- MIC — level locked -->
+            <button class="media-btn" title="Voice" onclick="toggleMicLocked(this)" style="position:relative">
               <i class="ph-bold ph-microphone"></i>
-              <input type="file" accept="audio/*" onchange="attachMedia(this,'audio')">
+              <div class="mic-locked-tip" id="micLockedTip">
+                <div class="mlk-icon">🔒</div>
+                <div class="mlk-title">Level Locked</div>
+                <div class="mlk-sub">Reach Level 3 · Scout to unlock voice messages</div>
+              </div>
             </button>
-            <button class="media-btn" title="Emoji" onclick="alert('Emoji picker — coming soon')">
+            <!-- EMOJI PICKER -->
+            <button class="media-btn" title="Emoji" onclick="toggleEmojiPicker(this)" style="position:relative">
               <i class="ph-bold ph-smiley"></i>
+              <div class="emoji-picker-wrap" id="emojiPickerWrap">
+                <input class="emoji-picker-search" id="emojiSearch" placeholder="Search emoji…" oninput="filterEmoji(this.value)" onclick="event.stopPropagation()">
+                <div class="emoji-grid" id="emojiGrid"></div>
+              </div>
+            </button>
+            <!-- QUOTE -->
+            <button class="media-btn" title="Quote" onclick="insertQuoteFormat()">
+              <i class="ph-bold ph-quotes"></i>
+            </button>
+            <!-- CODE BLOCK -->
+            <button class="media-btn" title="Code block" onclick="toggleLangPicker(this)" style="position:relative">
+              <i class="ph-bold ph-code"></i>
+              <div class="lang-picker-wrap" id="langPickerWrap">
+                <div class="lang-picker-title">Choose Language</div>
+                <button class="lang-option" onclick="insertCodeBlock('javascript')"><span class="lang-dot" style="background:#f7df1e"></span>JavaScript</button>
+                <button class="lang-option" onclick="insertCodeBlock('react')"><span class="lang-dot" style="background:#61dafb"></span>React / JSX</button>
+                <button class="lang-option" onclick="insertCodeBlock('html')"><span class="lang-dot" style="background:#e34c26"></span>HTML</button>
+                <button class="lang-option" onclick="insertCodeBlock('css')"><span class="lang-dot" style="background:#264de4"></span>CSS</button>
+                <button class="lang-option" onclick="insertCodeBlock('python')"><span class="lang-dot" style="background:#3572A5"></span>Python</button>
+                <button class="lang-option" onclick="insertCodeBlock('json')"><span class="lang-dot" style="background:#92d050"></span>JSON</button>
+                <button class="lang-option" onclick="insertCodeBlock('typescript')"><span class="lang-dot" style="background:#3178c6"></span>TypeScript</button>
+                <button class="lang-option" onclick="insertCodeBlock('sql')"><span class="lang-dot" style="background:#e38c00"></span>SQL</button>
+              </div>
             </button>
           </div>
           <div class="compose-right">
@@ -2138,6 +2321,141 @@ function closeYtModal() {
   document.getElementById('ytModalOverlay').classList.remove('open');
   document.getElementById('ytModalIframeWrap').innerHTML = '';
 }
+
+/* ══════════════════════════════════
+   EMOJI PICKER
+══════════════════════════════════ */
+const EMOJI_LIST = [
+  // Expressions & Reactions
+  '😂','🤣','😭','😍','🥰','😘','🤩','🥳','😎','🤯',
+  '🥺','😤','🤬','😱','🤫','🤭','🫣','🫡','🥴','😵‍💫',
+  // Rare / Modern
+  '🫠','🫥','🥹','🫨','🫶','🤌','🫰','🫳','🫴','🤙',
+  '🦾','🧠','👁️','🫀','🫁','🦷','🦴','👣','🧬','🔮',
+  // Nature & Vibe
+  '🌊','🌪️','⚡','🔥','❄️','🌑','🌕','☄️','🌈','🍀',
+  // Objects & Tech
+  '💀','👾','🤖','👽','🛸','🧿','🪬','🔯','🪄','🎭',
+  '💊','🧲','🔋','💡','🔑','🗝️','🧩','🎲','🪙','💎',
+  // Symbols
+  '⚔️','🛡️','🏹','🪃','🧨','💣','🔫','🪖','☢️','☣️',
+  '♾️','🔄','⏳','⌛','🔃','🔁','🔀','⬆️','🆙','🆒',
+  // Food vibes
+  '🍕','🍜','🧋','🍵','☕','🍺','🥂','🍾','🧃','🫖'
+];
+
+let _emojiAll = [...EMOJI_LIST];
+
+function toggleEmojiPicker(btn) {
+  event.stopPropagation();
+  const wrap = document.getElementById('emojiPickerWrap');
+  const isOpen = wrap.classList.toggle('open');
+  // Close other pickers
+  document.getElementById('langPickerWrap').classList.remove('open');
+  document.getElementById('micLockedTip').classList.remove('open');
+  if (isOpen) {
+    renderEmojiGrid(_emojiAll);
+    setTimeout(() => document.getElementById('emojiSearch').focus(), 50);
+  }
+}
+
+function renderEmojiGrid(list) {
+  const grid = document.getElementById('emojiGrid');
+  grid.innerHTML = list.map(e =>
+    `<button onclick="event.stopPropagation();insertEmoji('${e}')" title="${e}">${e}</button>`
+  ).join('');
+}
+
+function filterEmoji(val) {
+  if (!val.trim()) { renderEmojiGrid(_emojiAll); return; }
+  // Simple filter by unicode name approximation — just search by emoji character match
+  renderEmojiGrid(_emojiAll.filter(e => e.includes(val)));
+}
+
+function insertEmoji(emoji) {
+  const ta = document.getElementById('composeTa');
+  if (!ta) return;
+  const start = ta.selectionStart;
+  const end   = ta.selectionEnd;
+  ta.value = ta.value.slice(0, start) + emoji + ta.value.slice(end);
+  ta.selectionStart = ta.selectionEnd = start + emoji.length;
+  ta.focus();
+  onComposeInput(ta);
+  document.getElementById('emojiPickerWrap').classList.remove('open');
+}
+
+/* ══════════════════════════════════
+   MIC LOCKED
+══════════════════════════════════ */
+function toggleMicLocked(btn) {
+  event.stopPropagation();
+  const tip = document.getElementById('micLockedTip');
+  const isOpen = tip.classList.toggle('open');
+  document.getElementById('emojiPickerWrap').classList.remove('open');
+  document.getElementById('langPickerWrap').classList.remove('open');
+  if (isOpen) setTimeout(() => tip.classList.remove('open'), 3000);
+}
+
+/* ══════════════════════════════════
+   QUOTE FORMAT
+══════════════════════════════════ */
+function insertQuoteFormat() {
+  const ta = document.getElementById('composeTa');
+  if (!ta) return;
+  const start = ta.selectionStart;
+  const selected = ta.value.slice(start, ta.selectionEnd);
+  const quoteText = selected || 'Your quote here';
+  const insert = `>> ${quoteText}`;
+  ta.value = ta.value.slice(0, start) + insert + ta.value.slice(ta.selectionEnd);
+  ta.selectionStart = start + 3;
+  ta.selectionEnd   = start + insert.length;
+  ta.focus();
+  onComposeInput(ta);
+}
+
+/* ══════════════════════════════════
+   CODE BLOCK
+══════════════════════════════════ */
+function toggleLangPicker(btn) {
+  event.stopPropagation();
+  const wrap = document.getElementById('langPickerWrap');
+  wrap.classList.toggle('open');
+  document.getElementById('emojiPickerWrap').classList.remove('open');
+  document.getElementById('micLockedTip').classList.remove('open');
+}
+
+function insertCodeBlock(lang) {
+  event.stopPropagation();
+  document.getElementById('langPickerWrap').classList.remove('open');
+  const ta = document.getElementById('composeTa');
+  if (!ta) return;
+  const start = ta.selectionStart;
+  const selected = ta.value.slice(start, ta.selectionEnd);
+  const placeholder = selected || '// your code here';
+  const insert = `\`\`\`${lang}\n${placeholder}\n\`\`\``;
+  ta.value = ta.value.slice(0, start) + insert + ta.value.slice(ta.selectionEnd);
+  // Place cursor inside the code block
+  const cursorPos = start + `\`\`\`${lang}\n`.length;
+  ta.selectionStart = cursorPos;
+  ta.selectionEnd   = cursorPos + placeholder.length;
+  ta.focus();
+  onComposeInput(ta);
+}
+
+function copyCode(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  navigator.clipboard.writeText(el.textContent).then(() => {
+    if (typeof showToast === 'function') showToast('Code copied ✓');
+  });
+}
+
+// Close all pickers when clicking outside
+document.addEventListener('click', () => {
+  document.getElementById('emojiPickerWrap')?.classList.remove('open');
+  document.getElementById('langPickerWrap')?.classList.remove('open');
+  document.getElementById('micLockedTip')?.classList.remove('open');
+});
 
 /* ══════════════════════════════════
    MEDIA ATTACH
@@ -3133,9 +3451,70 @@ function renderCard(id, d) {
     ? `<img src="${photo}" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;" onerror="this.style.display='none'">`
     : initial;
 
-  const linkedTxt = txt
-    .replace(/(#\w+)/g, '<span class="ht">$1</span>')
-    .replace(/(@\w+)/g,  '<span class="mn">$1</span>');
+  // Parse special blocks from text before hashtag/mention linking
+  function renderSparkText(raw) {
+    let out = '';
+    // Split by code blocks first: ```lang\ncode```
+    const codeRe = /```(\w+)?\n?([\s\S]*?)```/g;
+    let lastIdx = 0;
+    let m;
+    while ((m = codeRe.exec(raw)) !== null) {
+      const before = raw.slice(lastIdx, m.index);
+      if (before) out += processInline(before);
+      const lang = m[1] || 'code';
+      const code = m[2].replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      const copyId = 'cb_' + Math.random().toString(36).slice(2,7);
+      out += `<div class="spark-code-wrap">
+        <div class="spark-code-header">
+          <span class="spark-code-lang">${lang}</span>
+          <button class="spark-code-copy" onclick="event.stopPropagation();copyCode('${copyId}')"><i class="ph-bold ph-copy"></i> Copy</button>
+        </div>
+        <div class="spark-code-body" id="${copyId}">${code}</div>
+      </div>`;
+      lastIdx = m.index + m[0].length;
+    }
+    const remaining = raw.slice(lastIdx);
+    if (remaining) out += processInline(remaining);
+    return out;
+  }
+
+  function processInline(txt) {
+    // Parse quote lines: lines starting with ">>"
+    let result = '';
+    const lines = txt.split('\n');
+    let quoteLines = [];
+    function flushQuote() {
+      if (quoteLines.length) {
+        result += `<div class="spark-quote">${quoteLines.join('<br>')}</div>`;
+        quoteLines = [];
+      }
+    }
+    let textLines = [];
+    function flushText() {
+      if (textLines.length) {
+        const joined = textLines.join('\n')
+          .replace(/(#\w+)/g,'<span class="ht">$1</span>')
+          .replace(/(@\w+)/g,'<span class="mn">$1</span>');
+        result += `<p class="spark-text">${joined}</p>`;
+        textLines = [];
+      }
+    }
+    lines.forEach(line => {
+      if (line.startsWith('>>')) {
+        flushText();
+        quoteLines.push(line.slice(2).trim());
+      } else {
+        flushQuote();
+        textLines.push(line);
+      }
+    });
+    flushQuote();
+    flushText();
+    return result;
+  }
+
+  const renderedTxt = renderSparkText(txt);
+  const linkedTxt = renderedTxt || `<p class="spark-text"></p>`;
 
   const safeText  = txt.replace(/'/g, "\\'").slice(0, 80);
   const safePhoto = photo.replace(/'/g, "\\'");
@@ -3169,7 +3548,7 @@ function renderCard(id, d) {
       ${dotsOrDelete}
     </div>
     <div class="card-content">
-      <p class="spark-text">${linkedTxt}</p>
+      <div class="spark-text-wrap">${linkedTxt}</div>
       ${d.youtubeId ? `<div class="yt-card" onclick="event.stopPropagation();openYtModal('` + d.youtubeId + `')">
         <div class="yt-thumb-wrap">
           <img src="https://i.ytimg.com/vi/` + d.youtubeId + `/hqdefault.jpg" alt="YouTube video">
