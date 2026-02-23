@@ -2792,12 +2792,16 @@ window._startFeedFn = startFeed;
 window._followingSet = new Set();
 
 // Load who the current user is following into memory
+// Reads from /follows where followerId == uid (matches Firestore rules)
 async function loadFollowingSet(uid) {
   try {
-    const snap = await getDocs(collection(db, 'users', uid, 'following'));
-    window._followingSet = new Set(snap.docs.map(d => d.id));
+    const snap = await getDocs(query(
+      collection(db, 'follows'),
+      where('followerId', '==', uid)
+    ));
+    window._followingSet = new Set(snap.docs.map(d => d.data().followedId));
   } catch(e) {
-    console.warn('loadFollowingSet error:', e);
+    console.warn('loadFollowingSet error:', e.code, e.message);
     window._followingSet = new Set();
   }
 }
@@ -2839,22 +2843,18 @@ window._followFn = async function({ ownerUid, btn, type }) {
 
   try {
     if (willFollow) {
-      // Write to both subcollections atomically via batch
-      const batch = writeBatch(db);
-      batch.set(doc(db, 'users', user.uid, 'following', ownerUid), {
-        uid:       ownerUid,
-        createdAt: serverTimestamp(),
-      });
-      batch.set(doc(db, 'users', ownerUid, 'followers', user.uid), {
-        uid:         user.uid,
+      // ── Write to /follows/{myUid}_{targetUid} — matches rules: create if followerId == auth.uid ──
+      const followDocId = `${user.uid}_${ownerUid}`;
+      await setDoc(doc(db, 'follows', followDocId), {
+        followerId: user.uid,
+        followedId: ownerUid,
         fromName,
         fromHandle,
         fromPhoto,
-        createdAt:   serverTimestamp(),
+        createdAt:  serverTimestamp(),
       });
-      await batch.commit();
 
-      // Send follow notification — deterministic ID prevents duplicates on re-follow
+      // ── Send follow notification to target — rules allow create if isSignedIn() ──
       const notifId = `follow_${user.uid}_${ownerUid}`;
       try {
         await setDoc(doc(db, 'users', ownerUid, 'notifications', notifId), {
@@ -2869,9 +2869,9 @@ window._followFn = async function({ ownerUid, btn, type }) {
           read:       false,
           createdAt:  serverTimestamp(),
         });
-      } catch(ne) { console.warn('follow notif error:', ne); }
+      } catch(ne) { console.warn('follow notif error:', ne.code, ne.message); }
 
-      // Log to current user's activity history
+      // ── Log to YOUR activity history — rules allow write if isOwner(userId) ──
       try {
         await addDoc(collection(db, 'users', user.uid, 'activityHistory'), {
           type:      'follow',
@@ -2881,17 +2881,15 @@ window._followFn = async function({ ownerUid, btn, type }) {
           text:      `<strong>Followed</strong> @${fromHandle}`,
           createdAt: serverTimestamp(),
         });
-      } catch(ae) { console.warn('follow activity log error:', ae); }
+      } catch(ae) { console.warn('follow activity log error:', ae.code, ae.message); }
 
       // Toast confirmation
       if (typeof window.showToast === 'function') window.showToast('Now following! 🤝');
 
     } else {
-      // Unfollow — delete both subcollection docs
-      const batch = writeBatch(db);
-      batch.delete(doc(db, 'users', user.uid, 'following', ownerUid));
-      batch.delete(doc(db, 'users', ownerUid, 'followers', user.uid));
-      await batch.commit();
+      // ── Unfollow: delete /follows/{myUid}_{targetUid} — rules allow delete if followerId == auth.uid ──
+      const followDocId = `${user.uid}_${ownerUid}`;
+      await deleteDoc(doc(db, 'follows', followDocId));
 
       // Toast confirmation
       if (typeof window.showToast === 'function') window.showToast('Unfollowed');
