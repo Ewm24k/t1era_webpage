@@ -3947,11 +3947,11 @@
        SOCIAL STATS ROW
   ══════════════════════════════════ -->
           <div class="stats-row fade-up delay-2">
-            <div class="stat-block" onclick="openModal('following')">
+            <div class="stat-block" onclick="window.openModal('following')">
               <span class="stat-num" id="followingCount"><span class="stat-skeleton"></span></span>
               <span class="stat-label">Following</span>
             </div>
-            <div class="stat-block" onclick="openModal('followers')">
+            <div class="stat-block" onclick="window.openModal('followers')">
               <span class="stat-num" id="followersCount"><span class="stat-skeleton"></span></span>
               <span class="stat-label">Followers</span>
             </div>
@@ -6245,10 +6245,19 @@
               getDocs(query(collection(db, 'follows'), where('followedId', '==', uid))),
             ]);
 
+            const myUid = window._currentUid;
+
+            // Filter self-follow docs out at the source
             const followingDocs = [];
-            followingSnap.forEach(d => followingDocs.push({ id: d.id, ...d.data() }));
+            followingSnap.forEach(d => {
+              const data = d.data();
+              if (data.followedId !== myUid) followingDocs.push({ id: d.id, ...data });
+            });
             const followersDocs = [];
-            followersSnap.forEach(d => followersDocs.push({ id: d.id, ...d.data() }));
+            followersSnap.forEach(d => {
+              const data = d.data();
+              if (data.followerId !== myUid) followersDocs.push({ id: d.id, ...data });
+            });
 
             window._followCache.following = followingDocs;
             window._followCache.followers = followersDocs;
@@ -6267,11 +6276,13 @@
             const ferEl = document.getElementById('followersCount');
             if (felEl) felEl.textContent = '—';
             if (ferEl) ferEl.textContent = '—';
-          } finally {
-            // Clear so a manual refresh later can re-fetch
-            window._followStatsPromise = null;
           }
         })();
+
+        // Wait for completion then clear so future manual refreshes can re-fetch
+        window._followStatsPromise.then(() => {
+          window._followStatsPromise = null;
+        });
 
         return window._followStatsPromise;
       }
@@ -6423,34 +6434,35 @@
           return;
         }
 
-        // Always wait for any in-flight loadFollowStats, or fetch fresh if cache is cold
+        // Wait for any in-flight fetch, or trigger one if cache is cold
         if (window._followStatsPromise) {
           await window._followStatsPromise;
-        } else if (!window._followCache[type]) {
+        }
+        if (!window._followCache[type]) {
           await loadFollowStats(uid);
         }
 
-        const list = window._followCache[type] || [];
         const uidField = type === 'following' ? 'followedId' : 'followerId';
 
-        // Filter out own UID — never show yourself in following/followers list
-        const filteredList = list.filter(entry => entry[uidField] !== uid);
+        // Always filter self out — belt-and-suspenders regardless of cache state
+        const myUid = window._currentUid; // re-read after awaits
+        const list = (window._followCache[type] || []).filter(entry => entry[uidField] !== myUid);
 
         // Update count in title
         const countEl = document.getElementById('modalTitleCount');
-        if (countEl) countEl.textContent = filteredList.length;
+        if (countEl) countEl.textContent = list.length;
 
-        if (filteredList.length === 0) {
+        if (list.length === 0) {
           const emptyMsg = type === 'following' ? "You're not following anyone yet" : "No followers yet";
           bodyEl.innerHTML = `<div class="modal-empty"><i class="ph-bold ph-users"></i>${emptyMsg}</div>`;
           window._allProfiles = [];
           return;
         }
 
-        // Resolve all profiles in parallel
+        // Resolve all profiles in parallel, strip nulls and self
         const profiles = (await Promise.all(
-          filteredList.map(entry => resolveProfile(entry, uidField))
-        )).filter(Boolean).filter(p => p.uid !== uid); // double-guard: strip self from resolved list too
+          list.map(entry => resolveProfile(entry, uidField))
+        )).filter(p => p && p.uid !== myUid);
 
         window._allProfiles = profiles;
 
@@ -6770,7 +6782,7 @@
 
     <script src="user-peek.js"></script>
 
-
+    <script>
       const dotsMenu = document.getElementById("dotsMenu");
 
       dotsBtn.addEventListener("click", (e) => {
@@ -6830,25 +6842,25 @@
         }
       };
 
-      // ══ FOLLOWING / FOLLOWERS MODAL — close helpers ══
       window.closeModal = function () {
-        document.getElementById("modalOverlay").classList.remove("open");
+        const overlay = document.getElementById("modalOverlay");
+        if (overlay) overlay.classList.remove("open");
         document.body.style.overflow = "";
         // Reset search & dropdown
-        const searchEl = document.getElementById('modalSearchInput');
-        const clearBtn = document.getElementById('modalSearchClear');
-        const dropdown = document.getElementById('modalSearchDropdown');
+        const searchEl   = document.getElementById('modalSearchInput');
+        const clearBtn   = document.getElementById('modalSearchClear');
+        const dropdown   = document.getElementById('modalSearchDropdown');
         const searchInner = document.getElementById('modalSearchInner');
-        if (searchEl) searchEl.value = '';
-        if (clearBtn) clearBtn.classList.remove('visible');
-        if (dropdown) { dropdown.innerHTML = ''; dropdown.classList.add('hidden'); }
+        if (searchEl)    { searchEl.value = ''; }
+        if (clearBtn)    clearBtn.classList.remove('visible');
+        if (dropdown)    { dropdown.innerHTML = ''; dropdown.classList.add('hidden'); }
         if (searchInner) searchInner.classList.remove('has-dropdown');
-        const items = document.querySelectorAll('#modalUserList .user-list-item');
-        items.forEach(el => el.style.display = '');
+        document.querySelectorAll('#modalUserList .user-list-item')
+          .forEach(el => el.style.display = '');
       };
 
       window.handleOverlayClick = function (e) {
-        if (e.target === document.getElementById("modalOverlay")) closeModal();
+        if (e.target === document.getElementById("modalOverlay")) window.closeModal();
       };
     </script>
   </body>
