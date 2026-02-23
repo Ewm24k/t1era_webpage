@@ -2537,9 +2537,30 @@ async function ensurePointMap(uid) {
     const snap = await getDoc(doc(db, 'users', uid));
     const existing = snap.exists() ? (snap.data().point || {}) : {};
     const patch = {};
+
+    // Only backfill spark and reply if missing (no reliable way to count past posts/replies here)
     if (existing.spark === undefined) patch['point.spark'] = 0;
-    if (existing.like  === undefined) patch['point.like']  = 0;
     if (existing.reply === undefined) patch['point.reply'] = 0;
+
+    // Backfill like count from actual likes subcollections if missing
+    if (existing.like === undefined) {
+      try {
+        // Count all sparks this user has liked by checking likes subcollection across all sparks
+        // Efficient approach: query sparks collection and check likes/{uid} per spark
+        const sparksSnap = await getDocs(query(collection(db, SPARKS_COL), where('tab', '==', 'standard')));
+        let likeCount = 0;
+        const likeChecks = sparksSnap.docs.map(sparkDoc =>
+          getDoc(doc(db, SPARKS_COL, sparkDoc.id, 'likes', uid))
+            .then(l => { if (l.exists()) likeCount++; })
+            .catch(() => {})
+        );
+        await Promise.all(likeChecks);
+        patch['point.like'] = likeCount;
+      } catch(le) {
+        patch['point.like'] = 0;
+      }
+    }
+
     if (Object.keys(patch).length > 0) {
       await updateDoc(doc(db, 'users', uid), patch);
     }
@@ -3229,6 +3250,12 @@ window._submitSparkFn = async function () {
     try {
       await updateDoc(doc(db, 'users', user.uid), { 'point.spark': increment(1) });
     } catch(xpe) { console.warn('XP spark award error:', xpe); }
+
+    // Show success toast
+    if (typeof window.showToast === 'function') window.showToast('Spark posted ⚡');
+
+    // Reset button
+    if (btn) { btn.disabled = false; btn.textContent = 'Spark ⚡'; }
 
     // Close compose box
     if (typeof window.closeCompose === 'function') window.closeCompose();
