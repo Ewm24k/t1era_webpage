@@ -981,19 +981,45 @@ a{text-decoration:none;color:inherit}
 .notif-list::-webkit-scrollbar{width:3px}
 .notif-list::-webkit-scrollbar-thumb{background:rgba(194,24,91,.25);border-radius:3px}
 
-/* section divider */
-.notif-section{
+/* section accordion */
+.notif-section-header{
   display:flex;align-items:center;gap:10px;
-  padding:12px 18px 6px;
+  padding:10px 18px 8px;
+  cursor:pointer;
+  user-select:none;
+  transition:background .15s;
+  position:relative;
 }
+.notif-section-header:hover{background:rgba(255,255,255,.02)}
+.notif-section-header.has-unread .notif-section-label{color:var(--pink-2)}
+.notif-section-header.has-unread .notif-section-dot{
+  display:block;
+  width:6px;height:6px;border-radius:50%;
+  background:var(--pink);flex-shrink:0;
+}
+.notif-section-dot{display:none}
 .notif-section-label{
   font-size:9px;font-weight:700;letter-spacing:.12em;
   color:var(--text-3);font-family:var(--f-display);
   text-transform:uppercase;white-space:nowrap;
+  flex:1;
 }
-.notif-section-line{
-  flex:1;height:1px;background:var(--border);
+.notif-section-count{
+  font-size:9px;font-family:var(--f-mono);
+  color:var(--text-3);margin-right:4px;
 }
+.notif-section-count.has-new{color:var(--pink-2);font-weight:700}
+.notif-section-chevron{
+  font-size:11px;color:var(--text-3);
+  transition:transform .22s var(--ease);
+  flex-shrink:0;
+}
+.notif-section-body{
+  overflow:hidden;
+  max-height:0;
+  transition:max-height .3s var(--ease);
+}
+.notif-section-body.open{max-height:2000px}
 
 /* individual notification row */
 .notif-row{
@@ -2359,6 +2385,7 @@ function closeNotifPanel() {
   document.getElementById('notifPanel').classList.remove('open');
   document.getElementById('notifBackdrop').classList.remove('open');
 }
+window.closeNotifPanel = closeNotifPanel;
 function toggleSettingsPanel() {
   // Close notif panel if open
   document.getElementById('notifPanel').classList.remove('open');
@@ -3134,6 +3161,8 @@ window._loadNotifsFn = async function() {
     const snap = await getDocs(collection(db, 'users', uid, 'notifications'));
     if (snap.empty) {
       if (empty) empty.style.display = 'flex';
+      list.innerHTML = '';
+      list.appendChild(empty);
       return;
     }
 
@@ -3146,22 +3175,23 @@ window._loadNotifsFn = async function() {
       return tb - ta;
     });
 
-    // Bucket by type
+    // Bucket by type — followers is a separate bucket from follow
     const buckets = { like: [], bookmark: [], reply: [], follow: [], message: [] };
     docs.forEach(d => {
       const t = d.data.type || 'message';
-      if (buckets[t]) buckets[t].push(d); else buckets.message.push(d);
+      if (buckets[t] !== undefined) buckets[t].push(d);
+      else buckets.message.push(d);
     });
 
     // Clear list
     list.innerHTML = '';
 
     const sectionMeta = [
-      { key: 'like',     label: 'Likes',             icon: 'ph-heart',        cls: 'like' },
-      { key: 'bookmark', label: 'Bookmarks',          icon: 'ph-bookmark-simple', cls: 'bookmark' },
-      { key: 'reply',    label: 'Replies & Mentions', icon: 'ph-chat-circle',  cls: 'reply' },
-      { key: 'follow',   label: 'New Followers',      icon: 'ph-user-plus',    cls: 'follow' },
-      { key: 'message',  label: 'System',             icon: 'ph-bell',         cls: 'message' },
+      { key: 'follow',   label: 'Followers',           icon: 'ph-user-plus',       cls: 'follow'   },
+      { key: 'like',     label: 'Likes',                icon: 'ph-heart',           cls: 'like'     },
+      { key: 'reply',    label: 'Replies & Mentions',   icon: 'ph-chat-circle',     cls: 'reply'    },
+      { key: 'bookmark', label: 'Bookmarks',            icon: 'ph-bookmark-simple', cls: 'bookmark' },
+      { key: 'message',  label: 'System',               icon: 'ph-bell',            cls: 'message'  },
     ];
 
     let hasAny = false;
@@ -3169,22 +3199,37 @@ window._loadNotifsFn = async function() {
     sectionMeta.forEach(({ key, label, icon, cls }) => {
       const items = buckets[key];
 
-      // Section header always shown
-      const sec = document.createElement('div');
-      sec.className = 'notif-section';
-      sec.innerHTML = `<span class="notif-section-line"></span><span class="notif-section-label">${label}</span><span class="notif-section-line"></span>`;
-      list.appendChild(sec);
-
-      if (items.length === 0) {
-        // Placeholder for empty sections
-        const ph = document.createElement('div');
-        ph.className = 'notif-placeholder';
-        ph.innerHTML = `<i class="ph-bold ${icon}" style="font-size:18px;color:var(--text-3);opacity:.3"></i><span>No ${label.toLowerCase()} yet</span>`;
-        list.appendChild(ph);
-        return;
-      }
+      // Skip empty sections entirely — no clutter
+      if (!items || items.length === 0) return;
 
       hasAny = true;
+
+      // Check if any item in this section is unread
+      const hasUnread = items.some(({ data: d }) => !d.read);
+      const unreadCount = items.filter(({ data: d }) => !d.read).length;
+
+      // ── Section header (clickable accordion toggle) ──
+      const header = document.createElement('div');
+      header.className = 'notif-section-header' + (hasUnread ? ' has-unread' : '');
+      header.innerHTML = `
+        <span class="notif-section-dot"></span>
+        <span class="notif-section-label"><i class="ph-bold ${icon}" style="margin-right:5px;font-size:10px"></i>${label}</span>
+        <span class="notif-section-count ${hasUnread ? 'has-new' : ''}">${hasUnread ? unreadCount + ' new' : items.length}</span>
+        <i class="ph-bold ph-caret-down notif-section-chevron" style="${hasUnread ? 'transform:rotate(180deg)' : ''}"></i>
+      `;
+
+      // ── Section body (collapsible) ──
+      const body = document.createElement('div');
+      body.className = 'notif-section-body' + (hasUnread ? ' open' : '');
+
+      // Toggle on header click
+      header.addEventListener('click', () => {
+        const isOpen = body.classList.toggle('open');
+        const chevron = header.querySelector('.notif-section-chevron');
+        if (chevron) chevron.style.transform = isOpen ? 'rotate(180deg)' : 'rotate(0deg)';
+      });
+
+      // ── Build notification rows ──
       items.forEach(({ id, data: d }) => {
         const avInner = d.fromPhoto
           ? `<img src="${d.fromPhoto}" referrerpolicy="no-referrer" onerror="this.style.display='none'">`
@@ -3198,28 +3243,47 @@ window._loadNotifsFn = async function() {
         const row = document.createElement('div');
         row.className = 'notif-row' + (d.read ? '' : ' unread');
         row.dataset.notifId = id;
+
         const replyBtn = (key === 'reply' && d.sparkId)
           ? `<button class="notif-reply-btn" onclick="event.stopPropagation();replyFromNotif('${d.sparkId}','${d.fromUid||''}','${(d.fromName||'').replace(/'/g,"\\'")}','${(d.fromHandle||d.fromName||'').replace(/'/g,"\\'")}','${(d.sparkText||'').replace(/'/g,"\\'").slice(0,60)}','${id}','${(d.fromPhoto||'').replace(/'/g,"\\'")}')"><i class="ph-bold ph-chat-circle"></i> Reply</button>`
           : '';
-        // Follow Back button — shown on follow notifications, reflects current follow state
+
         const alreadyFollowingBack = window._followingSet && window._followingSet.has(d.fromUid || '');
         const followBackBtn = (key === 'follow' && d.fromUid && d.fromUid !== window._sparkUser?.uid)
           ? `<button class="notif-reply-btn notif-follow-back-btn" data-target-uid="${d.fromUid}" style="${alreadyFollowingBack ? 'border-color:rgba(16,185,129,.4);color:var(--green);background:rgba(16,185,129,.08)' : ''}" onclick="event.stopPropagation();notifFollowBack(this,'${d.fromUid}','${id}')"><i class="ph-bold ${alreadyFollowingBack ? 'ph-check' : 'ph-user-plus'}"></i> ${alreadyFollowingBack ? 'Following' : 'Follow Back'}</button>`
           : '';
+
         row.innerHTML = `
           <div class="notif-av">${avInner}</div>
           <div class="notif-body">
-            <div class="notif-text">${d.message || `<strong>${d.fromName}</strong> interacted with your Spark`}</div>
+            <div class="notif-text">${d.message || `<strong>${d.fromName}</strong> interacted with your account`}</div>
             ${d.sparkText ? `<div class="notif-sub">"${d.sparkText}"</div>` : ''}
             <div class="notif-time">${timeStr}</div>
             ${replyBtn}${followBackBtn}
           </div>
           <div class="notif-type-icon ${cls}"><i class="ph-bold ${icon}"></i></div>
         `;
-        // Mark as read on click
-        row.addEventListener('click', () => markOneRead(uid, id, row));
-        list.appendChild(row);
+
+        row.addEventListener('click', () => {
+          markOneRead(uid, id, row);
+          // Update unread count in header after marking read
+          const stillUnread = body.querySelectorAll('.notif-row.unread').length - 1;
+          const countEl = header.querySelector('.notif-section-count');
+          if (stillUnread <= 0) {
+            header.classList.remove('has-unread');
+            if (countEl) { countEl.classList.remove('has-new'); countEl.textContent = items.length; }
+            const dot = header.querySelector('.notif-section-dot');
+            if (dot) dot.style.display = 'none';
+          } else {
+            if (countEl) countEl.textContent = stillUnread + ' new';
+          }
+        });
+
+        body.appendChild(row);
       });
+
+      list.appendChild(header);
+      list.appendChild(body);
     });
 
     if (empty) empty.style.display = hasAny ? 'none' : 'flex';
@@ -3440,12 +3504,40 @@ window._markAllReadFn = async function() {
     const snap = await getDocs(
       query(collection(db, 'users', uid, 'notifications'), where('read','==',false))
     );
-    if (snap.empty) return;
+    if (snap.empty) {
+      if (typeof window.closeNotifPanel === 'function') window.closeNotifPanel();
+      return;
+    }
     const batch = writeBatch(db);
     snap.forEach(d => batch.update(d.ref, { read: true }));
     await batch.commit();
-    // Update UI
+
+    // Remove all unread row highlights
     document.querySelectorAll('.notif-row.unread').forEach(r => r.classList.remove('unread'));
+
+    // Remove all section has-unread states and reset counts
+    document.querySelectorAll('.notif-section-header.has-unread').forEach(h => {
+      h.classList.remove('has-unread');
+      const dot = h.querySelector('.notif-section-dot');
+      if (dot) dot.style.display = 'none';
+      const countEl = h.querySelector('.notif-section-count');
+      const body = h.nextElementSibling;
+      if (countEl && body) {
+        const total = body.querySelectorAll('.notif-row').length;
+        countEl.classList.remove('has-new');
+        countEl.textContent = total;
+      }
+      const chevron = h.querySelector('.notif-section-chevron');
+      if (chevron) chevron.style.transform = 'rotate(0deg)';
+      // Collapse the section body
+      if (body) body.classList.remove('open');
+    });
+
+    // Auto-close panel after short delay so user sees the update
+    setTimeout(() => {
+      if (typeof window.closeNotifPanel === 'function') window.closeNotifPanel();
+    }, 420);
+
   } catch(e) { console.error('markAllRead:', e); }
 };
 
