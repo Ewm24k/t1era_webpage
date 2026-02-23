@@ -165,7 +165,6 @@
         max-width: 720px;
         margin: 0 auto;
         padding: 0 0 calc(80px + env(safe-area-inset-bottom));
-        overflow-x: clip;   /* prevents absolutely-positioned children from causing scroll */
         width: 100%;
       }
 
@@ -2577,19 +2576,12 @@
         padding-right: max(16px, env(safe-area-inset-right));
       }
 
-      body {
-        overflow-x: hidden;          /* double-lock at body too */
-        width: 100%;
-        position: relative;
-      }
-
       /* Ensure nothing escapes the viewport width */
       .profile-wrap,
       .stats-row,
       .chips-row,
       .tabs-wrap,
       .profile-identity,
-      .profile-banner,
       .intel-section,
       .rank-progress-card,
       .points-card,
@@ -2628,12 +2620,9 @@
         .rank-level-chip { padding: 3px 7px 3px 6px; }
 
         .xp-bar-wrap {
-          width: calc(100% - 100px); /* clear rank badge */
-          min-width: 0;              /* REMOVE the 200px min that overflows */
-          max-width: none;
-          left: auto;
-          right: 10px;
-          transform: none;
+          width: 55%;
+          min-width: 0;
+          /* keep base: left:50% + translateX(-50%) — centered */
         }
         .xp-label { font-size: 8px; }
 
