@@ -452,6 +452,19 @@ a{text-decoration:none;color:inherit}
 .badge.verified{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);color:var(--green)}
 .badge.prompt-tag{background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.25);color:var(--purple)}
 .badge.hot{background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.25);color:var(--orange)}
+.badge.follow-badge{
+  background:rgba(16,185,129,.08);
+  border:1px solid rgba(16,185,129,.28);
+  color:var(--green);
+  cursor:pointer;
+  font-family:var(--f-mono);
+  transition:background .18s,border-color .18s,color .18s;
+}
+.badge.follow-badge:hover{
+  background:rgba(16,185,129,.2);
+  border-color:rgba(16,185,129,.55);
+  color:#fff;
+}
 
 /* Dots menu */
 .dots-btn{
@@ -1390,8 +1403,9 @@ a{text-decoration:none;color:inherit}
   border-left:3px solid var(--purple);
   border-radius:0 var(--r-sm) var(--r-sm) 0;
   font-family:var(--f-mono);
-  font-size:13px;
-  color:var(--text-2);
+  font-size:11.5px;
+  font-style:italic;
+  color:rgba(255,255,255,0.55);
   line-height:1.65;
   word-break:break-word;
   white-space:pre-wrap;
@@ -2433,6 +2447,16 @@ function togglePopupFollow(btn) {
   const on = btn.classList.toggle('on');
   btn.textContent = on ? '✓ Following' : '+ Follow';
 }
+// Follow badge on feed cards — shows Follow only for now (unfollow logic added later)
+function toggleFollowBadge(btn) {
+  // For now: clicking Follow confirms the action visually but stays as Follow (no unfollow state)
+  btn.innerHTML = '<i class="ph-bold ph-check"></i> Following';
+  btn.style.background = 'rgba(16,185,129,.18)';
+  btn.style.borderColor = 'rgba(16,185,129,.5)';
+  btn.style.color = 'var(--green)';
+  btn.style.cursor = 'default';
+  btn.onclick = null; // disable further clicks until logic is wired up
+}
 
 /* ══════════════════════════════════
    PROFILE POPUP
@@ -3321,6 +3345,7 @@ function renderCard(id, d) {
         </div>
         <div class="badges-row">
           <span class="badge rank">LV 1</span>
+          ${!isOwner ? `<button class="badge follow-badge" onclick="event.stopPropagation();toggleFollowBadge(this)"><i class="ph-bold ph-user-plus"></i> Follow</button>` : ''}
         </div>
       </div>
       ${dotsOrDelete}
