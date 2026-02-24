@@ -6338,6 +6338,17 @@
       }
       window.loadFollowStats = loadFollowStats;
 
+      // ── XP rank helper — computes level+title from point fields ──
+      function _xpRank(d) {
+        const pt = d.accountStatus?.point || d.point || {};
+        const xp = (pt.spark||0)*20 + (pt.like||0)*10 + (pt.reply||0)*40;
+        const T = [0,550,1650,3300,5500,8250,11550,15400,19800,24750,30250,36300,42900,50050,57750,66000,74800,84150,94050,104500,115500,127050,139150,151800,165000,178750,193050,207900,223300,239250];
+        const N = ["Recruit","Recruit","Recruit","Recruit","Recruit","Recruit","Operative","Operative","Operative","Operative","Operative","Operative","Guardian","Guardian","Guardian","Guardian","Guardian","Guardian","Inferno","Inferno","Inferno","Inferno","Inferno","Inferno","Elite","Elite","Elite","Elite","Elite","Elite"];
+        let lvl = 1;
+        for (let i = T.length-1; i >= 0; i--) { if (xp >= T[i]) { lvl = i+1; break; } }
+        return { level: lvl, title: N[lvl-1] || 'Recruit' };
+      }
+
       // ── Fetch a single user profile doc (with cache) ──
       async function fetchUserProfile(uid) {
         // Never cache or return own profile in this context
@@ -6351,10 +6362,10 @@
             uid,
             name:    d.fullName   || d.nickname || 'T1ERA User',
             handle:  d.nickname   || '',
-            email:   d.emailPrimary || '',
-            photo:   d.profilePicture?.url || '',
-            rank:    d.rank?.title || 'Recruit',
-            level:   d.rank?.level || 1,
+            email:   d.emailPrimary || d.accountStatus?.emailPrimary || '',
+            photo:   d.accountStatus?.profilePicture?.url || d.profilePicture?.url || '',
+            rank:    _xpRank(d).title,
+            level:   _xpRank(d).level,
           };
           window._profileCache[uid] = profile;
           return profile;
@@ -6539,10 +6550,10 @@
                   uid:    targetUid,
                   name:   d.fullName || d.nickname || 'T1ERA User',
                   handle: d.nickname || '',
-                  email:  d.emailPrimary || '',
-                  photo:  d.profilePicture?.url || '',
-                  rank:   d.rank?.title || 'Recruit',
-                  level:  d.rank?.level || 1,
+                  email:  d.accountStatus?.emailPrimary || d.emailPrimary || '',
+                  photo:  d.accountStatus?.profilePicture?.url || d.profilePicture?.url || '',
+                  rank:   _xpRank(d).title,
+                  level:  _xpRank(d).level,
                 };
                 window._profileCache[targetUid] = p;
                 return p;
