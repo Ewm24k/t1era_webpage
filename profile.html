@@ -3632,7 +3632,7 @@
 
         <!-- XP BAR -->
         <div class="xp-bar-wrap">
-          <div class="xp-label">XP — <span id="xpVal">0</span> / 1000</div>
+          <div class="xp-label">XP — <span id="xpVal">0</span> / <span id="xpNext">1000</span></div>
           <div class="xp-track"><div class="xp-fill" id="xpFill"></div></div>
         </div>
 
@@ -5003,6 +5003,8 @@
         document.getElementById("callsignText").textContent =
           callsign.toUpperCase();
         document.getElementById("xpVal").textContent = totalXP;
+        const xpNextEl = document.getElementById("xpNext");
+        if (xpNextEl) xpNextEl.textContent = computedLevel >= XP_THRESHOLDS.length ? totalXP : nextThreshold;
         document.getElementById("intelRankTitle").textContent =
           computedTitle.toUpperCase();
         document.getElementById("intelLevel").textContent = computedLevel;
