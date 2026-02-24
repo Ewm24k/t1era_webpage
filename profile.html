@@ -4924,42 +4924,58 @@
           d.emailPrimary || user.email || "";
 
         // Rank
-        const rank = d.rank || {};
+        const rank = d.accountStatus?.rank || d.rank || {};
         const level = rank.level ?? 1;
         const title = rank.title ?? "Recruit";
         const callsign = d.callsign ?? "Alpha";
 
         // Compute total XP from point sub-fields (spark=20, like=10, reply=40)
-        const pt = d.point || {};
+        const pt = d.accountStatus?.point || d.point || {};
         const totalXP =
           (pt.spark || 0) * 20 + (pt.like || 0) * 10 + (pt.reply || 0) * 40;
 
-        // Level thresholds: LV1=0, LV2=1000, LV3=2500, LV4=5000, LV5=10000,
-        // LV6-9 continue scaling, LV10-30 same title "Legend"
+        // Level thresholds — each step = 550 × step number (cumulative: 550×n(n-1)/2)
+        // LV1=0, LV2=550, LV3=1650, LV4=3300 ... LV30=239250. MAX = LV30.
         const XP_THRESHOLDS = [
-          0, 1000, 2500, 5000, 10000,
-          18000, 28000, 40000, 55000,
-          // LV10-30: each +8000
-          70000, 78000, 86000, 94000, 102000, 110000,
-          118000, 126000, 134000, 142000, 150000,
-          158000, 166000, 174000, 182000, 190000,
-          198000, 206000, 214000, 222000, 230000
+          0,       // LV1
+          550,     // LV2
+          1650,    // LV3
+          3300,    // LV4
+          5500,    // LV5
+          8250,    // LV6
+          11550,   // LV7
+          15400,   // LV8
+          19800,   // LV9
+          24750,   // LV10
+          30250,   // LV11
+          36300,   // LV12
+          42900,   // LV13
+          50050,   // LV14
+          57750,   // LV15
+          66000,   // LV16
+          74800,   // LV17
+          84150,   // LV18
+          94050,   // LV19
+          104500,  // LV20
+          115500,  // LV21
+          127050,  // LV22
+          139150,  // LV23
+          151800,  // LV24
+          165000,  // LV25
+          178750,  // LV26
+          193050,  // LV27
+          207900,  // LV28
+          223300,  // LV29
+          239250,  // LV30 (MAX)
         ];
+        // Rank titles — 5 tiers, 6 levels each
+        // LV1-6: Recruit | LV7-12: Operative | LV13-18: Guardian | LV19-24: Inferno | LV25-30: Elite
         const RANK_TITLES = [
-          "Recruit",    // LV1
-          "Operative",  // LV2
-          "Scout",      // LV3
-          "Guardian",   // LV4
-          "Striker",    // LV5
-          "Ranger",     // LV6
-          "Vanguard",   // LV7
-          "Phantom",    // LV8
-          "Warlord",    // LV9
-          "Legend",     // LV10-30 (same title)
-          "Legend","Legend","Legend","Legend","Legend",
-          "Legend","Legend","Legend","Legend","Legend",
-          "Legend","Legend","Legend","Legend","Legend",
-          "Legend","Legend","Legend","Legend","Legend"
+          "Recruit","Recruit","Recruit","Recruit","Recruit","Recruit",
+          "Operative","Operative","Operative","Operative","Operative","Operative",
+          "Guardian","Guardian","Guardian","Guardian","Guardian","Guardian",
+          "Inferno","Inferno","Inferno","Inferno","Inferno","Inferno",
+          "Elite","Elite","Elite","Elite","Elite","Elite",
         ];
         let computedLevel = 1;
         for (let i = XP_THRESHOLDS.length - 1; i >= 0; i--) {
@@ -5023,11 +5039,13 @@
         if (intelLevelLabel)
           intelLevelLabel.innerHTML = `Level <span id="intelLevel">${computedLevel}</span> · ${totalXP} / ${nextThreshold} XP`;
 
-        // ── Write computed rank back to Firestore so other pages can read it ──
+        // ── Sync rank.xp, rank.level, rank.title back to Firestore ──
         try {
           await updateDoc(doc(db, "users", user.uid), {
-            "rank.level": computedLevel,
-            "rank.title": computedTitle,
+            "accountStatus.rank.xp": totalXP,
+            "accountStatus.rank.level": computedLevel,
+            "accountStatus.rank.title": computedTitle,
+            "accountStatus.rank.updatedAt": new Date().toISOString(),
           });
         } catch (_rankWriteErr) {
           console.warn("rank write error:", _rankWriteErr);
