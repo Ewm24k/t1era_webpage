@@ -6873,7 +6873,7 @@
               try {
                 const uSnap = await getDoc(doc(db, "users", uid));
                 if (uSnap.exists()) {
-                  const level = uSnap.data()?.map?.rank?.level;
+                  const level = uSnap.data()?.rank?.level;
                   rankCache[uid] = level ? `LV ${level}` : "LV 1";
                 } else {
                   rankCache[uid] = "LV 1";
