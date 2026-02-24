@@ -12,20 +12,20 @@
  */
 
 (function () {
-  'use strict';
+  "use strict";
 
   /* ═══════════════════════════════════════════
      WAIT FOR FIREBASE + DOM READY
   ═══════════════════════════════════════════ */
   function _ready(fn) {
-    if (document.readyState !== 'loading') fn();
-    else document.addEventListener('DOMContentLoaded', fn);
+    if (document.readyState !== "loading") fn();
+    else document.addEventListener("DOMContentLoaded", fn);
   }
 
   /* ═══════════════════════════════════════════
      STATE
   ═══════════════════════════════════════════ */
-  let _peekUid = null;   // uid currently shown in peek card
+  let _peekUid = null; // uid currently shown in peek card
 
   /* ═══════════════════════════════════════════
      OPEN PEEK CARD
@@ -34,20 +34,22 @@
     if (!uid) return;
     _peekUid = uid;
 
-    const overlay = document.getElementById('peekOverlay');
-    const card    = document.getElementById('peekCard');
+    const overlay = document.getElementById("peekOverlay");
+    const card = document.getElementById("peekCard");
     if (!overlay || !card) return;
 
     // Show loading spinner while fetching
     card.innerHTML = _loadingHtml();
-    overlay.classList.add('open');
-    document.body.style.overflow = 'hidden';
+    overlay.classList.add("open");
+    document.body.style.overflow = "hidden";
 
     // Only use cache if it has the full stat fields — otherwise always fetch fresh
     let profile = (window._profileCache && window._profileCache[uid]) || null;
-    const hasStats = profile && profile.sparkCount !== undefined
-                             && profile.followersCount !== undefined
-                             && profile.followingCount !== undefined;
+    const hasStats =
+      profile &&
+      profile.sparkCount !== undefined &&
+      profile.followersCount !== undefined &&
+      profile.followingCount !== undefined;
 
     if (!hasStats) {
       profile = await _fetchProfile(uid);
@@ -65,16 +67,16 @@
      CLOSE
   ═══════════════════════════════════════════ */
   window.closePeekCard = function () {
-    const overlay = document.getElementById('peekOverlay');
-    if (overlay) overlay.classList.remove('open');
-    document.body.style.overflow = '';
+    const overlay = document.getElementById("peekOverlay");
+    if (overlay) overlay.classList.remove("open");
+    document.body.style.overflow = "";
     _peekUid = null;
   };
 
   // Close on Escape key
   _ready(function () {
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') window.closePeekCard();
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") window.closePeekCard();
     });
   });
 
@@ -91,51 +93,64 @@
         window._t1FirestoreFns || {};
       if (!getDoc) return null;
 
-      const snap = await getDoc(doc(db, 'users', uid));
+      const snap = await getDoc(doc(db, "users", uid));
       if (!snap.exists()) return null;
 
       const d = snap.data();
 
       // Follow counts
-      let followersCount = '—';
-      let followingCount = '—';
+      let followersCount = "—";
+      let followingCount = "—";
       try {
         const [fersSnap, fingSnap] = await Promise.all([
-          getDocs(query(collection(db, 'follows'), where('followedId', '==', uid))),
-          getDocs(query(collection(db, 'follows'), where('followerId', '==', uid))),
+          getDocs(
+            query(collection(db, "follows"), where("followedId", "==", uid)),
+          ),
+          getDocs(
+            query(collection(db, "follows"), where("followerId", "==", uid)),
+          ),
         ]);
         followersCount = fersSnap.size;
         followingCount = fingSnap.size;
       } catch (_) {}
 
       // Spark count
-      let sparkCount = '—';
+      let sparkCount = "—";
       try {
         const sparksSnap = await getDocs(
-          query(collection(db, 'sparks'), where('uid', '==', uid))
+          query(collection(db, "sparks"), where("uid", "==", uid)),
         );
         sparkCount = sparksSnap.size;
       } catch (_) {}
 
+      // Compute rank level from XP — same formula as profile.html and spark.html
+      const _pt = d.accountStatus?.point || d.point || {};
+      const _totalXP = (_pt.spark||0)*20 + (_pt.like||0)*10 + (_pt.reply||0)*40;
+      const _XP_T = [0,550,1650,3300,5500,8250,11550,15400,19800,24750,30250,36300,42900,50050,57750,66000,74800,84150,94050,104500,115500,127050,139150,151800,165000,178750,193050,207900,223300,239250];
+      const _TITLES = ["Recruit","Recruit","Recruit","Recruit","Recruit","Recruit","Operative","Operative","Operative","Operative","Operative","Operative","Guardian","Guardian","Guardian","Guardian","Guardian","Guardian","Inferno","Inferno","Inferno","Inferno","Inferno","Inferno","Elite","Elite","Elite","Elite","Elite","Elite"];
+      let _computedLevel = 1;
+      for (let i = _XP_T.length-1; i >= 0; i--) { if (_totalXP >= _XP_T[i]) { _computedLevel = i+1; break; } }
+      const _computedTitle = _TITLES[_computedLevel-1] || 'Recruit';
+
       const profile = {
         uid,
-        name:           d.fullName    || d.nickname || 'T1ERA User',
-        handle:         d.nickname    || '',
-        photo:          d.profilePicture?.url || '',
-        rank:           d.rank?.title || 'Recruit',
-        level:          d.rank?.level || 1,
-        callsign:       d.callsign    || '',
-        plan:           d.plan?.type  || 'free',
-        verified:       d.accountStatus?.verified || false,
-        acctType:       d.accountStatus?.type || 'standard',
-        status:         d.userStatus  || '',
-        bio:            d.userBio     || '',
-        industry:       d.industry    || '',
-        city:           d.city        || '',
-        country:        d.country     || '',
-        aiLevel:        d.aiLevel     || '',
-        bannerPreset:   d.bannerImage?.preset || null,
-        bannerUrl:      d.bannerImage?.url    || null,
+        name: d.fullName || d.nickname || "T1ERA User",
+        handle: d.nickname || "",
+        photo: d.accountStatus?.profilePicture?.url || d.profilePicture?.url || "",
+        rank: _computedTitle,
+        level: _computedLevel,
+        callsign: d.accountStatus?.callsign || d.callsign || "",
+        plan: d.accountStatus?.plan?.type || d.plan?.type || "free",
+        verified: d.accountStatus?.verified || false,
+        acctType: d.accountStatus?.type || "standard",
+        status: d.accountStatus?.userStatus || d.userStatus || "",
+        bio: d.accountStatus?.userBio || d.userBio || "",
+        industry: d.accountStatus?.industry || d.industry || "",
+        city: d.accountStatus?.city || d.city || "",
+        country: d.accountStatus?.country || d.country || "",
+        aiLevel: d.accountStatus?.aiLevel || d.aiLevel || "",
+        bannerPreset: d.accountStatus?.bannerImage?.preset || d.bannerImage?.preset || null,
+        bannerUrl: d.accountStatus?.bannerImage?.url || d.bannerImage?.url || null,
         followersCount,
         followingCount,
         sparkCount,
@@ -147,7 +162,7 @@
 
       return profile;
     } catch (e) {
-      console.warn('openPeekCard fetch error:', e);
+      console.warn("openPeekCard fetch error:", e);
       return null;
     }
   }
@@ -156,25 +171,25 @@
      POPULATE CARD DOM
   ═══════════════════════════════════════════ */
   function _populateCard(p) {
-    const card = document.getElementById('peekCard');
+    const card = document.getElementById("peekCard");
     if (!card) return;
 
     // Rebuild full shell to be safe
     card.innerHTML = _cardShellHtml();
 
     // Banner
-    const bannerBg = document.getElementById('peekBannerBg');
+    const bannerBg = document.getElementById("peekBannerBg");
     if (bannerBg) {
       if (p.bannerUrl) {
         bannerBg.style.backgroundImage = `url('${p.bannerUrl}')`;
       } else if (p.bannerPreset) {
-        const banner = document.getElementById('peekBanner');
+        const banner = document.getElementById("peekBanner");
         if (banner) {
           const presetMap = {
-            default:  'banner-preset-default',
-            midnight: 'banner-preset-midnight',
-            cyber:    'banner-preset-cyber',
-            pinky:    'banner-preset-pinky',
+            default: "banner-preset-default",
+            midnight: "banner-preset-midnight",
+            cyber: "banner-preset-cyber",
+            pinky: "banner-preset-pinky",
           };
           const cls = presetMap[p.bannerPreset];
           if (cls) banner.classList.add(cls);
@@ -183,22 +198,22 @@
     }
 
     // Avatar
-    const avatarEl = document.getElementById('peekAvatar');
+    const avatarEl = document.getElementById("peekAvatar");
     if (avatarEl) {
       if (p.photo) {
         avatarEl.innerHTML = `<img src="${_esc(p.photo)}" referrerpolicy="no-referrer"
           onerror="this.style.display='none'" alt="avatar">`;
       } else {
-        avatarEl.textContent = (p.name[0] || '?').toUpperCase();
+        avatarEl.textContent = (p.name[0] || "?").toUpperCase();
       }
     }
 
     // Name + handle
-    _setText('peekName', p.name);
-    _setText('peekHandle', p.handle ? '@' + p.handle : '');
+    _setText("peekName", p.name);
+    _setText("peekHandle", p.handle ? "@" + p.handle : "");
 
     // Badges row
-    const badgesRow = document.getElementById('peekBadgesRow');
+    const badgesRow = document.getElementById("peekBadgesRow");
     if (badgesRow) {
       let html = `<span class="peek-rank-badge">⬡ LV${p.level} · ${_esc(p.rank)}</span>`;
       if (p.verified) {
@@ -209,53 +224,77 @@
     }
 
     // Status + bio
-    _setText('peekStatus', p.status);
-    _setText('peekBio',    p.bio);
+    _setText("peekStatus", p.status);
+    _setText("peekBio", p.bio);
     if (!p.status) {
-      const el = document.getElementById('peekStatus');
-      if (el) el.style.display = 'none';
+      const el = document.getElementById("peekStatus");
+      if (el) el.style.display = "none";
     }
     if (!p.bio) {
-      const el = document.getElementById('peekBio');
-      if (el) el.style.display = 'none';
+      const el = document.getElementById("peekBio");
+      if (el) el.style.display = "none";
     }
 
     // Stats — show '—' if value is missing
-    _setText('peekSparks',    p.sparkCount    != null ? String(p.sparkCount)    : '—');
-    _setText('peekFollowers', p.followersCount != null ? String(p.followersCount) : '—');
-    _setText('peekFollowing', p.followingCount != null ? String(p.followingCount) : '—');
+    _setText("peekSparks", p.sparkCount != null ? String(p.sparkCount) : "—");
+    _setText(
+      "peekFollowers",
+      p.followersCount != null ? String(p.followersCount) : "—",
+    );
+    _setText(
+      "peekFollowing",
+      p.followingCount != null ? String(p.followingCount) : "—",
+    );
 
     // Chips
-    const chipsEl = document.getElementById('peekChips');
+    const chipsEl = document.getElementById("peekChips");
     if (chipsEl) {
       const chips = [];
-      if (p.industry) chips.push({ icon: 'ph-briefcase',        label: _capitalize(p.industry) });
-      if (p.city)     chips.push({ icon: 'ph-map-pin',          label: `${p.city}${p.country ? ', '+p.country : ''}` });
-      if (p.aiLevel)  chips.push({ icon: 'ph-robot',            label: `AI: ${_capitalize(p.aiLevel)}`, cls: 'highlight' });
-      if (p.callsign) chips.push({ icon: 'ph-identification-badge', label: p.callsign.toUpperCase() });
-      chipsEl.innerHTML = chips.map(c =>
-        `<span class="chip ${c.cls||''}" style="font-size:9.5px;padding:3px 8px;">
+      if (p.industry)
+        chips.push({ icon: "ph-briefcase", label: _capitalize(p.industry) });
+      if (p.city)
+        chips.push({
+          icon: "ph-map-pin",
+          label: `${p.city}${p.country ? ", " + p.country : ""}`,
+        });
+      if (p.aiLevel)
+        chips.push({
+          icon: "ph-robot",
+          label: `AI: ${_capitalize(p.aiLevel)}`,
+          cls: "highlight",
+        });
+      if (p.callsign)
+        chips.push({
+          icon: "ph-identification-badge",
+          label: p.callsign.toUpperCase(),
+        });
+      chipsEl.innerHTML = chips
+        .map(
+          (c) =>
+            `<span class="chip ${c.cls || ""}" style="font-size:9.5px;padding:3px 8px;">
            <i class="ph-bold ${c.icon}"></i>${_esc(c.label)}
-         </span>`
-      ).join('');
+         </span>`,
+        )
+        .join("");
     }
 
     // Follow button
-    const followBtn = document.getElementById('peekFollowBtn');
+    const followBtn = document.getElementById("peekFollowBtn");
     if (followBtn) {
-      const myUid  = window._currentUid;
+      const myUid = window._currentUid;
       const isSelf = p.uid === myUid;
       if (isSelf) {
-        followBtn.className = 'peek-follow-btn self-view';
+        followBtn.className = "peek-follow-btn self-view";
         followBtn.innerHTML = '<i class="ph-bold ph-user"></i> You';
       } else {
-        const iFollow = window._myFollowingSet && window._myFollowingSet.has(p.uid);
-        _setFollowBtnState(followBtn, iFollow ? 'friends' : 'follow');
+        const iFollow =
+          window._myFollowingSet && window._myFollowingSet.has(p.uid);
+        _setFollowBtnState(followBtn, iFollow ? "friends" : "follow");
       }
     }
 
     // Visit Profile link
-    const visitBtn = document.getElementById('peekVisitBtn');
+    const visitBtn = document.getElementById("peekVisitBtn");
     if (visitBtn) {
       visitBtn.href = `user-profile.html?uid=${p.uid}`;
     }
@@ -268,35 +307,40 @@
     const uid = _peekUid;
     if (!uid || !window._currentUid) return;
 
-    const btn    = document.getElementById('peekFollowBtn');
+    const btn = document.getElementById("peekFollowBtn");
     if (!btn) return;
 
-    const iFollow  = window._myFollowingSet && window._myFollowingSet.has(uid);
-    const action   = iFollow ? 'unfollow' : 'follow';
+    const iFollow = window._myFollowingSet && window._myFollowingSet.has(uid);
+    const action = iFollow ? "unfollow" : "follow";
 
     // Optimistic UI update
-    _setFollowBtnState(btn, action === 'follow' ? 'friends' : 'follow');
+    _setFollowBtnState(btn, action === "follow" ? "friends" : "follow");
 
     // Delegate to the existing follow handler in profile.html
     // We create a dummy button proxy that matches the modalToggleFollow signature
-    const proxyBtn = { className: '', innerHTML: '', setAttribute: ()=>{}, classList: { add: ()=>{}, remove: ()=>{} } };
+    const proxyBtn = {
+      className: "",
+      innerHTML: "",
+      setAttribute: () => {},
+      classList: { add: () => {}, remove: () => {} },
+    };
     try {
       await window.modalToggleFollow(proxyBtn, uid, action);
     } catch (e) {
       // Revert on error
-      _setFollowBtnState(btn, iFollow ? 'friends' : 'follow');
+      _setFollowBtnState(btn, iFollow ? "friends" : "follow");
     }
   };
 
   function _setFollowBtnState(btn, state) {
-    if (state === 'follow') {
-      btn.className = 'peek-follow-btn';
+    if (state === "follow") {
+      btn.className = "peek-follow-btn";
       btn.innerHTML = '<i class="ph-bold ph-user-plus"></i> Follow';
-    } else if (state === 'friends') {
-      btn.className = 'peek-follow-btn friends';
+    } else if (state === "friends") {
+      btn.className = "peek-follow-btn friends";
       btn.innerHTML = '<i class="ph-bold ph-check"></i> Following';
-    } else if (state === 'unfollow') {
-      btn.className = 'peek-follow-btn following';
+    } else if (state === "unfollow") {
+      btn.className = "peek-follow-btn following";
       btn.innerHTML = '<i class="ph-bold ph-user-minus"></i> Unfollow';
     }
   }
@@ -367,16 +411,19 @@
   ═══════════════════════════════════════════ */
   function _setText(id, val) {
     const el = document.getElementById(id);
-    if (el) el.textContent = val || '';
+    if (el) el.textContent = val || "";
   }
 
   function _esc(str) {
-    return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    return (str || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
   }
 
   function _capitalize(str) {
-    if (!str) return '';
+    if (!str) return "";
     return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
   }
-
 })();
