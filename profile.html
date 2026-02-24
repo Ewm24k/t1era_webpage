@@ -4884,7 +4884,7 @@
         }
       });
 
-      function applyUserData(d, user) {
+      async function applyUserData(d, user) {
         // Profile photo
         const photoURL = d.profilePicture?.url || user.photoURL || "";
         if (photoURL) {
@@ -5022,6 +5022,16 @@
         const intelLevelLabel = document.querySelector(".rank-level-label");
         if (intelLevelLabel)
           intelLevelLabel.innerHTML = `Level <span id="intelLevel">${computedLevel}</span> · ${totalXP} / ${nextThreshold} XP`;
+
+        // ── Write computed rank back to Firestore so other pages can read it ──
+        try {
+          await updateDoc(doc(db, "users", user.uid), {
+            "rank.level": computedLevel,
+            "rank.title": computedTitle,
+          });
+        } catch (_rankWriteErr) {
+          console.warn("rank write error:", _rankWriteErr);
+        }
 
         // Account status
         const acctStatus = d.accountStatus || {};
