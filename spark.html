@@ -6876,7 +6876,8 @@
                 } else {
                   rankCache[uid] = "LV 1";
                 }
-              } catch (_) {
+              } catch (rankErr) {
+                console.warn("rank fetch error for uid", uid, rankErr?.code, rankErr?.message);
                 rankCache[uid] = "LV 1";
               }
             })
