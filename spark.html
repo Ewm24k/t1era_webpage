@@ -5737,7 +5737,7 @@
       async function ensurePointMap(uid) {
         try {
           const snap = await getDoc(doc(db, "users", uid));
-          const existing = snap.exists() ? snap.data().point || {} : {};
+          const existing = snap.exists() ? (snap.data().accountStatus?.point || snap.data().point || {}) : {};
           const patch = {};
 
           // spark and reply: only initialize if missing (no reliable backfill source)
@@ -6871,8 +6871,16 @@
               try {
                 const uSnap = await getDoc(doc(db, "users", uid));
                 if (uSnap.exists()) {
-                  const level = uSnap.data()?.accountStatus?.rank?.level;
-                  rankCache[uid] = level ? `LV ${level}` : "LV 1";
+                  const ud = uSnap.data();
+                  // Compute level from XP so it's always accurate regardless of stored value
+                  const pt = ud.accountStatus?.point || ud.point || {};
+                  const totalXP = (pt.spark || 0) * 20 + (pt.like || 0) * 10 + (pt.reply || 0) * 40;
+                  const XP_THRESHOLDS = [0,550,1650,3300,5500,8250,11550,15400,19800,24750,30250,36300,42900,50050,57750,66000,74800,84150,94050,104500,115500,127050,139150,151800,165000,178750,193050,207900,223300,239250];
+                  let computedLevel = 1;
+                  for (let i = XP_THRESHOLDS.length - 1; i >= 0; i--) {
+                    if (totalXP >= XP_THRESHOLDS[i]) { computedLevel = i + 1; break; }
+                  }
+                  rankCache[uid] = `LV ${computedLevel}`;
                 } else {
                   rankCache[uid] = "LV 1";
                 }
