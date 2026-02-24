@@ -6854,16 +6854,14 @@
           const docs = [];
           snap.forEach((d) => docs.push({ id: d.id, data: d.data() }));
 
-          // Sort newest-first client-side — handles null createdAt gracefully
-          docs.sort((a, b) => {
-            const ta = a.data.createdAt?.toMillis
-              ? a.data.createdAt.toMillis()
-              : 0;
-            const tb = b.data.createdAt?.toMillis
-              ? b.data.createdAt.toMillis()
-              : 0;
-            return tb - ta;
-          });
+          // Sort newest-first client-side — handles Firestore Timestamp, ISO string, or null
+          const toMs = (ts) => {
+            if (!ts) return 0;
+            if (ts.toMillis) return ts.toMillis();
+            const ms = new Date(ts).getTime();
+            return isNaN(ms) ? 0 : ms;
+          };
+          docs.sort((a, b) => toMs(b.data.createdAt) - toMs(a.data.createdAt));
 
           // ── Fetch rank for each unique author UID ──
           const uniqueUids = [...new Set(docs.slice(0, 50).map(({ data: d }) => d.uid).filter(Boolean))];
