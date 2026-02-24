@@ -430,9 +430,14 @@
       const nick = d.nickname ? `@${d.nickname}` : '';
       document.getElementById('displayNickname').textContent = nick;
 
-      // Rank — read directly from stored fields, same pattern as user-peek.js
-      const lvl       = d.rank?.level   || 1;
-      const rankTitle = d.rank?.title   || 'Recruit';
+      // Rank — compute from XP so it's always accurate
+      const _pt = d.accountStatus?.point || d.point || {};
+      const _totalXP = (_pt.spark||0)*20 + (_pt.like||0)*10 + (_pt.reply||0)*40;
+      const _XP_T = [0,550,1650,3300,5500,8250,11550,15400,19800,24750,30250,36300,42900,50050,57750,66000,74800,84150,94050,104500,115500,127050,139150,151800,165000,178750,193050,207900,223300,239250];
+      const _TITLES = ["Recruit","Recruit","Recruit","Recruit","Recruit","Recruit","Operative","Operative","Operative","Operative","Operative","Operative","Guardian","Guardian","Guardian","Guardian","Guardian","Guardian","Inferno","Inferno","Inferno","Inferno","Inferno","Inferno","Elite","Elite","Elite","Elite","Elite","Elite"];
+      let lvl = 1;
+      for (let i = _XP_T.length-1; i >= 0; i--) { if (_totalXP >= _XP_T[i]) { lvl = i+1; break; } }
+      const rankTitle = _TITLES[lvl-1] || 'Recruit';
 
       document.getElementById('rankLevelSvg').textContent  = lvl;
       document.getElementById('rankLevelNum').textContent  = `LV ${lvl}`;
@@ -444,7 +449,7 @@
       if (badgesStrip) {
         const isVer   = d.accountStatus?.verified || false;
         const acctTyp = d.accountStatus?.type || 'standard';
-        const planTyp = d.plan?.type || 'free';
+        const planTyp = d.accountStatus?.plan?.type || d.plan?.type || 'free';
         badgesStrip.innerHTML = `
           <span class="acct-type-badge ${acctTyp}">${cap(acctTyp)}</span>
           <span class="acct-type-badge ${planTyp}">${cap(planTyp)} Plan</span>
@@ -513,12 +518,21 @@
 
         const docs = [];
         snap.forEach(ds => docs.push({ id:ds.id, data:ds.data() }));
-        docs.sort((a,b) => (b.data.createdAt?.toMillis?.()||0) - (a.data.createdAt?.toMillis?.()||0));
+        docs.sort((a,b) => {
+          const toMs = ts => { if (!ts) return 0; if (ts.toMillis) return ts.toMillis(); const m = new Date(ts).getTime(); return isNaN(m)?0:m; };
+          return toMs(b.data.createdAt) - toMs(a.data.createdAt);
+        });
 
         const name  = d.fullName || d.nickname || 'User';
         const photo = d.profilePicture?.url || '';
-        const rank  = (d.rank?.title||'Recruit');
-        const level = (d.rank?.level||1);
+        const _spt = d.accountStatus?.point || d.point || {};
+        const _sxp = (_spt.spark||0)*20 + (_spt.like||0)*10 + (_spt.reply||0)*40;
+        const _sXP_T = [0,550,1650,3300,5500,8250,11550,15400,19800,24750,30250,36300,42900,50050,57750,66000,74800,84150,94050,104500,115500,127050,139150,151800,165000,178750,193050,207900,223300,239250];
+        const _sTITLES = ["Recruit","Recruit","Recruit","Recruit","Recruit","Recruit","Operative","Operative","Operative","Operative","Operative","Operative","Guardian","Guardian","Guardian","Guardian","Guardian","Guardian","Inferno","Inferno","Inferno","Inferno","Inferno","Inferno","Elite","Elite","Elite","Elite","Elite","Elite"];
+        let _slvl = 1;
+        for (let i = _sXP_T.length-1; i >= 0; i--) { if (_sxp >= _sXP_T[i]) { _slvl = i+1; break; } }
+        const rank  = _sTITLES[_slvl-1] || 'Recruit';
+        const level = _slvl;
 
         grid.innerHTML = docs.map(({id, data:sp}) => {
           const time = sp.createdAt?.toDate
@@ -637,12 +651,14 @@
     ═══════════════════════════════════════════ */
     function buildChips(d) {
       const row = document.getElementById('chipsRow');
+      const aiLevel = d.accountStatus?.aiLevel || d.aiLevel || '';
+      const plan    = d.accountStatus?.plan    || d.plan    || {};
       const items = [
         d.industry  ? { icon:'ph-briefcase', label:cap(d.industry) } : null,
         d.city      ? { icon:'ph-map-pin',   label:`${d.city}${d.country?', '+d.country:''}` } : null,
         d.language  ? { icon:'ph-translate', label:d.language.toUpperCase() } : null,
-        d.aiLevel   ? { icon:'ph-robot',     label:`AI: ${cap(d.aiLevel)}`, cls:'highlight' } : null,
-        d.plan?.type? { icon:'ph-crown',     label:`${cap(d.plan.type)} Plan`, cls:d.plan.type==='free'?'':'gold-chip' } : null,
+        aiLevel     ? { icon:'ph-robot',     label:`AI: ${cap(aiLevel)}`, cls:'highlight' } : null,
+        plan?.type  ? { icon:'ph-crown',     label:`${cap(plan.type)} Plan`, cls:plan.type==='free'?'':'gold-chip' } : null,
       ].filter(Boolean);
       if (row) row.innerHTML = items.map(c => `<span class="chip ${c.cls||''}"><i class="ph-bold ${c.icon}"></i>${c.label}</span>`).join('');
     }
