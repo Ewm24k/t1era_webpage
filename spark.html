@@ -6865,7 +6865,26 @@
             return tb - ta;
           });
 
-          docs.slice(0, 50).forEach(({ id, data }) => renderCard(id, data));
+          // ── Fetch rank for each unique author UID ──
+          const uniqueUids = [...new Set(docs.slice(0, 50).map(({ data: d }) => d.uid).filter(Boolean))];
+          const rankCache = {};
+          await Promise.all(
+            uniqueUids.map(async (uid) => {
+              try {
+                const uSnap = await getDoc(doc(db, "users", uid));
+                if (uSnap.exists()) {
+                  const level = uSnap.data()?.map?.rank?.level;
+                  rankCache[uid] = level ? `LV ${level}` : "LV 1";
+                } else {
+                  rankCache[uid] = "LV 1";
+                }
+              } catch (_) {
+                rankCache[uid] = "LV 1";
+              }
+            })
+          );
+
+          docs.slice(0, 50).forEach(({ id, data }) => renderCard(id, data, rankCache[data.uid] || "LV 1"));
         } catch (e) {
           console.error("startFeed error:", e);
         }
@@ -6892,7 +6911,7 @@
       }
 
       // ── RENDER ONE CARD INTO FEED ──
-      function renderCard(id, d) {
+      function renderCard(id, d, rankLabel) {
         const panel = document.getElementById("realFeed");
         if (!panel) return;
 
@@ -6952,7 +6971,7 @@
           <span class="spark-time">${timeAgo(d.createdAt)}</span>
         </div>
         <div class="badges-row">
-          <span class="badge rank">LV 1</span>
+          <span class="badge rank">${rankLabel || "LV 1"}</span>
           ${
             !isOwner
               ? (() => {
