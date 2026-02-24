@@ -2069,6 +2069,17 @@
         filter: grayscale(1);
       }
 
+      .badge-card.active {
+        border-color: #f59e0b;
+        box-shadow: 0 0 12px rgba(245,158,11,0.35), 0 0 24px rgba(245,158,11,0.12);
+        background: rgba(245,158,11,0.06);
+      }
+
+      .badge-card.active .badge-name {
+        color: #f59e0b;
+        text-shadow: 0 0 8px rgba(245,158,11,0.6);
+      }
+
       /* points breakdown */
       .points-card {
         background: var(--bg-card);
@@ -4285,6 +4296,7 @@
                           font-size="14"
                           font-weight="800"
                           fill="#f59e0b"
+                          id="intelShieldLevel"
                         >
                           1
                         </text>
@@ -4346,26 +4358,17 @@
               <!-- Badges -->
               <div class="intel-section">
                 <div class="intel-section-title">Badges</div>
-                <div class="badges-grid">
-                  <div class="badge-card">
+                <div class="badges-grid" id="rankBadgesGrid">
+                  <div class="badge-card locked" data-rank="Recruit">
                     <div
                       class="badge-icon"
                       style="background: rgba(16, 185, 129, 0.1)"
-                    >
-                      🌱
-                    </div>
-                    <div class="badge-name">Early Bird</div>
-                  </div>
-                  <div class="badge-card">
-                    <div
-                      class="badge-icon"
-                      style="background: rgba(245, 158, 11, 0.1)"
                     >
                       ⭐
                     </div>
                     <div class="badge-name">Recruit</div>
                   </div>
-                  <div class="badge-card locked">
+                  <div class="badge-card locked" data-rank="Operative">
                     <div
                       class="badge-icon"
                       style="background: rgba(139, 92, 246, 0.1)"
@@ -4374,7 +4377,7 @@
                     </div>
                     <div class="badge-name">Operative</div>
                   </div>
-                  <div class="badge-card locked">
+                  <div class="badge-card locked" data-rank="Guardian">
                     <div
                       class="badge-icon"
                       style="background: rgba(239, 68, 68, 0.1)"
@@ -4383,7 +4386,7 @@
                     </div>
                     <div class="badge-name">Guardian</div>
                   </div>
-                  <div class="badge-card locked">
+                  <div class="badge-card locked" data-rank="Inferno">
                     <div
                       class="badge-icon"
                       style="background: rgba(249, 115, 22, 0.1)"
@@ -4392,7 +4395,7 @@
                     </div>
                     <div class="badge-name">Inferno</div>
                   </div>
-                  <div class="badge-card locked">
+                  <div class="badge-card locked" data-rank="Elite">
                     <div
                       class="badge-icon"
                       style="background: rgba(194, 24, 91, 0.1)"
@@ -5009,6 +5012,23 @@
           computedTitle.toUpperCase();
         document.getElementById("intelLevel").textContent = computedLevel;
         document.getElementById("intelCallsign").textContent = callsign;
+        const intelShieldLevelEl = document.getElementById("intelShieldLevel");
+        if (intelShieldLevelEl) intelShieldLevelEl.textContent = computedLevel;
+
+        // ── Rank badge cards — unlock earned tiers, highlight active tier ──
+        const RANK_ORDER = ["Recruit","Operative","Guardian","Inferno","Elite"];
+        const currentTierIndex = RANK_ORDER.indexOf(computedTitle);
+        document.querySelectorAll("#rankBadgesGrid .badge-card[data-rank]").forEach((card) => {
+          const cardTierIndex = RANK_ORDER.indexOf(card.dataset.rank);
+          card.classList.remove("locked","active");
+          if (cardTierIndex < currentTierIndex) {
+            // already passed — unlocked but not active
+          } else if (cardTierIndex === currentTierIndex) {
+            card.classList.add("active");
+          } else {
+            card.classList.add("locked");
+          }
+        });
 
         document.getElementById("xpFill").style.width = `${xpPct}%`;
         const rankXpFillEl = document.getElementById("rankXpFill");
