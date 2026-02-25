@@ -5829,6 +5829,7 @@
           // spark and reply: only initialize if missing (no reliable backfill source)
           if (existing.spark === undefined) patch["point.spark"] = 0;
           if (existing.reply === undefined) patch["point.reply"] = 0;
+          if (existing.follower === undefined) patch["point.follower"] = 0;
 
           // like: ALWAYS recalculate from actual sparks/{sparkId}/likes/{uid} subcollection
           // This is the source of truth — fixes any dirty/wrong values from previous bugs
@@ -6076,6 +6077,15 @@
               console.warn("follow activity log error:", ae.code, ae.message);
             }
 
+            // ── Award +25 XP to user A for following (writes to own doc — isOwner passes) ──
+            try {
+              await updateDoc(doc(db, "users", user.uid), {
+                "point.follower": increment(1),
+              });
+            } catch (fe) {
+              console.warn("follower XP award error:", fe.code, fe.message);
+            }
+
             // Toast confirmation
             if (typeof window.showToast === "function")
               window.showToast("Now following! 🤝");
@@ -6083,13 +6093,6 @@
             // ── Unfollow: delete /follows/{myUid}_{targetUid} — rules allow delete if followerId == auth.uid ──
             const followDocId = `${user.uid}_${ownerUid}`;
             await deleteDoc(doc(db, "follows", followDocId));
-
-            // ── Delete stale follow notification from target so re-follow always creates fresh ──
-            try {
-              await deleteDoc(
-                doc(db, "users", ownerUid, "notifications", `follow_${user.uid}_${ownerUid}`),
-              );
-            } catch (_) {}
 
             // Toast confirmation
             if (typeof window.showToast === "function")
