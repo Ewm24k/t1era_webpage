@@ -3105,6 +3105,54 @@
         align-items: center;
         gap: 5px;
       }
+      /* ══════════════════════════════════════════
+   PROMPT COMPOSE BLOCK
+══════════════════════════════════════════ */
+      .prompt-compose-block {
+        margin: 12px 16px 0;
+        border-radius: var(--r);
+        background: linear-gradient(
+          135deg,
+          rgba(139, 92, 246, 0.08),
+          rgba(194, 24, 91, 0.05)
+        );
+        border: 1px solid rgba(139, 92, 246, 0.22);
+        overflow: hidden;
+      }
+      .prompt-compose-nav {
+        display: flex;
+        align-items: stretch;
+        gap: 0;
+      }
+      .prompt-nav-btn {
+        flex-shrink: 0;
+        width: 36px;
+        background: none;
+        border: none;
+        color: var(--text-3);
+        font-size: 14px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: color 0.15s, background 0.15s;
+      }
+      .prompt-nav-btn:hover {
+        color: var(--purple);
+        background: rgba(139, 92, 246, 0.08);
+      }
+      .prompt-compose-inner {
+        flex: 1;
+        padding: 12px 8px;
+        min-width: 0;
+      }
+      .prompt-compose-hint {
+        font-size: 11px;
+        color: var(--text-3);
+        font-family: var(--f-mono);
+        margin-top: 6px;
+        line-height: 1.5;
+      }
     </style>
   </head>
   <body>
@@ -4031,387 +4079,171 @@
          TAB 1 — SPARK PROMPT
     ════════════════════════ -->
         <div class="tab-panel" id="panel-1">
-          <div
-            style="
-              padding: 14px 16px;
-              border-bottom: 1px solid var(--border);
-              background: rgba(139, 92, 246, 0.04);
-            "
-          >
-            <p
+
+          <!-- ── PROMPT FEED SKELETON (shown until data ready) ── -->
+          <div class="sk-page-overlay" id="skPromptFeed">
+            <div
+              class="sk-pulse sk-compose"
               style="
-                font-size: 12px;
-                color: var(--text-3);
-                line-height: 1.65;
-                font-family: var(--f-mono);
+                margin: 0;
+                border-radius: 0;
+                height: 64px;
+                border-bottom: 1px solid var(--border);
               "
-            >
-              <span style="color: var(--purple); font-weight: 700"
-                >// SPARK PROMPTS</span
-              >
-              — Open questions from the community. Tap a prompt to reply. Your
-              answer becomes a Spark on your profile.
-            </p>
+            ></div>
+            <div class="sk-card">
+              <div class="sk-card-head">
+                <div class="sk-pulse sk-circle sk-card-av"></div>
+                <div class="sk-card-meta">
+                  <div class="sk-pulse sk-line w60"></div>
+                  <div class="sk-pulse sk-line w40"></div>
+                </div>
+              </div>
+              <div class="sk-pulse sk-line w90"></div>
+              <div class="sk-pulse sk-line w70"></div>
+              <div class="sk-card-acts">
+                <div class="sk-pulse sk-act"></div>
+                <div class="sk-pulse sk-act"></div>
+                <div class="sk-pulse sk-act"></div>
+                <div class="sk-pulse sk-act"></div>
+              </div>
+            </div>
+            <div class="sk-card">
+              <div class="sk-card-head">
+                <div class="sk-pulse sk-circle sk-card-av"></div>
+                <div class="sk-card-meta">
+                  <div class="sk-pulse sk-line w60"></div>
+                  <div class="sk-pulse sk-line w40"></div>
+                </div>
+              </div>
+              <div class="sk-pulse sk-line w90"></div>
+              <div class="sk-pulse sk-line w70"></div>
+              <div class="sk-card-acts">
+                <div class="sk-pulse sk-act"></div>
+                <div class="sk-pulse sk-act"></div>
+                <div class="sk-pulse sk-act"></div>
+                <div class="sk-pulse sk-act"></div>
+              </div>
+            </div>
           </div>
 
-          <!-- Prompt 1 -->
-          <article
-            class="spark-card fu"
-            onclick="
-              openReply(
-                'Danial L.',
-                'DL',
-                '#8b5cf6',
-                'What single habit completely changed your productivity?',
-              )
-            "
-          >
-            <div class="card-head">
-              <div class="av-wrap">
-                <div
-                  class="spark-av"
-                  style="background: linear-gradient(135deg, #8b5cf6, #c2185b)"
-                  onclick="
-                    event.stopPropagation();
-                    showProfile(
-                      'Danial L.',
-                      'danialL',
-                      'LV 4 · Operative',
-                      99,
-                      301,
-                      'Productivity nerd. Building the future.',
-                      '#8b5cf6',
-                      false,
-                    );
-                  "
-                >
-                  DL
-                </div>
-              </div>
-              <div class="card-meta">
-                <div class="meta-row-1">
-                  <span class="author-name">Danial L.</span>
-                  <span class="author-handle">@danialL</span>
-                  <button
-                    class="follow-pill"
-                    onclick="
-                      event.stopPropagation();
-                      toggleFollow(this);
-                    "
-                  >
-                    <i class="ph-bold ph-plus"></i> Follow
-                  </button>
-                  <span class="spark-time">3h ago</span>
-                </div>
-                <div class="badges-row">
-                  <span class="badge rank">LV 4</span>
-                  <span class="badge prompt-tag"
-                    ><i class="ph-bold ph-chat-teardrop-dots"></i> Prompt</span
-                  >
-                </div>
-              </div>
-              <button class="dots-btn" onclick="event.stopPropagation()">
-                <i class="ph-bold ph-dots-three-vertical"></i>
-              </button>
-            </div>
-            <div class="card-content">
-              <div class="prompt-card">
-                <div class="prompt-label">
-                  <i class="ph-bold ph-question"></i> Open Prompt
-                </div>
-                <p class="prompt-q">
-                  What is the single habit that completely changed your
-                  productivity — and could you ever go back to life without it?
-                </p>
-                <p class="prompt-replies">
-                  💬 47 people replied · tap to add your spark
-                </p>
-              </div>
-            </div>
-            <div class="action-bar">
-              <button
-                class="act-btn like"
-                onclick="
-                  event.stopPropagation();
-                  toggleLike(this);
-                "
-              >
-                <i class="ph-bold ph-heart"></i><span>203</span>
-              </button>
-              <button
-                class="act-btn reply"
-                onclick="
-                  event.stopPropagation();
-                  openReply(
-                    'Danial L.',
-                    'DL',
-                    '#8b5cf6',
-                    'What single habit completely changed your productivity?',
-                  );
-                "
-              >
-                <i class="ph-bold ph-chat-circle"></i><span>47</span>
-              </button>
-              <button
-                class="act-btn repost"
-                onclick="
-                  event.stopPropagation();
-                  toggleRepost(this);
-                "
-              >
-                <i class="ph-bold ph-repeat"></i><span>61</span>
-              </button>
-              <button
-                class="act-btn share"
-                onclick="
-                  event.stopPropagation();
-                  shareSpark();
-                "
-              >
-                <i class="ph-bold ph-share-network"></i><span>15</span>
-              </button>
-            </div>
-          </article>
+          <!-- ── REAL PROMPT FEED CONTENT ── -->
+          <div class="real-content sk-hidden" id="realPromptFeedWrap">
 
-          <!-- Prompt 2 -->
-          <article
-            class="spark-card fu d1"
-            onclick="
-              openReply(
-                'Wani Aisyah',
-                'WA',
-                '#f59e0b',
-                'Best underrated tool for remote teams in 2025?',
-              )
-            "
-          >
-            <div class="card-head">
-              <div class="av-wrap">
-                <div
-                  class="spark-av"
-                  style="background: linear-gradient(135deg, #f59e0b, #f97316)"
-                  onclick="
-                    event.stopPropagation();
-                    showProfile(
-                      'Wani Aisyah',
-                      'waniaisyah',
-                      'LV 3 · Scout',
-                      64,
-                      210,
-                      'Tech enthusiast & early adopter 🌟',
-                      '#f59e0b',
-                      false,
-                    );
-                  "
-                >
-                  WA
-                </div>
+            <!-- Feed Mini Header -->
+            <div class="feed-mini-header">
+              <div class="feed-mini-title">
+                <i class="ph-bold ph-chat-teardrop-dots"></i>
+                Spark Prompts
               </div>
-              <div class="card-meta">
-                <div class="meta-row-1">
-                  <span class="author-name">Wani Aisyah</span>
-                  <span class="author-handle">@waniaisyah</span>
-                  <button
-                    class="follow-pill"
-                    onclick="
-                      event.stopPropagation();
-                      toggleFollow(this);
-                    "
-                  >
-                    <i class="ph-bold ph-plus"></i> Follow
-                  </button>
-                  <span class="spark-time">6h ago</span>
-                </div>
-                <div class="badges-row">
-                  <span class="badge rank">LV 3</span>
-                  <span class="badge prompt-tag"
-                    ><i class="ph-bold ph-chat-teardrop-dots"></i> Prompt</span
-                  >
-                </div>
-              </div>
-              <button class="dots-btn" onclick="event.stopPropagation()">
-                <i class="ph-bold ph-dots-three-vertical"></i>
+              <button
+                class="feed-refresh-btn"
+                id="promptRefreshBtn"
+                onclick="startPromptFeed()"
+                title="Refresh prompts"
+              >
+                <i class="ph-bold ph-arrows-clockwise" id="promptRefreshIcon"></i>
               </button>
             </div>
-            <div class="card-content">
-              <div class="prompt-card">
-                <div class="prompt-label">
-                  <i class="ph-bold ph-question"></i> Open Prompt
-                </div>
-                <p class="prompt-q">
-                  What is the most underrated tool for remote teams in 2025 that
-                  most people still haven't discovered?
-                </p>
-                <p class="prompt-replies">
-                  💬 23 people replied · tap to add your spark
-                </p>
-              </div>
-            </div>
-            <div class="action-bar">
-              <button
-                class="act-btn like"
-                onclick="
-                  event.stopPropagation();
-                  toggleLike(this);
-                "
-              >
-                <i class="ph-bold ph-heart"></i><span>88</span>
-              </button>
-              <button
-                class="act-btn reply"
-                onclick="
-                  event.stopPropagation();
-                  openReply(
-                    'Wani Aisyah',
-                    'WA',
-                    '#f59e0b',
-                    'Best underrated tool for remote teams in 2025?',
-                  );
-                "
-              >
-                <i class="ph-bold ph-chat-circle"></i><span>23</span>
-              </button>
-              <button
-                class="act-btn repost"
-                onclick="
-                  event.stopPropagation();
-                  toggleRepost(this);
-                "
-              >
-                <i class="ph-bold ph-repeat"></i><span>17</span>
-              </button>
-              <button
-                class="act-btn share"
-                onclick="
-                  event.stopPropagation();
-                  shareSpark();
-                "
-              >
-                <i class="ph-bold ph-share-network"></i><span>5</span>
-              </button>
-            </div>
-          </article>
 
-          <!-- Prompt 3 -->
-          <article
-            class="spark-card fu d2"
-            onclick="
-              openReply(
-                'Ikram Basri',
-                'IB',
-                '#c2185b',
-                'What does your ideal morning routine look like?',
-              )
-            "
-          >
-            <div class="card-head">
-              <div class="av-wrap">
-                <div
-                  class="spark-av"
-                  style="background: linear-gradient(135deg, #c2185b, #8b5cf6)"
-                  onclick="
-                    event.stopPropagation();
-                    showProfile(
-                      'Ikram Basri',
-                      'ewm24k',
-                      'LV 5 · Operative',
-                      128,
-                      947,
-                      'Just shipped T1ERA. Building the future in public 🔥',
-                      '#c2185b',
-                      true,
-                    );
-                  "
-                >
-                  IB
-                </div>
-                <span class="online-dot"></span>
+            <!-- Compose toggle -->
+            <div
+              class="compose-toggle"
+              id="promptComposeToggle"
+              onclick="openPromptCompose()"
+            >
+              <div class="compose-mini-av" id="promptMiniAv">M</div>
+              <span class="compose-placeholder">Answer a prompt and spark the conversation…</span>
+              <button class="compose-plus-btn">
+                <i class="ph-bold ph-plus"></i>
+              </button>
+            </div>
+
+            <!-- Compose box -->
+            <div class="compose-box" id="promptComposeBox">
+              <div class="compose-top">
+                <span class="compose-label">
+                  <i class="ph-bold ph-chat-teardrop-dots"></i> PROMPT SPARK
+                </span>
+                <button class="compose-close-btn" onclick="closePromptCompose()">
+                  <i class="ph-bold ph-x"></i>
+                </button>
               </div>
-              <div class="card-meta">
-                <div class="meta-row-1">
-                  <span class="author-name">Ikram Basri</span>
-                  <span class="author-handle">@ewm24k</span>
+
+              <!-- Active prompt display — the question the user is answering -->
+              <div class="prompt-compose-block" id="promptComposeBlock">
+                <div class="prompt-compose-nav">
                   <button
-                    class="follow-pill on"
-                    onclick="
-                      event.stopPropagation();
-                      toggleFollow(this);
-                    "
+                    class="prompt-nav-btn"
+                    onclick="cyclePrompt(-1)"
+                    title="Previous prompt"
                   >
-                    Following
+                    <i class="ph-bold ph-caret-left"></i>
                   </button>
-                  <span class="spark-time">Yesterday</span>
-                </div>
-                <div class="badges-row">
-                  <span class="badge rank">LV 5</span>
-                  <span class="badge verified">✓ Verified</span>
-                  <span class="badge prompt-tag"
-                    ><i class="ph-bold ph-chat-teardrop-dots"></i> Prompt</span
+                  <div class="prompt-compose-inner">
+                    <div class="prompt-label">
+                      <i class="ph-bold ph-chat-teardrop-dots"></i> Active Prompt
+                    </div>
+                    <p class="prompt-q" id="promptActiveQuestion">Loading prompt…</p>
+                    <p class="prompt-compose-hint" id="promptActiveHint"></p>
+                  </div>
+                  <button
+                    class="prompt-nav-btn"
+                    onclick="cyclePrompt(1)"
+                    title="Next prompt"
                   >
+                    <i class="ph-bold ph-caret-right"></i>
+                  </button>
                 </div>
               </div>
-              <button class="dots-btn" onclick="event.stopPropagation()">
-                <i class="ph-bold ph-dots-three-vertical"></i>
-              </button>
-            </div>
-            <div class="card-content">
-              <div class="prompt-card">
-                <div class="prompt-label">
-                  <i class="ph-bold ph-question"></i> Open Prompt
+
+              <!-- User reply textarea -->
+              <div class="compose-body" style="margin-top: 10px;">
+                <div class="compose-av" id="promptComposeAv">M</div>
+                <div style="flex: 1; min-width: 0">
+                  <textarea
+                    class="compose-textarea"
+                    id="promptTa"
+                    placeholder="Write your answer… use #hashtags and @mentions"
+                    oninput="onPromptInput(this)"
+                    maxlength="500"
+                  ></textarea>
                 </div>
-                <p class="prompt-q">
-                  Describe your ideal morning routine in 3 steps — be specific.
-                  What time, what actions, and what outcome?
-                </p>
-                <p class="prompt-replies">
-                  💬 112 people replied · tap to add your spark
-                </p>
+              </div>
+
+              <!-- Footer -->
+              <div class="compose-footer">
+                <div class="media-btns">
+                  <button
+                    class="media-btn"
+                    title="Emoji"
+                    onclick="openEmojiPicker('promptTa')"
+                  >
+                    <i class="ph-bold ph-smiley"></i>
+                  </button>
+                </div>
+                <div class="compose-right">
+                  <span class="char-count" id="promptCharCount">0 / 500</span>
+                  <button
+                    class="spark-submit-btn"
+                    id="promptSubmitBtn"
+                    disabled
+                    onclick="submitPromptSpark()"
+                  >
+                    Spark ⚡
+                  </button>
+                </div>
               </div>
             </div>
-            <div class="action-bar">
-              <button
-                class="act-btn like liked"
-                onclick="
-                  event.stopPropagation();
-                  toggleLike(this);
-                "
-              >
-                <i class="ph-fill ph-heart"></i><span>318</span>
-              </button>
-              <button
-                class="act-btn reply"
-                onclick="
-                  event.stopPropagation();
-                  openReply(
-                    'Ikram Basri',
-                    'IB',
-                    '#c2185b',
-                    'Describe your ideal morning routine...',
-                  );
-                "
-              >
-                <i class="ph-bold ph-chat-circle"></i><span>112</span>
-              </button>
-              <button
-                class="act-btn repost"
-                onclick="
-                  event.stopPropagation();
-                  toggleRepost(this);
-                "
-              >
-                <i class="ph-bold ph-repeat"></i><span>89</span>
-              </button>
-              <button
-                class="act-btn share"
-                onclick="
-                  event.stopPropagation();
-                  shareSpark();
-                "
-              >
-                <i class="ph-bold ph-share-network"></i><span>22</span>
-              </button>
+
+            <!-- Live prompt feed — Firestore cards injected here -->
+            <div id="realPromptFeed">
+              <!-- filled by spark-prompt-module.js -->
             </div>
-          </article>
+
+          </div>
+          <!-- end realPromptFeedWrap -->
+
         </div>
         <!-- end panel-1 -->
 
@@ -5189,6 +5021,8 @@
     <script src="spark-core.js"></script>
 
     <script type="module" src="spark-module.js"></script>
+
+    <script type="module" src="spark-prompt-module.js"></script>
 
     <!-- ═══════════════════════════
      EMOJI PICKER OVERLAY
