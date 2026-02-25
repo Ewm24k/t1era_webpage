@@ -642,10 +642,8 @@
         if (!wrap) return;
         const isOpen = wrap.classList.toggle("open");
         if (isOpen) {
-          // Focus input after transition
           setTimeout(() => { if (input) input.focus(); }, 30);
         } else {
-          // Clear search and restore feed
           if (input) input.value = "";
           filterFeedByQuery("");
         }
@@ -668,10 +666,8 @@
         const feed = document.getElementById("realFeed");
         const noResults = document.getElementById("searchNoResults");
         if (!feed) return;
-
         const cards = feed.querySelectorAll(".spark-card");
         let visibleCount = 0;
-
         cards.forEach((card) => {
           if (!q) {
             card.style.display = "";
@@ -688,7 +684,6 @@
           card.style.display = matches ? "" : "none";
           if (matches) visibleCount++;
         });
-
         if (noResults) {
           noResults.style.display = (q && visibleCount === 0) ? "block" : "none";
         }
