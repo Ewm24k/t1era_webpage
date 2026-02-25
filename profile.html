@@ -855,6 +855,212 @@
         }
       }
 
+      /* ═══════════════════════════════════════════
+         SETTINGS PANEL — profile ring customization
+      ═══════════════════════════════════════════ */
+      .prof-settings-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 397;
+        background: rgba(0, 0, 0, 0.45);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      .prof-settings-backdrop.open {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .prof-settings-panel {
+        position: fixed;
+        top: 52px;
+        right: 0;
+        width: 340px;
+        max-width: 100vw;
+        height: calc(100vh - 52px);
+        background: var(--bg-2);
+        border-left: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        transform: translateX(100%);
+        transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 398;
+        overflow: hidden;
+      }
+      .prof-settings-panel.open {
+        transform: translateX(0);
+      }
+      .prof-settings-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 18px;
+        border-bottom: 1px solid var(--border);
+        flex-shrink: 0;
+      }
+      .prof-settings-title {
+        font-family: var(--font-display);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .prof-settings-title i {
+        color: var(--purple);
+        font-size: 14px;
+      }
+      .prof-settings-close {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: none;
+        border: 1px solid var(--border);
+        color: var(--text-3);
+        font-size: 14px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.15s;
+      }
+      .prof-settings-close:hover {
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--text);
+      }
+      .prof-settings-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+      .prof-settings-section-label {
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        color: var(--text-3);
+        font-family: var(--font-display);
+        text-transform: uppercase;
+        margin-bottom: 8px;
+      }
+      .prof-settings-footer {
+        padding: 14px 18px;
+        border-top: 1px solid var(--border);
+        flex-shrink: 0;
+        display: none;
+      }
+      .prof-settings-footer.visible {
+        display: block;
+      }
+      .prof-settings-save-btn {
+        width: 100%;
+        padding: 10px 0;
+        border-radius: var(--radius-sm);
+        background: linear-gradient(135deg, var(--pink), var(--purple));
+        border: none;
+        color: #fff;
+        font-family: var(--font-display);
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        cursor: pointer;
+        transition: opacity 0.2s;
+      }
+      .prof-settings-save-btn:hover {
+        opacity: 0.85;
+      }
+      .prof-settings-save-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      /* Ring color picker grid */
+      .ring-options-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+      }
+      .ring-option {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+      }
+      .ring-option.locked {
+        cursor: not-allowed;
+      }
+      .ring-preview {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .ring-preview::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        padding: 3px;
+        background: var(--ring-gradient);
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+      }
+      .ring-preview-inner {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: var(--bg-3);
+      }
+      .ring-option-label {
+        font-size: 9px;
+        color: var(--text-3);
+        font-family: var(--font-display);
+        letter-spacing: 0.06em;
+        text-align: center;
+        line-height: 1.3;
+      }
+      .ring-option.selected .ring-preview::after {
+        content: "";
+        position: absolute;
+        inset: -3px;
+        border-radius: 50%;
+        border: 2px solid var(--pink);
+      }
+      .ring-option.selected .ring-option-label {
+        color: var(--pink);
+      }
+      .ring-lock-overlay {
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.55);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2;
+      }
+      .ring-lock-overlay i {
+        font-size: 13px;
+        color: rgba(255, 255, 255, 0.5);
+      }
+      .ring-lock-tip {
+        font-size: 8px;
+        color: var(--text-3);
+        font-family: var(--font-display);
+        text-align: center;
+        margin-top: 4px;
+        letter-spacing: 0.04em;
+      }
+
       /* online dot */
       .avatar-online {
         position: absolute;
@@ -3781,7 +3987,17 @@
         <div class="topbar-logo-mark">T1</div>
         T1ERA
       </a>
-      <div style="width: 52px"></div>
+      <div style="width: 52px; display: flex; align-items: center; justify-content: flex-end;">
+        <button
+          onclick="openProfileSettingsPanel()"
+          title="Settings"
+          style="width:36px;height:36px;border-radius:50%;background:none;border:1px solid var(--border);color:var(--text-3);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;"
+          onmouseover="this.style.background='rgba(255,255,255,0.06)';this.style.color='var(--text)'"
+          onmouseout="this.style.background='none';this.style.color='var(--text-3)'"
+        >
+          <i class="ph-bold ph-gear"></i>
+        </button>
+      </div>
       <!-- spacer -->
     </nav>
 
@@ -4592,26 +4808,6 @@
                     <div class="rank-xp-bar">
                       <div class="rank-xp-fill" id="rankXpFill"></div>
                     </div>
-                    <!-- XP breakdown by source -->
-                    <div id="xpBreakdown" style="margin-top:12px;display:flex;flex-direction:column;gap:5px;">
-                      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-3);font-family:var(--font-mono);margin-bottom:2px;">XP Breakdown</div>
-                      <div style="display:flex;justify-content:space-between;font-size:10.5px;font-family:var(--font-mono);">
-                        <span style="color:var(--text-3);">⚡ Sparks <span style="color:var(--text-3);font-size:9px;">×20</span></span>
-                        <span id="xpBreakSpark" style="color:var(--text-2);">0 XP</span>
-                      </div>
-                      <div style="display:flex;justify-content:space-between;font-size:10.5px;font-family:var(--font-mono);">
-                        <span style="color:var(--text-3);">❤ Likes <span style="color:var(--text-3);font-size:9px;">×10</span></span>
-                        <span id="xpBreakLike" style="color:var(--text-2);">0 XP</span>
-                      </div>
-                      <div style="display:flex;justify-content:space-between;font-size:10.5px;font-family:var(--font-mono);">
-                        <span style="color:var(--text-3);">💬 Replies <span style="color:var(--text-3);font-size:9px;">×40</span></span>
-                        <span id="xpBreakReply" style="color:var(--text-2);">0 XP</span>
-                      </div>
-                      <div style="display:flex;justify-content:space-between;font-size:10.5px;font-family:var(--font-mono);">
-                        <span style="color:var(--text-3);">👥 Followers <span style="color:var(--text-3);font-size:9px;">×25</span></span>
-                        <span id="xpBreakFollower" style="color:var(--pink-2);">0 XP</span>
-                      </div>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -5216,10 +5412,10 @@
         const title = rank.title ?? "Recruit";
         const callsign = d.callsign ?? "Alpha";
 
-        // Compute total XP from point sub-fields (spark=20, like=10, reply=40, follower=25)
+        // Compute total XP from point sub-fields (spark=20, like=10, reply=40)
         const pt = d.accountStatus?.point || d.point || {};
         const totalXP =
-          (pt.spark || 0) * 20 + (pt.like || 0) * 10 + (pt.reply || 0) * 40 + (pt.follower || 0) * 25;
+          (pt.spark || 0) * 20 + (pt.like || 0) * 10 + (pt.reply || 0) * 40;
 
         // Level thresholds — each step = 550 × step number (cumulative: 550×n(n-1)/2)
         // LV1=0, LV2=550, LV3=1650, LV4=3300 ... LV30=239250. MAX = LV30.
@@ -5296,6 +5492,7 @@
             break;
           }
         }
+        window._computedLevel = computedLevel;
         const computedTitle = RANK_TITLES[computedLevel - 1] || title;
         const nextThreshold =
           XP_THRESHOLDS[computedLevel] ||
@@ -5353,16 +5550,6 @@
         const rankXpFillEl = document.getElementById("rankXpFill");
         if (rankXpFillEl) rankXpFillEl.style.width = `${xpPct}%`;
 
-        // Populate XP breakdown rows in Intel rank card
-        const xpBreakSpark = document.getElementById("xpBreakSpark");
-        const xpBreakLike  = document.getElementById("xpBreakLike");
-        const xpBreakReply = document.getElementById("xpBreakReply");
-        const xpBreakFollower = document.getElementById("xpBreakFollower");
-        if (xpBreakSpark)    xpBreakSpark.textContent    = `${(pt.spark    || 0) * 20} XP`;
-        if (xpBreakLike)     xpBreakLike.textContent     = `${(pt.like     || 0) * 10} XP`;
-        if (xpBreakReply)    xpBreakReply.textContent    = `${(pt.reply    || 0) * 40} XP`;
-        if (xpBreakFollower) xpBreakFollower.textContent = `${(pt.follower || 0) * 25} XP`;
-
         // Update Intel tab XP text labels
         const intelXpCurrentEl = document.getElementById("intelXpCurrent");
         if (intelXpCurrentEl) intelXpCurrentEl.textContent = `${totalXP} XP`;
@@ -5402,6 +5589,11 @@
         } catch (_rankWriteErr) {
           console.warn("rank write error:", _rankWriteErr);
         }
+
+        // ── Apply saved profile ring color ──
+        const savedRing = d.profileRing || "pink-purple";
+        _currentRingKey = savedRing;
+        applyRingColor(savedRing);
 
         // Account status
         const acctStatus = d.accountStatus || {};
@@ -6663,34 +6855,6 @@
             const ferEl = document.getElementById("followersCount");
             if (felEl) felEl.textContent = followingDocs.length;
             if (ferEl) ferEl.textContent = followersDocs.length;
-
-            // ── Log activity for newly gained followers since last load ──
-            const prevCount = window._prevFollowerCount ?? null;
-            const newCount  = followersDocs.length;
-            if (prevCount !== null && newCount > prevCount) {
-              const gained = newCount - prevCount;
-              const xpEarned = gained * 25;
-              const activityData = {
-                type: "new_follower",
-                icon: "ph-user-plus",
-                iconColor: "var(--pink-2)",
-                bgClass: "pink-bg",
-                text: gained === 1
-                  ? `<strong>New follower gained</strong> — +${xpEarned} XP`
-                  : `<strong>${gained} new followers gained</strong> — +${xpEarned} XP`,
-              };
-              // Log to Firestore activityHistory
-              try { await logActivity(activityData); } catch (_) {}
-              // Live-update Activity tab DOM immediately
-              const nowStr = new Date().toLocaleString("en-MY", {
-                day: "numeric", month: "short", year: "numeric",
-                hour: "2-digit", minute: "2-digit",
-              });
-              if (typeof appendActivityItemToFeed === "function") {
-                appendActivityItemToFeed(activityData, nowStr);
-              }
-            }
-            window._prevFollowerCount = newCount;
           } catch (e) {
             console.warn("loadFollowStats error:", e.code, e.message);
             const felEl = document.getElementById("followingCount");
@@ -6713,7 +6877,7 @@
       function _xpRank(d) {
         const pt = d.accountStatus?.point || d.point || {};
         const xp =
-          (pt.spark || 0) * 20 + (pt.like || 0) * 10 + (pt.reply || 0) * 40 + (pt.follower || 0) * 25;
+          (pt.spark || 0) * 20 + (pt.like || 0) * 10 + (pt.reply || 0) * 40;
         const T = [
           0, 550, 1650, 3300, 5500, 8250, 11550, 15400, 19800, 24750, 30250,
           36300, 42900, 50050, 57750, 66000, 74800, 84150, 94050, 104500,
@@ -7495,6 +7659,214 @@
         if (e.target === document.getElementById("modalOverlay"))
           window.closeModal();
       };
+
+      // ══════════════════════════════════════════════════════
+      // PROFILE SETTINGS PANEL — Ring Border Customization
+      // ══════════════════════════════════════════════════════
+
+      const RING_OPTIONS = [
+        {
+          key: "white",
+          label: "White",
+          gradient: "#ffffff",
+          solid: true,
+          minLevel: 1,
+        },
+        {
+          key: "white-grey",
+          label: "White Grey",
+          gradient: "linear-gradient(135deg,#ffffff,#888888)",
+          solid: false,
+          minLevel: 1,
+        },
+        {
+          key: "pink-purple",
+          label: "Pink Purple",
+          gradient: "linear-gradient(135deg,var(--pink),var(--purple))",
+          solid: false,
+          minLevel: 3,
+        },
+        {
+          key: "gold",
+          label: "Gold",
+          gradient: "linear-gradient(135deg,#f59e0b,#fbbf24)",
+          solid: false,
+          minLevel: 3,
+        },
+        {
+          key: "green",
+          label: "Cyber Green",
+          gradient: "linear-gradient(135deg,#10b981,#34d399)",
+          solid: false,
+          minLevel: 3,
+        },
+        {
+          key: "blue",
+          label: "Ice Blue",
+          gradient: "linear-gradient(135deg,#3b82f6,#60a5fa)",
+          solid: false,
+          minLevel: 3,
+        },
+        {
+          key: "red",
+          label: "Crimson",
+          gradient: "linear-gradient(135deg,#ef4444,#f87171)",
+          solid: false,
+          minLevel: 3,
+        },
+        {
+          key: "orange",
+          label: "Inferno",
+          gradient: "linear-gradient(135deg,#f97316,#fb923c)",
+          solid: false,
+          minLevel: 3,
+        },
+        {
+          key: "rainbow",
+          label: "Rainbow",
+          gradient: "conic-gradient(#f59e0b,#ef4444,#8b5cf6,#3b82f6,#10b981,#f59e0b)",
+          solid: false,
+          minLevel: 3,
+        },
+      ];
+
+      // The gradient string applied to .avatar-ring background
+      const RING_GRADIENTS = {
+        "white":       "#ffffff",
+        "white-grey":  "linear-gradient(135deg,#ffffff,#888888)",
+        "pink-purple": "conic-gradient(var(--pink) 0deg,var(--purple) 90deg,var(--pink-2) 180deg,var(--pink) 360deg)",
+        "gold":        "linear-gradient(135deg,#f59e0b,#fbbf24)",
+        "green":       "linear-gradient(135deg,#10b981,#34d399)",
+        "blue":        "linear-gradient(135deg,#3b82f6,#60a5fa)",
+        "red":         "linear-gradient(135deg,#ef4444,#f87171)",
+        "orange":      "linear-gradient(135deg,#f97316,#fb923c)",
+        "rainbow":     "conic-gradient(#f59e0b,#ef4444,#8b5cf6,#3b82f6,#10b981,#f59e0b)",
+      };
+
+      const DEV_RING_EMAIL = "ewm24k@gmail.com";
+      let _pendingRingKey = null;
+      let _currentRingKey = "pink-purple"; // default
+
+      function applyRingColor(key) {
+        const gradient = RING_GRADIENTS[key] || RING_GRADIENTS["pink-purple"];
+        document.querySelectorAll(".avatar-ring").forEach((el) => {
+          el.style.background = gradient;
+        });
+        _currentRingKey = key;
+      }
+
+      function buildRingOptionsGrid(userLevel, userEmail) {
+        const grid = document.getElementById("ringOptionsGrid");
+        const lockTip = document.getElementById("ringLockTip");
+        if (!grid) return;
+        const isDev = userEmail === DEV_RING_EMAIL;
+        let hasLocked = false;
+        grid.innerHTML = "";
+        RING_OPTIONS.forEach((opt) => {
+          const locked = !isDev && userLevel < opt.minLevel;
+          if (locked) hasLocked = true;
+          const isSelected = _currentRingKey === opt.key;
+          const div = document.createElement("div");
+          div.className = "ring-option" + (isSelected ? " selected" : "") + (locked ? " locked" : "");
+          div.dataset.key = opt.key;
+          div.innerHTML = `
+            <div class="ring-preview" style="--ring-gradient:${opt.gradient};">
+              <div class="ring-preview-inner"></div>
+              ${locked ? '<div class="ring-lock-overlay"><i class="ph-bold ph-lock"></i></div>' : ""}
+            </div>
+            <span class="ring-option-label">${opt.label}</span>
+          `;
+          if (!locked) {
+            div.addEventListener("click", () => selectRingOption(opt.key));
+          }
+          grid.appendChild(div);
+        });
+        if (lockTip) lockTip.style.display = hasLocked ? "block" : "none";
+      }
+
+      function selectRingOption(key) {
+        _pendingRingKey = key;
+        document.querySelectorAll(".ring-option").forEach((el) => {
+          el.classList.toggle("selected", el.dataset.key === key);
+        });
+        // Show save footer
+        const footer = document.getElementById("profSettingsFooter");
+        if (footer) footer.classList.add("visible");
+      }
+
+      async function saveRingColor() {
+        if (!_pendingRingKey) return;
+        const btn = document.getElementById("profSettingsSaveBtn");
+        if (btn) { btn.disabled = true; btn.textContent = "Saving…"; }
+        try {
+          const uid = window._currentUid;
+          if (uid) {
+            await updateDoc(doc(db, "users", uid), {
+              "profileRing": _pendingRingKey,
+            });
+          }
+          applyRingColor(_pendingRingKey);
+          _currentRingKey = _pendingRingKey;
+          _pendingRingKey = null;
+          const footer = document.getElementById("profSettingsFooter");
+          if (footer) footer.classList.remove("visible");
+          if (btn) { btn.disabled = false; btn.textContent = "Save Changes"; }
+        } catch (e) {
+          console.warn("saveRingColor error:", e);
+          if (btn) { btn.disabled = false; btn.textContent = "Save Changes"; }
+        }
+      }
+
+      function openProfileSettingsPanel() {
+        document.getElementById("profSettingsPanel").classList.add("open");
+        document.getElementById("profSettingsBackdrop").classList.add("open");
+        // Build grid using current level and email
+        const level = window._computedLevel || 1;
+        const email = window._currentUserEmail || "";
+        buildRingOptionsGrid(level, email);
+      }
+
+      function closeProfileSettingsPanel() {
+        document.getElementById("profSettingsPanel").classList.remove("open");
+        document.getElementById("profSettingsBackdrop").classList.remove("open");
+      }
+
+      window.saveRingColor = saveRingColor;
+      window.openProfileSettingsPanel = openProfileSettingsPanel;
+      window.closeProfileSettingsPanel = closeProfileSettingsPanel;
     </script>
+    <!-- ═══════════════════════════
+     PROFILE SETTINGS PANEL
+═══════════════════════════ -->
+    <div class="prof-settings-backdrop" id="profSettingsBackdrop" onclick="closeProfileSettingsPanel()"></div>
+    <div class="prof-settings-panel" id="profSettingsPanel">
+      <div class="prof-settings-header">
+        <div class="prof-settings-title">
+          <i class="ph-bold ph-gear"></i> Settings
+        </div>
+        <button class="prof-settings-close" onclick="closeProfileSettingsPanel()">
+          <i class="ph-bold ph-x"></i>
+        </button>
+      </div>
+      <div class="prof-settings-body">
+
+        <div>
+          <div class="prof-settings-section-label">Profile Ring Border</div>
+          <div class="ring-options-grid" id="ringOptionsGrid">
+            <!-- filled by JS -->
+          </div>
+          <div class="ring-lock-tip" id="ringLockTip" style="display:none;">
+            🔒 Reach Level 3 to unlock gradient rings
+          </div>
+        </div>
+
+      </div>
+      <div class="prof-settings-footer" id="profSettingsFooter">
+        <button class="prof-settings-save-btn" id="profSettingsSaveBtn" onclick="saveRingColor()">
+          Save Changes
+        </button>
+      </div>
+    </div>
+
   </body>
 </html>
