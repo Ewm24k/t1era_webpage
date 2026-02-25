@@ -5780,30 +5780,6 @@
             user.email ||
             "U")[0].toUpperCase();
           applyComposeAvatar(photoURL, initial);
-
-          // ── Apply saved ring color to current user's feed cards ──
-          const _sparkRingGradients = {
-            "white":       "2px solid #ffffff",
-            "white-grey":  "2px solid #aaaaaa",
-            "pink-purple": "2px solid var(--pink)",
-            "gold":        "2px solid #f59e0b",
-            "green":       "2px solid #10b981",
-            "blue":        "2px solid #3b82f6",
-            "red":         "2px solid #ef4444",
-            "orange":      "2px solid #f97316",
-            "rainbow":     "2px solid #8b5cf6",
-          };
-          const savedRing = d.profileRing || "pink-purple";
-          const ringBorder = _sparkRingGradients[savedRing] || _sparkRingGradients["pink-purple"];
-          // Inject a dynamic style rule scoped to current user's cards
-          const styleId = "spark-ring-style";
-          let ringStyle = document.getElementById(styleId);
-          if (!ringStyle) {
-            ringStyle = document.createElement("style");
-            ringStyle.id = styleId;
-            document.head.appendChild(ringStyle);
-          }
-          ringStyle.textContent = `[data-owner-uid="${user.uid}"] .spark-av { border: ${ringBorder} !important; }`;
         } catch (e) {
           window._sparkUserData = {};
           applyComposeAvatar(
