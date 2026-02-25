@@ -2471,12 +2471,6 @@
         cursor: pointer;
         flex-shrink: 0;
         transition: all 0.15s;
-        opacity: 0;
-        pointer-events: none;
-      }
-      .search-clear-btn.visible {
-        opacity: 1;
-        pointer-events: auto;
       }
       .search-clear-btn:hover {
         background: rgba(239, 68, 68, 0.2);
@@ -3172,7 +3166,7 @@
         SPARKS
       </a>
       <div class="topbar-actions">
-        <button class="tb-icon-btn" title="Search" onclick="openSearch()">
+        <button class="tb-icon-btn" title="Search" onclick="toggleSearch()">
           <i class="ph-bold ph-magnifying-glass"></i>
         </button>
         <button
@@ -3206,7 +3200,7 @@
     <!-- ═══════════════════════════
      HASHTAG SEARCH OVERLAY
 ═══════════════════════════ -->
-    <div class="search-overlay" id="searchOverlay">
+    <div class="search-overlay" id="searchOverlay" onclick="if(event.target===this)closeSearch();">
       <div class="search-inner">
         <i class="ph-bold ph-hash"></i>
         <input
@@ -3219,7 +3213,7 @@
           autocorrect="off"
           spellcheck="false"
         />
-        <button class="search-clear-btn" id="searchClearBtn" onclick="clearSearch()">
+        <button class="search-clear-btn" id="searchClearBtn" onclick="closeSearch()">
           <i class="ph-bold ph-x"></i>
         </button>
       </div>
@@ -5886,6 +5880,11 @@
 ══════════════════════════════════ */
       let _searchActive = false;
 
+      function toggleSearch() {
+        if (_searchActive) { closeSearch(); return; }
+        openSearch();
+      }
+
       function openSearch() {
         // Close other panels first
         document.getElementById("notifPanel").classList.remove("open");
@@ -5906,13 +5905,9 @@
         const overlay = document.getElementById("searchOverlay");
         overlay.classList.remove("open");
         _searchActive = false;
-        // If a search was active, revert feed to default
         const inp = document.getElementById("searchInput");
-        if (inp && inp.value.trim().length > 0) {
-          inp.value = "";
-          document.getElementById("searchClearBtn").classList.remove("visible");
-          _revertFeedToDefault();
-        }
+        if (inp) inp.value = "";
+        _revertFeedToDefault();
       }
       window.closeSearch = closeSearch;
 
@@ -5922,18 +5917,13 @@
           inp.value = "";
           inp.focus();
         }
-        document.getElementById("searchClearBtn").classList.remove("visible");
         _revertFeedToDefault();
       }
 
       function onSearchInput(inp) {
         const val = inp.value.trim();
-        const clearBtn = document.getElementById("searchClearBtn");
 
-        if (val.length > 0) {
-          clearBtn.classList.add("visible");
-        } else {
-          clearBtn.classList.remove("visible");
+        if (val.length === 0) {
           _revertFeedToDefault();
           return;
         }
