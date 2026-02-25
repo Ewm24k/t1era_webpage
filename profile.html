@@ -3818,7 +3818,13 @@
         />
 
         <!-- RANK BADGE -->
-        <div class="rank-badge" id="rankBadge" onclick="window.openRankPopup()" title="View rank &amp; points guide" style="cursor:pointer">
+        <div
+          class="rank-badge"
+          id="rankBadge"
+          onclick="window.openRankPopup()"
+          title="View rank &amp; points guide"
+          style="cursor: pointer"
+        >
           <div class="rank-level-chip">
             <!-- Shield SVG inline -->
             <svg
@@ -4586,6 +4592,26 @@
                     <div class="rank-xp-bar">
                       <div class="rank-xp-fill" id="rankXpFill"></div>
                     </div>
+                    <!-- XP breakdown by source -->
+                    <div id="xpBreakdown" style="margin-top:12px;display:flex;flex-direction:column;gap:5px;">
+                      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-3);font-family:var(--font-mono);margin-bottom:2px;">XP Breakdown</div>
+                      <div style="display:flex;justify-content:space-between;font-size:10.5px;font-family:var(--font-mono);">
+                        <span style="color:var(--text-3);">⚡ Sparks <span style="color:var(--text-3);font-size:9px;">×20</span></span>
+                        <span id="xpBreakSpark" style="color:var(--text-2);">0 XP</span>
+                      </div>
+                      <div style="display:flex;justify-content:space-between;font-size:10.5px;font-family:var(--font-mono);">
+                        <span style="color:var(--text-3);">❤ Likes <span style="color:var(--text-3);font-size:9px;">×10</span></span>
+                        <span id="xpBreakLike" style="color:var(--text-2);">0 XP</span>
+                      </div>
+                      <div style="display:flex;justify-content:space-between;font-size:10.5px;font-family:var(--font-mono);">
+                        <span style="color:var(--text-3);">💬 Replies <span style="color:var(--text-3);font-size:9px;">×40</span></span>
+                        <span id="xpBreakReply" style="color:var(--text-2);">0 XP</span>
+                      </div>
+                      <div style="display:flex;justify-content:space-between;font-size:10.5px;font-family:var(--font-mono);">
+                        <span style="color:var(--text-3);">👥 Followers <span style="color:var(--text-3);font-size:9px;">×25</span></span>
+                        <span id="xpBreakFollower" style="color:var(--pink-2);">0 XP</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -5190,10 +5216,10 @@
         const title = rank.title ?? "Recruit";
         const callsign = d.callsign ?? "Alpha";
 
-        // Compute total XP from point sub-fields (spark=20, like=10, reply=40)
+        // Compute total XP from point sub-fields (spark=20, like=10, reply=40, follower=25)
         const pt = d.accountStatus?.point || d.point || {};
         const totalXP =
-          (pt.spark || 0) * 20 + (pt.like || 0) * 10 + (pt.reply || 0) * 40;
+          (pt.spark || 0) * 20 + (pt.like || 0) * 10 + (pt.reply || 0) * 40 + (pt.follower || 0) * 25;
 
         // Level thresholds — each step = 550 × step number (cumulative: 550×n(n-1)/2)
         // LV1=0, LV2=550, LV3=1650, LV4=3300 ... LV30=239250. MAX = LV30.
@@ -5326,6 +5352,16 @@
         document.getElementById("xpFill").style.width = `${xpPct}%`;
         const rankXpFillEl = document.getElementById("rankXpFill");
         if (rankXpFillEl) rankXpFillEl.style.width = `${xpPct}%`;
+
+        // Populate XP breakdown rows in Intel rank card
+        const xpBreakSpark = document.getElementById("xpBreakSpark");
+        const xpBreakLike  = document.getElementById("xpBreakLike");
+        const xpBreakReply = document.getElementById("xpBreakReply");
+        const xpBreakFollower = document.getElementById("xpBreakFollower");
+        if (xpBreakSpark)    xpBreakSpark.textContent    = `${(pt.spark    || 0) * 20} XP`;
+        if (xpBreakLike)     xpBreakLike.textContent     = `${(pt.like     || 0) * 10} XP`;
+        if (xpBreakReply)    xpBreakReply.textContent    = `${(pt.reply    || 0) * 40} XP`;
+        if (xpBreakFollower) xpBreakFollower.textContent = `${(pt.follower || 0) * 25} XP`;
 
         // Update Intel tab XP text labels
         const intelXpCurrentEl = document.getElementById("intelXpCurrent");
@@ -6627,6 +6663,34 @@
             const ferEl = document.getElementById("followersCount");
             if (felEl) felEl.textContent = followingDocs.length;
             if (ferEl) ferEl.textContent = followersDocs.length;
+
+            // ── Log activity for newly gained followers since last load ──
+            const prevCount = window._prevFollowerCount ?? null;
+            const newCount  = followersDocs.length;
+            if (prevCount !== null && newCount > prevCount) {
+              const gained = newCount - prevCount;
+              const xpEarned = gained * 25;
+              const activityData = {
+                type: "new_follower",
+                icon: "ph-user-plus",
+                iconColor: "var(--pink-2)",
+                bgClass: "pink-bg",
+                text: gained === 1
+                  ? `<strong>New follower gained</strong> — +${xpEarned} XP`
+                  : `<strong>${gained} new followers gained</strong> — +${xpEarned} XP`,
+              };
+              // Log to Firestore activityHistory
+              try { await logActivity(activityData); } catch (_) {}
+              // Live-update Activity tab DOM immediately
+              const nowStr = new Date().toLocaleString("en-MY", {
+                day: "numeric", month: "short", year: "numeric",
+                hour: "2-digit", minute: "2-digit",
+              });
+              if (typeof appendActivityItemToFeed === "function") {
+                appendActivityItemToFeed(activityData, nowStr);
+              }
+            }
+            window._prevFollowerCount = newCount;
           } catch (e) {
             console.warn("loadFollowStats error:", e.code, e.message);
             const felEl = document.getElementById("followingCount");
@@ -6649,7 +6713,7 @@
       function _xpRank(d) {
         const pt = d.accountStatus?.point || d.point || {};
         const xp =
-          (pt.spark || 0) * 20 + (pt.like || 0) * 10 + (pt.reply || 0) * 40;
+          (pt.spark || 0) * 20 + (pt.like || 0) * 10 + (pt.reply || 0) * 40 + (pt.follower || 0) * 25;
         const T = [
           0, 550, 1650, 3300, 5500, 8250, 11550, 15400, 19800, 24750, 30250,
           36300, 42900, 50050, 57750, 66000, 74800, 84150, 94050, 104500,
