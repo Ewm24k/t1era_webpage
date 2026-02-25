@@ -2400,6 +2400,138 @@
         transform: scale(1);
       }
 
+      /* ══════════════════════════════════════════
+   HASHTAG SEARCH BAR
+══════════════════════════════════════════ */
+      .search-overlay {
+        position: fixed;
+        top: 52px;
+        left: 0;
+        right: 0;
+        z-index: 350;
+        background: rgba(0, 0, 0, 0.96);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid var(--border);
+        padding: 10px 16px;
+        transform: translateY(-100%);
+        opacity: 0;
+        visibility: hidden;
+        transition:
+          transform 0.22s var(--ease),
+          opacity 0.22s,
+          visibility 0.22s;
+      }
+      .search-overlay.open {
+        transform: translateY(0);
+        opacity: 1;
+        visibility: visible;
+      }
+      .search-inner {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: var(--bg-3);
+        border: 1px solid var(--border-2);
+        border-radius: 100px;
+        padding: 0 14px;
+        transition: border-color 0.18s;
+      }
+      .search-inner:focus-within {
+        border-color: rgba(194, 24, 91, 0.45);
+      }
+      .search-inner i {
+        font-size: 15px;
+        color: var(--text-3);
+        flex-shrink: 0;
+      }
+      .search-input {
+        flex: 1;
+        background: none;
+        border: none;
+        outline: none;
+        font-family: var(--f-body);
+        font-size: 14px;
+        color: var(--text);
+        padding: 10px 0;
+      }
+      .search-input::placeholder {
+        color: var(--text-3);
+      }
+      .search-clear-btn {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: var(--bg-4);
+        border: none;
+        color: var(--text-3);
+        font-size: 11px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        flex-shrink: 0;
+        transition: all 0.15s;
+        opacity: 0;
+        pointer-events: none;
+      }
+      .search-clear-btn.visible {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .search-clear-btn:hover {
+        background: rgba(239, 68, 68, 0.2);
+        color: var(--red);
+      }
+      .search-close-btn {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: none;
+        border: 1px solid var(--border);
+        color: var(--text-3);
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        flex-shrink: 0;
+        transition: all 0.15s;
+      }
+      .search-close-btn:hover {
+        background: rgba(239, 68, 68, 0.1);
+        border-color: rgba(239, 68, 68, 0.25);
+        color: rgba(239, 68, 68, 0.8);
+      }
+      .search-hint {
+        font-size: 10px;
+        color: var(--text-3);
+        font-family: var(--f-mono);
+        padding: 6px 14px 2px;
+        letter-spacing: 0.05em;
+      }
+      .search-result-banner {
+        display: none;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        background: rgba(194, 24, 91, 0.06);
+        border-bottom: 1px solid rgba(194, 24, 91, 0.15);
+        font-size: 12px;
+        color: var(--text-2);
+        font-family: var(--f-mono);
+      }
+      .search-result-banner.visible {
+        display: flex;
+      }
+      .search-result-banner i {
+        color: var(--pink);
+        font-size: 13px;
+      }
+      .search-result-tag {
+        color: var(--pink-2);
+        font-weight: 700;
+      }
+
       /* hide settings icon on mobile, show on desktop */
       .tb-settings-btn {
         display: none;
@@ -3040,7 +3172,7 @@
         SPARKS
       </a>
       <div class="topbar-actions">
-        <button class="tb-icon-btn" title="Search">
+        <button class="tb-icon-btn" title="Search" onclick="openSearch()">
           <i class="ph-bold ph-magnifying-glass"></i>
         </button>
         <button
@@ -3070,6 +3202,38 @@
         </button>
       </div>
     </nav>
+
+    <!-- ═══════════════════════════
+     HASHTAG SEARCH OVERLAY
+═══════════════════════════ -->
+    <div class="search-overlay" id="searchOverlay">
+      <div class="search-inner">
+        <i class="ph-bold ph-hash"></i>
+        <input
+          type="text"
+          class="search-input"
+          id="searchInput"
+          placeholder="Search hashtag… e.g. T1ERA"
+          oninput="onSearchInput(this)"
+          autocomplete="off"
+          autocorrect="off"
+          spellcheck="false"
+        />
+        <button class="search-clear-btn" id="searchClearBtn" onclick="clearSearch()">
+          <i class="ph-bold ph-x"></i>
+        </button>
+      </div>
+      <div class="search-hint">Type a hashtag to filter the Spark feed</div>
+    </div>
+
+    <!-- ═══════════════════════════
+     SEARCH RESULT BANNER
+═══════════════════════════ -->
+    <div class="search-result-banner" id="searchResultBanner">
+      <i class="ph-bold ph-hash"></i>
+      Showing results for <span class="search-result-tag" id="searchResultTag"></span>
+      &mdash; <span id="searchResultCount">0</span> Sparks found
+    </div>
 
     <!-- ═══════════════════════════
      MAIN GRID
@@ -4661,21 +4825,105 @@
           <div class="widget">
             <p class="widget-title">Who to Follow</p>
             <div id="wtfList">
-              <div class="sk-wtf-row" style="display:flex;align-items:center;gap:10px;padding:8px 0;">
-                <div class="sk-pulse sk-circle sk-wtf-av" style="width:36px;height:36px;border-radius:50%;background:var(--bg-4);flex-shrink:0;"></div>
-                <div class="sk-wtf-info" style="flex:1;">
-                  <div class="sk-pulse sk-wtf-name" style="height:10px;border-radius:4px;background:var(--bg-4);width:70%;margin-bottom:6px;"></div>
-                  <div class="sk-pulse sk-wtf-sub" style="height:8px;border-radius:4px;background:var(--bg-4);width:50%;"></div>
+              <div
+                class="sk-wtf-row"
+                style="
+                  display: flex;
+                  align-items: center;
+                  gap: 10px;
+                  padding: 8px 0;
+                "
+              >
+                <div
+                  class="sk-pulse sk-circle sk-wtf-av"
+                  style="
+                    width: 36px;
+                    height: 36px;
+                    border-radius: 50%;
+                    background: var(--bg-4);
+                    flex-shrink: 0;
+                  "
+                ></div>
+                <div class="sk-wtf-info" style="flex: 1">
+                  <div
+                    class="sk-pulse sk-wtf-name"
+                    style="
+                      height: 10px;
+                      border-radius: 4px;
+                      background: var(--bg-4);
+                      width: 70%;
+                      margin-bottom: 6px;
+                    "
+                  ></div>
+                  <div
+                    class="sk-pulse sk-wtf-sub"
+                    style="
+                      height: 8px;
+                      border-radius: 4px;
+                      background: var(--bg-4);
+                      width: 50%;
+                    "
+                  ></div>
                 </div>
-                <div class="sk-pulse sk-wtf-btn" style="height:26px;width:56px;border-radius:100px;background:var(--bg-4);"></div>
+                <div
+                  class="sk-pulse sk-wtf-btn"
+                  style="
+                    height: 26px;
+                    width: 56px;
+                    border-radius: 100px;
+                    background: var(--bg-4);
+                  "
+                ></div>
               </div>
-              <div class="sk-wtf-row" style="display:flex;align-items:center;gap:10px;padding:8px 0;">
-                <div class="sk-pulse sk-circle sk-wtf-av" style="width:36px;height:36px;border-radius:50%;background:var(--bg-4);flex-shrink:0;"></div>
-                <div class="sk-wtf-info" style="flex:1;">
-                  <div class="sk-pulse sk-wtf-name" style="height:10px;border-radius:4px;background:var(--bg-4);width:70%;margin-bottom:6px;"></div>
-                  <div class="sk-pulse sk-wtf-sub" style="height:8px;border-radius:4px;background:var(--bg-4);width:50%;"></div>
+              <div
+                class="sk-wtf-row"
+                style="
+                  display: flex;
+                  align-items: center;
+                  gap: 10px;
+                  padding: 8px 0;
+                "
+              >
+                <div
+                  class="sk-pulse sk-circle sk-wtf-av"
+                  style="
+                    width: 36px;
+                    height: 36px;
+                    border-radius: 50%;
+                    background: var(--bg-4);
+                    flex-shrink: 0;
+                  "
+                ></div>
+                <div class="sk-wtf-info" style="flex: 1">
+                  <div
+                    class="sk-pulse sk-wtf-name"
+                    style="
+                      height: 10px;
+                      border-radius: 4px;
+                      background: var(--bg-4);
+                      width: 70%;
+                      margin-bottom: 6px;
+                    "
+                  ></div>
+                  <div
+                    class="sk-pulse sk-wtf-sub"
+                    style="
+                      height: 8px;
+                      border-radius: 4px;
+                      background: var(--bg-4);
+                      width: 50%;
+                    "
+                  ></div>
                 </div>
-                <div class="sk-pulse sk-wtf-btn" style="height:26px;width:56px;border-radius:100px;background:var(--bg-4);"></div>
+                <div
+                  class="sk-pulse sk-wtf-btn"
+                  style="
+                    height: 26px;
+                    width: 56px;
+                    border-radius: 100px;
+                    background: var(--bg-4);
+                  "
+                ></div>
               </div>
             </div>
           </div>
@@ -4802,7 +5050,7 @@
      MOBILE BOTTOM NAV
 ═══════════════════════════ -->
     <nav class="mob-nav">
-      <a href="profile.html" class="mob-btn"
+      <a href="home.html" class="mob-btn"
         ><i class="ph-bold ph-house"></i
       ></a>
       <button class="mob-btn active">
@@ -5632,6 +5880,139 @@
         if (typeof window._markOneReadFn === "function")
           window._markOneReadFn(uid, notifId, rowEl);
       }
+
+      /* ══════════════════════════════════
+   HASHTAG SEARCH BAR
+══════════════════════════════════ */
+      let _searchActive = false;
+
+      function openSearch() {
+        // Close other panels first
+        document.getElementById("notifPanel").classList.remove("open");
+        document.getElementById("notifBackdrop").classList.remove("open");
+        document.getElementById("settingsPanel").classList.remove("open");
+        document.getElementById("settingsBackdrop").classList.remove("open");
+
+        const overlay = document.getElementById("searchOverlay");
+        overlay.classList.add("open");
+        _searchActive = true;
+        setTimeout(() => {
+          const inp = document.getElementById("searchInput");
+          if (inp) inp.focus();
+        }, 180);
+      }
+
+      function closeSearch() {
+        const overlay = document.getElementById("searchOverlay");
+        overlay.classList.remove("open");
+        _searchActive = false;
+        // If a search was active, revert feed to default
+        const inp = document.getElementById("searchInput");
+        if (inp && inp.value.trim().length > 0) {
+          inp.value = "";
+          document.getElementById("searchClearBtn").classList.remove("visible");
+          _revertFeedToDefault();
+        }
+      }
+      window.closeSearch = closeSearch;
+
+      function clearSearch() {
+        const inp = document.getElementById("searchInput");
+        if (inp) {
+          inp.value = "";
+          inp.focus();
+        }
+        document.getElementById("searchClearBtn").classList.remove("visible");
+        _revertFeedToDefault();
+      }
+
+      function onSearchInput(inp) {
+        const val = inp.value.trim();
+        const clearBtn = document.getElementById("searchClearBtn");
+
+        if (val.length > 0) {
+          clearBtn.classList.add("visible");
+        } else {
+          clearBtn.classList.remove("visible");
+          _revertFeedToDefault();
+          return;
+        }
+
+        // Debounce: wait 350ms after user stops typing
+        clearTimeout(window._searchDebounce);
+        window._searchDebounce = setTimeout(() => {
+          // Strip leading # if user typed it
+          const rawTag = val.startsWith("#") ? val.slice(1) : val;
+          if (rawTag.length > 0) {
+            _filterFeedByHashtag(rawTag);
+          }
+        }, 350);
+      }
+
+      function _revertFeedToDefault() {
+        // Hide result banner
+        const banner = document.getElementById("searchResultBanner");
+        if (banner) banner.classList.remove("visible");
+
+        // Revert feed to standard view
+        if (typeof window._startFeedFn === "function") {
+          window._startFeedFn();
+        }
+      }
+
+      async function _filterFeedByHashtag(tag) {
+        const panel = document.getElementById("realFeed");
+        if (!panel) return;
+
+        // Remove existing Firestore cards
+        panel
+          .querySelectorAll(".spark-card[data-spark-id]")
+          .forEach((el) => el.remove());
+
+        // Show a loading indicator inside feed
+        const loadingEl = document.createElement("div");
+        loadingEl.id = "searchLoadingEl";
+        loadingEl.style.cssText =
+          "padding:32px 20px;text-align:center;font-size:12px;color:var(--text-3);font-family:var(--f-mono)";
+        loadingEl.innerHTML =
+          '<i class="ph-bold ph-circle-notch" style="animation:spin .8s linear infinite;display:inline-block;margin-right:6px"></i>Searching #' +
+          tag +
+          "…";
+        const firstDemo = panel.querySelector(".spark-card:not([data-spark-id])");
+        if (firstDemo) {
+          panel.insertBefore(loadingEl, firstDemo);
+        } else {
+          panel.appendChild(loadingEl);
+        }
+
+        try {
+          // Firestore: query sparks collection where tab == "standard"
+          // then client-side filter for hashtag (Firestore doesn't support substring search natively)
+          const { getDocs, collection, query, where } = await import(
+            "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"
+          );
+
+          // Use the exposed startFeed's internal DB reference via window._searchFirebaseFn
+          if (typeof window._searchFirebaseFn !== "function") {
+            // Fallback: remove loading and show message
+            const le = document.getElementById("searchLoadingEl");
+            if (le) le.remove();
+            const msg = document.createElement("div");
+            msg.style.cssText =
+              "padding:32px 20px;text-align:center;font-size:12px;color:var(--text-3)";
+            msg.textContent = "Search initializing — please try again.";
+            if (firstDemo) panel.insertBefore(msg, firstDemo);
+            else panel.appendChild(msg);
+            return;
+          }
+
+          window._searchFirebaseFn(tag);
+        } catch (e) {
+          console.error("_filterFeedByHashtag error:", e);
+          const le = document.getElementById("searchLoadingEl");
+          if (le) le.remove();
+        }
+      }
     </script>
 
     <script type="module">
@@ -5737,12 +6118,15 @@
       async function ensurePointMap(uid) {
         try {
           const snap = await getDoc(doc(db, "users", uid));
-          const existing = snap.exists() ? (snap.data().accountStatus?.point || snap.data().point || {}) : {};
+          const existing = snap.exists()
+            ? snap.data().accountStatus?.point || snap.data().point || {}
+            : {};
           const patch = {};
 
           // spark and reply: only initialize if missing (no reliable backfill source)
           if (existing.spark === undefined) patch["point.spark"] = 0;
           if (existing.reply === undefined) patch["point.reply"] = 0;
+          if (existing.follower === undefined) patch["point.follower"] = 0;
 
           // like: ALWAYS recalculate from actual sparks/{sparkId}/likes/{uid} subcollection
           // This is the source of truth — fixes any dirty/wrong values from previous bugs
@@ -5782,7 +6166,8 @@
           // Fetch all users
           const snap = await getDocs(collection(db, "users"));
           if (snap.empty) {
-            container.innerHTML = '<div style="font-size:12px;color:var(--text-3);padding:8px 0;">No users found.</div>';
+            container.innerHTML =
+              '<div style="font-size:12px;color:var(--text-3);padding:8px 0;">No users found.</div>';
             return;
           }
 
@@ -5803,7 +6188,8 @@
           const picked = allUsers.slice(0, 4);
 
           if (picked.length === 0) {
-            container.innerHTML = '<div style="font-size:12px;color:var(--text-3);padding:8px 0;">No other users yet.</div>';
+            container.innerHTML =
+              '<div style="font-size:12px;color:var(--text-3);padding:8px 0;">No other users yet.</div>';
             return;
           }
 
@@ -5818,13 +6204,18 @@
           ];
 
           picked.forEach(({ uid, data: u }, idx) => {
-            const name = u.fullName || u.nickname || u.email?.split("@")[0] || "T1ERA User";
+            const name =
+              u.fullName ||
+              u.nickname ||
+              u.email?.split("@")[0] ||
+              "T1ERA User";
             const handle = u.nickname || u.email?.split("@")[0] || "user";
             const photo = u.profilePicture?.url || u.photoURL || "";
             const initial = name[0].toUpperCase();
             const grad = gradients[idx % gradients.length];
 
-            const isFollowing = window._followingSet && window._followingSet.has(uid);
+            const isFollowing =
+              window._followingSet && window._followingSet.has(uid);
 
             const avHtml = photo
               ? `<img src="${photo}" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;" onerror="this.style.display='none';this.parentElement.textContent='${initial}'">`
@@ -5846,7 +6237,9 @@
         } catch (e) {
           console.warn("loadWhoToFollow error:", e);
           const container2 = document.getElementById("wtfList");
-          if (container2) container2.innerHTML = '<div style="font-size:12px;color:var(--text-3);padding:8px 0;">Could not load.</div>';
+          if (container2)
+            container2.innerHTML =
+              '<div style="font-size:12px;color:var(--text-3);padding:8px 0;">Could not load.</div>';
         }
       }
 
@@ -5863,6 +6256,141 @@
 
       // ── EXPOSE startFeed to non-module scripts ──
       window._startFeedFn = startFeed;
+
+      // ── EXPOSE hashtag search function to non-module scripts ──
+      window._searchFirebaseFn = async function (tag) {
+        const panel = document.getElementById("realFeed");
+        if (!panel) return;
+
+        // Remove loading indicator and existing Firestore cards
+        const le = document.getElementById("searchLoadingEl");
+        if (le) le.remove();
+        panel
+          .querySelectorAll(".spark-card[data-spark-id]")
+          .forEach((el) => el.remove());
+
+        try {
+          const snap = await getDocs(
+            query(collection(db, SPARKS_COL), where("tab", "==", "standard")),
+          );
+
+          if (snap.empty) {
+            const msg = document.createElement("div");
+            msg.style.cssText =
+              "padding:48px 20px;text-align:center;font-size:13px;color:var(--text-3)";
+            msg.innerHTML =
+              '<i class="ph-bold ph-hash" style="display:block;font-size:36px;margin-bottom:12px;opacity:.3"></i>No Sparks found for <strong>#' +
+              tag +
+              "</strong>";
+            const firstDemo = panel.querySelector(
+              ".spark-card:not([data-spark-id])",
+            );
+            if (firstDemo) panel.insertBefore(msg, firstDemo);
+            else panel.appendChild(msg);
+            return;
+          }
+
+          // Client-side filter: text contains #tag (case-insensitive)
+          const searchLower = tag.toLowerCase();
+          const matchDocs = [];
+          snap.forEach((d) => {
+            const text = (d.data().text || "").toLowerCase();
+            if (
+              text.includes("#" + searchLower) ||
+              text.includes(searchLower)
+            ) {
+              matchDocs.push({ id: d.id, data: d.data() });
+            }
+          });
+
+          // Sort newest first
+          const toMs = (ts) => {
+            if (!ts) return 0;
+            if (ts.toMillis) return ts.toMillis();
+            const ms = new Date(ts).getTime();
+            return isNaN(ms) ? 0 : ms;
+          };
+          matchDocs.sort(
+            (a, b) => toMs(b.data.createdAt) - toMs(a.data.createdAt),
+          );
+
+          // Show result banner
+          const banner = document.getElementById("searchResultBanner");
+          const tagEl = document.getElementById("searchResultTag");
+          const countEl = document.getElementById("searchResultCount");
+          if (banner) banner.classList.add("visible");
+          if (tagEl) tagEl.textContent = "#" + tag;
+          if (countEl) countEl.textContent = matchDocs.length;
+
+          if (matchDocs.length === 0) {
+            const msg = document.createElement("div");
+            msg.style.cssText =
+              "padding:48px 20px;text-align:center;font-size:13px;color:var(--text-3)";
+            msg.innerHTML =
+              '<i class="ph-bold ph-magnifying-glass" style="display:block;font-size:36px;margin-bottom:12px;opacity:.3"></i>No Sparks found for <strong>#' +
+              tag +
+              "</strong>";
+            const firstDemo = panel.querySelector(
+              ".spark-card:not([data-spark-id])",
+            );
+            if (firstDemo) panel.insertBefore(msg, firstDemo);
+            else panel.appendChild(msg);
+            return;
+          }
+
+          // Fetch rank cache for unique authors
+          const uniqueUids = [
+            ...new Set(
+              matchDocs
+                .slice(0, 50)
+                .map(({ data: d }) => d.uid)
+                .filter(Boolean),
+            ),
+          ];
+          const rankCache = {};
+          await Promise.all(
+            uniqueUids.map(async (uid) => {
+              try {
+                const uSnap = await getDoc(doc(db, "users", uid));
+                if (uSnap.exists()) {
+                  const ud = uSnap.data();
+                  const pt = ud.accountStatus?.point || ud.point || {};
+                  const totalXP =
+                    (pt.spark || 0) * 20 +
+                    (pt.like || 0) * 10 +
+                    (pt.reply || 0) * 40;
+                  const XP_THRESHOLDS = [
+                    0, 550, 1650, 3300, 5500, 8250, 11550, 15400, 19800, 24750,
+                    30250, 36300, 42900, 50050, 57750, 66000, 74800, 84150,
+                    94050, 104500, 115500, 127050, 139150, 151800, 165000,
+                    178750, 193050, 207900, 223300, 239250,
+                  ];
+                  let computedLevel = 1;
+                  for (let i = XP_THRESHOLDS.length - 1; i >= 0; i--) {
+                    if (totalXP >= XP_THRESHOLDS[i]) {
+                      computedLevel = i + 1;
+                      break;
+                    }
+                  }
+                  rankCache[uid] = `LV ${computedLevel}`;
+                } else {
+                  rankCache[uid] = "LV 1";
+                }
+              } catch (_) {
+                rankCache[uid] = "LV 1";
+              }
+            }),
+          );
+
+          matchDocs
+            .slice(0, 50)
+            .forEach(({ id, data }) =>
+              renderCard(id, data, rankCache[data.uid] || "LV 1"),
+            );
+        } catch (e) {
+          console.error("_searchFirebaseFn error:", e);
+        }
+      };
 
       // ══════════════════════════════════════════════════════
       // FOLLOW MODULE
@@ -5941,6 +6469,15 @@
               fromPhoto,
               createdAt: serverTimestamp(),
             });
+
+            // ── Award +25 base follower points to the followed user ──
+            try {
+              await updateDoc(doc(db, "users", ownerUid), {
+                "point.follower": increment(1),
+              });
+            } catch (fpe) {
+              console.warn("XP follower award error:", fpe);
+            }
 
             // ── Send follow notification to target — rules allow create if isSignedIn() ──
             const notifId = `follow_${user.uid}_${ownerUid}`;
@@ -6864,7 +7401,14 @@
           docs.sort((a, b) => toMs(b.data.createdAt) - toMs(a.data.createdAt));
 
           // ── Fetch rank for each unique author UID ──
-          const uniqueUids = [...new Set(docs.slice(0, 50).map(({ data: d }) => d.uid).filter(Boolean))];
+          const uniqueUids = [
+            ...new Set(
+              docs
+                .slice(0, 50)
+                .map(({ data: d }) => d.uid)
+                .filter(Boolean),
+            ),
+          ];
           const rankCache = {};
           await Promise.all(
             uniqueUids.map(async (uid) => {
@@ -6874,24 +7418,44 @@
                   const ud = uSnap.data();
                   // Compute level from XP so it's always accurate regardless of stored value
                   const pt = ud.accountStatus?.point || ud.point || {};
-                  const totalXP = (pt.spark || 0) * 20 + (pt.like || 0) * 10 + (pt.reply || 0) * 40;
-                  const XP_THRESHOLDS = [0,550,1650,3300,5500,8250,11550,15400,19800,24750,30250,36300,42900,50050,57750,66000,74800,84150,94050,104500,115500,127050,139150,151800,165000,178750,193050,207900,223300,239250];
+                  const totalXP =
+                    (pt.spark || 0) * 20 +
+                    (pt.like || 0) * 10 +
+                    (pt.reply || 0) * 40;
+                  const XP_THRESHOLDS = [
+                    0, 550, 1650, 3300, 5500, 8250, 11550, 15400, 19800, 24750,
+                    30250, 36300, 42900, 50050, 57750, 66000, 74800, 84150,
+                    94050, 104500, 115500, 127050, 139150, 151800, 165000,
+                    178750, 193050, 207900, 223300, 239250,
+                  ];
                   let computedLevel = 1;
                   for (let i = XP_THRESHOLDS.length - 1; i >= 0; i--) {
-                    if (totalXP >= XP_THRESHOLDS[i]) { computedLevel = i + 1; break; }
+                    if (totalXP >= XP_THRESHOLDS[i]) {
+                      computedLevel = i + 1;
+                      break;
+                    }
                   }
                   rankCache[uid] = `LV ${computedLevel}`;
                 } else {
                   rankCache[uid] = "LV 1";
                 }
               } catch (rankErr) {
-                console.warn("rank fetch error for uid", uid, rankErr?.code, rankErr?.message);
+                console.warn(
+                  "rank fetch error for uid",
+                  uid,
+                  rankErr?.code,
+                  rankErr?.message,
+                );
                 rankCache[uid] = "LV 1";
               }
-            })
+            }),
           );
 
-          docs.slice(0, 50).forEach(({ id, data }) => renderCard(id, data, rankCache[data.uid] || "LV 1"));
+          docs
+            .slice(0, 50)
+            .forEach(({ id, data }) =>
+              renderCard(id, data, rankCache[data.uid] || "LV 1"),
+            );
         } catch (e) {
           console.error("startFeed error:", e);
         }
