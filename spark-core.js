@@ -192,33 +192,105 @@
       /* ══════════════════════════════════
    MEDIA ATTACH
 ══════════════════════════════════ */
+      const IMAGE_MAX = 4;
+
       function attachMedia(input, type) {
         const strip = document.getElementById("mediaStrip");
-        Array.from(input.files).forEach((file) => {
+        const files = Array.from(input.files);
+
+        // For images, enforce 4-per-upload max
+        if (type === "image") {
+          const existing = strip.querySelectorAll(".media-thumb[data-type='image']").length;
+          const slots = IMAGE_MAX - existing;
+          if (slots <= 0) {
+            if (typeof window.showToast === "function")
+              window.showToast("Max 4 images per Spark 📷");
+            input.value = "";
+            return;
+          }
+          // Slice to however many slots remain
+          const allowed = files.slice(0, slots);
+          if (files.length > slots && typeof window.showToast === "function")
+            window.showToast(`Only ${slots} image slot${slots === 1 ? "" : "s"} remaining — added ${allowed.length}`);
+          allowed.forEach((file) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              const d = document.createElement("div");
+              d.className = "media-thumb";
+              d.dataset.type = "image";
+              d.innerHTML =
+                `<img src="${e.target.result}" alt="">` +
+                `<div class="media-type-tag">image</div>` +
+                `<button class="media-thumb-remove" onclick="this.parentElement.remove()"><i class="ph-bold ph-x"></i></button>`;
+              strip.appendChild(d);
+            };
+            reader.readAsDataURL(file);
+          });
+        } else {
+          // Non-image types — no count restriction
+          files.forEach((file) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              const d = document.createElement("div");
+              d.className = "media-thumb";
+              d.dataset.type = type;
+              const ext = file.name.split(".").pop().toUpperCase();
+              let inner = "";
+              if (type === "video")
+                inner = `<video src="${e.target.result}" muted></video>`;
+              else if (type === "audio")
+                inner = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-3);font-size:26px;"><i class="ph-bold ph-music-note"></i></div>`;
+              else
+                inner = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-3);font-size:26px;"><i class="ph-bold ph-file-text"></i></div>`;
+              d.innerHTML =
+                inner +
+                `<div class="media-type-tag">${type === "file" ? ext : type}</div>` +
+                `<button class="media-thumb-remove" onclick="this.parentElement.remove()"><i class="ph-bold ph-x"></i></button>`;
+              strip.appendChild(d);
+            };
+            reader.readAsDataURL(file);
+          });
+        }
+
+        document.getElementById("submitBtn").disabled = false;
+        input.value = "";
+      }
+
+      function attachPromptMedia(input) {
+        const strip = document.getElementById("promptMediaStrip");
+        if (!strip) return;
+        const files = Array.from(input.files);
+        const existing = strip.querySelectorAll(".media-thumb[data-type='image']").length;
+        const slots = IMAGE_MAX - existing;
+        if (slots <= 0) {
+          if (typeof window.showToast === "function")
+            window.showToast("Max 4 images per Spark 📷");
+          input.value = "";
+          return;
+        }
+        const allowed = files.slice(0, slots);
+        if (files.length > slots && typeof window.showToast === "function")
+          window.showToast(`Only ${slots} slot${slots === 1 ? "" : "s"} left — added ${allowed.length}`);
+        allowed.forEach((file) => {
           const reader = new FileReader();
           reader.onload = (e) => {
             const d = document.createElement("div");
             d.className = "media-thumb";
-            const ext = file.name.split(".").pop().toUpperCase();
-            let inner = "";
-            if (type === "image")
-              inner = `<img src="${e.target.result}" alt="">`;
-            else if (type === "video")
-              inner = `<video src="${e.target.result}" muted></video>`;
-            else if (type === "audio")
-              inner = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-3);font-size:26px;"><i class="ph-bold ph-music-note"></i></div>`;
-            else
-              inner = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-3);font-size:26px;"><i class="ph-bold ph-file-text"></i></div>`;
+            d.dataset.type = "image";
             d.innerHTML =
-              inner +
-              `<div class="media-type-tag">${type === "file" ? ext : type}</div><button class="media-thumb-remove" onclick="this.parentElement.remove()"><i class="ph-bold ph-x"></i></button>`;
+              `<img src="${e.target.result}" alt="">` +
+              `<div class="media-type-tag">image</div>` +
+              `<button class="media-thumb-remove" onclick="this.parentElement.remove()"><i class="ph-bold ph-x"></i></button>`;
             strip.appendChild(d);
           };
           reader.readAsDataURL(file);
         });
-        document.getElementById("submitBtn").disabled = false;
+        const ta = document.getElementById("promptTa");
+        const btn = document.getElementById("promptSubmitBtn");
+        if (btn && ta && ta.value.trim().length > 0) btn.disabled = false;
         input.value = "";
       }
+      window.attachPromptMedia = attachPromptMedia;
 
       function submitSpark() {
         // Delegated to Firebase module — window._submitSparkFn is set by the module script below
