@@ -79,12 +79,17 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
         // Start standard feed
         startFeed();
 
-        // Start prompt feed (spark-prompt-module.js exposes window.startPromptFeed)
-        // Delay slightly to let prompt module finish registering window.startPromptFeed
-        setTimeout(() => {
-          if (typeof window.startPromptFeed === "function")
-            window.startPromptFeed();
-        }, 100);
+        // Start prompt feed — safe regardless of which module loaded first
+        window._promptAuthReady = true;
+        if (typeof window.startPromptFeed === "function") {
+          window.startPromptFeed();
+        } else {
+          // Prompt module hasn't finished loading yet — wait for its ready event
+          window.addEventListener("promptModuleReady", () => {
+            if (typeof window.startPromptFeed === "function")
+              window.startPromptFeed();
+          }, { once: true });
+        }
 
         // Auto-refresh feed every 35 seconds
         if (window._feedAutoRefreshTimer)
