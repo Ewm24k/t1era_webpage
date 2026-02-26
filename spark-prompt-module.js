@@ -378,7 +378,7 @@ function closePromptCompose() {
 
   const cc = document.getElementById("promptCharCount");
   if (cc) {
-    cc.textContent = "0 / 500";
+    cc.textContent = "0 / 1500";
     cc.className = "char-count";
   }
 
@@ -410,7 +410,7 @@ function cyclePrompt(direction) {
   }
   const cc = document.getElementById("promptCharCount");
   if (cc) {
-    cc.textContent = "0 / 500";
+    cc.textContent = "0 / 1500";
     cc.className = "char-count";
   }
   const btn = document.getElementById("promptSubmitBtn");
@@ -422,9 +422,9 @@ function onPromptInput(ta) {
   const trim = ta.value.trim().length;
   const cc = document.getElementById("promptCharCount");
   if (cc) {
-    cc.textContent = `${len} / 500`;
+    cc.textContent = `${len} / 1500`;
     cc.className =
-      "char-count" + (len >= 500 ? " over" : len >= 400 ? " warn" : "");
+      "char-count" + (len >= 1500 ? " over" : len >= 1400 ? " warn" : "");
   }
   const btn = document.getElementById("promptSubmitBtn");
   if (btn) btn.disabled = trim === 0;
