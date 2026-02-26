@@ -17,7 +17,7 @@ import {
   increment,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// ── CONFIG — same project as spark-module.js ──
+// ── CONFIG ──
 const firebaseConfig = {
   apiKey: "AIzaSyBnt9mbb8LdMVeguSHUmS20L6uBHIfxwAs",
   authDomain: "t1era-v2.firebaseapp.com",
@@ -27,16 +27,14 @@ const firebaseConfig = {
   appId: "1:279266491659:web:28a03c7b7300fcb152b60e",
 };
 
-// Reuse existing Firebase app if already initialised (avoids duplicate-app error)
 const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 const SPARKS_COL = "sparks";
 const PROMPT_TAB = "prompt";
-const DEV_EMAIL = "ewm24k@gmail.com";
 
 // ══════════════════════════════════════════════════════════════
-// PROMPT LIBRARY — rotating active prompts shown in compose box
+// PROMPT LIBRARY
 // ══════════════════════════════════════════════════════════════
 const PROMPT_LIBRARY = [
   {
@@ -77,7 +75,6 @@ const PROMPT_LIBRARY = [
   },
 ];
 
-// Track which prompt is active in the compose box
 let _activePromptIndex = 0;
 
 // ══════════════════════════════════════════════════════════════
@@ -103,6 +100,211 @@ function _timeAgo(ts) {
 }
 
 // ══════════════════════════════════════════════════════════════
+// SKELETON HELPERS — show while fetching, hide when done
+// mirrors hidePageSkeleton() behaviour in spark-module.js
+// ══════════════════════════════════════════════════════════════
+function _showPromptSkeleton() {
+  const sk = document.getElementById("skPromptFeed");
+  const real = document.getElementById("realPromptFeedWrap");
+  if (sk) sk.classList.remove("sk-hidden");
+  if (real) real.classList.add("sk-hidden");
+}
+
+function _hidePromptSkeleton() {
+  const sk = document.getElementById("skPromptFeed");
+  const real = document.getElementById("realPromptFeedWrap");
+  if (sk) sk.classList.add("sk-hidden");
+  if (real) real.classList.remove("sk-hidden");
+}
+
+// ══════════════════════════════════════════════════════════════
+// DOTS MENU — dropdown with Delete (owner) or Report (others)
+// ══════════════════════════════════════════════════════════════
+function _closeAllDotsMenus() {
+  document.querySelectorAll(".prompt-dots-menu").forEach((m) => m.remove());
+}
+window._closeAllDotsMenus = _closeAllDotsMenus;
+
+function openPromptDotsMenu(btn, sparkId, ownerUid) {
+  _closeAllDotsMenus();
+
+  const isOwner = window._sparkUser && ownerUid === window._sparkUser.uid;
+
+  const menu = document.createElement("div");
+  menu.className = "prompt-dots-menu";
+  menu.style.cssText = [
+    "position:absolute",
+    "right:0",
+    "top:32px",
+    "background:var(--bg-card)",
+    "border:1px solid var(--border-2)",
+    "border-radius:var(--r)",
+    "box-shadow:0 8px 32px rgba(0,0,0,.55)",
+    "min-width:160px",
+    "z-index:350",
+    "overflow:hidden",
+    "animation:fu .18s var(--ease) forwards",
+  ].join(";");
+
+  if (isOwner) {
+    const deleteBtn = document.createElement("button");
+    deleteBtn.style.cssText = [
+      "display:flex",
+      "align-items:center",
+      "gap:10px",
+      "width:100%",
+      "padding:11px 16px",
+      "background:none",
+      "border:none",
+      "color:rgba(239,68,68,.85)",
+      "font-size:13px",
+      "font-weight:600",
+      "font-family:var(--f-body)",
+      "cursor:pointer",
+      "transition:background .15s",
+    ].join(";");
+    deleteBtn.innerHTML = '<i class="ph-bold ph-trash" style="font-size:16px"></i> Delete Spark';
+    deleteBtn.addEventListener("mouseover", () => { deleteBtn.style.background = "rgba(239,68,68,.08)"; });
+    deleteBtn.addEventListener("mouseout", () => { deleteBtn.style.background = "none"; });
+    deleteBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      _promptDeleteCard(sparkId);
+    });
+    menu.appendChild(deleteBtn);
+  } else {
+    const reportBtn = document.createElement("button");
+    reportBtn.style.cssText = [
+      "display:flex",
+      "align-items:center",
+      "gap:10px",
+      "width:100%",
+      "padding:11px 16px",
+      "background:none",
+      "border:none",
+      "color:var(--text-2)",
+      "font-size:13px",
+      "font-weight:600",
+      "font-family:var(--f-body)",
+      "cursor:pointer",
+      "transition:background .15s",
+    ].join(";");
+    reportBtn.innerHTML = '<i class="ph-bold ph-flag" style="font-size:16px"></i> Report Spark';
+    reportBtn.addEventListener("mouseover", () => { reportBtn.style.background = "rgba(255,255,255,.04)"; });
+    reportBtn.addEventListener("mouseout", () => { reportBtn.style.background = "none"; });
+    reportBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      _closeAllDotsMenus();
+      if (typeof window.showToast === "function") window.showToast("Reported — thank you \uD83D\uDE4F");
+    });
+    menu.appendChild(reportBtn);
+  }
+
+  // Anchor menu to the dots button wrapper
+  const wrapper = btn.parentElement;
+  wrapper.style.position = "relative";
+  wrapper.appendChild(menu);
+
+  // Close on any outside click
+  setTimeout(() => {
+    document.addEventListener("click", _closeAllDotsMenus, { once: true });
+  }, 0);
+}
+window.openPromptDotsMenu = openPromptDotsMenu;
+
+// ══════════════════════════════════════════════════════════════
+// DELETE PROMPT CARD — Firestore delete + DOM remove + toast
+// ══════════════════════════════════════════════════════════════
+async function _promptDeleteCard(sparkId) {
+  _closeAllDotsMenus();
+  if (!sparkId) return;
+  if (!confirm("Delete this Prompt Spark? This cannot be undone.")) return;
+
+  const card = document.querySelector(`.spark-card[data-spark-id="${sparkId}"]`);
+  try {
+    await deleteDoc(doc(db, SPARKS_COL, sparkId));
+    if (card) card.remove();
+    if (typeof window.showToast === "function")
+      window.showToast("Prompt Spark deleted");
+  } catch (e) {
+    console.error("Delete prompt spark failed:", e);
+    if (typeof window.showToast === "function")
+      window.showToast("Delete failed — try again");
+  }
+}
+window._promptDeleteCard = _promptDeleteCard;
+
+// ══════════════════════════════════════════════════════════════
+// COPY TO CLIPBOARD — used by quote block copy icon
+// ══════════════════════════════════════════════════════════════
+window._copyQuoteText = function (encodedText) {
+  const text = decodeURIComponent(encodedText);
+  const doFallback = () => {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.cssText = "position:fixed;opacity:0;pointer-events:none";
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand("copy");
+    ta.remove();
+    if (typeof window.showToast === "function") window.showToast("Copied \u2713");
+  };
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => {
+      if (typeof window.showToast === "function") window.showToast("Copied to clipboard \u2713");
+    }).catch(doFallback);
+  } else {
+    doFallback();
+  }
+};
+
+// ══════════════════════════════════════════════════════════════
+// LIKE — full parity with standard spark
+// Optimistic UI + delegates to _toggleLikeFn (XP + notif + activity)
+// ══════════════════════════════════════════════════════════════
+window._promptToggleLike = async function (btn) {
+  const card = btn.closest(".spark-card[data-spark-id]");
+  if (!card) return;
+  const sparkId = card.dataset.sparkId;
+  const ownerUid = card.dataset.ownerUid;
+  const sparkText = card.querySelector(".spark-text")?.textContent?.slice(0, 80) || "";
+
+  // Optimistic UI
+  const on = btn.classList.toggle("liked");
+  const icon = btn.querySelector("i");
+  const cnt = btn.querySelector("span");
+  const n = parseInt(cnt.textContent.replace(/[^0-9]/g, "")) || 0;
+  icon.className = on ? "ph-fill ph-heart" : "ph-bold ph-heart";
+  cnt.textContent = on ? n + 1 : Math.max(0, n - 1);
+
+  // Persist via shared handler in spark-module.js (XP + notif)
+  if (typeof window._toggleLikeFn === "function") {
+    window._toggleLikeFn({ liked: on, sparkId, ownerUid, sparkText });
+  }
+};
+
+// ══════════════════════════════════════════════════════════════
+// BOOKMARK — full parity with standard spark (notification)
+// ══════════════════════════════════════════════════════════════
+window._promptToggleBookmark = function (btn) {
+  const on = btn.classList.toggle("bookmarked");
+  const icon = btn.querySelector("i");
+  icon.className = on ? "ph-fill ph-bookmark-simple" : "ph-bold ph-bookmark-simple";
+  btn.style.color = on ? "var(--gold)" : "";
+
+  if (on && typeof window._sendNotifFn === "function") {
+    const card = btn.closest(".spark-card[data-spark-id]");
+    if (card) {
+      window._sendNotifFn({
+        type: "bookmark",
+        ownerUid: card.dataset.ownerUid,
+        sparkId: card.dataset.sparkId,
+        sparkText: card.querySelector(".spark-text")?.textContent?.slice(0, 80) || "",
+      });
+    }
+  }
+};
+
+// ══════════════════════════════════════════════════════════════
 // RENDER PROMPT CARD
 // ══════════════════════════════════════════════════════════════
 function renderPromptCard(id, d, rankLabel) {
@@ -121,42 +323,42 @@ function renderPromptCard(id, d, rankLabel) {
     ? `<img src="${photo}" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;" onerror="this.style.display='none'">`
     : initial;
 
-  // Detect ```quote ... ``` blocks — strip from display text, render as quote-block
+  // Quote block — strip raw syntax, render with "Prompt" label + copy icon
   const quoteMatch = txt.match(/```quote\n([\s\S]*?)\n```/);
-  const quoteContent = quoteMatch ? quoteMatch[1] : null;
-  const displayRaw = quoteContent
-    ? txt.replace(/```quote\n[\s\S]*?\n```/, "").trim()
-    : txt;
+  const quoteContent = quoteMatch ? quoteMatch[1] : (d.quoteText || null);
+  const displayRaw = quoteMatch ? txt.replace(/```quote\n[\s\S]*?\n```/, "").trim() : txt;
 
   const linkedTxt = displayRaw
     .replace(/(#\w+)/g, '<span class="ht">$1</span>')
     .replace(/(@\w+)/g, '<span class="mn">$1</span>');
 
-  const quoteBlockHtml = quoteContent
-    ? `<div class="quote-block"><div class="quote-block-label"><i class="ph-bold ph-quotes"></i> Quote</div>${quoteContent.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>`
-    : d.quoteText
-      ? `<div class="quote-block"><div class="quote-block-label"><i class="ph-bold ph-quotes"></i> Quote</div>${String(d.quoteText).replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>`
-      : "";
+  let quoteBlockHtml = "";
+  if (quoteContent) {
+    const escaped = quoteContent.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    const encoded = encodeURIComponent(quoteContent);
+    quoteBlockHtml = `<div class="quote-block" style="position:relative">
+      <div class="quote-block-label" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <span><i class="ph-bold ph-chat-teardrop-dots"></i> Prompt</span>
+        <button onclick="event.stopPropagation();_copyQuoteText('${encoded}')" title="Copy to clipboard" style="background:none;border:none;cursor:pointer;color:var(--text-3);font-size:12px;padding:2px 5px;border-radius:4px;display:inline-flex;align-items:center;gap:3px;transition:color .15s;" onmouseover="this.style.color='var(--purple)'" onmouseout="this.style.color='var(--text-3)'"><i class="ph-bold ph-copy"></i></button>
+      </div>${escaped}</div>`;
+  }
 
   const safeText = txt.replace(/'/g, "\\'").slice(0, 80);
   const safePhoto = photo.replace(/'/g, "\\'");
+  const safeOwnerUid = (d.uid || "").replace(/'/g, "\\'");
 
   const isOwner = d.uid && window._sparkUser && d.uid === window._sparkUser.uid;
 
-  const dotsOrDelete = isOwner
-    ? `<button class="dots-btn" onclick="event.stopPropagation();deletePromptCard(this)" title="Delete" style="color:var(--text-3)"><i class="ph-bold ph-trash"></i></button>`
-    : `<button class="dots-btn" onclick="event.stopPropagation()"><i class="ph-bold ph-dots-three-vertical"></i></button>`;
-
-  // Prompt block — shown above the reply text
+  // Prompt question block shown above the user's answer
   const promptBlockHtml = promptText
     ? `<div class="prompt-card">
-               <div class="prompt-label"><i class="ph-bold ph-chat-teardrop-dots"></i> Prompt</div>
-               <p class="prompt-q">${promptText.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</p>
-             </div>`
+         <div class="prompt-label"><i class="ph-bold ph-chat-teardrop-dots"></i> Prompt</div>
+         <p class="prompt-q">${promptText.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</p>
+       </div>`
     : "";
 
   const article = document.createElement("article");
-  article.className = "spark-card";
+  article.className = "spark-card fu";
   article.dataset.sparkId = id;
   article.dataset.ownerUid = d.uid || "";
   article.setAttribute("onclick", "openSparkDetail(this)");
@@ -177,9 +379,7 @@ function renderPromptCard(id, d, rankLabel) {
           ${
             !isOwner
               ? (() => {
-                  const isFollowing =
-                    window._followingSet &&
-                    window._followingSet.has(d.uid || "");
+                  const isFollowing = window._followingSet && window._followingSet.has(d.uid || "");
                   return isFollowing
                     ? `<button class="badge follow-badge following" onclick="event.stopPropagation();toggleFollowBadge(this)"><i class="ph-bold ph-check"></i> Following</button>`
                     : `<button class="badge follow-badge" onclick="event.stopPropagation();toggleFollowBadge(this)"><i class="ph-bold ph-user-plus"></i> Follow</button>`;
@@ -188,7 +388,9 @@ function renderPromptCard(id, d, rankLabel) {
           }
         </div>
       </div>
-      ${dotsOrDelete}
+      <button class="dots-btn" onclick="event.stopPropagation();openPromptDotsMenu(this,'${id}','${safeOwnerUid}')">
+        <i class="ph-bold ph-dots-three-vertical"></i>
+      </button>
     </div>
     <div class="card-content">
       ${promptBlockHtml}
@@ -197,37 +399,38 @@ function renderPromptCard(id, d, rankLabel) {
       ${typeof window._buildMediaGridHtml === "function" ? window._buildMediaGridHtml(d.images) : ""}
     </div>
     <div class="action-bar">
-      <button class="act-btn like" id="plk-${id}" onclick="event.stopPropagation();toggleLike(this)"><i class="ph-bold ph-heart"></i><span id="plkc-${id}">0</span></button>
-      <button class="act-btn reply" onclick="event.stopPropagation();openReply('${name}','${initial}','#8b5cf6','${safeText}','${id}','${d.uid || ""}','${handle}','${safePhoto}')"><i class="ph-bold ph-chat-circle"></i><span id="prpc-${id}">0</span></button>
-      <button class="act-btn repost" onclick="event.stopPropagation();toggleRepost(this)"><i class="ph-bold ph-repeat"></i><span>${d.reposts || 0}</span></button>
-      <button class="act-btn share" onclick="event.stopPropagation();shareSpark()"><i class="ph-bold ph-share-network"></i><span></span></button>
-      <button class="act-btn bookmark" onclick="event.stopPropagation();toggleBookmark(this)" style="margin-left:auto"><i class="ph-bold ph-bookmark-simple"></i></button>
+      <button class="act-btn like" id="plk-${id}" onclick="event.stopPropagation();_promptToggleLike(this)">
+        <i class="ph-bold ph-heart"></i><span id="plkc-${id}">0</span>
+      </button>
+      <button class="act-btn reply" onclick="event.stopPropagation();openReply('${name}','${initial}','#8b5cf6','${safeText}','${id}','${d.uid || ""}','${handle}','${safePhoto}')">
+        <i class="ph-bold ph-chat-circle"></i><span id="prpc-${id}">0</span>
+      </button>
+      <button class="act-btn repost" onclick="event.stopPropagation();toggleRepost(this)">
+        <i class="ph-bold ph-repeat"></i><span>${d.reposts || 0}</span>
+      </button>
+      <button class="act-btn share" onclick="event.stopPropagation();shareSpark()">
+        <i class="ph-bold ph-share-network"></i><span></span>
+      </button>
+      <button class="act-btn bookmark" id="pbk-${id}" onclick="event.stopPropagation();_promptToggleBookmark(this)" style="margin-left:auto">
+        <i class="ph-bold ph-bookmark-simple"></i>
+      </button>
     </div>
   `;
 
-  // Insert before first demo card (no data-spark-id) or append
   const firstDemo = panel.querySelector(".spark-card:not([data-spark-id])");
-  if (firstDemo) {
-    panel.insertBefore(article, firstDemo);
-  } else {
-    panel.appendChild(article);
-  }
+  firstDemo ? panel.insertBefore(article, firstDemo) : panel.appendChild(article);
 
-  // Fetch likes
+  // Fetch real like count + check if current user already liked
   const currentUid = window._sparkUser?.uid;
   getDocs(collection(db, SPARKS_COL, id, "likes"))
     .then((snap) => {
       const el = document.getElementById("plkc-" + id);
       if (el) el.textContent = snap.size;
-      if (currentUid) {
-        const liked = snap.docs.some((d) => d.id === currentUid);
-        if (liked) {
-          const btn = document.getElementById("plk-" + id);
-          if (btn) {
-            btn.classList.add("liked");
-            btn.querySelector("i").className = "ph-fill ph-heart";
-            btn.querySelector("span").textContent = snap.size;
-          }
+      if (currentUid && snap.docs.some((s) => s.id === currentUid)) {
+        const likeBtn = document.getElementById("plk-" + id);
+        if (likeBtn) {
+          likeBtn.classList.add("liked");
+          likeBtn.querySelector("i").className = "ph-fill ph-heart";
         }
       }
     })
@@ -236,7 +439,7 @@ function renderPromptCard(id, d, rankLabel) {
       if (el) el.textContent = "0";
     });
 
-  // Fetch reply count
+  // Fetch real reply count
   getDocs(collection(db, SPARKS_COL, id, "comments"))
     .then((snap) => {
       const el = document.getElementById("prpc-" + id);
@@ -247,117 +450,98 @@ function renderPromptCard(id, d, rankLabel) {
 
 // ══════════════════════════════════════════════════════════════
 // START PROMPT FEED
+// Shows skeleton while fetching, hides it when data is ready
 // ══════════════════════════════════════════════════════════════
 async function startPromptFeed() {
   const container = document.getElementById("realPromptFeed");
   if (!container) return;
 
-  // Remove previously rendered Firestore cards
-  container
-    .querySelectorAll(".spark-card[data-spark-id]")
-    .forEach((el) => el.remove());
+  // Show skeleton while loading
+  _showPromptSkeleton();
 
-  // Spin refresh icon
+  // Clear previously rendered Firestore cards
+  container.querySelectorAll(".spark-card[data-spark-id]").forEach((el) => el.remove());
+
+  // Spin refresh button
+  const refreshBtn = document.getElementById("promptRefreshBtn");
   const icon = document.getElementById("promptRefreshIcon");
-  if (icon) icon.closest(".feed-refresh-btn")?.classList.add("spinning");
+  if (refreshBtn) refreshBtn.classList.add("spinning");
+  if (icon) icon.style.animation = "spin .6s linear";
 
   try {
     const snap = await getDocs(
       query(collection(db, SPARKS_COL), where("tab", "==", PROMPT_TAB)),
     );
 
-    if (snap.empty) {
-      if (icon) icon.closest(".feed-refresh-btn")?.classList.remove("spinning");
-      return;
-    }
+    if (!snap.empty) {
+      const docs = [];
+      snap.forEach((d) => docs.push({ id: d.id, data: d.data() }));
 
-    const docs = [];
-    snap.forEach((d) => docs.push({ id: d.id, data: d.data() }));
+      const toMs = (ts) => {
+        if (!ts) return 0;
+        if (ts.toMillis) return ts.toMillis();
+        const ms = new Date(ts).getTime();
+        return isNaN(ms) ? 0 : ms;
+      };
+      docs.sort((a, b) => toMs(b.data.createdAt) - toMs(a.data.createdAt));
 
-    // Sort newest-first
-    const toMs = (ts) => {
-      if (!ts) return 0;
-      if (ts.toMillis) return ts.toMillis();
-      const ms = new Date(ts).getTime();
-      return isNaN(ms) ? 0 : ms;
-    };
-    docs.sort((a, b) => toMs(b.data.createdAt) - toMs(a.data.createdAt));
-
-    // Fetch ranks
-    const uniqueUids = [
-      ...new Set(
-        docs
-          .slice(0, 50)
-          .map(({ data: d }) => d.uid)
-          .filter(Boolean),
-      ),
-    ];
-    const rankCache = {};
-    await Promise.all(
-      uniqueUids.map(async (uid) => {
-        try {
-          const uSnap = await getDoc(doc(db, "users", uid));
-          if (uSnap.exists()) {
-            const ud = uSnap.data();
-            const pt = ud.accountStatus?.point || ud.point || {};
-            const totalXP =
-              (pt.spark || 0) * 20 +
-              (pt.like || 0) * 10 +
-              (pt.reply || 0) * 40 +
-              (pt.follower || 0) * 25;
-            const XP_THRESHOLDS = [
-              0, 550, 1650, 3300, 5500, 8250, 11550, 15400, 19800, 24750, 30250,
-              36300, 42900, 50050, 57750, 66000, 74800, 84150, 94050, 104500,
-              115500, 127050, 139150, 151800, 165000, 178750, 193050, 207900,
-              223300, 239250,
-            ];
-            let computedLevel = 1;
-            for (let i = XP_THRESHOLDS.length - 1; i >= 0; i--) {
-              if (totalXP >= XP_THRESHOLDS[i]) {
-                computedLevel = i + 1;
-                break;
+      // Fetch ranks for each unique author
+      const uniqueUids = [...new Set(docs.slice(0, 50).map(({ data: d }) => d.uid).filter(Boolean))];
+      const rankCache = {};
+      await Promise.all(
+        uniqueUids.map(async (uid) => {
+          try {
+            const uSnap = await getDoc(doc(db, "users", uid));
+            if (uSnap.exists()) {
+              const ud = uSnap.data();
+              const pt = ud.accountStatus?.point || ud.point || {};
+              const totalXP =
+                (pt.spark || 0) * 20 + (pt.like || 0) * 10 +
+                (pt.reply || 0) * 40 + (pt.follower || 0) * 25;
+              const XP_THRESHOLDS = [
+                0, 550, 1650, 3300, 5500, 8250, 11550, 15400, 19800, 24750,
+                30250, 36300, 42900, 50050, 57750, 66000, 74800, 84150, 94050,
+                104500, 115500, 127050, 139150, 151800, 165000, 178750, 193050,
+                207900, 223300, 239250,
+              ];
+              let computedLevel = 1;
+              for (let i = XP_THRESHOLDS.length - 1; i >= 0; i--) {
+                if (totalXP >= XP_THRESHOLDS[i]) { computedLevel = i + 1; break; }
               }
+              rankCache[uid] = `LV ${computedLevel}`;
+            } else {
+              rankCache[uid] = "LV 1";
             }
-            rankCache[uid] = `LV ${computedLevel}`;
-          } else {
+          } catch {
             rankCache[uid] = "LV 1";
           }
-        } catch {
-          rankCache[uid] = "LV 1";
-        }
-      }),
-    );
+        }),
+      );
 
-    docs
-      .slice(0, 50)
-      .forEach(({ id, data }) =>
+      docs.slice(0, 50).forEach(({ id, data }) =>
         renderPromptCard(id, data, rankCache[data.uid] || "LV 1"),
       );
+    }
   } catch (e) {
     console.error("startPromptFeed error:", e);
   }
 
-  if (icon) icon.closest(".feed-refresh-btn")?.classList.remove("spinning");
+  // Always reveal real content and stop skeleton regardless of outcome
+  _hidePromptSkeleton();
+  if (refreshBtn) refreshBtn.classList.remove("spinning");
+  if (icon) icon.style.animation = "";
 }
 
 // ══════════════════════════════════════════════════════════════
-// PROMPT COMPOSE — open / close / switch prompt
+// PROMPT COMPOSE — open / close / cycle / input
 // ══════════════════════════════════════════════════════════════
 function openPromptCompose() {
   const box = document.getElementById("promptComposeBox");
   const toggle = document.getElementById("promptComposeToggle");
   if (!box) return;
-
-  // Show the compose box
   box.classList.add("open");
-
-  // Hide the toggle bar (match exactly how standard spark does it)
   if (toggle) toggle.style.display = "none";
-
-  // Render the active prompt in the compose box
   renderActivePromptInBox();
-
-  // Focus textarea with same delay pattern as openCompose() in spark-core.js
   setTimeout(() => {
     const ta = document.getElementById("promptTa");
     if (ta) ta.focus();
@@ -367,24 +551,14 @@ function openPromptCompose() {
 function closePromptCompose() {
   const box = document.getElementById("promptComposeBox");
   const toggle = document.getElementById("promptComposeToggle");
-
   if (box) box.classList.remove("open");
-
-  // Restore toggle — use "flex" to match its CSS display type (same as composeToggle)
   if (toggle) toggle.style.display = "flex";
-
   const ta = document.getElementById("promptTa");
   if (ta) ta.value = "";
-
   const cc = document.getElementById("promptCharCount");
-  if (cc) {
-    cc.textContent = "0 / 1500";
-    cc.className = "char-count";
-  }
-
+  if (cc) { cc.textContent = "0 / 1500"; cc.className = "char-count"; }
   const btn = document.getElementById("promptSubmitBtn");
   if (btn) btn.disabled = true;
-
   const strip = document.getElementById("promptMediaStrip");
   if (strip) strip.innerHTML = "";
 }
@@ -400,19 +574,12 @@ function renderActivePromptInBox() {
 
 function cyclePrompt(direction) {
   _activePromptIndex =
-    (_activePromptIndex + direction + PROMPT_LIBRARY.length) %
-    PROMPT_LIBRARY.length;
+    (_activePromptIndex + direction + PROMPT_LIBRARY.length) % PROMPT_LIBRARY.length;
   renderActivePromptInBox();
   const ta = document.getElementById("promptTa");
-  if (ta) {
-    ta.value = "";
-    ta.focus();
-  }
+  if (ta) { ta.value = ""; ta.focus(); }
   const cc = document.getElementById("promptCharCount");
-  if (cc) {
-    cc.textContent = "0 / 1500";
-    cc.className = "char-count";
-  }
+  if (cc) { cc.textContent = "0 / 1500"; cc.className = "char-count"; }
   const btn = document.getElementById("promptSubmitBtn");
   if (btn) btn.disabled = true;
 }
@@ -423,17 +590,14 @@ function onPromptInput(ta) {
   const cc = document.getElementById("promptCharCount");
   if (cc) {
     cc.textContent = `${len} / 1500`;
-    cc.className =
-      "char-count" + (len >= 1500 ? " over" : len >= 1400 ? " warn" : "");
+    cc.className = "char-count" + (len >= 1500 ? " over" : len >= 1400 ? " warn" : "");
   }
   const btn = document.getElementById("promptSubmitBtn");
   if (btn) btn.disabled = trim === 0;
 }
 
 // ══════════════════════════════════════════════════════════════
-// IMAGE COMPRESSION HELPER
-// Resizes to max 800px and compresses to JPEG 0.72
-// — keeps each image well under Firestore's 1MB field cap
+// IMAGE COMPRESSION — max 800px, JPEG 0.72
 // ══════════════════════════════════════════════════════════════
 function _compressImage(dataUrl) {
   return new Promise((resolve) => {
@@ -442,28 +606,21 @@ function _compressImage(dataUrl) {
       const MAX = 800;
       let { width, height } = img;
       if (width > MAX || height > MAX) {
-        if (width >= height) {
-          height = Math.round((height * MAX) / width);
-          width = MAX;
-        } else {
-          width = Math.round((width * MAX) / height);
-          height = MAX;
-        }
+        if (width >= height) { height = Math.round((height * MAX) / width); width = MAX; }
+        else { width = Math.round((width * MAX) / height); height = MAX; }
       }
       const canvas = document.createElement("canvas");
-      canvas.width = width;
-      canvas.height = height;
+      canvas.width = width; canvas.height = height;
       canvas.getContext("2d").drawImage(img, 0, 0, width, height);
       resolve(canvas.toDataURL("image/jpeg", 0.72));
     };
-    img.onerror = () => resolve(dataUrl); // fallback: keep original
+    img.onerror = () => resolve(dataUrl);
     img.src = dataUrl;
   });
 }
 
 // ══════════════════════════════════════════════════════════════
-// ATTACH MEDIA (prompt compose strip)
-// Reads → compresses → appends thumb with compressed src
+// ATTACH MEDIA — compress before storing in DOM
 // ══════════════════════════════════════════════════════════════
 function attachPromptMedia(input) {
   const strip = document.getElementById("promptMediaStrip");
@@ -499,14 +656,11 @@ async function submitPromptSpark() {
   const activePrompt = PROMPT_LIBRARY[_activePromptIndex];
 
   const btn = document.getElementById("promptSubmitBtn");
-  if (btn) {
-    btn.disabled = true;
-    btn.textContent = "Posting…";
-  }
+  if (btn) { btn.disabled = true; btn.textContent = "Posting\u2026"; }
 
   const ud = window._sparkUserData || {};
   const name = ud.fullName || user.displayName || "T1ERA User";
-  const handle = (user.email || "user").split("@")[0];
+  const handle = ud.nickname || (user.email || "user").split("@")[0];
   const photo = ud.profilePicture?.url || user.photoURL || "";
 
   try {
@@ -524,71 +678,55 @@ async function submitPromptSpark() {
       replies: 0,
       reposts: 0,
     };
-    // Collect attached images from prompt media strip
-    const promptImgs = document.querySelectorAll(
-      "#promptMediaStrip .media-thumb img",
-    );
+
+    // Collect compressed images
+    const promptImgs = document.querySelectorAll("#promptMediaStrip .media-thumb img");
     if (promptImgs.length > 0) {
       sparkData.images = Array.from(promptImgs).map((img) => img.src);
     }
-    // Save quoteText if user inserted a ```quote block
+
+    // Save quoteText if user inserted a quote block
     const quoteMatch = txt.match(/```quote\n([\s\S]*?)\n```/);
-    if (quoteMatch) {
-      sparkData.quoteText = quoteMatch[1];
-    }
+    if (quoteMatch) sparkData.quoteText = quoteMatch[1];
 
     await addDoc(collection(db, SPARKS_COL), sparkData);
 
-    // Award +20 XP for posting
+    // Award +1 spark point (= +20 XP)
     try {
-      await updateDoc(doc(db, "users", user.uid), {
-        "point.spark": increment(1),
-      });
+      await updateDoc(doc(db, "users", user.uid), { "point.spark": increment(1) });
     } catch (xpe) {
       console.warn("XP spark award error:", xpe);
     }
 
-    if (typeof window.showToast === "function")
-      window.showToast("Prompt Spark posted 💬");
-
-    if (btn) {
-      btn.disabled = false;
-      btn.textContent = "Spark ⚡";
+    // Log to activity history
+    try {
+      await addDoc(collection(db, "users", user.uid, "activityHistory"), {
+        type: "spark",
+        icon: "ph-chat-teardrop-dots",
+        iconColor: "var(--purple)",
+        bgClass: "purple-bg",
+        text: `<strong>Posted a Prompt Spark</strong>: "${txt.slice(0, 50)}${txt.length > 50 ? "\u2026" : ""}"`,
+        createdAt: serverTimestamp(),
+      });
+    } catch (ae) {
+      console.warn("activity log error:", ae);
     }
 
+    if (typeof window.showToast === "function")
+      window.showToast("Prompt Spark posted \uD83D\uDCAC");
+
+    if (btn) { btn.disabled = false; btn.textContent = "Spark \u26A1"; }
     closePromptCompose();
     await startPromptFeed();
   } catch (e) {
     console.error("submitPromptSpark error:", e);
     alert("Failed to post. Please try again.");
-    if (btn) {
-      btn.disabled = false;
-      btn.textContent = "Spark ⚡";
-    }
+    if (btn) { btn.disabled = false; btn.textContent = "Spark \u26A1"; }
   }
 }
 
 // ══════════════════════════════════════════════════════════════
-// DELETE PROMPT CARD (owner only)
-// ══════════════════════════════════════════════════════════════
-window.deletePromptCard = async function (btn) {
-  const card = btn.closest(".spark-card[data-spark-id]");
-  if (!card) return;
-  const sparkId = card.dataset.sparkId;
-  if (!sparkId) return;
-  if (!confirm("Delete this Prompt Spark? This cannot be undone.")) return;
-  try {
-    await deleteDoc(doc(db, SPARKS_COL, sparkId));
-    card.remove();
-  } catch (e) {
-    console.error("Delete failed:", e);
-    alert("Failed to delete. Please try again.");
-  }
-};
-
-// ══════════════════════════════════════════════════════════════
-// EXPOSE TO WINDOW — called by HTML onclick attributes
-// and by spark-module.js after auth + hidePageSkeleton()
+// EXPOSE TO WINDOW
 // ══════════════════════════════════════════════════════════════
 window.startPromptFeed = startPromptFeed;
 window.openPromptCompose = openPromptCompose;
@@ -598,13 +736,9 @@ window.onPromptInput = onPromptInput;
 window.submitPromptSpark = submitPromptSpark;
 window.attachPromptMedia = attachPromptMedia;
 
-// Quote button in prompt compose — delegates to the same insertQuoteFormat
-// already defined in spark-core.js (non-module, so available on window)
+// Quote button delegates to insertQuoteFormat in spark-core.js
 window.insertPromptQuoteBlock = function () {
-  if (typeof insertQuoteFormat === "function") {
-    insertQuoteFormat("promptTa");
-  }
-  // After inserting, update char count + enable submit
+  if (typeof insertQuoteFormat === "function") insertQuoteFormat("promptTa");
   const ta = document.getElementById("promptTa");
   if (ta) onPromptInput(ta);
 };
