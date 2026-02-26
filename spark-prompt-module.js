@@ -331,6 +331,60 @@ window._promptToggleBookmark = function (btn) {
 };
 
 // ══════════════════════════════════════════════════════════════
+// IMAGE LIGHTBOX — full-screen viewer for prompt card images
+// ══════════════════════════════════════════════════════════════
+function _openPromptLightbox(src) {
+  let lb = document.getElementById("promptLightbox");
+  if (!lb) {
+    lb = document.createElement("div");
+    lb.id = "promptLightbox";
+    lb.style.cssText = [
+      "position:fixed", "inset:0", "z-index:9999",
+      "background:rgba(0,0,0,.92)",
+      "display:flex", "align-items:center", "justify-content:center",
+      "cursor:zoom-out", "animation:fu .18s var(--ease,ease) forwards",
+    ].join(";");
+    lb.innerHTML = `<img id="promptLightboxImg" style="max-width:92vw;max-height:88vh;border-radius:10px;object-fit:contain;box-shadow:0 8px 60px rgba(0,0,0,.7)">
+      <button onclick="event.stopPropagation();_closePromptLightbox()" style="position:absolute;top:18px;right:22px;background:rgba(255,255,255,.12);border:none;color:#fff;font-size:22px;width:40px;height:40px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;"><i class="ph-bold ph-x" style="pointer-events:none"></i></button>`;
+    lb.addEventListener("click", _closePromptLightbox);
+    document.body.appendChild(lb);
+  }
+  document.getElementById("promptLightboxImg").src = src;
+  lb.style.display = "flex";
+  document.body.style.overflow = "hidden";
+}
+window._openPromptLightbox = _openPromptLightbox;
+
+function _closePromptLightbox() {
+  const lb = document.getElementById("promptLightbox");
+  if (lb) lb.style.display = "none";
+  document.body.style.overflow = "";
+}
+window._closePromptLightbox = _closePromptLightbox;
+
+// Close lightbox on Escape key
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") _closePromptLightbox();
+});
+
+// ══════════════════════════════════════════════════════════════
+// PROMPT MEDIA GRID — same layout as standard spark (g1/g2/g3/g4)
+// but with stopPropagation + lightbox on each image click
+// ══════════════════════════════════════════════════════════════
+function _promptBuildMediaGrid(images) {
+  if (!images || images.length === 0) return "";
+  const imgs = images.slice(0, 4);
+  const cls = `g${imgs.length}`;
+  const cells = imgs.map((src) => {
+    const safeSrc = src.replace(/'/g, "\'");
+    return `<div class="media-cell" onclick="event.stopPropagation();_openPromptLightbox('${safeSrc}')" style="cursor:zoom-in;overflow:hidden;border-radius:8px;">
+      <img src="${safeSrc}" style="width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;" loading="lazy" onerror="this.closest('.media-cell').style.display='none'">
+    </div>`;
+  }).join("");
+  return `<div class="media-grid ${cls}" onclick="event.stopPropagation()" style="margin-top:10px">${cells}</div>`;
+}
+
+// ══════════════════════════════════════════════════════════════
 // RENDER PROMPT CARD
 // ══════════════════════════════════════════════════════════════
 function renderPromptCard(id, d, rankLabel) {
@@ -362,10 +416,10 @@ function renderPromptCard(id, d, rankLabel) {
   if (quoteContent) {
     const escaped = quoteContent.replace(/</g, "&lt;").replace(/>/g, "&gt;");
     const encoded = encodeURIComponent(quoteContent);
-    quoteBlockHtml = `<div class="quote-block" style="position:relative">
+    quoteBlockHtml = `<div class="quote-block" style="position:relative" onclick="event.stopPropagation()">
       <div class="quote-block-label" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-        <span><i class="ph-bold ph-chat-teardrop-dots"></i> Prompt</span>
-        <button onclick="event.stopPropagation();_copyQuoteText('${encoded}')" title="Copy to clipboard" style="background:none;border:none;cursor:pointer;color:var(--text-3);font-size:12px;padding:2px 5px;border-radius:4px;display:inline-flex;align-items:center;gap:3px;transition:color .15s;" onmouseover="this.style.color='var(--purple)'" onmouseout="this.style.color='var(--text-3)'"><i class="ph-bold ph-copy"></i></button>
+        <span><i class="ph-bold ph-chat-teardrop-dots" style="pointer-events:none"></i> Prompt</span>
+        <button onclick="event.stopPropagation();_copyQuoteText('${encoded}')" title="Copy to clipboard" style="background:none;border:none;cursor:pointer;color:var(--text-3);font-size:12px;padding:2px 5px;border-radius:4px;display:inline-flex;align-items:center;gap:3px;transition:color .15s;" onmouseover="this.style.color='var(--purple)'" onmouseout="this.style.color='var(--text-3)'"><i class="ph-bold ph-copy" style="pointer-events:none"></i></button>
       </div>${escaped}</div>`;
   }
 
@@ -422,7 +476,7 @@ function renderPromptCard(id, d, rankLabel) {
       ${promptBlockHtml}
       <p class="spark-text" style="margin-top:${promptText ? "10px" : "0"}">${linkedTxt}</p>
       ${quoteBlockHtml}
-      ${typeof window._buildMediaGridHtml === "function" ? window._buildMediaGridHtml(d.images) : ""}
+      ${_promptBuildMediaGrid(d.images)}
     </div>
     <div class="action-bar">
       <button class="act-btn like" id="plk-${id}" onclick="event.stopPropagation();_promptToggleLike(this)">
