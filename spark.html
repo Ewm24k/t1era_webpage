@@ -5164,9 +5164,12 @@
 
         <div>
           <div class="settings-section-label">Appearance</div>
-          <div class="settings-placeholder">
-            <i class="ph-bold ph-paint-brush"></i>
-            <span>Theme &amp; display — coming soon</span>
+          <div id="appearanceSettingsSlot">
+            <!-- Populated by spark-module.js after Firebase auth resolves -->
+            <div class="settings-placeholder" id="appearanceLoadingPlaceholder">
+              <i class="ph-bold ph-paint-brush"></i>
+              <span>Loading display settings…</span>
+            </div>
           </div>
         </div>
 
