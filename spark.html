@@ -4206,7 +4206,7 @@
                     id="promptTa"
                     placeholder="Write your answer… use #hashtags and @mentions"
                     oninput="onPromptInput(this)"
-                    maxlength="500"
+                    maxlength="1500"
                   ></textarea>
                 </div>
               </div>
@@ -4228,6 +4228,13 @@
                   </button>
                   <button
                     class="media-btn"
+                    title="Insert quote block"
+                    onclick="insertPromptQuoteBlock()"
+                  >
+                    <i class="ph-bold ph-quotes"></i>
+                  </button>
+                  <button
+                    class="media-btn"
                     title="Emoji"
                     onclick="openEmojiPicker('promptTa')"
                   >
@@ -4235,7 +4242,7 @@
                   </button>
                 </div>
                 <div class="compose-right">
-                  <span class="char-count" id="promptCharCount">0 / 500</span>
+                  <span class="char-count" id="promptCharCount">0 / 1500</span>
                   <button
                     class="spark-submit-btn"
                     id="promptSubmitBtn"
