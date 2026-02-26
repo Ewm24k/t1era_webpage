@@ -121,9 +121,22 @@ function renderPromptCard(id, d, rankLabel) {
     ? `<img src="${photo}" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;" onerror="this.style.display='none'">`
     : initial;
 
-  const linkedTxt = txt
+  // Detect ```quote ... ``` blocks — strip from display text, render as quote-block
+  const quoteMatch = txt.match(/```quote\n([\s\S]*?)\n```/);
+  const quoteContent = quoteMatch ? quoteMatch[1] : null;
+  const displayRaw = quoteContent
+    ? txt.replace(/```quote\n[\s\S]*?\n```/, "").trim()
+    : txt;
+
+  const linkedTxt = displayRaw
     .replace(/(#\w+)/g, '<span class="ht">$1</span>')
     .replace(/(@\w+)/g, '<span class="mn">$1</span>');
+
+  const quoteBlockHtml = quoteContent
+    ? `<div class="quote-block"><div class="quote-block-label"><i class="ph-bold ph-quotes"></i> Quote</div>${quoteContent.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>`
+    : d.quoteText
+      ? `<div class="quote-block"><div class="quote-block-label"><i class="ph-bold ph-quotes"></i> Quote</div>${String(d.quoteText).replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>`
+      : "";
 
   const safeText = txt.replace(/'/g, "\\'").slice(0, 80);
   const safePhoto = photo.replace(/'/g, "\\'");
@@ -180,6 +193,7 @@ function renderPromptCard(id, d, rankLabel) {
     <div class="card-content">
       ${promptBlockHtml}
       <p class="spark-text" style="margin-top:${promptText ? "10px" : "0"}">${linkedTxt}</p>
+      ${quoteBlockHtml}
       ${typeof window._buildMediaGridHtml === "function" ? window._buildMediaGridHtml(d.images) : ""}
     </div>
     <div class="action-bar">
@@ -479,10 +493,15 @@ async function submitPromptSpark() {
     };
     // Collect attached images from prompt media strip
     const promptImgs = document.querySelectorAll(
-      "#promptMediaStrip .media-thumb[data-type='image'] img",
+      "#promptMediaStrip .media-thumb img",
     );
     if (promptImgs.length > 0) {
       sparkData.images = Array.from(promptImgs).map((img) => img.src);
+    }
+    // Save quoteText if user inserted a ```quote block
+    const quoteMatch = txt.match(/```quote\n([\s\S]*?)\n```/);
+    if (quoteMatch) {
+      sparkData.quoteText = quoteMatch[1];
     }
 
     await addDoc(collection(db, SPARKS_COL), sparkData);
@@ -545,3 +564,14 @@ window.cyclePrompt = cyclePrompt;
 window.onPromptInput = onPromptInput;
 window.submitPromptSpark = submitPromptSpark;
 window.attachPromptMedia = attachPromptMedia;
+
+// Quote button in prompt compose — delegates to the same insertQuoteFormat
+// already defined in spark-core.js (non-module, so available on window)
+window.insertPromptQuoteBlock = function () {
+  if (typeof insertQuoteFormat === "function") {
+    insertQuoteFormat("promptTa");
+  }
+  // After inserting, update char count + enable submit
+  const ta = document.getElementById("promptTa");
+  if (ta) onPromptInput(ta);
+};
