@@ -8,6 +8,15 @@
         document
           .querySelectorAll(".tab-panel")
           .forEach((p, j) => p.classList.toggle("active", j === i));
+
+        // Tab 1 = Spark Prompt — start/stop its 35s auto-refresh timer
+        if (i === 1) {
+          if (typeof window.startPromptAutoRefresh === "function")
+            window.startPromptAutoRefresh();
+        } else {
+          if (typeof window.stopPromptAutoRefresh === "function")
+            window.stopPromptAutoRefresh();
+        }
       }
 
       /* ══════════════════════════════════
@@ -84,6 +93,8 @@
         ta.focus();
         // Trigger compose input update if it's the main compose box
         if (_emojiTargetId === "composeTa") onComposeInput(ta);
+        // Trigger prompt input update if it's the prompt compose box
+        if (_emojiTargetId === "promptTa" && typeof onPromptInput === "function") onPromptInput(ta);
         closeEmojiPicker();
       }
 
@@ -102,6 +113,7 @@
         ta.selectionStart = ta.selectionEnd = start + insert.length;
         ta.focus();
         if (targetId === "composeTa") onComposeInput(ta);
+        if (targetId === "promptTa" && typeof onPromptInput === "function") onPromptInput(ta);
       }
 
       /* ══════════════════════════════════
