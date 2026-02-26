@@ -76,6 +76,30 @@ const PROMPT_LIBRARY = [
 ];
 
 let _activePromptIndex = 0;
+let _promptAutoRefreshTimer = null;
+
+// ══════════════════════════════════════════════════════════════
+// AUTO-REFRESH — 35s interval, matches standard spark tab behaviour
+// startPromptAutoRefresh() called when tab-1 becomes active
+// stopPromptAutoRefresh() called when leaving the tab
+// ══════════════════════════════════════════════════════════════
+function startPromptAutoRefresh() {
+  stopPromptAutoRefresh(); // clear any existing timer first
+  _promptAutoRefreshTimer = setInterval(() => {
+    // Only auto-refresh if panel-1 (prompt tab) is currently visible
+    const panel = document.getElementById("panel-1");
+    if (panel && !panel.classList.contains("hidden") && !panel.hidden) {
+      startPromptFeed();
+    }
+  }, 35000);
+}
+
+function stopPromptAutoRefresh() {
+  if (_promptAutoRefreshTimer) {
+    clearInterval(_promptAutoRefreshTimer);
+    _promptAutoRefreshTimer = null;
+  }
+}
 
 // ══════════════════════════════════════════════════════════════
 // TIME HELPER
@@ -280,6 +304,10 @@ window._promptToggleLike = async function (btn) {
   if (typeof window._toggleLikeFn === "function") {
     window._toggleLikeFn({ liked: on, sparkId, ownerUid, sparkText });
   }
+
+  // Soft-refresh this card's like count after a short delay so the
+  // new value from Firestore is reflected without a full feed reload
+  setTimeout(() => _softRefreshCard(sparkId), 1200);
 };
 
 // ══════════════════════════════════════════════════════════════
@@ -291,16 +319,14 @@ window._promptToggleBookmark = function (btn) {
   icon.className = on ? "ph-fill ph-bookmark-simple" : "ph-bold ph-bookmark-simple";
   btn.style.color = on ? "var(--gold)" : "";
 
-  if (on && typeof window._sendNotifFn === "function") {
-    const card = btn.closest(".spark-card[data-spark-id]");
-    if (card) {
-      window._sendNotifFn({
-        type: "bookmark",
-        ownerUid: card.dataset.ownerUid,
-        sparkId: card.dataset.sparkId,
-        sparkText: card.querySelector(".spark-text")?.textContent?.slice(0, 80) || "",
-      });
-    }
+  const card = btn.closest(".spark-card[data-spark-id]");
+  if (on && typeof window._sendNotifFn === "function" && card) {
+    window._sendNotifFn({
+      type: "bookmark",
+      ownerUid: card.dataset.ownerUid,
+      sparkId: card.dataset.sparkId,
+      sparkText: card.querySelector(".spark-text")?.textContent?.slice(0, 80) || "",
+    });
   }
 };
 
@@ -446,6 +472,38 @@ function renderPromptCard(id, d, rankLabel) {
       if (el) el.textContent = snap.size;
     })
     .catch(() => {});
+}
+
+// ══════════════════════════════════════════════════════════════
+// SOFT REFRESH — re-fetches like + reply counts on a single card
+// without skeleton flash. Used after like/reply actions.
+// ══════════════════════════════════════════════════════════════
+async function _softRefreshCard(sparkId) {
+  try {
+    const [likeSnap, replySnap] = await Promise.all([
+      getDocs(collection(db, SPARKS_COL, sparkId, "likes")),
+      getDocs(collection(db, SPARKS_COL, sparkId, "comments")),
+    ]);
+
+    const likeEl = document.getElementById("plkc-" + sparkId);
+    if (likeEl) likeEl.textContent = likeSnap.size;
+
+    const replyEl = document.getElementById("prpc-" + sparkId);
+    if (replyEl) replyEl.textContent = replySnap.size;
+
+    // Re-check liked state
+    const currentUid = window._sparkUser?.uid;
+    if (currentUid) {
+      const likeBtn = document.getElementById("plk-" + sparkId);
+      if (likeBtn) {
+        const alreadyLiked = likeSnap.docs.some((d) => d.id === currentUid);
+        likeBtn.classList.toggle("liked", alreadyLiked);
+        likeBtn.querySelector("i").className = alreadyLiked ? "ph-fill ph-heart" : "ph-bold ph-heart";
+      }
+    }
+  } catch (e) {
+    // Silent fail — optimistic UI already updated
+  }
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -729,6 +787,53 @@ async function submitPromptSpark() {
 // EXPOSE TO WINDOW
 // ══════════════════════════════════════════════════════════════
 window.startPromptFeed = startPromptFeed;
+
+// ── Reply-submit hook ──
+// When a reply is submitted and the reply overlay's sparkId belongs to
+// a prompt card, trigger a full feed refresh so the reply count updates.
+// We wrap the existing _submitReplyFn (set by spark-module.js) to
+// also call startPromptFeed after completion when on the prompt tab.
+(function _installPromptReplyHook() {
+  // Retry until spark-module.js has set _submitReplyFn
+  const tryInstall = () => {
+    const original = window._submitReplyFn;
+    if (typeof original !== "function") {
+      setTimeout(tryInstall, 300);
+      return;
+    }
+    window._submitReplyFn = async function (txt) {
+      await original(txt);
+      // After reply submitted, refresh prompt feed if it is the active tab
+      const panel = document.getElementById("panel-1");
+      const isPromptTabActive = panel &&
+        !panel.classList.contains("hidden") && !panel.hidden;
+      // Also check if the reply was for a prompt card
+      const sparkId = window._replyCtx?.sparkId;
+      const isPromptCard = sparkId &&
+        !!document.querySelector(`#realPromptFeed .spark-card[data-spark-id="${sparkId}"]`);
+      if (isPromptTabActive || isPromptCard) {
+        setTimeout(() => startPromptFeed(), 600);
+      } else if (isPromptCard) {
+        // Soft refresh the specific card's counts
+        setTimeout(() => _softRefreshCard(sparkId), 600);
+      }
+    };
+  };
+  setTimeout(tryInstall, 800); // give spark-module.js time to set _submitReplyFn first
+})();
+
+// ── Start auto-refresh once the module loads ──
+// spark-module.js calls startPromptFeed() after auth; we hook in after that.
+(function _installAutoRefresh() {
+  const tryInstall = () => {
+    if (window._sparkUser) {
+      startPromptAutoRefresh();
+    } else {
+      setTimeout(tryInstall, 500);
+    }
+  };
+  setTimeout(tryInstall, 1000);
+})();
 window.openPromptCompose = openPromptCompose;
 window.closePromptCompose = closePromptCompose;
 window.cyclePrompt = cyclePrompt;
@@ -737,6 +842,9 @@ window.submitPromptSpark = submitPromptSpark;
 window.attachPromptMedia = attachPromptMedia;
 
 // Quote button delegates to insertQuoteFormat in spark-core.js
+window.startPromptAutoRefresh = startPromptAutoRefresh;
+window.stopPromptAutoRefresh = stopPromptAutoRefresh;
+
 window.insertPromptQuoteBlock = function () {
   if (typeof insertQuoteFormat === "function") insertQuoteFormat("promptTa");
   const ta = document.getElementById("promptTa");
