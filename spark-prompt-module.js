@@ -1,9 +1,5 @@
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
       import {
-        getAuth,
-        onAuthStateChanged,
-      } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-      import {
         getFirestore,
         collection,
         addDoc,
@@ -32,7 +28,6 @@ import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12
       const app = getApps().length
         ? getApps()[0]
         : initializeApp(firebaseConfig);
-      const auth = getAuth(app);
       const db = getFirestore(app);
 
       const SPARKS_COL = "sparks";
@@ -176,6 +171,7 @@ import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12
     <div class="card-content">
       ${promptBlockHtml}
       <p class="spark-text" style="margin-top:${promptText ? "10px" : "0"}">${linkedTxt}</p>
+      ${typeof window._buildMediaGridHtml === "function" ? window._buildMediaGridHtml(d.images) : ""}
     </div>
     <div class="action-bar">
       <button class="act-btn like" id="plk-${id}" onclick="event.stopPropagation();toggleLike(this)"><i class="ph-bold ph-heart"></i><span id="plkc-${id}">0</span></button>
@@ -335,6 +331,8 @@ import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12
         if (cc) cc.textContent = "0 / 500";
         const btn = document.getElementById("promptSubmitBtn");
         if (btn) btn.disabled = true;
+        const strip = document.getElementById("promptMediaStrip");
+        if (strip) strip.innerHTML = "";
       }
 
       function renderActivePromptInBox() {
@@ -401,6 +399,11 @@ import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12
             replies: 0,
             reposts: 0,
           };
+          // Collect attached images from prompt media strip
+          const promptImgs = document.querySelectorAll("#promptMediaStrip .media-thumb[data-type='image'] img");
+          if (promptImgs.length > 0) {
+            sparkData.images = Array.from(promptImgs).map((img) => img.src);
+          }
 
           await addDoc(collection(db, SPARKS_COL), sparkData);
 
@@ -447,6 +450,7 @@ import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12
 
       // ══════════════════════════════════════════════════════════════
       // EXPOSE TO WINDOW — called by HTML onclick attributes
+      // and by spark-module.js after auth + hidePageSkeleton()
       // ══════════════════════════════════════════════════════════════
       window.startPromptFeed = startPromptFeed;
       window.openPromptCompose = openPromptCompose;
@@ -454,12 +458,3 @@ import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12
       window.cyclePrompt = cyclePrompt;
       window.onPromptInput = onPromptInput;
       window.submitPromptSpark = submitPromptSpark;
-
-      // ══════════════════════════════════════════════════════════════
-      // INIT — wait for auth state, then start feed when tab is active
-      // ══════════════════════════════════════════════════════════════
-      onAuthStateChanged(auth, async (user) => {
-        if (!user) return; // Main spark-module.js handles redirect
-        // Start prompt feed — works even if panel-1 is not active yet
-        await startPromptFeed();
-      });
