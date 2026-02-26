@@ -431,24 +431,57 @@ function onPromptInput(ta) {
 }
 
 // ══════════════════════════════════════════════════════════════
+// IMAGE COMPRESSION HELPER
+// Resizes to max 800px and compresses to JPEG 0.72
+// — keeps each image well under Firestore's 1MB field cap
+// ══════════════════════════════════════════════════════════════
+function _compressImage(dataUrl) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const MAX = 800;
+      let { width, height } = img;
+      if (width > MAX || height > MAX) {
+        if (width >= height) {
+          height = Math.round((height * MAX) / width);
+          width = MAX;
+        } else {
+          width = Math.round((width * MAX) / height);
+          height = MAX;
+        }
+      }
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      canvas.getContext("2d").drawImage(img, 0, 0, width, height);
+      resolve(canvas.toDataURL("image/jpeg", 0.72));
+    };
+    img.onerror = () => resolve(dataUrl); // fallback: keep original
+    img.src = dataUrl;
+  });
+}
+
+// ══════════════════════════════════════════════════════════════
 // ATTACH MEDIA (prompt compose strip)
+// Reads → compresses → appends thumb with compressed src
 // ══════════════════════════════════════════════════════════════
 function attachPromptMedia(input) {
   const strip = document.getElementById("promptMediaStrip");
   if (!strip) return;
   Array.from(input.files).forEach((file) => {
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
+      const compressed = await _compressImage(e.target.result);
       const d = document.createElement("div");
       d.className = "media-thumb";
       d.dataset.type = "image";
-      d.innerHTML = `<img src="${e.target.result}" alt=""><div class="media-type-tag">image</div><button class="media-thumb-remove" onclick="this.parentElement.remove()"><i class="ph-bold ph-x"></i></button>`;
+      d.innerHTML = `<img src="${compressed}" alt=""><div class="media-type-tag">image</div><button class="media-thumb-remove" onclick="this.parentElement.remove()"><i class="ph-bold ph-x"></i></button>`;
       strip.appendChild(d);
+      const btn = document.getElementById("promptSubmitBtn");
+      if (btn) btn.disabled = false;
     };
     reader.readAsDataURL(file);
   });
-  const btn = document.getElementById("promptSubmitBtn");
-  if (btn) btn.disabled = false;
   input.value = "";
 }
 
