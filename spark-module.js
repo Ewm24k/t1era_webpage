@@ -76,8 +76,15 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
         // Reveal real content, hide skeletons
         hidePageSkeleton();
 
-        // Start live feed — loads existing posts and listens for new ones
+        // Start standard feed
         startFeed();
+
+        // Start prompt feed (spark-prompt-module.js exposes window.startPromptFeed)
+        // Delay slightly to let prompt module finish registering window.startPromptFeed
+        setTimeout(() => {
+          if (typeof window.startPromptFeed === "function")
+            window.startPromptFeed();
+        }, 100);
 
         // Auto-refresh feed every 35 seconds
         if (window._feedAutoRefreshTimer)
@@ -1173,11 +1180,11 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 
       // ── SKELETON SHOW/HIDE ──
       function hidePageSkeleton() {
-        ["skLeft", "skFeed", "skRight"].forEach((id) => {
+        ["skLeft", "skFeed", "skRight", "skPromptFeed"].forEach((id) => {
           const el = document.getElementById(id);
           if (el) el.classList.add("sk-hidden");
         });
-        ["realLeft", "realFeed", "realRight"].forEach((id) => {
+        ["realLeft", "realFeed", "realRight", "realPromptFeedWrap"].forEach((id) => {
           const el = document.getElementById(id);
           if (el) el.classList.remove("sk-hidden");
         });
@@ -1318,6 +1325,19 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
         return `${Math.floor(mths / 12)}y ago`;
       }
 
+      // ── MEDIA GRID HTML BUILDER (shared by renderCard + renderPromptCard) ──
+      function buildMediaGridHtml(images) {
+        if (!images || images.length === 0) return "";
+        const count = Math.min(images.length, 4);
+        const gridClass = ["", "g1", "g2", "g3", "g4"][count];
+        const items = images.slice(0, 4).map(
+          (src) =>
+            `<div class="mi"><img src="${src}" alt="" loading="lazy" onerror="this.parentElement.style.display='none'"></div>`
+        ).join("");
+        return `<div class="media-grid ${gridClass}" style="margin-top:10px">${items}</div>`;
+      }
+      window._buildMediaGridHtml = buildMediaGridHtml;
+
       // ── RENDER ONE CARD INTO FEED ──
       function renderCard(id, d, rankLabel) {
         const panel = document.getElementById("realFeed");
@@ -1399,6 +1419,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
     <div class="card-content">
       <p class="spark-text">${displayTxt}</p>
       ${quoteBlockHtml}
+      ${buildMediaGridHtml(d.images)}
       ${
         d.youtubeId
           ? `<div class="yt-card" onclick="event.stopPropagation();openYtModal('` +
@@ -1539,6 +1560,11 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
             replies: 0,
             reposts: 0,
           };
+          // Collect attached images (base64 data URLs from mediaStrip)
+          const imgThumbs = document.querySelectorAll("#mediaStrip .media-thumb[data-type='image'] img");
+          if (imgThumbs.length > 0) {
+            sparkData.images = Array.from(imgThumbs).map((img) => img.src);
+          }
           // Attach YouTube video ID if user pasted a YouTube link
           if (window._pendingYtId) {
             sparkData.youtubeId = window._pendingYtId;
@@ -1682,10 +1708,12 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
       function applyComposeAvatar(photoURL, initial) {
         const miniAv = document.getElementById("miniAv");
         const composeAv = document.getElementById("composeAv");
+        const promptMiniAv = document.getElementById("promptMiniAv");
+        const promptComposeAv = document.getElementById("promptComposeAv");
         const replyAvs = document.querySelectorAll(".reply-av");
 
         if (photoURL) {
-          [miniAv, composeAv].forEach((el) => {
+          [miniAv, composeAv, promptMiniAv, promptComposeAv].forEach((el) => {
             if (!el) return;
             el.textContent = "";
             el.style.background = "none";
@@ -1721,6 +1749,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
         } else {
           if (miniAv) miniAv.textContent = initial;
           if (composeAv) composeAv.textContent = initial;
+          if (promptMiniAv) promptMiniAv.textContent = initial;
+          if (promptComposeAv) promptComposeAv.textContent = initial;
           replyAvs.forEach((el) => {
             el.textContent = initial;
           });
