@@ -1832,10 +1832,6 @@
       }
 
       /* ══════════════════════════════════════════
-   FADE IN
-══════════════════════════════════════════ */
-
-      /* ══════════════════════════════════════════
    SKELETON LOADER
 ══════════════════════════════════════════ */
       .skeleton-card {
@@ -2056,6 +2052,11 @@
       .notif-backdrop.open {
         opacity: 1;
         visibility: visible;
+      }
+
+      /* ── Settings backdrop sits BEHIND settings panel ── */
+      #settingsBackdrop {
+        z-index: 397;
       }
 
       /* panel header */
@@ -2377,7 +2378,7 @@
         flex-direction: column;
         transform: translateX(100%);
         transition: transform 0.28s var(--ease);
-        z-index: 400;
+        z-index: 398;
         overflow: hidden;
       }
       .settings-panel.open {
@@ -5054,9 +5055,7 @@
     </div>
 
     <script src="spark-core.js"></script>
-
     <script type="module" src="spark-module.js"></script>
-
     <script type="module" src="spark-prompt-module.js"></script>
 
     <!-- ═══════════════════════════
@@ -5097,7 +5096,7 @@
     </div>
 
     <!-- ═══════════════════════════
-     NOTIFICATION BACKDROP
+     NOTIFICATION BACKDROP + PANEL
 ═══════════════════════════ -->
     <div
       class="notif-backdrop"
@@ -5105,9 +5104,6 @@
       onclick="closeNotifPanel()"
     ></div>
 
-    <!-- ═══════════════════════════
-     NOTIFICATION PANEL
-═══════════════════════════ -->
     <div class="notif-panel" id="notifPanel">
       <div class="notif-header">
         <div class="notif-title">
@@ -5128,7 +5124,6 @@
         </div>
       </div>
       <div class="notif-list" id="notifList">
-        <!-- filled dynamically -->
         <div class="notif-empty" id="notifEmpty">
           <i class="ph-bold ph-bell-slash"></i>
           <p>No notifications yet</p>
@@ -5137,14 +5132,18 @@
     </div>
 
     <!-- ═══════════════════════════
-     SETTINGS PANEL
+     SETTINGS BACKDROP + PANEL
+     NOTE: backdrop z-index:397 (via CSS #settingsBackdrop rule)
+           panel   z-index:398 — panel is ABOVE backdrop
+           clicks inside panel do NOT reach backdrop
 ═══════════════════════════ -->
     <div
       class="notif-backdrop"
       id="settingsBackdrop"
       onclick="closeSettingsPanel()"
     ></div>
-    <div class="settings-panel" id="settingsPanel" onclick="event.stopPropagation()"></div>
+
+    <div class="settings-panel" id="settingsPanel">
       <div class="settings-header">
         <div class="settings-title">
           <i class="ph-bold ph-gear"></i> Settings
@@ -5165,7 +5164,6 @@
         <div>
           <div class="settings-section-label">Appearance</div>
           <div id="appearanceSettingsSlot">
-            <!-- Populated by spark-module.js after Firebase auth resolves -->
             <div class="settings-placeholder" id="appearanceLoadingPlaceholder">
               <i class="ph-bold ph-paint-brush"></i>
               <span>Loading display settings…</span>
@@ -5198,6 +5196,7 @@
         </div>
       </div>
     </div>
+
     <script src="popup-announce.js"></script>
   </body>
 </html>
