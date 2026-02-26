@@ -187,9 +187,14 @@ function openPromptDotsMenu(btn, sparkId, ownerUid) {
       "cursor:pointer",
       "transition:background .15s",
     ].join(";");
-    deleteBtn.innerHTML = '<i class="ph-bold ph-trash" style="font-size:16px"></i> Delete Spark';
-    deleteBtn.addEventListener("mouseover", () => { deleteBtn.style.background = "rgba(239,68,68,.08)"; });
-    deleteBtn.addEventListener("mouseout", () => { deleteBtn.style.background = "none"; });
+    deleteBtn.innerHTML =
+      '<i class="ph-bold ph-trash" style="font-size:16px"></i> Delete Spark';
+    deleteBtn.addEventListener("mouseover", () => {
+      deleteBtn.style.background = "rgba(239,68,68,.08)";
+    });
+    deleteBtn.addEventListener("mouseout", () => {
+      deleteBtn.style.background = "none";
+    });
     deleteBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       _promptDeleteCard(sparkId);
@@ -212,13 +217,19 @@ function openPromptDotsMenu(btn, sparkId, ownerUid) {
       "cursor:pointer",
       "transition:background .15s",
     ].join(";");
-    reportBtn.innerHTML = '<i class="ph-bold ph-flag" style="font-size:16px"></i> Report Spark';
-    reportBtn.addEventListener("mouseover", () => { reportBtn.style.background = "rgba(255,255,255,.04)"; });
-    reportBtn.addEventListener("mouseout", () => { reportBtn.style.background = "none"; });
+    reportBtn.innerHTML =
+      '<i class="ph-bold ph-flag" style="font-size:16px"></i> Report Spark';
+    reportBtn.addEventListener("mouseover", () => {
+      reportBtn.style.background = "rgba(255,255,255,.04)";
+    });
+    reportBtn.addEventListener("mouseout", () => {
+      reportBtn.style.background = "none";
+    });
     reportBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       _closeAllDotsMenus();
-      if (typeof window.showToast === "function") window.showToast("Reported — thank you \uD83D\uDE4F");
+      if (typeof window.showToast === "function")
+        window.showToast("Reported — thank you \uD83D\uDE4F");
     });
     menu.appendChild(reportBtn);
   }
@@ -243,7 +254,9 @@ async function _promptDeleteCard(sparkId) {
   if (!sparkId) return;
   if (!confirm("Delete this Prompt Spark? This cannot be undone.")) return;
 
-  const card = document.querySelector(`.spark-card[data-spark-id="${sparkId}"]`);
+  const card = document.querySelector(
+    `.spark-card[data-spark-id="${sparkId}"]`,
+  );
   try {
     await deleteDoc(doc(db, SPARKS_COL, sparkId));
     if (card) card.remove();
@@ -270,12 +283,17 @@ window._copyQuoteText = function (encodedText) {
     ta.select();
     document.execCommand("copy");
     ta.remove();
-    if (typeof window.showToast === "function") window.showToast("Copied \u2713");
+    if (typeof window.showToast === "function")
+      window.showToast("Copied \u2713");
   };
   if (navigator.clipboard) {
-    navigator.clipboard.writeText(text).then(() => {
-      if (typeof window.showToast === "function") window.showToast("Copied to clipboard \u2713");
-    }).catch(doFallback);
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        if (typeof window.showToast === "function")
+          window.showToast("Copied to clipboard \u2713");
+      })
+      .catch(doFallback);
   } else {
     doFallback();
   }
@@ -290,7 +308,8 @@ window._promptToggleLike = async function (btn) {
   if (!card) return;
   const sparkId = card.dataset.sparkId;
   const ownerUid = card.dataset.ownerUid;
-  const sparkText = card.querySelector(".spark-text")?.textContent?.slice(0, 80) || "";
+  const sparkText =
+    card.querySelector(".spark-text")?.textContent?.slice(0, 80) || "";
 
   // Optimistic UI
   const on = btn.classList.toggle("liked");
@@ -316,7 +335,9 @@ window._promptToggleLike = async function (btn) {
 window._promptToggleBookmark = function (btn) {
   const on = btn.classList.toggle("bookmarked");
   const icon = btn.querySelector("i");
-  icon.className = on ? "ph-fill ph-bookmark-simple" : "ph-bold ph-bookmark-simple";
+  icon.className = on
+    ? "ph-fill ph-bookmark-simple"
+    : "ph-bold ph-bookmark-simple";
   btn.style.color = on ? "var(--gold)" : "";
 
   const card = btn.closest(".spark-card[data-spark-id]");
@@ -325,7 +346,8 @@ window._promptToggleBookmark = function (btn) {
       type: "bookmark",
       ownerUid: card.dataset.ownerUid,
       sparkId: card.dataset.sparkId,
-      sparkText: card.querySelector(".spark-text")?.textContent?.slice(0, 80) || "",
+      sparkText:
+        card.querySelector(".spark-text")?.textContent?.slice(0, 80) || "",
     });
   }
 };
@@ -339,10 +361,15 @@ function _openPromptLightbox(src) {
     lb = document.createElement("div");
     lb.id = "promptLightbox";
     lb.style.cssText = [
-      "position:fixed", "inset:0", "z-index:9999",
+      "position:fixed",
+      "inset:0",
+      "z-index:9999",
       "background:rgba(0,0,0,.92)",
-      "display:flex", "align-items:center", "justify-content:center",
-      "cursor:zoom-out", "animation:fu .18s var(--ease,ease) forwards",
+      "display:flex",
+      "align-items:center",
+      "justify-content:center",
+      "cursor:zoom-out",
+      "animation:fu .18s var(--ease,ease) forwards",
     ].join(";");
     lb.innerHTML = `<img id="promptLightboxImg" style="max-width:92vw;max-height:88vh;border-radius:10px;object-fit:contain;box-shadow:0 8px 60px rgba(0,0,0,.7)">
       <button onclick="event.stopPropagation();_closePromptLightbox()" style="position:absolute;top:18px;right:22px;background:rgba(255,255,255,.12);border:none;color:#fff;font-size:22px;width:40px;height:40px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;"><i class="ph-bold ph-x" style="pointer-events:none"></i></button>`;
@@ -375,12 +402,14 @@ function _promptBuildMediaGrid(images) {
   if (!images || images.length === 0) return "";
   const imgs = images.slice(0, 4);
   const cls = `g${imgs.length}`;
-  const cells = imgs.map((src) => {
-    const safeSrc = src.replace(/'/g, "\'");
-    return `<div class="media-cell" onclick="event.stopPropagation();_openPromptLightbox('${safeSrc}')" style="cursor:zoom-in;overflow:hidden;border-radius:8px;">
+  const cells = imgs
+    .map((src) => {
+      const safeSrc = src.replace(/'/g, "\'");
+      return `<div class="media-cell" onclick="event.stopPropagation();_openPromptLightbox('${safeSrc}')" style="cursor:zoom-in;overflow:hidden;border-radius:8px;">
       <img src="${safeSrc}" style="width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;" loading="lazy" onerror="this.closest('.media-cell').style.display='none'">
     </div>`;
-  }).join("");
+    })
+    .join("");
   return `<div class="media-grid ${cls}" onclick="event.stopPropagation()" style="margin-top:10px">${cells}</div>`;
 }
 
@@ -405,8 +434,10 @@ function renderPromptCard(id, d, rankLabel) {
 
   // Quote block — strip raw syntax, render with "Prompt" label + copy icon
   const quoteMatch = txt.match(/```quote\n([\s\S]*?)\n```/);
-  const quoteContent = quoteMatch ? quoteMatch[1] : (d.quoteText || null);
-  const displayRaw = quoteMatch ? txt.replace(/```quote\n[\s\S]*?\n```/, "").trim() : txt;
+  const quoteContent = quoteMatch ? quoteMatch[1] : d.quoteText || null;
+  const displayRaw = quoteMatch
+    ? txt.replace(/```quote\n[\s\S]*?\n```/, "").trim()
+    : txt;
 
   const linkedTxt = displayRaw
     .replace(/(#\w+)/g, '<span class="ht">$1</span>')
@@ -454,12 +485,23 @@ function renderPromptCard(id, d, rankLabel) {
           <span class="spark-time">${_timeAgo(d.createdAt)}</span>
         </div>
         <div class="badges-row">
-          <span class="badge rank">${rankLabel || "LV 1"}</span>
+         <span class="badge rank">${rankLabel || "LV 1"}</span>
+          ${(() => {
+            const _lvNum =
+              parseInt((rankLabel || "LV 1").replace("LV ", "")) || 1;
+            if (_lvNum >= 25)
+              return `<span class="badge verified-gold" title="Gold Verified · LV 25+"><i class="ph-fill ph-seal-check"></i></span>`;
+            if (_lvNum >= 20)
+              return `<span class="badge verified-grey" title="Verified · LV 20+"><i class="ph-fill ph-seal-check"></i></span>`;
+            return "";
+          })()}
           <span class="badge prompt-tag"><i class="ph-bold ph-chat-teardrop-dots"></i> Prompt</span>
           ${
             !isOwner
               ? (() => {
-                  const isFollowing = window._followingSet && window._followingSet.has(d.uid || "");
+                  const isFollowing =
+                    window._followingSet &&
+                    window._followingSet.has(d.uid || "");
                   return isFollowing
                     ? `<button class="badge follow-badge following" onclick="event.stopPropagation();toggleFollowBadge(this)"><i class="ph-bold ph-check"></i> Following</button>`
                     : `<button class="badge follow-badge" onclick="event.stopPropagation();toggleFollowBadge(this)"><i class="ph-bold ph-user-plus"></i> Follow</button>`;
@@ -498,7 +540,9 @@ function renderPromptCard(id, d, rankLabel) {
   `;
 
   const firstDemo = panel.querySelector(".spark-card:not([data-spark-id])");
-  firstDemo ? panel.insertBefore(article, firstDemo) : panel.appendChild(article);
+  firstDemo
+    ? panel.insertBefore(article, firstDemo)
+    : panel.appendChild(article);
 
   // Fetch real like count + check if current user already liked
   const currentUid = window._sparkUser?.uid;
@@ -552,7 +596,9 @@ async function _softRefreshCard(sparkId) {
       if (likeBtn) {
         const alreadyLiked = likeSnap.docs.some((d) => d.id === currentUid);
         likeBtn.classList.toggle("liked", alreadyLiked);
-        likeBtn.querySelector("i").className = alreadyLiked ? "ph-fill ph-heart" : "ph-bold ph-heart";
+        likeBtn.querySelector("i").className = alreadyLiked
+          ? "ph-fill ph-heart"
+          : "ph-bold ph-heart";
       }
     }
   } catch (e) {
@@ -572,7 +618,9 @@ async function startPromptFeed() {
   _showPromptSkeleton();
 
   // Clear previously rendered Firestore cards
-  container.querySelectorAll(".spark-card[data-spark-id]").forEach((el) => el.remove());
+  container
+    .querySelectorAll(".spark-card[data-spark-id]")
+    .forEach((el) => el.remove());
 
   // Spin refresh button
   const refreshBtn = document.getElementById("promptRefreshBtn");
@@ -598,7 +646,14 @@ async function startPromptFeed() {
       docs.sort((a, b) => toMs(b.data.createdAt) - toMs(a.data.createdAt));
 
       // Fetch ranks for each unique author
-      const uniqueUids = [...new Set(docs.slice(0, 50).map(({ data: d }) => d.uid).filter(Boolean))];
+      const uniqueUids = [
+        ...new Set(
+          docs
+            .slice(0, 50)
+            .map(({ data: d }) => d.uid)
+            .filter(Boolean),
+        ),
+      ];
       const rankCache = {};
       await Promise.all(
         uniqueUids.map(async (uid) => {
@@ -608,8 +663,10 @@ async function startPromptFeed() {
               const ud = uSnap.data();
               const pt = ud.accountStatus?.point || ud.point || {};
               const totalXP =
-                (pt.spark || 0) * 20 + (pt.like || 0) * 10 +
-                (pt.reply || 0) * 40 + (pt.follower || 0) * 25;
+                (pt.spark || 0) * 20 +
+                (pt.like || 0) * 10 +
+                (pt.reply || 0) * 40 +
+                (pt.follower || 0) * 25;
               const XP_THRESHOLDS = [
                 0, 550, 1650, 3300, 5500, 8250, 11550, 15400, 19800, 24750,
                 30250, 36300, 42900, 50050, 57750, 66000, 74800, 84150, 94050,
@@ -618,7 +675,10 @@ async function startPromptFeed() {
               ];
               let computedLevel = 1;
               for (let i = XP_THRESHOLDS.length - 1; i >= 0; i--) {
-                if (totalXP >= XP_THRESHOLDS[i]) { computedLevel = i + 1; break; }
+                if (totalXP >= XP_THRESHOLDS[i]) {
+                  computedLevel = i + 1;
+                  break;
+                }
               }
               rankCache[uid] = `LV ${computedLevel}`;
             } else {
@@ -630,9 +690,11 @@ async function startPromptFeed() {
         }),
       );
 
-      docs.slice(0, 50).forEach(({ id, data }) =>
-        renderPromptCard(id, data, rankCache[data.uid] || "LV 1"),
-      );
+      docs
+        .slice(0, 50)
+        .forEach(({ id, data }) =>
+          renderPromptCard(id, data, rankCache[data.uid] || "LV 1"),
+        );
     }
   } catch (e) {
     console.error("startPromptFeed error:", e);
@@ -668,7 +730,10 @@ function closePromptCompose() {
   const ta = document.getElementById("promptTa");
   if (ta) ta.value = "";
   const cc = document.getElementById("promptCharCount");
-  if (cc) { cc.textContent = "0 / 1500"; cc.className = "char-count"; }
+  if (cc) {
+    cc.textContent = "0 / 1500";
+    cc.className = "char-count";
+  }
   const btn = document.getElementById("promptSubmitBtn");
   if (btn) btn.disabled = true;
   const strip = document.getElementById("promptMediaStrip");
@@ -686,12 +751,19 @@ function renderActivePromptInBox() {
 
 function cyclePrompt(direction) {
   _activePromptIndex =
-    (_activePromptIndex + direction + PROMPT_LIBRARY.length) % PROMPT_LIBRARY.length;
+    (_activePromptIndex + direction + PROMPT_LIBRARY.length) %
+    PROMPT_LIBRARY.length;
   renderActivePromptInBox();
   const ta = document.getElementById("promptTa");
-  if (ta) { ta.value = ""; ta.focus(); }
+  if (ta) {
+    ta.value = "";
+    ta.focus();
+  }
   const cc = document.getElementById("promptCharCount");
-  if (cc) { cc.textContent = "0 / 1500"; cc.className = "char-count"; }
+  if (cc) {
+    cc.textContent = "0 / 1500";
+    cc.className = "char-count";
+  }
   const btn = document.getElementById("promptSubmitBtn");
   if (btn) btn.disabled = true;
 }
@@ -702,7 +774,8 @@ function onPromptInput(ta) {
   const cc = document.getElementById("promptCharCount");
   if (cc) {
     cc.textContent = `${len} / 1500`;
-    cc.className = "char-count" + (len >= 1500 ? " over" : len >= 1400 ? " warn" : "");
+    cc.className =
+      "char-count" + (len >= 1500 ? " over" : len >= 1400 ? " warn" : "");
   }
   const btn = document.getElementById("promptSubmitBtn");
   if (btn) btn.disabled = trim === 0;
@@ -718,11 +791,17 @@ function _compressImage(dataUrl) {
       const MAX = 800;
       let { width, height } = img;
       if (width > MAX || height > MAX) {
-        if (width >= height) { height = Math.round((height * MAX) / width); width = MAX; }
-        else { width = Math.round((width * MAX) / height); height = MAX; }
+        if (width >= height) {
+          height = Math.round((height * MAX) / width);
+          width = MAX;
+        } else {
+          width = Math.round((width * MAX) / height);
+          height = MAX;
+        }
       }
       const canvas = document.createElement("canvas");
-      canvas.width = width; canvas.height = height;
+      canvas.width = width;
+      canvas.height = height;
       canvas.getContext("2d").drawImage(img, 0, 0, width, height);
       resolve(canvas.toDataURL("image/jpeg", 0.72));
     };
@@ -768,7 +847,10 @@ async function submitPromptSpark() {
   const activePrompt = PROMPT_LIBRARY[_activePromptIndex];
 
   const btn = document.getElementById("promptSubmitBtn");
-  if (btn) { btn.disabled = true; btn.textContent = "Posting\u2026"; }
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = "Posting\u2026";
+  }
 
   const ud = window._sparkUserData || {};
   const name = ud.fullName || user.displayName || "T1ERA User";
@@ -792,7 +874,9 @@ async function submitPromptSpark() {
     };
 
     // Collect compressed images
-    const promptImgs = document.querySelectorAll("#promptMediaStrip .media-thumb img");
+    const promptImgs = document.querySelectorAll(
+      "#promptMediaStrip .media-thumb img",
+    );
     if (promptImgs.length > 0) {
       sparkData.images = Array.from(promptImgs).map((img) => img.src);
     }
@@ -805,7 +889,9 @@ async function submitPromptSpark() {
 
     // Award +1 spark point (= +20 XP)
     try {
-      await updateDoc(doc(db, "users", user.uid), { "point.spark": increment(1) });
+      await updateDoc(doc(db, "users", user.uid), {
+        "point.spark": increment(1),
+      });
     } catch (xpe) {
       console.warn("XP spark award error:", xpe);
     }
@@ -827,13 +913,19 @@ async function submitPromptSpark() {
     if (typeof window.showToast === "function")
       window.showToast("Prompt Spark posted \uD83D\uDCAC");
 
-    if (btn) { btn.disabled = false; btn.textContent = "Spark \u26A1"; }
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = "Spark \u26A1";
+    }
     closePromptCompose();
     await startPromptFeed();
   } catch (e) {
     console.error("submitPromptSpark error:", e);
     alert("Failed to post. Please try again.");
-    if (btn) { btn.disabled = false; btn.textContent = "Spark \u26A1"; }
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = "Spark \u26A1";
+    }
   }
 }
 
@@ -859,12 +951,15 @@ window.startPromptFeed = startPromptFeed;
       await original(txt);
       // After reply submitted, refresh prompt feed if it is the active tab
       const panel = document.getElementById("panel-1");
-      const isPromptTabActive = panel &&
-        !panel.classList.contains("hidden") && !panel.hidden;
+      const isPromptTabActive =
+        panel && !panel.classList.contains("hidden") && !panel.hidden;
       // Also check if the reply was for a prompt card
       const sparkId = window._replyCtx?.sparkId;
-      const isPromptCard = sparkId &&
-        !!document.querySelector(`#realPromptFeed .spark-card[data-spark-id="${sparkId}"]`);
+      const isPromptCard =
+        sparkId &&
+        !!document.querySelector(
+          `#realPromptFeed .spark-card[data-spark-id="${sparkId}"]`,
+        );
       if (isPromptTabActive || isPromptCard) {
         setTimeout(() => startPromptFeed(), 600);
       } else if (isPromptCard) {
