@@ -4211,9 +4211,21 @@
                 </div>
               </div>
 
+              <!-- Prompt media strip -->
+              <div class="media-strip" id="promptMediaStrip"></div>
+
               <!-- Footer -->
               <div class="compose-footer">
                 <div class="media-btns">
+                  <button class="media-btn" title="Photo">
+                    <i class="ph-bold ph-image"></i>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onchange="attachPromptMedia(this)"
+                    />
+                  </button>
                   <button
                     class="media-btn"
                     title="Emoji"
