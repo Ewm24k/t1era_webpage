@@ -114,9 +114,23 @@ import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12
           ? `<img src="${photo}" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;" onerror="this.style.display='none'">`
           : initial;
 
-        const linkedTxt = txt
+        // Quote block detection (same as standard renderCard)
+        const quoteMatch = txt.match(/```quote\n([\s\S]*?)\n```/);
+        const quoteContent = quoteMatch ? quoteMatch[1] : null;
+
+        const rawLinked = txt
           .replace(/(#\w+)/g, '<span class="ht">$1</span>')
           .replace(/(@\w+)/g, '<span class="mn">$1</span>');
+
+        const linkedTxt = quoteContent
+          ? rawLinked.replace(/```quote\n[\s\S]*?\n```/, "").trim()
+          : rawLinked;
+
+        const quoteBlockHtml = quoteContent
+          ? `<div class="quote-block"><div class="quote-block-label"><i class="ph-bold ph-quotes"></i> Quote</div>${quoteContent.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>`
+          : d.quoteText
+            ? `<div class="quote-block"><div class="quote-block-label"><i class="ph-bold ph-quotes"></i> Quote</div>${String(d.quoteText).replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>`
+            : "";
 
         const safeText = txt.replace(/'/g, "\\'").slice(0, 80);
         const safePhoto = photo.replace(/'/g, "\\'");
@@ -171,6 +185,7 @@ import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12
     <div class="card-content">
       ${promptBlockHtml}
       <p class="spark-text" style="margin-top:${promptText ? "10px" : "0"}">${linkedTxt}</p>
+      ${quoteBlockHtml}
       ${typeof window._buildMediaGridHtml === "function" ? window._buildMediaGridHtml(d.images) : ""}
     </div>
     <div class="action-bar">
@@ -328,7 +343,7 @@ import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12
         const ta = document.getElementById("promptTa");
         if (ta) ta.value = "";
         const cc = document.getElementById("promptCharCount");
-        if (cc) cc.textContent = "0 / 500";
+        if (cc) cc.textContent = "0 / 1500";
         const btn = document.getElementById("promptSubmitBtn");
         if (btn) btn.disabled = true;
         const strip = document.getElementById("promptMediaStrip");
@@ -350,7 +365,7 @@ import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12
         const ta = document.getElementById("promptTa");
         if (ta) { ta.value = ""; ta.focus(); }
         const cc = document.getElementById("promptCharCount");
-        if (cc) cc.textContent = "0 / 500";
+        if (cc) cc.textContent = "0 / 1500";
         const btn = document.getElementById("promptSubmitBtn");
         if (btn) btn.disabled = true;
       }
@@ -358,10 +373,30 @@ import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12
       function onPromptInput(ta) {
         const len = ta.value.length;
         const cc = document.getElementById("promptCharCount");
-        if (cc) cc.textContent = `${len} / 500`;
+        if (cc) cc.textContent = `${len} / 1500`;
         const btn = document.getElementById("promptSubmitBtn");
         if (btn) btn.disabled = len === 0;
       }
+
+      function insertPromptQuoteBlock() {
+        const ta = document.getElementById("promptTa");
+        if (!ta) return;
+        const block = "```quote
+
+```";
+        const start = ta.selectionStart;
+        const end = ta.selectionEnd;
+        const before = ta.value.slice(0, start);
+        const after = ta.value.slice(end);
+        ta.value = before + block + after;
+        // Place cursor inside the block (between the two newlines)
+        const cursorPos = start + "```quote
+".length;
+        ta.setSelectionRange(cursorPos, cursorPos);
+        ta.focus();
+        onPromptInput(ta);
+      }
+      window.insertPromptQuoteBlock = insertPromptQuoteBlock;
 
       // ══════════════════════════════════════════════════════════════
       // SUBMIT PROMPT SPARK
@@ -403,6 +438,11 @@ import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12
           const promptImgs = document.querySelectorAll("#promptMediaStrip .media-thumb[data-type='image'] img");
           if (promptImgs.length > 0) {
             sparkData.images = Array.from(promptImgs).map((img) => img.src);
+          }
+          // Extract quoteText from ```quote block if present
+          const promptQuoteMatch = txt.match(/```quote\n([\s\S]*?)\n```/);
+          if (promptQuoteMatch) {
+            sparkData.quoteText = promptQuoteMatch[1];
           }
 
           await addDoc(collection(db, SPARKS_COL), sparkData);
@@ -458,3 +498,6 @@ import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12
       window.cyclePrompt = cyclePrompt;
       window.onPromptInput = onPromptInput;
       window.submitPromptSpark = submitPromptSpark;
+
+      // Signal to spark-module.js that this module is ready
+      window.dispatchEvent(new CustomEvent("promptModuleReady"));
