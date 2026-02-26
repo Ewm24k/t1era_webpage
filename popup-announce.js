@@ -15,7 +15,12 @@
     /* ── Overlay backdrop ── */
     #ann-overlay {
       position: fixed;
-      inset: 0;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: 100vw;
+      height: 100vh;
       z-index: 9999;
       background: rgba(0, 0, 0, 0.78);
       backdrop-filter: blur(10px);
@@ -24,7 +29,11 @@
       align-items: center;
       justify-content: center;
       padding: 16px;
+      /* Counteract any body padding-bottom (e.g. mobile nav bar = 60px) */
+      padding-bottom: 16px !important;
       box-sizing: border-box;
+      /* Detach from body flow so body padding doesn't affect centering */
+      margin: 0 !important;
       opacity: 0;
       animation: ann-fadein 0.32s cubic-bezier(0.4, 0, 0.2, 1) forwards;
     }
@@ -131,14 +140,28 @@
 
     /* ── Mobile tweaks ── */
     @media (max-width: 480px) {
+      #ann-overlay {
+        align-items: center;
+        justify-content: center;
+        /* Force true center regardless of body padding or bottom nav */
+        padding: 20px 12px !important;
+      }
       #ann-popup {
         max-width: 96vw;
+        /* Constrain height so image never exceeds visible screen */
+        max-height: calc(100vh - 40px);
         border-radius: 13px;
         border-width: 1.5px;
       }
-      #ann-img-wrap,
+      #ann-img-wrap {
+        border-radius: 11px;
+        overflow: hidden;
+      }
       #ann-poster {
         border-radius: 11px;
+        max-height: calc(100vh - 60px);
+        width: 100%;
+        height: auto;
       }
       #ann-close {
         width: 28px;
@@ -146,6 +169,10 @@
         top: -11px;
         right: -11px;
         font-size: 13px;
+      }
+      #ann-hint {
+        font-size: 10px;
+        margin-top: 8px;
       }
     }
   `;
@@ -201,8 +228,13 @@
 
     document.body.appendChild(overlay);
 
+    /* ── Lock body scroll so page can't shift under the popup ── */
+    const _prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
     /* ── Close logic ── */
     function dismissPopup() {
+      document.body.style.overflow = _prevOverflow;
       overlay.style.animation = "ann-fadeout 0.22s ease forwards";
       overlay.addEventListener(
         "animationend",
