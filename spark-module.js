@@ -1405,6 +1405,15 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
         </div>
         <div class="badges-row">
           <span class="badge rank">${rankLabel || "LV 1"}</span>
+          ${(() => {
+            const _lvNum =
+              parseInt((rankLabel || "LV 1").replace("LV ", "")) || 1;
+            if (_lvNum >= 25)
+              return `<span class="badge verified-gold" title="Gold Verified · LV 25+"><i class="ph-fill ph-seal-check"></i></span>`;
+            if (_lvNum >= 20)
+              return `<span class="badge verified-grey" title="Verified · LV 20+"><i class="ph-fill ph-seal-check"></i></span>`;
+            return "";
+          })()}
           ${
             !isOwner
               ? (() => {
