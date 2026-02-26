@@ -39,6 +39,36 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
       const DEV_EMAIL = "ewm24k@gmail.com";
       const SPARKS_COL = "sparks";
 
+      // ══════════════════════════════════════════════════════
+      // DISPLAY NAME PREFERENCE
+      // Stored in Firestore: users/{uid}.displayNamePref
+      // Values: "fullName" (default) | "nickname"
+      // ══════════════════════════════════════════════════════
+
+      // Global pref — set during auth, used everywhere a display name is needed
+      window._displayNamePref = "fullName";
+
+      async function loadDisplayNamePref(uid) {
+        try {
+          const snap = await getDoc(doc(db, "users", uid));
+          if (snap.exists()) {
+            return snap.data().displayNamePref || "fullName";
+          }
+        } catch (e) {
+          console.warn("loadDisplayNamePref error:", e);
+        }
+        return "fullName";
+      }
+
+      // Resolves the correct display name string given a user data object + pref
+      function resolveDisplayName(ud, pref) {
+        if (pref === "nickname") {
+          return ud.nickname || ud.fullName || "T1ERA User";
+        }
+        return ud.fullName || "T1ERA User";
+      }
+      window._resolveDisplayName = resolveDisplayName;
+
       // ── AUTH STATE ──
       onAuthStateChanged(auth, async (user) => {
         if (!user) {
@@ -53,14 +83,16 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
           const snap = await getDoc(doc(db, "users", user.uid));
           const d = snap.exists() ? snap.data() : {};
           window._sparkUserData = d;
+
+          // ── Load display name preference ──
+          window._displayNamePref = d.displayNamePref || "fullName";
+
           const photoURL = d.profilePicture?.url || user.photoURL || "";
-          const initial = (d.fullName ||
-            user.displayName ||
-            user.email ||
-            "U")[0].toUpperCase();
+          const initial = resolveDisplayName(d, window._displayNamePref)[0].toUpperCase();
           applyComposeAvatar(photoURL, initial);
         } catch (e) {
           window._sparkUserData = {};
+          window._displayNamePref = "fullName";
           applyComposeAvatar(
             "",
             (user.displayName || user.email || "U")[0].toUpperCase(),
@@ -106,7 +138,216 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 
         // Load real users into Who to Follow widget
         await loadWhoToFollow(user.uid);
+
+        // ── Render appearance settings now that user data is loaded ──
+        renderAppearanceSettings();
       });
+
+      // ══════════════════════════════════════════════════════
+      // APPEARANCE SETTINGS — Display Name toggle
+      // Injected into the settings panel's Appearance section
+      // ══════════════════════════════════════════════════════
+
+      function renderAppearanceSettings() {
+        const container = document.getElementById("appearanceSettingsSlot");
+        if (!container) return;
+
+        const ud = window._sparkUserData || {};
+        const fullName = ud.fullName || "—";
+        const nickname = ud.nickname || "—";
+        const currentPref = window._displayNamePref || "fullName";
+
+        container.innerHTML = `
+          <div id="displayNameSettingCard" style="
+            background: var(--bg-3);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            overflow: hidden;
+          ">
+            <!-- Header -->
+            <div style="
+              padding: 14px 16px 10px;
+              border-bottom: 1px solid var(--border);
+              display: flex;
+              align-items: center;
+              gap: 8px;
+            ">
+              <i class="ph-bold ph-identification-card" style="font-size:16px;color:var(--purple)"></i>
+              <div>
+                <div style="font-size:12px;font-weight:700;color:var(--text)">Display Name</div>
+                <div style="font-size:10px;color:var(--text-3);font-family:var(--f-mono);margin-top:1px">How your name appears on Sparks</div>
+              </div>
+            </div>
+
+            <!-- Options -->
+            <div style="padding: 12px 16px; display: flex; flex-direction: column; gap: 8px;">
+
+              <!-- Full Name option -->
+              <label id="dnoption-fullName" style="
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 10px 12px;
+                border-radius: var(--r-sm);
+                border: 1px solid ${currentPref === 'fullName' ? 'rgba(194,24,91,0.35)' : 'var(--border)'};
+                background: ${currentPref === 'fullName' ? 'rgba(194,24,91,0.07)' : 'var(--bg-4)'};
+                cursor: pointer;
+                transition: all 0.18s;
+              " onclick="selectDisplayNamePref('fullName')">
+                <div>
+                  <div style="font-size:12px;font-weight:600;color:var(--text)">Full Name</div>
+                  <div style="font-size:11px;color:var(--text-3);margin-top:2px;font-family:var(--f-mono)">${fullName}</div>
+                </div>
+                <div id="dncheck-fullName" style="
+                  width: 20px; height: 20px;
+                  border-radius: 50%;
+                  border: 2px solid ${currentPref === 'fullName' ? 'var(--pink-2)' : 'var(--border-2)'};
+                  background: ${currentPref === 'fullName' ? 'var(--pink)' : 'transparent'};
+                  display: flex; align-items: center; justify-content: center;
+                  transition: all 0.18s; flex-shrink: 0;
+                ">
+                  ${currentPref === 'fullName' ? '<i class="ph-bold ph-check" style="font-size:10px;color:#fff;pointer-events:none"></i>' : ''}
+                </div>
+              </label>
+
+              <!-- Nickname option -->
+              <label id="dnoption-nickname" style="
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 10px 12px;
+                border-radius: var(--r-sm);
+                border: 1px solid ${currentPref === 'nickname' ? 'rgba(194,24,91,0.35)' : 'var(--border)'};
+                background: ${currentPref === 'nickname' ? 'rgba(194,24,91,0.07)' : 'var(--bg-4)'};
+                cursor: pointer;
+                transition: all 0.18s;
+              " onclick="selectDisplayNamePref('nickname')">
+                <div>
+                  <div style="font-size:12px;font-weight:600;color:var(--text)">Nickname</div>
+                  <div style="font-size:11px;color:var(--text-3);margin-top:2px;font-family:var(--f-mono)">${nickname}</div>
+                </div>
+                <div id="dncheck-nickname" style="
+                  width: 20px; height: 20px;
+                  border-radius: 50%;
+                  border: 2px solid ${currentPref === 'nickname' ? 'var(--pink-2)' : 'var(--border-2)'};
+                  background: ${currentPref === 'nickname' ? 'var(--pink)' : 'transparent'};
+                  display: flex; align-items: center; justify-content: center;
+                  transition: all 0.18s; flex-shrink: 0;
+                ">
+                  ${currentPref === 'nickname' ? '<i class="ph-bold ph-check" style="font-size:10px;color:#fff;pointer-events:none"></i>' : ''}
+                </div>
+              </label>
+            </div>
+
+            <!-- Save button — hidden until user changes from current pref -->
+            <div id="dnSaveRow" style="
+              padding: 0 16px 14px;
+              display: none;
+            ">
+              <button id="dnSaveBtn" onclick="saveDisplayNamePref()" style="
+                width: 100%;
+                padding: 10px;
+                border-radius: 100px;
+                background: linear-gradient(135deg, var(--pink), var(--pink-2));
+                border: none;
+                color: #fff;
+                font-size: 12px;
+                font-weight: 700;
+                letter-spacing: 0.04em;
+                box-shadow: 0 0 16px var(--pink-glow);
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 7px;
+                transition: all 0.2s;
+                font-family: var(--f-body);
+              ">
+                <i class="ph-bold ph-floppy-disk"></i>
+                Save Display Name
+              </button>
+            </div>
+          </div>
+        `;
+
+        // Store the "original" pref so we can detect changes
+        container.dataset.originalPref = currentPref;
+        container.dataset.pendingPref = currentPref;
+      }
+
+      // ── Select a display name pref option (UI only — no save yet) ──
+      window.selectDisplayNamePref = function(pref) {
+        const container = document.getElementById("appearanceSettingsSlot");
+        if (!container) return;
+
+        const originalPref = container.dataset.originalPref;
+        container.dataset.pendingPref = pref;
+
+        const options = ["fullName", "nickname"];
+        options.forEach((opt) => {
+          const label = document.getElementById("dnoption-" + opt);
+          const check = document.getElementById("dncheck-" + opt);
+          if (!label || !check) return;
+
+          const isSelected = opt === pref;
+          label.style.border = isSelected
+            ? "1px solid rgba(194,24,91,0.35)"
+            : "1px solid var(--border)";
+          label.style.background = isSelected
+            ? "rgba(194,24,91,0.07)"
+            : "var(--bg-4)";
+          check.style.border = isSelected
+            ? "2px solid var(--pink-2)"
+            : "2px solid var(--border-2)";
+          check.style.background = isSelected ? "var(--pink)" : "transparent";
+          check.innerHTML = isSelected
+            ? '<i class="ph-bold ph-check" style="font-size:10px;color:#fff;pointer-events:none"></i>'
+            : "";
+        });
+
+        // Show/hide save button based on whether selection differs from stored pref
+        const saveRow = document.getElementById("dnSaveRow");
+        if (saveRow) {
+          saveRow.style.display = pref !== originalPref ? "block" : "none";
+        }
+      };
+
+      // ── Save display name preference to Firestore, then reload ──
+      window.saveDisplayNamePref = async function() {
+        const user = window._sparkUser;
+        if (!user) return;
+
+        const container = document.getElementById("appearanceSettingsSlot");
+        const pendingPref = container ? container.dataset.pendingPref : "fullName";
+
+        const saveBtn = document.getElementById("dnSaveBtn");
+        if (saveBtn) {
+          saveBtn.disabled = true;
+          saveBtn.innerHTML = '<i class="ph-bold ph-circle-notch" style="animation:spin .6s linear infinite"></i> Saving…';
+        }
+
+        try {
+          await updateDoc(doc(db, "users", user.uid), {
+            displayNamePref: pendingPref,
+          });
+
+          if (typeof window.showToast === "function")
+            window.showToast("Display name updated ✓");
+
+          // Short delay so toast is visible, then reload
+          setTimeout(() => {
+            window.location.reload();
+          }, 800);
+        } catch (e) {
+          console.error("saveDisplayNamePref error:", e);
+          if (saveBtn) {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = '<i class="ph-bold ph-floppy-disk"></i> Save Display Name';
+          }
+          if (typeof window.showToast === "function")
+            window.showToast("Save failed — try again");
+        }
+      };
 
       // ── ENSURE point map fields exist on first load ──
       async function ensurePointMap(uid) {
@@ -117,12 +358,9 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
             : {};
           const patch = {};
 
-          // spark and reply: only initialize if missing (no reliable backfill source)
           if (existing.spark === undefined) patch["point.spark"] = 0;
           if (existing.reply === undefined) patch["point.reply"] = 0;
 
-          // like: ALWAYS recalculate from actual sparks/{sparkId}/likes/{uid} subcollection
-          // This is the source of truth — fixes any dirty/wrong values from previous bugs
           try {
             const sparksSnap = await getDocs(
               query(collection(db, SPARKS_COL), where("tab", "==", "standard")),
@@ -156,7 +394,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
         if (!container) return;
 
         try {
-          // Fetch all users
           const snap = await getDocs(collection(db, "users"));
           if (snap.empty) {
             container.innerHTML =
@@ -164,7 +401,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
             return;
           }
 
-          // Filter out current user, shuffle, pick up to 4
           const allUsers = [];
           snap.forEach((d) => {
             if (d.id !== currentUid) {
@@ -172,7 +408,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
             }
           });
 
-          // Fisher-Yates shuffle
           for (let i = allUsers.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [allUsers[i], allUsers[j]] = [allUsers[j], allUsers[i]];
@@ -188,7 +423,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 
           container.innerHTML = "";
 
-          // Gradient palette for avatars without photos
           const gradients = [
             "linear-gradient(135deg,#8b5cf6,#c2185b)",
             "linear-gradient(135deg,#f59e0b,#f97316)",
@@ -197,11 +431,11 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
           ];
 
           picked.forEach(({ uid, data: u }, idx) => {
-            const name =
-              u.fullName ||
-              u.nickname ||
-              u.email?.split("@")[0] ||
-              "T1ERA User";
+            // Use resolved display name for WTF widget too
+            const wtfPref = u.displayNamePref || "fullName";
+            const name = wtfPref === "nickname"
+              ? (u.nickname || u.fullName || u.email?.split("@")[0] || "T1ERA User")
+              : (u.fullName || u.email?.split("@")[0] || "T1ERA User");
             const handle = u.nickname || u.email?.split("@")[0] || "user";
             const photo = u.profilePicture?.url || u.photoURL || "";
             const initial = name[0].toUpperCase();
@@ -236,10 +470,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
         }
       }
 
-      // ── WTF FOLLOW BUTTON CLICK — wired to same _followFn used by feed cards ──
       window._wtfFollowClick = function (btn, ownerUid) {
         if (!ownerUid || typeof window._followFn !== "function") {
-          // Fallback UI-only toggle
           const on = btn.classList.toggle("on");
           btn.textContent = on ? "✓ Following" : "+ Follow";
           return;
@@ -247,18 +479,14 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
         window._followFn({ ownerUid, btn, type: "wtf" });
       };
 
-      // ── EXPOSE startFeed to non-module scripts ──
       window._startFeedFn = startFeed;
 
       // ══════════════════════════════════════════════════════
       // FOLLOW MODULE
       // ══════════════════════════════════════════════════════
 
-      // In-memory set of UIDs the current user follows — loaded once on auth
       window._followingSet = new Set();
 
-      // Load who the current user is following into memory
-      // Reads from /follows where followerId == uid (matches Firestore rules)
       async function loadFollowingSet(uid) {
         try {
           const snap = await getDocs(
@@ -273,7 +501,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
         }
       }
 
-      // Core follow/unfollow toggle — called by both pill and badge buttons
       window._followFn = async function ({ ownerUid, btn, type }) {
         const user = window._sparkUser;
         if (!user || !ownerUid || ownerUid === user.uid) return;
@@ -281,7 +508,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
         const isFollowing = window._followingSet.has(ownerUid);
         const willFollow = !isFollowing;
 
-        // ── Show loading state immediately on the clicked button ──
         btn.disabled = true;
         if (type === "badge") {
           btn.classList.add("loading");
@@ -298,26 +524,19 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
             '<i class="ph-bold ph-circle-dashed" style="animation:follow-pulse .8s ease infinite"></i> …';
         }
 
-        // ── Update in-memory set immediately (optimistic) ──
         if (willFollow) {
           window._followingSet.add(ownerUid);
         } else {
           window._followingSet.delete(ownerUid);
         }
 
-        // ── Persist to Firestore ──
         const ud = window._sparkUserData || {};
-        const fromName =
-          ud.fullName ||
-          user.displayName ||
-          user.email?.split("@")[0] ||
-          "Someone";
+        const fromName = resolveDisplayName(ud, window._displayNamePref);
         const fromHandle = ud.nickname || user.email?.split("@")[0] || "user";
         const fromPhoto = ud.profilePicture?.url || user.photoURL || "";
 
         try {
           if (willFollow) {
-            // ── Write to /follows/{myUid}_{targetUid} — matches rules: create if followerId == auth.uid ──
             const followDocId = `${user.uid}_${ownerUid}`;
             await setDoc(doc(db, "follows", followDocId), {
               followerId: user.uid,
@@ -328,7 +547,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
               createdAt: serverTimestamp(),
             });
 
-            // ── Send follow notification to target — rules allow create if isSignedIn() ──
             const notifId = `follow_${user.uid}_${ownerUid}`;
             try {
               await setDoc(
@@ -350,7 +568,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
               console.warn("follow notif error:", ne.code, ne.message);
             }
 
-            // ── Log to YOUR activity history — rules allow write if isOwner(userId) ──
             try {
               await addDoc(
                 collection(db, "users", user.uid, "activityHistory"),
@@ -367,20 +584,15 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
               console.warn("follow activity log error:", ae.code, ae.message);
             }
 
-            // Toast confirmation
             if (typeof window.showToast === "function")
               window.showToast("Now following! 🤝");
           } else {
-            // ── Unfollow: delete /follows/{myUid}_{targetUid} — rules allow delete if followerId == auth.uid ──
             const followDocId = `${user.uid}_${ownerUid}`;
             await deleteDoc(doc(db, "follows", followDocId));
-
-            // Toast confirmation
             if (typeof window.showToast === "function")
               window.showToast("Unfollowed");
           }
 
-          // ── Settle button into final state after Firestore confirms ──
           btn.disabled = false;
           if (type === "badge") {
             btn.classList.remove("loading");
@@ -400,8 +612,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
               btn.style.color = "var(--green)";
               btn.style.background = "rgba(16,185,129,.08)";
             } else {
-              btn.innerHTML =
-                '<i class="ph-bold ph-user-plus"></i> Follow Back';
+              btn.innerHTML = '<i class="ph-bold ph-user-plus"></i> Follow Back';
               btn.style.borderColor = "";
               btn.style.color = "";
               btn.style.background = "";
@@ -417,7 +628,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
             }
           }
 
-          // ── Sync all other buttons on page for the same user ──
           document.querySelectorAll(".spark-card").forEach((card) => {
             if (card.dataset.ownerUid !== ownerUid) return;
             card.querySelectorAll(".badge.follow-badge").forEach((b) => {
@@ -443,13 +653,11 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
           });
         } catch (e) {
           console.error("_followFn Firestore error:", e.code, e.message);
-          // Rollback in-memory set
           if (willFollow) {
             window._followingSet.delete(ownerUid);
           } else {
             window._followingSet.add(ownerUid);
           }
-          // Rollback button UI
           btn.disabled = false;
           if (type === "badge") {
             btn.classList.remove("loading");
@@ -469,8 +677,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
               btn.style.color = "var(--green)";
               btn.style.background = "rgba(16,185,129,.08)";
             } else {
-              btn.innerHTML =
-                '<i class="ph-bold ph-user-plus"></i> Follow Back';
+              btn.innerHTML = '<i class="ph-bold ph-user-plus"></i> Follow Back';
               btn.style.borderColor = "";
               btn.style.color = "";
               btn.style.background = "";
@@ -502,19 +709,16 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
             const count = snap.size;
             const label = count > 99 ? "99+" : String(count);
             const visible = count > 0;
-            // Desktop badge
             const badge = document.getElementById("notifBadge");
             if (badge) {
               badge.textContent = label;
               badge.classList.toggle("visible", visible);
             }
-            // Mobile badge
             const mobBadge = document.getElementById("mobNotifBadge");
             if (mobBadge) {
               mobBadge.textContent = label;
               mobBadge.classList.toggle("visible", visible);
             }
-            // If the panel is currently open, refresh its list live so new follow notifs appear instantly
             const panel = document.getElementById("notifPanel");
             if (
               panel &&
@@ -528,7 +732,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
         );
       }
 
-      // ── SEND a notification to another user ──
       window._sendNotifFn = async function ({
         type,
         ownerUid,
@@ -538,15 +741,10 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
       }) {
         const currentUser = window._sparkUser;
         if (!currentUser || !ownerUid) return;
-        // Never notify yourself
         if (ownerUid === currentUser.uid) return;
 
         const ud = window._sparkUserData || {};
-        const fromName =
-          ud.fullName ||
-          currentUser.displayName ||
-          currentUser.email?.split("@")[0] ||
-          "Someone";
+        const fromName = resolveDisplayName(ud, window._displayNamePref);
         const fromPhoto = ud.profilePicture?.url || currentUser.photoURL || "";
 
         const messages = {
@@ -575,7 +773,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
         }
       };
 
-      // ── TOGGLE LIKE — write to Firestore ──
       window._toggleLikeFn = async function ({
         liked,
         sparkId,
@@ -585,11 +782,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
         const user = window._sparkUser;
         if (!user || !sparkId) return;
 
-        // likes subcollection: sparks/{sparkId}/likes/{uid}
         const likeRef = doc(db, "sparks", sparkId, "likes", user.uid);
-
-        // Deterministic notification ID so we can delete it on unlike
-        // Pattern: like_{likerUid}_{sparkId}
         const notifId = `like_${user.uid}_${sparkId}`;
         const notifRef =
           ownerUid && ownerUid !== user.uid
@@ -598,13 +791,11 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 
         try {
           if (liked) {
-            // 1. Record the like
             await setDoc(likeRef, {
               uid: user.uid,
               createdAt: serverTimestamp(),
             });
 
-            // 2. Award +10 XP only if liking someone else's post (not own post)
             if (ownerUid !== user.uid) {
               try {
                 await updateDoc(doc(db, "users", user.uid), {
@@ -615,14 +806,9 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
               }
             }
 
-            // 3. Write like notification with deterministic ID (overwrites if already exists)
             if (notifRef) {
               const ud = window._sparkUserData || {};
-              const fromName =
-                ud.fullName ||
-                user.displayName ||
-                user.email?.split("@")[0] ||
-                "Someone";
+              const fromName = resolveDisplayName(ud, window._displayNamePref);
               const fromPhoto = ud.profilePicture?.url || user.photoURL || "";
               try {
                 await setDoc(notifRef, {
@@ -641,10 +827,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
               }
             }
           } else {
-            // 1. Remove the like record
             await deleteDoc(likeRef);
 
-            // 2. Deduct XP only if unliking someone else's post (never go below 0)
             if (ownerUid !== user.uid) {
               try {
                 const userSnap = await getDoc(doc(db, "users", user.uid));
@@ -659,7 +843,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
               }
             }
 
-            // 3. Delete the like notification from post owner (if it exists and unread)
             if (notifRef) {
               try {
                 const notifSnap = await getDoc(notifRef);
@@ -676,7 +859,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
         }
       };
 
-      // ── LOAD notifications into the panel ──
       window._loadNotifsFn = async function () {
         const uid = window._sparkUser?.uid;
         if (!uid) return;
@@ -695,7 +877,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
             return;
           }
 
-          // Sort newest first client-side
           const docs = [];
           snap.forEach((d) => docs.push({ id: d.id, data: d.data() }));
           docs.sort((a, b) => {
@@ -704,7 +885,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
             return tb - ta;
           });
 
-          // Bucket by type — followers is a separate bucket from follow
           const buckets = {
             like: [],
             bookmark: [],
@@ -718,55 +898,28 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
             else buckets.message.push(d);
           });
 
-          // Clear list
           list.innerHTML = "";
 
           const sectionMeta = [
-            {
-              key: "follow",
-              label: "Followers",
-              icon: "ph-user-plus",
-              cls: "follow",
-            },
+            { key: "follow", label: "Followers", icon: "ph-user-plus", cls: "follow" },
             { key: "like", label: "Likes", icon: "ph-heart", cls: "like" },
-            {
-              key: "reply",
-              label: "Replies & Mentions",
-              icon: "ph-chat-circle",
-              cls: "reply",
-            },
-            {
-              key: "bookmark",
-              label: "Bookmarks",
-              icon: "ph-bookmark-simple",
-              cls: "bookmark",
-            },
-            {
-              key: "message",
-              label: "System",
-              icon: "ph-bell",
-              cls: "message",
-            },
+            { key: "reply", label: "Replies & Mentions", icon: "ph-chat-circle", cls: "reply" },
+            { key: "bookmark", label: "Bookmarks", icon: "ph-bookmark-simple", cls: "bookmark" },
+            { key: "message", label: "System", icon: "ph-bell", cls: "message" },
           ];
 
           let hasAny = false;
 
           sectionMeta.forEach(({ key, label, icon, cls }) => {
             const items = buckets[key];
-
-            // Skip empty sections entirely — no clutter
             if (!items || items.length === 0) return;
-
             hasAny = true;
 
-            // Check if any item in this section is unread
             const hasUnread = items.some(({ data: d }) => !d.read);
             const unreadCount = items.filter(({ data: d }) => !d.read).length;
 
-            // ── Section header (clickable accordion toggle) ──
             const header = document.createElement("div");
-            header.className =
-              "notif-section-header" + (hasUnread ? " has-unread" : "");
+            header.className = "notif-section-header" + (hasUnread ? " has-unread" : "");
             header.innerHTML = `
         <span class="notif-section-dot"></span>
         <span class="notif-section-label"><i class="ph-bold ${icon}" style="margin-right:5px;font-size:10px"></i>${label}</span>
@@ -774,21 +927,16 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
         <i class="ph-bold ph-caret-down notif-section-chevron" style="${hasUnread ? "transform:rotate(180deg)" : ""}"></i>
       `;
 
-            // ── Section body (collapsible) ──
             const body = document.createElement("div");
             body.className = "notif-section-body" + (hasUnread ? " open" : "");
 
-            // Toggle on header click
             header.addEventListener("click", () => {
               const isOpen = body.classList.toggle("open");
               const chevron = header.querySelector(".notif-section-chevron");
               if (chevron)
-                chevron.style.transform = isOpen
-                  ? "rotate(180deg)"
-                  : "rotate(0deg)";
+                chevron.style.transform = isOpen ? "rotate(180deg)" : "rotate(0deg)";
             });
 
-            // ── Build notification rows ──
             items.forEach(({ id, data: d }) => {
               const avInner = d.fromPhoto
                 ? `<img src="${d.fromPhoto}" referrerpolicy="no-referrer" onerror="this.style.display='none'">`
@@ -814,12 +962,9 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
                   : "";
 
               const alreadyFollowingBack =
-                window._followingSet &&
-                window._followingSet.has(d.fromUid || "");
+                window._followingSet && window._followingSet.has(d.fromUid || "");
               const followBackBtn =
-                key === "follow" &&
-                d.fromUid &&
-                d.fromUid !== window._sparkUser?.uid
+                key === "follow" && d.fromUid && d.fromUid !== window._sparkUser?.uid
                   ? `<button class="notif-reply-btn notif-follow-back-btn" data-target-uid="${d.fromUid}" style="${alreadyFollowingBack ? "border-color:rgba(16,185,129,.4);color:var(--green);background:rgba(16,185,129,.08)" : ""}" onclick="event.stopPropagation();notifFollowBack(this,'${d.fromUid}','${id}')"><i class="ph-bold ${alreadyFollowingBack ? "ph-check" : "ph-user-plus"}"></i> ${alreadyFollowingBack ? "Following" : "Follow Back"}</button>`
                   : "";
 
@@ -836,9 +981,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 
               row.addEventListener("click", () => {
                 markOneRead(uid, id, row);
-                // Update unread count in header after marking read
-                const stillUnread =
-                  body.querySelectorAll(".notif-row.unread").length - 1;
+                const stillUnread = body.querySelectorAll(".notif-row.unread").length - 1;
                 const countEl = header.querySelector(".notif-section-count");
                 if (stillUnread <= 0) {
                   header.classList.remove("has-unread");
@@ -866,7 +1009,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
         }
       };
 
-      // ── MARK ONE notification as read ──
       async function markOneRead(uid, notifId, rowEl) {
         try {
           await updateDoc(doc(db, "users", uid, "notifications", notifId), {
@@ -879,17 +1021,14 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
       }
       window._markOneReadFn = markOneRead;
 
-      // ── MARK ALL notifications as read ──
       // ══════════════════════════════════════════════════════
       // REPLIES MODULE
       // ══════════════════════════════════════════════════════
 
-      // Load replies for a spark into the reply sheet
       window._loadRepliesFn = async function (sparkId) {
         const list = document.getElementById("repliesList");
         if (!list) return;
 
-        // Show shimmer skeleton
         list.innerHTML = `
     <div class="reply-item" style="opacity:.5">
       <div class="ri-av" style="background:var(--bg-4);position:relative;overflow:hidden"><div style="position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent);animation:sk-shimmer 1.4s infinite"></div></div>
@@ -916,7 +1055,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
           replies.sort((a, b) => {
             const ta = a.data.createdAt?.toMillis?.() || 0;
             const tb = b.data.createdAt?.toMillis?.() || 0;
-            return tb - ta; // newest first
+            return tb - ta;
           });
 
           replies.forEach(({ id, data: r }) => {
@@ -947,32 +1086,18 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
         }
       };
 
-      // Submit a reply
       window._submitReplyFn = async function (txt) {
         const user = window._sparkUser;
         if (!user || !txt) return;
 
         const ctx = window._replyCtx || {};
-        const {
-          sparkId,
-          ownerUid,
-          ownerHandle,
-          author,
-          mentionedUid,
-          mentionedHandle,
-          notifId,
-        } = ctx;
+        const { sparkId, ownerUid, ownerHandle, author, mentionedUid, mentionedHandle, notifId } = ctx;
 
         const ud = window._sparkUserData || {};
-        const authorName =
-          ud.fullName ||
-          user.displayName ||
-          user.email?.split("@")[0] ||
-          "User";
+        const authorName = resolveDisplayName(ud, window._displayNamePref);
         const authorPhoto = ud.profilePicture?.url || user.photoURL || "";
         const handle = ud.nickname || user.email?.split("@")[0] || "user";
 
-        // Disable submit btn to prevent double submit
         const submitBtn = document.querySelector(".reply-submit");
         if (submitBtn) {
           submitBtn.disabled = true;
@@ -980,7 +1105,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
         }
 
         if (!sparkId) {
-          // Demo card — just show optimistic item and close
           const list = document.getElementById("repliesList");
           const item = document.createElement("div");
           item.className = "reply-item fu";
@@ -1004,7 +1128,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
         }
 
         try {
-          // 1. Write reply to sparks/{sparkId}/comments subcollection
           const replyData = {
             uid: user.uid,
             authorName,
@@ -1014,12 +1137,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
             sparkId,
             createdAt: serverTimestamp(),
           };
-          await addDoc(
-            collection(db, "sparks", sparkId, "comments"),
-            replyData,
-          );
+          await addDoc(collection(db, "sparks", sparkId, "comments"), replyData);
 
-          // 2. Fetch updated reply count for this spark and update feed card counter
           const repliesSnap = await getDocs(
             collection(db, "sparks", sparkId, "comments"),
           );
@@ -1027,7 +1146,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
           const countEl = document.getElementById("replycount-" + sparkId);
           if (countEl) countEl.textContent = newCount;
 
-          // 3. Send notification to post owner (skip self-replies)
           if (ownerUid && ownerUid !== user.uid) {
             try {
               await addDoc(collection(db, "users", ownerUid, "notifications"), {
@@ -1047,35 +1165,25 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
             }
           }
 
-          // 3b. Send notification to the @mentioned replier (when replying to someone's reply)
-          //     Only fires if mentionedUid is set, is not yourself, and is not the spark owner (already notified above)
-          if (
-            mentionedUid &&
-            mentionedUid !== user.uid &&
-            mentionedUid !== ownerUid
-          ) {
+          if (mentionedUid && mentionedUid !== user.uid && mentionedUid !== ownerUid) {
             try {
-              await addDoc(
-                collection(db, "users", mentionedUid, "notifications"),
-                {
-                  type: "reply",
-                  fromUid: user.uid,
-                  fromName: authorName,
-                  fromHandle: handle,
-                  fromPhoto: authorPhoto,
-                  sparkId,
-                  sparkText: txt.slice(0, 80),
-                  message: `<strong>${authorName}</strong> replied to your comment`,
-                  read: false,
-                  createdAt: serverTimestamp(),
-                },
-              );
+              await addDoc(collection(db, "users", mentionedUid, "notifications"), {
+                type: "reply",
+                fromUid: user.uid,
+                fromName: authorName,
+                fromHandle: handle,
+                fromPhoto: authorPhoto,
+                sparkId,
+                sparkText: txt.slice(0, 80),
+                message: `<strong>${authorName}</strong> replied to your comment`,
+                read: false,
+                createdAt: serverTimestamp(),
+              });
             } catch (me) {
               console.warn("mention notif error:", me.code, me.message);
             }
           }
 
-          // 4. Log to replier's activity history
           try {
             await addDoc(collection(db, "users", user.uid, "activityHistory"), {
               type: "reply",
@@ -1089,7 +1197,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
             console.warn("activity log error:", ae);
           }
 
-          // 4b. Award +40 XP for replying to a spark (increment count by 1; profile.html multiplies by 40)
           try {
             await updateDoc(doc(db, "users", user.uid), {
               "point.reply": increment(1),
@@ -1098,9 +1205,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
             console.warn("XP reply award error:", xpe);
           }
 
-          // 5. Clear textarea — DB write confirmed, show toast and close immediately
           document.getElementById("replyTa").value = "";
-          // Mark the source notification as read if this reply came from the notif panel
           if (notifId && window._sparkUser?.uid) {
             markOneRead(
               window._sparkUser.uid,
@@ -1112,7 +1217,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
             window.showToast("Reply posted ⚡");
           if (typeof window.closeReply === "function") window.closeReply();
 
-          // 6. Reload replies in the sheet (fire-and-forget, panel may already be closing)
           window._loadRepliesFn(sparkId);
         } catch (e) {
           console.error("submitReply error:", e.code, e.message);
@@ -1148,32 +1252,23 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
           snap.forEach((d) => batch.update(d.ref, { read: true }));
           await batch.commit();
 
-          // Remove all unread row highlights
-          document
-            .querySelectorAll(".notif-row.unread")
-            .forEach((r) => r.classList.remove("unread"));
+          document.querySelectorAll(".notif-row.unread").forEach((r) => r.classList.remove("unread"));
+          document.querySelectorAll(".notif-section-header.has-unread").forEach((h) => {
+            h.classList.remove("has-unread");
+            const dot = h.querySelector(".notif-section-dot");
+            if (dot) dot.style.display = "none";
+            const countEl = h.querySelector(".notif-section-count");
+            const body = h.nextElementSibling;
+            if (countEl && body) {
+              const total = body.querySelectorAll(".notif-row").length;
+              countEl.classList.remove("has-new");
+              countEl.textContent = total;
+            }
+            const chevron = h.querySelector(".notif-section-chevron");
+            if (chevron) chevron.style.transform = "rotate(0deg)";
+            if (body) body.classList.remove("open");
+          });
 
-          // Remove all section has-unread states and reset counts
-          document
-            .querySelectorAll(".notif-section-header.has-unread")
-            .forEach((h) => {
-              h.classList.remove("has-unread");
-              const dot = h.querySelector(".notif-section-dot");
-              if (dot) dot.style.display = "none";
-              const countEl = h.querySelector(".notif-section-count");
-              const body = h.nextElementSibling;
-              if (countEl && body) {
-                const total = body.querySelectorAll(".notif-row").length;
-                countEl.classList.remove("has-new");
-                countEl.textContent = total;
-              }
-              const chevron = h.querySelector(".notif-section-chevron");
-              if (chevron) chevron.style.transform = "rotate(0deg)";
-              // Collapse the section body
-              if (body) body.classList.remove("open");
-            });
-
-          // Auto-close panel after short delay so user sees the update
           setTimeout(() => {
             if (typeof window.closeNotifPanel === "function")
               window.closeNotifPanel();
@@ -1194,8 +1289,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
           if (el) el.classList.remove("sk-hidden");
         });
       }
-
-      // ── FEED — fetch all standard sparks, sort client-side ──
 
       function buildSkeleton() {
         const s = document.createElement("div");
@@ -1221,14 +1314,10 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
       }
 
       async function startFeed() {
-        // Target realFeed — the revealed content container inside panel-0
         const container = document.getElementById("realFeed");
         if (!container) return;
 
-        // Remove any previously rendered Firestore cards
-        container
-          .querySelectorAll(".spark-card[data-spark-id]")
-          .forEach((el) => el.remove());
+        container.querySelectorAll(".spark-card[data-spark-id]").forEach((el) => el.remove());
 
         try {
           const snap = await getDocs(
@@ -1240,7 +1329,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
           const docs = [];
           snap.forEach((d) => docs.push({ id: d.id, data: d.data() }));
 
-          // Sort newest-first client-side — handles Firestore Timestamp, ISO string, or null
           const toMs = (ts) => {
             if (!ts) return 0;
             if (ts.toMillis) return ts.toMillis();
@@ -1249,13 +1337,9 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
           };
           docs.sort((a, b) => toMs(b.data.createdAt) - toMs(a.data.createdAt));
 
-          // ── Fetch rank for each unique author UID ──
           const uniqueUids = [
             ...new Set(
-              docs
-                .slice(0, 50)
-                .map(({ data: d }) => d.uid)
-                .filter(Boolean),
+              docs.slice(0, 50).map(({ data: d }) => d.uid).filter(Boolean),
             ),
           ];
           const rankCache = {};
@@ -1265,7 +1349,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
                 const uSnap = await getDoc(doc(db, "users", uid));
                 if (uSnap.exists()) {
                   const ud = uSnap.data();
-                  // Compute level from XP so it's always accurate regardless of stored value
                   const pt = ud.accountStatus?.point || ud.point || {};
                   const totalXP =
                     (pt.spark || 0) * 20 +
@@ -1289,28 +1372,20 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
                   rankCache[uid] = "LV 1";
                 }
               } catch (rankErr) {
-                console.warn(
-                  "rank fetch error for uid",
-                  uid,
-                  rankErr?.code,
-                  rankErr?.message,
-                );
+                console.warn("rank fetch error for uid", uid, rankErr?.code, rankErr?.message);
                 rankCache[uid] = "LV 1";
               }
             }),
           );
 
-          docs
-            .slice(0, 50)
-            .forEach(({ id, data }) =>
-              renderCard(id, data, rankCache[data.uid] || "LV 1"),
-            );
+          docs.slice(0, 50).forEach(({ id, data }) =>
+            renderCard(id, data, rankCache[data.uid] || "LV 1"),
+          );
         } catch (e) {
           console.error("startFeed error:", e);
         }
       }
 
-      // ── RELATIVE TIME HELPER ──
       function timeAgo(ts) {
         if (!ts) return "just now";
         const date = ts.toDate ? ts.toDate() : new Date(ts);
@@ -1330,7 +1405,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
         return `${Math.floor(mths / 12)}y ago`;
       }
 
-      // ── MEDIA GRID HTML BUILDER (shared by renderCard + renderPromptCard) ──
       function buildMediaGridHtml(images) {
         if (!images || images.length === 0) return "";
         const count = Math.min(images.length, 4);
@@ -1343,19 +1417,19 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
       }
       window._buildMediaGridHtml = buildMediaGridHtml;
 
-      // ── RENDER ONE CARD INTO FEED ──
       function renderCard(id, d, rankLabel) {
         const panel = document.getElementById("realFeed");
         if (!panel) return;
 
+        // Resolve display name for this card's author
+        const authorPref = d.authorDisplayPref || "fullName";
         const name = d.authorName || "T1ERA User";
         const handle = d.authorHandle || "user";
         const photo = d.authorPhoto || "";
         const txt = d.text || "";
         const initial = name[0].toUpperCase();
 
-        const avBg =
-          "background:linear-gradient(135deg,var(--pink),var(--purple))";
+        const avBg = "background:linear-gradient(135deg,var(--pink),var(--purple))";
         const avInner = photo
           ? `<img src="${photo}" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;" onerror="this.style.display='none'">`
           : initial;
@@ -1364,7 +1438,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
           .replace(/(#\w+)/g, '<span class="ht">$1</span>')
           .replace(/(@\w+)/g, '<span class="mn">$1</span>');
 
-        // Detect ```quote ... ``` blocks and extract quote content
         const quoteMatch = txt.match(/```quote\n([\s\S]*?)\n```/);
         const quoteContent = quoteMatch ? quoteMatch[1] : null;
         const displayTxt = quoteContent
@@ -1380,8 +1453,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
         const safeText = txt.replace(/'/g, "\\'").slice(0, 80);
         const safePhoto = photo.replace(/'/g, "\\'");
 
-        const isOwner =
-          d.uid && window._sparkUser && d.uid === window._sparkUser.uid;
+        const isOwner = d.uid && window._sparkUser && d.uid === window._sparkUser.uid;
 
         const dotsOrDelete = isOwner
           ? `<button class="dots-btn" onclick="event.stopPropagation();deleteSparkCard(this)" title="Delete Spark" style="color:var(--text-3)"><i class="ph-bold ph-trash"></i></button>`
@@ -1406,8 +1478,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
         <div class="badges-row">
           <span class="badge rank">${rankLabel || "LV 1"}</span>
           ${(() => {
-            const _lvNum =
-              parseInt((rankLabel || "LV 1").replace("LV ", "")) || 1;
+            const _lvNum = parseInt((rankLabel || "LV 1").replace("LV ", "")) || 1;
             if (_lvNum >= 25)
               return `<span class="badge verified-gold" title="Gold Verified · LV 25+"><i class="ph-fill ph-seal-check"></i></span>`;
             if (_lvNum >= 20)
@@ -1417,9 +1488,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
           ${
             !isOwner
               ? (() => {
-                  const isFollowing =
-                    window._followingSet &&
-                    window._followingSet.has(d.uid || "");
+                  const isFollowing = window._followingSet && window._followingSet.has(d.uid || "");
                   return isFollowing
                     ? `<button class="badge follow-badge following" onclick="event.stopPropagation();toggleFollowBadge(this)"><i class="ph-bold ph-check"></i> Following</button>`
                     : `<button class="badge follow-badge" onclick="event.stopPropagation();toggleFollowBadge(this)"><i class="ph-bold ph-user-plus"></i> Follow</button>`;
@@ -1436,20 +1505,14 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
       ${buildMediaGridHtml(d.images)}
       ${
         d.youtubeId
-          ? `<div class="yt-card" onclick="event.stopPropagation();openYtModal('` +
-            d.youtubeId +
-            `')">
+          ? `<div class="yt-card" onclick="event.stopPropagation();openYtModal('` + d.youtubeId + `')">
         <div class="yt-thumb-wrap">
-          <img src="https://i.ytimg.com/vi/` +
-            d.youtubeId +
-            `/hqdefault.jpg" alt="YouTube video">
+          <img src="https://i.ytimg.com/vi/` + d.youtubeId + `/hqdefault.jpg" alt="YouTube video">
           <div class="yt-play-btn"><div class="yt-play-icon"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div></div>
         </div>
         <div class="yt-label">
           <div class="yt-logo"><svg viewBox="0 0 24 24" fill="#fff"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31.4 31.4 0 0 0 0 12a31.4 31.4 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31.4 31.4 0 0 0 24 12a31.4 31.4 0 0 0-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg></div>
-          <span class="yt-url-text">youtube.com/watch?v=` +
-            d.youtubeId +
-            `</span>
+          <span class="yt-url-text">youtube.com/watch?v=` + d.youtubeId + `</span>
           <span style="font-size:10px;color:var(--text-3);margin-left:auto;flex-shrink:0;padding-right:4px">▶ Play</span>
         </div>
       </div>`
@@ -1465,28 +1528,20 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
     </div>
   `;
 
-        // Place before the first demo card inside realFeed (demo cards have no data-spark-id)
-        const firstDemo = panel.querySelector(
-          ".spark-card:not([data-spark-id])",
-        );
+        const firstDemo = panel.querySelector(".spark-card:not([data-spark-id])");
         if (firstDemo) {
           panel.insertBefore(article, firstDemo);
         } else {
           panel.appendChild(article);
         }
 
-        // Fetch likes subcollection — get real count + check if current user liked
         const currentUid = window._sparkUser?.uid;
         getDocs(collection(db, "sparks", id, "likes"))
           .then((likesSnap) => {
-            // Real count
             const countEl = document.getElementById("likecount-" + id);
             if (countEl) countEl.textContent = likesSnap.size;
-            // Highlight if current user liked
             if (currentUid) {
-              const alreadyLiked = likesSnap.docs.some(
-                (d) => d.id === currentUid,
-              );
+              const alreadyLiked = likesSnap.docs.some((d) => d.id === currentUid);
               if (alreadyLiked) {
                 const likeBtn = document.getElementById("like-" + id);
                 if (likeBtn) {
@@ -1502,7 +1557,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
             if (countEl) countEl.textContent = "0";
           });
 
-        // Fetch reply count from subcollection
         getDocs(collection(db, "sparks", id, "comments"))
           .then((repliesSnap) => {
             const el = document.getElementById("replycount-" + id);
@@ -1511,18 +1565,14 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
           .catch(() => {});
       }
 
-      // ── DELETE SPARK (owner only) ──
       window.deleteSparkCard = async function (btn) {
         const card = btn.closest(".spark-card[data-spark-id]");
         if (!card) return;
         const sparkId = card.dataset.sparkId;
         if (!sparkId) return;
-
         if (!confirm("Delete this Spark? This cannot be undone.")) return;
-
         try {
           await deleteDoc(doc(db, SPARKS_COL, sparkId));
-          // Remove card from DOM immediately
           card.remove();
         } catch (e) {
           console.error("Delete failed:", e);
@@ -1530,7 +1580,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
         }
       };
 
-      // ── POST NEW SPARK ──
       window._submitSparkFn = async function () {
         const user = window._sparkUser;
         if (!user) return;
@@ -1538,13 +1587,10 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
         const txt = document.getElementById("composeTa").value.trim();
         if (!txt) return;
 
-        // Dev bypass — ewm24k@gmail.com unlimited
         const isDev = user.email === DEV_EMAIL;
 
         if (!isDev && (window._todayCount || 0) >= DAILY_LIMIT) {
-          alert(
-            `You have reached your daily limit of ${DAILY_LIMIT} Sparks. Come back tomorrow!`,
-          );
+          alert(`You have reached your daily limit of ${DAILY_LIMIT} Sparks. Come back tomorrow!`);
           return;
         }
 
@@ -1555,8 +1601,9 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
         }
 
         const ud = window._sparkUserData || {};
-        const name = ud.fullName || user.displayName || "T1ERA User";
-        const handle = (user.email || "user").split("@")[0];
+        // Use resolved display name when posting a spark
+        const name = resolveDisplayName(ud, window._displayNamePref);
+        const handle = ud.nickname || (user.email || "user").split("@")[0];
         const photo = ud.profilePicture?.url || user.photoURL || "";
         const today = getToday();
 
@@ -1566,6 +1613,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
             authorName: name,
             authorHandle: handle,
             authorPhoto: photo,
+            authorDisplayPref: window._displayNamePref,
             text: txt,
             tab: "standard",
             dateStr: today,
@@ -1574,23 +1622,19 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
             replies: 0,
             reposts: 0,
           };
-          // Collect attached images (base64 data URLs from mediaStrip)
           const imgThumbs = document.querySelectorAll("#mediaStrip .media-thumb[data-type='image'] img");
           if (imgThumbs.length > 0) {
             sparkData.images = Array.from(imgThumbs).map((img) => img.src);
           }
-          // Attach YouTube video ID if user pasted a YouTube link
           if (window._pendingYtId) {
             sparkData.youtubeId = window._pendingYtId;
           }
-          // Attach quoteText if user inserted a ```quote block
           const quoteMatch = txt.match(/```quote\n([\s\S]*?)\n```/);
           if (quoteMatch) {
             sparkData.quoteText = quoteMatch[1];
           }
           await addDoc(collection(db, SPARKS_COL), sparkData);
 
-          // Award +20 XP for posting a spark (increment count by 1; profile.html multiplies by 20)
           try {
             await updateDoc(doc(db, "users", user.uid), {
               "point.spark": increment(1),
@@ -1599,23 +1643,16 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
             console.warn("XP spark award error:", xpe);
           }
 
-          // Show success toast
           if (typeof window.showToast === "function")
             window.showToast("Spark posted ⚡");
 
-          // Reset button
           if (btn) {
             btn.disabled = false;
             btn.textContent = "Spark ⚡";
           }
 
-          // Close compose box
           if (typeof window.closeCompose === "function") window.closeCompose();
-
-          // Reload feed so new post appears immediately
           await startFeed();
-
-          // Refresh quota count
           if (!isDev) await checkQuota(user.uid);
         } catch (e) {
           console.error("Post failed:", e);
@@ -1627,7 +1664,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
         }
       };
 
-      // ── DAILY QUOTA ──
       async function checkQuota(uid) {
         const banner = document.getElementById("quotaBanner");
         const quotaMsg = document.getElementById("quotaMsg");
@@ -1635,12 +1671,10 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
         const btn = document.getElementById("submitBtn");
         const toggle = document.getElementById("composeToggle");
 
-        // Dev = unlimited
         if (window._sparkUser && window._sparkUser.email === DEV_EMAIL) {
           banner.classList.remove("show", "warn", "full");
           if (btn)
-            btn.disabled =
-              document.getElementById("composeTa")?.value.trim().length === 0;
+            btn.disabled = document.getElementById("composeTa")?.value.trim().length === 0;
           if (toggle) {
             toggle.style.opacity = "1";
             toggle.style.pointerEvents = "auto";
@@ -1666,8 +1700,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 
           if (count === 0) {
             if (btn)
-              btn.disabled =
-                document.getElementById("composeTa")?.value.trim().length === 0;
+              btn.disabled = document.getElementById("composeTa")?.value.trim().length === 0;
             if (toggle) {
               toggle.style.opacity = "1";
               toggle.style.pointerEvents = "auto";
@@ -1678,8 +1711,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
             quotaMsg.textContent = `${count} of ${DAILY_LIMIT} daily Sparks used — ${remaining} remaining`;
             quotaReset.textContent = getMidnightText();
             if (btn)
-              btn.disabled =
-                document.getElementById("composeTa")?.value.trim().length === 0;
+              btn.disabled = document.getElementById("composeTa")?.value.trim().length === 0;
             if (toggle) {
               toggle.style.opacity = "1";
               toggle.style.pointerEvents = "auto";
@@ -1694,15 +1726,13 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
               toggle.style.opacity = "0.45";
               toggle.style.pointerEvents = "none";
             }
-            if (typeof window.closeCompose === "function")
-              window.closeCompose();
+            if (typeof window.closeCompose === "function") window.closeCompose();
           }
         } catch (e) {
           window._todayCount = 0;
         }
       }
 
-      // ── HELPERS ──
       function getToday() {
         const n = new Date();
         return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, "0")}-${String(n.getDate()).padStart(2, "0")}`;
@@ -1718,7 +1748,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
         return h > 0 ? `Resets in ${h}h ${m}m` : `Resets in ${m}m`;
       }
 
-      // ── APPLY AVATAR TO COMPOSE BOXES ──
       function applyComposeAvatar(photoURL, initial) {
         const miniAv = document.getElementById("miniAv");
         const composeAv = document.getElementById("composeAv");
@@ -1736,8 +1765,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
             img.src = photoURL;
             img.alt = "avatar";
             img.referrerPolicy = "no-referrer";
-            img.style.cssText =
-              "width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;";
+            img.style.cssText = "width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;";
             img.onerror = () => {
               el.textContent = initial;
               el.style.background = "";
@@ -1752,8 +1780,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
             img.src = photoURL;
             img.alt = "avatar";
             img.referrerPolicy = "no-referrer";
-            img.style.cssText =
-              "width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;";
+            img.style.cssText = "width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;";
             img.onerror = () => {
               el.textContent = initial;
               el.style.background = "";
