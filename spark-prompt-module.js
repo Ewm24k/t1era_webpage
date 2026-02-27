@@ -33,9 +33,6 @@ const db = getFirestore(app);
 const SPARKS_COL = "sparks";
 const PROMPT_TAB = "prompt";
 
-// ══════════════════════════════════════════════════════════════
-// PROMPT LIBRARY
-// ══════════════════════════════════════════════════════════════
 const PROMPT_LIBRARY = [
   {
     id: "p1",
@@ -78,15 +75,9 @@ const PROMPT_LIBRARY = [
 let _activePromptIndex = 0;
 let _promptAutoRefreshTimer = null;
 
-// ══════════════════════════════════════════════════════════════
-// AUTO-REFRESH — 35s interval, matches standard spark tab behaviour
-// startPromptAutoRefresh() called when tab-1 becomes active
-// stopPromptAutoRefresh() called when leaving the tab
-// ══════════════════════════════════════════════════════════════
 function startPromptAutoRefresh() {
-  stopPromptAutoRefresh(); // clear any existing timer first
+  stopPromptAutoRefresh();
   _promptAutoRefreshTimer = setInterval(() => {
-    // Only auto-refresh if panel-1 (prompt tab) is currently visible
     const panel = document.getElementById("panel-1");
     if (panel && !panel.classList.contains("hidden") && !panel.hidden) {
       startPromptFeed();
@@ -101,9 +92,6 @@ function stopPromptAutoRefresh() {
   }
 }
 
-// ══════════════════════════════════════════════════════════════
-// TIME HELPER
-// ══════════════════════════════════════════════════════════════
 function _timeAgo(ts) {
   if (!ts) return "just now";
   const date = ts.toDate ? ts.toDate() : new Date(ts);
@@ -123,10 +111,6 @@ function _timeAgo(ts) {
   return `${Math.floor(mths / 12)}y ago`;
 }
 
-// ══════════════════════════════════════════════════════════════
-// SKELETON HELPERS — show while fetching, hide when done
-// mirrors hidePageSkeleton() behaviour in spark-module.js
-// ══════════════════════════════════════════════════════════════
 function _showPromptSkeleton() {
   const sk = document.getElementById("skPromptFeed");
   const real = document.getElementById("realPromptFeedWrap");
@@ -141,9 +125,6 @@ function _hidePromptSkeleton() {
   if (real) real.classList.remove("sk-hidden");
 }
 
-// ══════════════════════════════════════════════════════════════
-// DOTS MENU — dropdown with Delete (owner) or Report (others)
-// ══════════════════════════════════════════════════════════════
 function _closeAllDotsMenus() {
   document.querySelectorAll(".prompt-dots-menu").forEach((m) => m.remove());
 }
@@ -229,26 +210,21 @@ function openPromptDotsMenu(btn, sparkId, ownerUid) {
       e.stopPropagation();
       _closeAllDotsMenus();
       if (typeof window.showToast === "function")
-        window.showToast("Reported — thank you \uD83D\uDE4F");
+        window.showToast("Reported — thank you 🙏");
     });
     menu.appendChild(reportBtn);
   }
 
-  // Anchor menu to the dots button wrapper
   const wrapper = btn.parentElement;
   wrapper.style.position = "relative";
   wrapper.appendChild(menu);
 
-  // Close on any outside click
   setTimeout(() => {
     document.addEventListener("click", _closeAllDotsMenus, { once: true });
   }, 0);
 }
 window.openPromptDotsMenu = openPromptDotsMenu;
 
-// ══════════════════════════════════════════════════════════════
-// DELETE PROMPT CARD — Firestore delete + DOM remove + toast
-// ══════════════════════════════════════════════════════════════
 async function _promptDeleteCard(sparkId) {
   _closeAllDotsMenus();
   if (!sparkId) return;
@@ -270,9 +246,6 @@ async function _promptDeleteCard(sparkId) {
 }
 window._promptDeleteCard = _promptDeleteCard;
 
-// ══════════════════════════════════════════════════════════════
-// COPY TO CLIPBOARD — used by quote block copy icon
-// ══════════════════════════════════════════════════════════════
 window._copyQuoteText = function (encodedText) {
   const text = decodeURIComponent(encodedText);
   const doFallback = () => {
@@ -284,14 +257,14 @@ window._copyQuoteText = function (encodedText) {
     document.execCommand("copy");
     ta.remove();
     if (typeof window.showToast === "function")
-      window.showToast("Copied \u2713");
+      window.showToast("Copied ✓");
   };
   if (navigator.clipboard) {
     navigator.clipboard
       .writeText(text)
       .then(() => {
         if (typeof window.showToast === "function")
-          window.showToast("Copied to clipboard \u2713");
+          window.showToast("Copied to clipboard ✓");
       })
       .catch(doFallback);
   } else {
@@ -299,10 +272,6 @@ window._copyQuoteText = function (encodedText) {
   }
 };
 
-// ══════════════════════════════════════════════════════════════
-// LIKE — full parity with standard spark
-// Optimistic UI + delegates to _toggleLikeFn (XP + notif + activity)
-// ══════════════════════════════════════════════════════════════
 window._promptToggleLike = async function (btn) {
   const card = btn.closest(".spark-card[data-spark-id]");
   if (!card) return;
@@ -311,7 +280,6 @@ window._promptToggleLike = async function (btn) {
   const sparkText =
     card.querySelector(".spark-text")?.textContent?.slice(0, 80) || "";
 
-  // Optimistic UI
   const on = btn.classList.toggle("liked");
   const icon = btn.querySelector("i");
   const cnt = btn.querySelector("span");
@@ -319,19 +287,13 @@ window._promptToggleLike = async function (btn) {
   icon.className = on ? "ph-fill ph-heart" : "ph-bold ph-heart";
   cnt.textContent = on ? n + 1 : Math.max(0, n - 1);
 
-  // Persist via shared handler in spark-module.js (XP + notif)
   if (typeof window._toggleLikeFn === "function") {
     window._toggleLikeFn({ liked: on, sparkId, ownerUid, sparkText });
   }
 
-  // Soft-refresh this card's like count after a short delay so the
-  // new value from Firestore is reflected without a full feed reload
   setTimeout(() => _softRefreshCard(sparkId), 1200);
 };
 
-// ══════════════════════════════════════════════════════════════
-// BOOKMARK — full parity with standard spark (notification)
-// ══════════════════════════════════════════════════════════════
 window._promptToggleBookmark = function (btn) {
   const on = btn.classList.toggle("bookmarked");
   const icon = btn.querySelector("i");
@@ -352,9 +314,6 @@ window._promptToggleBookmark = function (btn) {
   }
 };
 
-// ══════════════════════════════════════════════════════════════
-// IMAGE LIGHTBOX — full-screen viewer for prompt card images
-// ══════════════════════════════════════════════════════════════
 function _openPromptLightbox(src) {
   let lb = document.getElementById("promptLightbox");
   if (!lb) {
@@ -389,22 +348,17 @@ function _closePromptLightbox() {
 }
 window._closePromptLightbox = _closePromptLightbox;
 
-// Close lightbox on Escape key
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") _closePromptLightbox();
 });
 
-// ══════════════════════════════════════════════════════════════
-// PROMPT MEDIA GRID — same layout as standard spark (g1/g2/g3/g4)
-// but with stopPropagation + lightbox on each image click
-// ══════════════════════════════════════════════════════════════
 function _promptBuildMediaGrid(images) {
   if (!images || images.length === 0) return "";
   const imgs = images.slice(0, 4);
   const cls = `g${imgs.length}`;
   const cells = imgs
     .map((src) => {
-      const safeSrc = src.replace(/'/g, "\'");
+      const safeSrc = src.replace(/'/g, "\\'");
       return `<div class="media-cell" onclick="event.stopPropagation();_openPromptLightbox('${safeSrc}')" style="cursor:zoom-in;overflow:hidden;border-radius:8px;">
       <img src="${safeSrc}" style="width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;" loading="lazy" onerror="this.closest('.media-cell').style.display='none'">
     </div>`;
@@ -417,15 +371,20 @@ function _promptBuildMediaGrid(images) {
 // RENDER PROMPT CARD
 // ══════════════════════════════════════════════════════════════
 function renderPromptCard(id, d, rankLabel) {
+  // ── FIX: declare currentUid FIRST before any usage ──
+  const currentUid = window._sparkUser?.uid;
+
   const panel = document.getElementById("realPromptFeed");
   if (!panel) return;
 
- 
+  // ── FIX: own cards always use live in-memory display name pref ──
   const isOwnCard = d.uid && currentUid && d.uid === currentUid;
   let name, handle;
   if (isOwnCard) {
     const ud = window._sparkUserData || {};
-    name = window._resolveDisplayName(ud, window._displayNamePref);
+    name = window._resolveDisplayName
+      ? window._resolveDisplayName(ud, window._displayNamePref)
+      : ud.fullName || "T1ERA User";
     handle =
       ud.nickname ||
       window._sparkUser?.email?.split("@")[0] ||
@@ -435,6 +394,7 @@ function renderPromptCard(id, d, rankLabel) {
     name = d.authorName || "T1ERA User";
     handle = d.authorHandle || "user";
   }
+
   const photo = d.authorPhoto || "";
   const txt = d.text || "";
   const promptText = d.promptText || "";
@@ -445,7 +405,6 @@ function renderPromptCard(id, d, rankLabel) {
     ? `<img src="${photo}" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;" onerror="this.style.display='none'">`
     : initial;
 
-  // Quote block — strip raw syntax, render with "Prompt" label + copy icon
   const quoteMatch = txt.match(/```quote\n([\s\S]*?)\n```/);
   const quoteContent = quoteMatch ? quoteMatch[1] : d.quoteText || null;
   const displayRaw = quoteMatch
@@ -471,9 +430,8 @@ function renderPromptCard(id, d, rankLabel) {
   const safePhoto = photo.replace(/'/g, "\\'");
   const safeOwnerUid = (d.uid || "").replace(/'/g, "\\'");
 
-  const isOwner = d.uid && window._sparkUser && d.uid === window._sparkUser.uid;
+  const isOwner = isOwnCard;
 
-  // Prompt question block shown above the user's answer
   const promptBlockHtml = promptText
     ? `<div class="prompt-card">
          <div class="prompt-label"><i class="ph-bold ph-chat-teardrop-dots"></i> Prompt</div>
@@ -558,7 +516,6 @@ function renderPromptCard(id, d, rankLabel) {
     : panel.appendChild(article);
 
   // Fetch real like count + check if current user already liked
-  const currentUid = window._sparkUser?.uid;
   getDocs(collection(db, SPARKS_COL, id, "likes"))
     .then((snap) => {
       const el = document.getElementById("plkc-" + id);
@@ -576,7 +533,6 @@ function renderPromptCard(id, d, rankLabel) {
       if (el) el.textContent = "0";
     });
 
-  // Fetch real reply count
   getDocs(collection(db, SPARKS_COL, id, "comments"))
     .then((snap) => {
       const el = document.getElementById("prpc-" + id);
@@ -585,10 +541,6 @@ function renderPromptCard(id, d, rankLabel) {
     .catch(() => {});
 }
 
-// ══════════════════════════════════════════════════════════════
-// SOFT REFRESH — re-fetches like + reply counts on a single card
-// without skeleton flash. Used after like/reply actions.
-// ══════════════════════════════════════════════════════════════
 async function _softRefreshCard(sparkId) {
   try {
     const [likeSnap, replySnap] = await Promise.all([
@@ -602,12 +554,11 @@ async function _softRefreshCard(sparkId) {
     const replyEl = document.getElementById("prpc-" + sparkId);
     if (replyEl) replyEl.textContent = replySnap.size;
 
-    // Re-check liked state
-    const currentUid = window._sparkUser?.uid;
-    if (currentUid) {
+    const uid = window._sparkUser?.uid;
+    if (uid) {
       const likeBtn = document.getElementById("plk-" + sparkId);
       if (likeBtn) {
-        const alreadyLiked = likeSnap.docs.some((d) => d.id === currentUid);
+        const alreadyLiked = likeSnap.docs.some((d) => d.id === uid);
         likeBtn.classList.toggle("liked", alreadyLiked);
         likeBtn.querySelector("i").className = alreadyLiked
           ? "ph-fill ph-heart"
@@ -615,27 +566,20 @@ async function _softRefreshCard(sparkId) {
       }
     }
   } catch (e) {
-    // Silent fail — optimistic UI already updated
+    // Silent fail
   }
 }
 
-// ══════════════════════════════════════════════════════════════
-// START PROMPT FEED
-// Shows skeleton while fetching, hides it when data is ready
-// ══════════════════════════════════════════════════════════════
 async function startPromptFeed() {
   const container = document.getElementById("realPromptFeed");
   if (!container) return;
 
-  // Show skeleton while loading
   _showPromptSkeleton();
 
-  // Clear previously rendered Firestore cards
   container
     .querySelectorAll(".spark-card[data-spark-id]")
     .forEach((el) => el.remove());
 
-  // Spin refresh button
   const refreshBtn = document.getElementById("promptRefreshBtn");
   const icon = document.getElementById("promptRefreshIcon");
   if (refreshBtn) refreshBtn.classList.add("spinning");
@@ -658,7 +602,6 @@ async function startPromptFeed() {
       };
       docs.sort((a, b) => toMs(b.data.createdAt) - toMs(a.data.createdAt));
 
-      // Fetch ranks for each unique author
       const uniqueUids = [
         ...new Set(
           docs
@@ -713,15 +656,11 @@ async function startPromptFeed() {
     console.error("startPromptFeed error:", e);
   }
 
-  // Always reveal real content and stop skeleton regardless of outcome
   _hidePromptSkeleton();
   if (refreshBtn) refreshBtn.classList.remove("spinning");
   if (icon) icon.style.animation = "";
 }
 
-// ══════════════════════════════════════════════════════════════
-// PROMPT COMPOSE — open / close / cycle / input
-// ══════════════════════════════════════════════════════════════
 function openPromptCompose() {
   const box = document.getElementById("promptComposeBox");
   const toggle = document.getElementById("promptComposeToggle");
@@ -794,9 +733,6 @@ function onPromptInput(ta) {
   if (btn) btn.disabled = trim === 0;
 }
 
-// ══════════════════════════════════════════════════════════════
-// IMAGE COMPRESSION — max 800px, JPEG 0.72
-// ══════════════════════════════════════════════════════════════
 function _compressImage(dataUrl) {
   return new Promise((resolve) => {
     const img = new Image();
@@ -823,9 +759,6 @@ function _compressImage(dataUrl) {
   });
 }
 
-// ══════════════════════════════════════════════════════════════
-// ATTACH MEDIA — compress before storing in DOM
-// ══════════════════════════════════════════════════════════════
 function attachPromptMedia(input) {
   const strip = document.getElementById("promptMediaStrip");
   if (!strip) return;
@@ -846,9 +779,6 @@ function attachPromptMedia(input) {
   input.value = "";
 }
 
-// ══════════════════════════════════════════════════════════════
-// SUBMIT PROMPT SPARK
-// ══════════════════════════════════════════════════════════════
 async function submitPromptSpark() {
   const user = window._sparkUser;
   if (!user) return;
@@ -862,11 +792,13 @@ async function submitPromptSpark() {
   const btn = document.getElementById("promptSubmitBtn");
   if (btn) {
     btn.disabled = true;
-    btn.textContent = "Posting\u2026";
+    btn.textContent = "Posting…";
   }
 
   const ud = window._sparkUserData || {};
-  const name = ud.fullName || user.displayName || "T1ERA User";
+  const name = window._resolveDisplayName
+    ? window._resolveDisplayName(ud, window._displayNamePref)
+    : ud.fullName || user.displayName || "T1ERA User";
   const handle = ud.nickname || (user.email || "user").split("@")[0];
   const photo = ud.profilePicture?.url || user.photoURL || "";
 
@@ -886,7 +818,6 @@ async function submitPromptSpark() {
       reposts: 0,
     };
 
-    // Collect compressed images
     const promptImgs = document.querySelectorAll(
       "#promptMediaStrip .media-thumb img",
     );
@@ -894,13 +825,11 @@ async function submitPromptSpark() {
       sparkData.images = Array.from(promptImgs).map((img) => img.src);
     }
 
-    // Save quoteText if user inserted a quote block
     const quoteMatch = txt.match(/```quote\n([\s\S]*?)\n```/);
     if (quoteMatch) sparkData.quoteText = quoteMatch[1];
 
     await addDoc(collection(db, SPARKS_COL), sparkData);
 
-    // Award +1 spark point (= +20 XP)
     try {
       await updateDoc(doc(db, "users", user.uid), {
         "point.spark": increment(1),
@@ -909,14 +838,13 @@ async function submitPromptSpark() {
       console.warn("XP spark award error:", xpe);
     }
 
-    // Log to activity history
     try {
       await addDoc(collection(db, "users", user.uid, "activityHistory"), {
         type: "spark",
         icon: "ph-chat-teardrop-dots",
         iconColor: "var(--purple)",
         bgClass: "purple-bg",
-        text: `<strong>Posted a Prompt Spark</strong>: "${txt.slice(0, 50)}${txt.length > 50 ? "\u2026" : ""}"`,
+        text: `<strong>Posted a Prompt Spark</strong>: "${txt.slice(0, 50)}${txt.length > 50 ? "…" : ""}"`,
         createdAt: serverTimestamp(),
       });
     } catch (ae) {
@@ -924,11 +852,11 @@ async function submitPromptSpark() {
     }
 
     if (typeof window.showToast === "function")
-      window.showToast("Prompt Spark posted \uD83D\uDCAC");
+      window.showToast("Prompt Spark posted 💬");
 
     if (btn) {
       btn.disabled = false;
-      btn.textContent = "Spark \u26A1";
+      btn.textContent = "Spark ⚡";
     }
     closePromptCompose();
     await startPromptFeed();
@@ -937,23 +865,14 @@ async function submitPromptSpark() {
     alert("Failed to post. Please try again.");
     if (btn) {
       btn.disabled = false;
-      btn.textContent = "Spark \u26A1";
+      btn.textContent = "Spark ⚡";
     }
   }
 }
 
-// ══════════════════════════════════════════════════════════════
-// EXPOSE TO WINDOW
-// ══════════════════════════════════════════════════════════════
 window.startPromptFeed = startPromptFeed;
 
-// ── Reply-submit hook ──
-// When a reply is submitted and the reply overlay's sparkId belongs to
-// a prompt card, trigger a full feed refresh so the reply count updates.
-// We wrap the existing _submitReplyFn (set by spark-module.js) to
-// also call startPromptFeed after completion when on the prompt tab.
 (function _installPromptReplyHook() {
-  // Retry until spark-module.js has set _submitReplyFn
   const tryInstall = () => {
     const original = window._submitReplyFn;
     if (typeof original !== "function") {
@@ -962,11 +881,9 @@ window.startPromptFeed = startPromptFeed;
     }
     window._submitReplyFn = async function (txt) {
       await original(txt);
-      // After reply submitted, refresh prompt feed if it is the active tab
       const panel = document.getElementById("panel-1");
       const isPromptTabActive =
         panel && !panel.classList.contains("hidden") && !panel.hidden;
-      // Also check if the reply was for a prompt card
       const sparkId = window._replyCtx?.sparkId;
       const isPromptCard =
         sparkId &&
@@ -976,16 +893,13 @@ window.startPromptFeed = startPromptFeed;
       if (isPromptTabActive || isPromptCard) {
         setTimeout(() => startPromptFeed(), 600);
       } else if (isPromptCard) {
-        // Soft refresh the specific card's counts
         setTimeout(() => _softRefreshCard(sparkId), 600);
       }
     };
   };
-  setTimeout(tryInstall, 800); // give spark-module.js time to set _submitReplyFn first
+  setTimeout(tryInstall, 800);
 })();
 
-// ── Start auto-refresh once the module loads ──
-// spark-module.js calls startPromptFeed() after auth; we hook in after that.
 (function _installAutoRefresh() {
   const tryInstall = () => {
     if (window._sparkUser) {
@@ -996,14 +910,13 @@ window.startPromptFeed = startPromptFeed;
   };
   setTimeout(tryInstall, 1000);
 })();
+
 window.openPromptCompose = openPromptCompose;
 window.closePromptCompose = closePromptCompose;
 window.cyclePrompt = cyclePrompt;
 window.onPromptInput = onPromptInput;
 window.submitPromptSpark = submitPromptSpark;
 window.attachPromptMedia = attachPromptMedia;
-
-// Quote button delegates to insertQuoteFormat in spark-core.js
 window.startPromptAutoRefresh = startPromptAutoRefresh;
 window.stopPromptAutoRefresh = stopPromptAutoRefresh;
 
