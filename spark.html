@@ -468,11 +468,55 @@
       }
 
       /* ══════════════════════════════════════════
+   SUPER TABS (SPARKS / T1ERA) — above inner tabs
+══════════════════════════════════════════ */
+      .super-tabs-bar {
+        position: sticky;
+        top: 52px;
+        z-index: 310;
+        background: rgba(0, 0, 0, 0.95);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .super-tab-btn {
+        flex: 1;
+        max-width: 200px;
+        padding: 13px 10px;
+        background: none;
+        border: none;
+        border-bottom: 2px solid transparent;
+        color: var(--text-3);
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        font-family: var(--f-display);
+        text-transform: uppercase;
+        transition: all 0.18s;
+        text-align: center;
+      }
+      .super-tab-btn.active {
+        color: var(--pink-2);
+        border-bottom-color: var(--pink-2);
+      }
+      .super-tab-btn:hover:not(.active) {
+        color: var(--text-2);
+      }
+      .super-tab-panel {
+        display: none;
+      }
+      .super-tab-panel.active {
+        display: block;
+      }
+
+      /* ══════════════════════════════════════════
    TABS (sticky under topbar)
 ══════════════════════════════════════════ */
       .tabs-bar {
         position: sticky;
-        top: 52px;
+        top: 98px;
         z-index: 200;
         background: rgba(0, 0, 0, 0.92);
         backdrop-filter: blur(16px);
@@ -3279,271 +3323,261 @@
 
       <!-- ── CENTER FEED ── -->
       <div class="feed-col">
-        <!-- TABS -->
-        <div class="tabs-bar">
-          <button class="tab-btn active" onclick="switchTab(0, this)">
-            ⚡ Standard Spark
-          </button>
-          <button class="tab-btn" onclick="switchTab(1, this)">
-            💬 Spark Prompt
-          </button>
-          <button class="tab-btn" onclick="switchTab(2, this)">
-            🔥 Trending
-          </button>
+
+        <!-- ═══════════════════════════
+         SUPER TABS — SPARKS / T1ERA
+        ═══════════════════════════ -->
+        <div class="super-tabs-bar">
+          <button class="super-tab-btn active" onclick="switchSuperTab(0, this)">⚡ SPARKS</button>
+          <button class="super-tab-btn" onclick="switchSuperTab(1, this)">T1ERA</button>
         </div>
 
-        <!-- ════════════════════════
-         TAB 0 — STANDARD SPARK
-    ════════════════════════ -->
-        <div class="tab-panel active" id="panel-0">
-          <!-- Center feed skeleton (shown until auth+data ready) -->
-          <div class="sk-page-overlay" id="skFeed">
-            <div
-              class="sk-pulse sk-compose"
-              style="
-                margin: 0;
-                border-radius: 0;
-                height: 64px;
-                border-bottom: 1px solid var(--border);
-              "
-            ></div>
-            <div class="sk-card">
-              <div class="sk-card-head">
-                <div class="sk-pulse sk-circle sk-card-av"></div>
-                <div class="sk-card-meta">
-                  <div class="sk-pulse sk-line w60"></div>
-                  <div class="sk-pulse sk-line w40"></div>
-                </div>
-              </div>
-              <div class="sk-pulse sk-line w90"></div>
-              <div class="sk-pulse sk-line w70"></div>
-              <div class="sk-card-acts">
-                <div class="sk-pulse sk-act"></div>
-                <div class="sk-pulse sk-act"></div>
-                <div class="sk-pulse sk-act"></div>
-                <div class="sk-pulse sk-act"></div>
-              </div>
-            </div>
-            <div class="sk-card">
-              <div class="sk-card-head">
-                <div class="sk-pulse sk-circle sk-card-av"></div>
-                <div class="sk-card-meta">
-                  <div class="sk-pulse sk-line w60"></div>
-                  <div class="sk-pulse sk-line w40"></div>
-                </div>
-              </div>
-              <div class="sk-pulse sk-line w90"></div>
-              <div class="sk-pulse sk-line w70"></div>
-              <div class="sk-card-acts">
-                <div class="sk-pulse sk-act"></div>
-                <div class="sk-pulse sk-act"></div>
-                <div class="sk-pulse sk-act"></div>
-                <div class="sk-pulse sk-act"></div>
-              </div>
-            </div>
-            <div class="sk-card">
-              <div class="sk-card-head">
-                <div class="sk-pulse sk-circle sk-card-av"></div>
-                <div class="sk-card-meta">
-                  <div class="sk-pulse sk-line w60"></div>
-                  <div class="sk-pulse sk-line w40"></div>
-                </div>
-              </div>
-              <div class="sk-pulse sk-line w90"></div>
-              <div class="sk-pulse sk-line w70"></div>
-              <div class="sk-card-acts">
-                <div class="sk-pulse sk-act"></div>
-                <div class="sk-pulse sk-act"></div>
-                <div class="sk-pulse sk-act"></div>
-                <div class="sk-pulse sk-act"></div>
-              </div>
-            </div>
-            <div class="sk-card">
-              <div class="sk-card-head">
-                <div class="sk-pulse sk-circle sk-card-av"></div>
-                <div class="sk-card-meta">
-                  <div class="sk-pulse sk-line w60"></div>
-                  <div class="sk-pulse sk-line w40"></div>
-                </div>
-              </div>
-              <div class="sk-pulse sk-line w90"></div>
-              <div class="sk-pulse sk-line w70"></div>
-              <div class="sk-card-acts">
-                <div class="sk-pulse sk-act"></div>
-                <div class="sk-pulse sk-act"></div>
-                <div class="sk-pulse sk-act"></div>
-                <div class="sk-pulse sk-act"></div>
-              </div>
-            </div>
+        <!-- ══ SUPER PANEL 0 — SPARKS (all existing content) ══ -->
+        <div class="super-tab-panel active" id="super-panel-0">
+
+          <!-- TABS -->
+          <div class="tabs-bar">
+            <button class="tab-btn active" onclick="switchTab(0, this)">
+              ⚡ Standard Spark
+            </button>
+            <button class="tab-btn" onclick="switchTab(1, this)">
+              💬 Spark Prompt
+            </button>
+            <button class="tab-btn" onclick="switchTab(2, this)">
+              🔥 Trending
+            </button>
           </div>
 
-          <!-- real feed content (hidden until auth+data ready) -->
-          <div class="real-content sk-hidden" id="realFeed">
-            <!-- Feed Mini Header -->
-            <div class="feed-mini-header">
-              <div class="feed-mini-title">
-                <i class="ph-bold ph-lightning"></i>
-                Sparks Feed
+          <!-- ════════════════════════
+               TAB 0 — STANDARD SPARK
+          ════════════════════════ -->
+          <div class="tab-panel active" id="panel-0">
+            <!-- Center feed skeleton (shown until auth+data ready) -->
+            <div class="sk-page-overlay" id="skFeed">
+              <div
+                class="sk-pulse sk-compose"
+                style="
+                  margin: 0;
+                  border-radius: 0;
+                  height: 64px;
+                  border-bottom: 1px solid var(--border);
+                "
+              ></div>
+              <div class="sk-card">
+                <div class="sk-card-head">
+                  <div class="sk-pulse sk-circle sk-card-av"></div>
+                  <div class="sk-card-meta">
+                    <div class="sk-pulse sk-line w60"></div>
+                    <div class="sk-pulse sk-line w40"></div>
+                  </div>
+                </div>
+                <div class="sk-pulse sk-line w90"></div>
+                <div class="sk-pulse sk-line w70"></div>
+                <div class="sk-card-acts">
+                  <div class="sk-pulse sk-act"></div>
+                  <div class="sk-pulse sk-act"></div>
+                  <div class="sk-pulse sk-act"></div>
+                  <div class="sk-pulse sk-act"></div>
+                </div>
               </div>
-              <button
-                class="feed-refresh-btn"
-                id="feedRefreshBtn"
-                onclick="triggerFeedRefresh()"
-                title="Refresh feed"
-              >
-                <i class="ph-bold ph-arrows-clockwise" id="feedRefreshIcon"></i>
-              </button>
+              <div class="sk-card">
+                <div class="sk-card-head">
+                  <div class="sk-pulse sk-circle sk-card-av"></div>
+                  <div class="sk-card-meta">
+                    <div class="sk-pulse sk-line w60"></div>
+                    <div class="sk-pulse sk-line w40"></div>
+                  </div>
+                </div>
+                <div class="sk-pulse sk-line w90"></div>
+                <div class="sk-pulse sk-line w70"></div>
+                <div class="sk-card-acts">
+                  <div class="sk-pulse sk-act"></div>
+                  <div class="sk-pulse sk-act"></div>
+                  <div class="sk-pulse sk-act"></div>
+                  <div class="sk-pulse sk-act"></div>
+                </div>
+              </div>
+              <div class="sk-card">
+                <div class="sk-card-head">
+                  <div class="sk-pulse sk-circle sk-card-av"></div>
+                  <div class="sk-card-meta">
+                    <div class="sk-pulse sk-line w60"></div>
+                    <div class="sk-pulse sk-line w40"></div>
+                  </div>
+                </div>
+                <div class="sk-pulse sk-line w90"></div>
+                <div class="sk-pulse sk-line w70"></div>
+                <div class="sk-card-acts">
+                  <div class="sk-pulse sk-act"></div>
+                  <div class="sk-pulse sk-act"></div>
+                  <div class="sk-pulse sk-act"></div>
+                  <div class="sk-pulse sk-act"></div>
+                </div>
+              </div>
+              <div class="sk-card">
+                <div class="sk-card-head">
+                  <div class="sk-pulse sk-circle sk-card-av"></div>
+                  <div class="sk-card-meta">
+                    <div class="sk-pulse sk-line w60"></div>
+                    <div class="sk-pulse sk-line w40"></div>
+                  </div>
+                </div>
+                <div class="sk-pulse sk-line w90"></div>
+                <div class="sk-pulse sk-line w70"></div>
+                <div class="sk-card-acts">
+                  <div class="sk-pulse sk-act"></div>
+                  <div class="sk-pulse sk-act"></div>
+                  <div class="sk-pulse sk-act"></div>
+                  <div class="sk-pulse sk-act"></div>
+                </div>
+              </div>
             </div>
 
-            <!-- Compose toggle -->
-            <div
-              class="compose-toggle"
-              id="composeToggle"
-              onclick="openCompose()"
-            >
-              <div class="compose-mini-av" id="miniAv">M</div>
-              <span class="compose-placeholder">What's sparking today…</span>
-              <button class="compose-plus-btn">
-                <i class="ph-bold ph-plus"></i>
-              </button>
-            </div>
-
-            <!-- Daily quota banner -->
-            <div class="quota-banner" id="quotaBanner">
-              <i class="ph-bold ph-warning"></i>
-              <span id="quotaMsg"></span>
-              <span class="quota-banner-reset" id="quotaReset"></span>
-            </div>
-
-            <!-- Compose box (hidden by default) -->
-            <div class="compose-box" id="composeBox">
-              <div class="compose-top">
-                <span class="compose-label"
-                  ><i class="ph-bold ph-lightning"></i> NEW SPARK</span
+            <!-- real feed content (hidden until auth+data ready) -->
+            <div class="real-content sk-hidden" id="realFeed">
+              <!-- Feed Mini Header -->
+              <div class="feed-mini-header">
+                <div class="feed-mini-title">
+                  <i class="ph-bold ph-lightning"></i>
+                  Sparks Feed
+                </div>
+                <button
+                  class="feed-refresh-btn"
+                  id="feedRefreshBtn"
+                  onclick="triggerFeedRefresh()"
+                  title="Refresh feed"
                 >
-                <button class="compose-close-btn" onclick="closeCompose()">
-                  <i class="ph-bold ph-x"></i>
+                  <i class="ph-bold ph-arrows-clockwise" id="feedRefreshIcon"></i>
                 </button>
               </div>
-              <div class="compose-body">
-                <div class="compose-av" id="composeAv">M</div>
-                <div style="flex: 1; min-width: 0">
-                  <textarea
-                    class="compose-textarea"
-                    id="composeTa"
-                    placeholder="Share what's on your mind… use #hashtags and @mentions"
-                    oninput="onComposeInput(this)"
-                    maxlength="500"
-                  ></textarea>
-                </div>
-              </div>
-              <!-- Media preview strip -->
-              <div class="media-strip" id="mediaStrip"></div>
-              <!-- Footer -->
-              <div class="compose-footer">
-                <div class="media-btns">
-                  <button class="media-btn" title="Photo">
-                    <i class="ph-bold ph-image"></i>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      onchange="attachMedia(this, 'image')"
-                    />
-                  </button>
-                  <button class="media-btn" title="Video">
-                    <i class="ph-bold ph-video-camera"></i>
-                    <input
-                      type="file"
-                      accept="video/*"
-                      onchange="attachMedia(this, 'video')"
-                    />
-                  </button>
-                  <button
-                    class="media-btn"
-                    title="GIF"
-                    onclick="alert('GIF picker — coming soon')"
-                  >
-                    <i class="ph-bold ph-gif"></i>
-                  </button>
-                  <button class="media-btn" title="File">
-                    <i class="ph-bold ph-paperclip"></i>
-                    <input
-                      type="file"
-                      accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar,.txt,.csv"
-                      onchange="attachMedia(this, 'file')"
-                    />
-                  </button>
-                  <button class="media-btn" title="Audio">
-                    <i class="ph-bold ph-microphone"></i>
-                    <input
-                      type="file"
-                      accept="audio/*"
-                      onchange="attachMedia(this, 'audio')"
-                    />
-                  </button>
-                  <button
-                    class="media-btn"
-                    title="Emoji"
-                    onclick="openEmojiPicker('composeTa')"
-                  >
-                    <i class="ph-bold ph-smiley"></i>
-                  </button>
-                  <button
-                    class="media-btn"
-                    title="Quote"
-                    onclick="insertQuoteFormat('composeTa')"
-                  >
-                    <i class="ph-bold ph-quotes"></i>
-                  </button>
-                </div>
-                <div class="compose-right">
-                  <span class="char-count" id="charCount">0 / 500</span>
-                  <button
-                    class="spark-submit-btn"
-                    id="submitBtn"
-                    disabled
-                    onclick="submitSpark()"
-                  >
-                    Spark ⚡
-                  </button>
-                </div>
-              </div>
-            </div>
 
-            <!-- ═══ DEMO SPARK CARDS ═══ -->
+              <!-- Compose toggle -->
+              <div
+                class="compose-toggle"
+                id="composeToggle"
+                onclick="openCompose()"
+              >
+                <div class="compose-mini-av" id="miniAv">M</div>
+                <span class="compose-placeholder">What's sparking today…</span>
+                <button class="compose-plus-btn">
+                  <i class="ph-bold ph-plus"></i>
+                </button>
+              </div>
 
-            <!-- Card 1: text + single image, already liked -->
-            <article class="spark-card fu" onclick="openSparkDetail(this)">
-              <div class="card-head">
-                <div class="av-wrap">
-                  <div
-                    class="spark-av"
-                    style="
-                      background: linear-gradient(135deg, #c2185b, #8b5cf6);
-                    "
-                    onclick="
-                      event.stopPropagation();
-                      showProfile(
-                        'Ikram Basri',
-                        'ewm24k',
-                        'LV 5 · Operative',
-                        128,
-                        947,
-                        'Just shipped T1ERA. Building the future in public 🔥 Founder · Dev · Strategist',
-                        '#c2185b',
-                        true,
-                      );
-                    "
+              <!-- Daily quota banner -->
+              <div class="quota-banner" id="quotaBanner">
+                <i class="ph-bold ph-warning"></i>
+                <span id="quotaMsg"></span>
+                <span class="quota-banner-reset" id="quotaReset"></span>
+              </div>
+
+              <!-- Compose box (hidden by default) -->
+              <div class="compose-box" id="composeBox">
+                <div class="compose-top">
+                  <span class="compose-label"
+                    ><i class="ph-bold ph-lightning"></i> NEW SPARK</span
                   >
-                    IB
+                  <button class="compose-close-btn" onclick="closeCompose()">
+                    <i class="ph-bold ph-x"></i>
+                  </button>
+                </div>
+                <div class="compose-body">
+                  <div class="compose-av" id="composeAv">M</div>
+                  <div style="flex: 1; min-width: 0">
+                    <textarea
+                      class="compose-textarea"
+                      id="composeTa"
+                      placeholder="Share what's on your mind… use #hashtags and @mentions"
+                      oninput="onComposeInput(this)"
+                      maxlength="500"
+                    ></textarea>
                   </div>
-                  <span class="online-dot"></span>
                 </div>
-                <div class="card-meta">
-                  <div class="meta-row-1">
-                    <span
-                      class="author-name"
+                <!-- Media preview strip -->
+                <div class="media-strip" id="mediaStrip"></div>
+                <!-- Footer -->
+                <div class="compose-footer">
+                  <div class="media-btns">
+                    <button class="media-btn" title="Photo">
+                      <i class="ph-bold ph-image"></i>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onchange="attachMedia(this, 'image')"
+                      />
+                    </button>
+                    <button class="media-btn" title="Video">
+                      <i class="ph-bold ph-video-camera"></i>
+                      <input
+                        type="file"
+                        accept="video/*"
+                        onchange="attachMedia(this, 'video')"
+                      />
+                    </button>
+                    <button
+                      class="media-btn"
+                      title="GIF"
+                      onclick="alert('GIF picker — coming soon')"
+                    >
+                      <i class="ph-bold ph-gif"></i>
+                    </button>
+                    <button class="media-btn" title="File">
+                      <i class="ph-bold ph-paperclip"></i>
+                      <input
+                        type="file"
+                        accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar,.txt,.csv"
+                        onchange="attachMedia(this, 'file')"
+                      />
+                    </button>
+                    <button class="media-btn" title="Audio">
+                      <i class="ph-bold ph-microphone"></i>
+                      <input
+                        type="file"
+                        accept="audio/*"
+                        onchange="attachMedia(this, 'audio')"
+                      />
+                    </button>
+                    <button
+                      class="media-btn"
+                      title="Emoji"
+                      onclick="openEmojiPicker('composeTa')"
+                    >
+                      <i class="ph-bold ph-smiley"></i>
+                    </button>
+                    <button
+                      class="media-btn"
+                      title="Quote"
+                      onclick="insertQuoteFormat('composeTa')"
+                    >
+                      <i class="ph-bold ph-quotes"></i>
+                    </button>
+                  </div>
+                  <div class="compose-right">
+                    <span class="char-count" id="charCount">0 / 500</span>
+                    <button
+                      class="spark-submit-btn"
+                      id="submitBtn"
+                      disabled
+                      onclick="submitSpark()"
+                    >
+                      Spark ⚡
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ═══ DEMO SPARK CARDS ═══ -->
+
+              <!-- Card 1: text + single image, already liked -->
+              <article class="spark-card fu" onclick="openSparkDetail(this)">
+                <div class="card-head">
+                  <div class="av-wrap">
+                    <div
+                      class="spark-av"
+                      style="
+                        background: linear-gradient(135deg, #c2185b, #8b5cf6);
+                      "
                       onclick="
                         event.stopPropagation();
                         showProfile(
@@ -3558,138 +3592,139 @@
                         );
                       "
                     >
-                      Ikram Basri
-                    </span>
-                    <span class="author-handle">@ewm24k</span>
-                    <button
-                      class="follow-pill on"
-                      onclick="
-                        event.stopPropagation();
-                        toggleFollow(this);
-                      "
-                    >
-                      Following
-                    </button>
-                    <span class="spark-time">2m ago</span>
+                      IB
+                    </div>
+                    <span class="online-dot"></span>
                   </div>
-                  <div class="badges-row">
-                    <span class="badge rank"
-                      ><i class="ph-fill ph-shield-star"></i> LV 5</span
-                    >
-                    <span class="badge verified">✓ Verified</span>
+                  <div class="card-meta">
+                    <div class="meta-row-1">
+                      <span
+                        class="author-name"
+                        onclick="
+                          event.stopPropagation();
+                          showProfile(
+                            'Ikram Basri',
+                            'ewm24k',
+                            'LV 5 · Operative',
+                            128,
+                            947,
+                            'Just shipped T1ERA. Building the future in public 🔥 Founder · Dev · Strategist',
+                            '#c2185b',
+                            true,
+                          );
+                        "
+                      >
+                        Ikram Basri
+                      </span>
+                      <span class="author-handle">@ewm24k</span>
+                      <button
+                        class="follow-pill on"
+                        onclick="
+                          event.stopPropagation();
+                          toggleFollow(this);
+                        "
+                      >
+                        Following
+                      </button>
+                      <span class="spark-time">2m ago</span>
+                    </div>
+                    <div class="badges-row">
+                      <span class="badge rank"
+                        ><i class="ph-fill ph-shield-star"></i> LV 5</span
+                      >
+                      <span class="badge verified">✓ Verified</span>
+                    </div>
+                  </div>
+                  <button class="dots-btn" onclick="event.stopPropagation()">
+                    <i class="ph-bold ph-dots-three-vertical"></i>
+                  </button>
+                </div>
+                <div class="card-content">
+                  <p class="spark-text">
+                    Just pushed a massive update to T1ERA 🚀 New profile page live
+                    — bio, status, banner presets, Cloudinary photo upload, and
+                    desktop layout. Really proud of this build.
+                    <span class="ht">#T1ERA</span>
+                    <span class="ht">#BuildInPublic</span>
+                    <span class="mn">@team</span> 🔥
+                  </p>
+                  <div class="media-grid g1">
+                    <div class="mi">
+                      <img
+                        src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=700&q=80"
+                        alt="code"
+                        loading="lazy"
+                      />
+                    </div>
                   </div>
                 </div>
-                <button class="dots-btn" onclick="event.stopPropagation()">
-                  <i class="ph-bold ph-dots-three-vertical"></i>
-                </button>
-              </div>
-              <div class="card-content">
-                <p class="spark-text">
-                  Just pushed a massive update to T1ERA 🚀 New profile page live
-                  — bio, status, banner presets, Cloudinary photo upload, and
-                  desktop layout. Really proud of this build.
-                  <span class="ht">#T1ERA</span>
-                  <span class="ht">#BuildInPublic</span>
-                  <span class="mn">@team</span> 🔥
-                </p>
-                <div class="media-grid g1">
-                  <div class="mi">
-                    <img
-                      src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=700&q=80"
-                      alt="code"
-                      loading="lazy"
-                    />
-                  </div>
-                </div>
-              </div>
-              <div class="action-bar">
-                <button
-                  class="act-btn like liked"
-                  onclick="
-                    event.stopPropagation();
-                    toggleLike(this);
-                  "
-                >
-                  <i class="ph-fill ph-heart"></i><span>142</span>
-                </button>
-                <button
-                  class="act-btn reply"
-                  onclick="
-                    event.stopPropagation();
-                    openReply(
-                      'Ikram Basri',
-                      'IB',
-                      '#c2185b',
-                      'Just pushed a massive update to T1ERA 🚀',
-                    );
-                  "
-                >
-                  <i class="ph-bold ph-chat-circle"></i><span>28</span>
-                </button>
-                <button
-                  class="act-btn repost"
-                  onclick="
-                    event.stopPropagation();
-                    toggleRepost(this);
-                  "
-                >
-                  <i class="ph-bold ph-repeat"></i><span>19</span>
-                </button>
-                <button
-                  class="act-btn share"
-                  onclick="
-                    event.stopPropagation();
-                    shareSpark();
-                  "
-                >
-                  <i class="ph-bold ph-share-network"></i><span>7</span>
-                </button>
-                <button
-                  class="act-btn bookmark"
-                  onclick="
-                    event.stopPropagation();
-                    toggleBookmark(this);
-                  "
-                  style="margin-left: auto"
-                >
-                  <i class="ph-bold ph-bookmark-simple"></i>
-                </button>
-              </div>
-            </article>
-
-            <!-- Card 2: reposted, text only -->
-            <article class="spark-card fu d1" onclick="openSparkDetail(this)">
-              <div class="repost-bar">
-                <i class="ph-bold ph-repeat"></i> Danial reposted
-              </div>
-              <div class="card-head">
-                <div class="av-wrap">
-                  <div
-                    class="spark-av"
-                    style="
-                      background: linear-gradient(135deg, #f59e0b, #f97316);
-                    "
+                <div class="action-bar">
+                  <button
+                    class="act-btn like liked"
                     onclick="
                       event.stopPropagation();
-                      showProfile(
-                        'Wani Aisyah',
-                        'waniaisyah',
-                        'LV 3 · Scout',
-                        64,
-                        210,
-                        'Tech enthusiast & T1ERA early adopter 🌟 Always building something new',
-                        '#f59e0b',
-                        false,
+                      toggleLike(this);
+                    "
+                  >
+                    <i class="ph-fill ph-heart"></i><span>142</span>
+                  </button>
+                  <button
+                    class="act-btn reply"
+                    onclick="
+                      event.stopPropagation();
+                      openReply(
+                        'Ikram Basri',
+                        'IB',
+                        '#c2185b',
+                        'Just pushed a massive update to T1ERA 🚀',
                       );
                     "
                   >
-                    WA
-                  </div>
+                    <i class="ph-bold ph-chat-circle"></i><span>28</span>
+                  </button>
+                  <button
+                    class="act-btn repost"
+                    onclick="
+                      event.stopPropagation();
+                      toggleRepost(this);
+                    "
+                  >
+                    <i class="ph-bold ph-repeat"></i><span>19</span>
+                  </button>
+                  <button
+                    class="act-btn share"
+                    onclick="
+                      event.stopPropagation();
+                      shareSpark();
+                    "
+                  >
+                    <i class="ph-bold ph-share-network"></i><span>7</span>
+                  </button>
+                  <button
+                    class="act-btn bookmark"
+                    onclick="
+                      event.stopPropagation();
+                      toggleBookmark(this);
+                    "
+                    style="margin-left: auto"
+                  >
+                    <i class="ph-bold ph-bookmark-simple"></i>
+                  </button>
                 </div>
-                <div class="card-meta">
-                  <div class="meta-row-1">
-                    <span
-                      class="author-name"
+              </article>
+
+              <!-- Card 2: reposted, text only -->
+              <article class="spark-card fu d1" onclick="openSparkDetail(this)">
+                <div class="repost-bar">
+                  <i class="ph-bold ph-repeat"></i> Danial reposted
+                </div>
+                <div class="card-head">
+                  <div class="av-wrap">
+                    <div
+                      class="spark-av"
+                      style="
+                        background: linear-gradient(135deg, #f59e0b, #f97316);
+                      "
                       onclick="
                         event.stopPropagation();
                         showProfile(
@@ -3698,127 +3733,127 @@
                           'LV 3 · Scout',
                           64,
                           210,
-                          'Tech enthusiast & T1ERA early adopter 🌟',
+                          'Tech enthusiast & T1ERA early adopter 🌟 Always building something new',
                           '#f59e0b',
                           false,
                         );
                       "
-                      >Wani Aisyah</span
                     >
-                    <span class="author-handle">@waniaisyah</span>
-                    <button
-                      class="follow-pill"
-                      onclick="
-                        event.stopPropagation();
-                        toggleFollow(this);
-                      "
-                    >
-                      <i class="ph-bold ph-plus"></i> Follow
-                    </button>
-                    <span class="spark-time">15m ago</span>
+                      WA
+                    </div>
                   </div>
-                  <div class="badges-row">
-                    <span class="badge rank">LV 3</span>
+                  <div class="card-meta">
+                    <div class="meta-row-1">
+                      <span
+                        class="author-name"
+                        onclick="
+                          event.stopPropagation();
+                          showProfile(
+                            'Wani Aisyah',
+                            'waniaisyah',
+                            'LV 3 · Scout',
+                            64,
+                            210,
+                            'Tech enthusiast & T1ERA early adopter 🌟',
+                            '#f59e0b',
+                            false,
+                          );
+                        "
+                        >Wani Aisyah</span
+                      >
+                      <span class="author-handle">@waniaisyah</span>
+                      <button
+                        class="follow-pill"
+                        onclick="
+                          event.stopPropagation();
+                          toggleFollow(this);
+                        "
+                      >
+                        <i class="ph-bold ph-plus"></i> Follow
+                      </button>
+                      <span class="spark-time">15m ago</span>
+                    </div>
+                    <div class="badges-row">
+                      <span class="badge rank">LV 3</span>
+                    </div>
                   </div>
+                  <button class="dots-btn" onclick="event.stopPropagation()">
+                    <i class="ph-bold ph-dots-three-vertical"></i>
+                  </button>
                 </div>
-                <button class="dots-btn" onclick="event.stopPropagation()">
-                  <i class="ph-bold ph-dots-three-vertical"></i>
-                </button>
-              </div>
-              <div class="card-content">
-                <p class="spark-text">
-                  The way AI is reshaping workflows in 2025 is genuinely insane.
-                  Shoutout to everyone building in public — you inspire me more
-                  than you know. Keep going 💪
-                  <span class="ht">#BuildInPublic</span>
-                  <span class="ht">#AI</span> <span class="ht">#T1ERA</span>
-                </p>
-              </div>
-              <div class="action-bar">
-                <button
-                  class="act-btn like"
-                  onclick="
-                    event.stopPropagation();
-                    toggleLike(this);
-                  "
-                >
-                  <i class="ph-bold ph-heart"></i><span>87</span>
-                </button>
-                <button
-                  class="act-btn reply"
-                  onclick="
-                    event.stopPropagation();
-                    openReply(
-                      'Wani Aisyah',
-                      'WA',
-                      '#f59e0b',
-                      'The way AI is reshaping workflows in 2025...',
-                    );
-                  "
-                >
-                  <i class="ph-bold ph-chat-circle"></i><span>14</span>
-                </button>
-                <button
-                  class="act-btn repost reposted"
-                  onclick="
-                    event.stopPropagation();
-                    toggleRepost(this);
-                  "
-                >
-                  <i class="ph-bold ph-repeat"></i><span>31</span>
-                </button>
-                <button
-                  class="act-btn share"
-                  onclick="
-                    event.stopPropagation();
-                    shareSpark();
-                  "
-                >
-                  <i class="ph-bold ph-share-network"></i><span>4</span>
-                </button>
-                <button
-                  class="act-btn bookmark"
-                  onclick="
-                    event.stopPropagation();
-                    toggleBookmark(this);
-                  "
-                  style="margin-left: auto"
-                >
-                  <i class="ph-bold ph-bookmark-simple"></i>
-                </button>
-              </div>
-            </article>
-
-            <!-- Card 3: double image grid -->
-            <article class="spark-card fu d2" onclick="openSparkDetail(this)">
-              <div class="card-head">
-                <div class="av-wrap">
-                  <div
-                    class="spark-av"
-                    style="
-                      background: linear-gradient(135deg, #10b981, #0ea5e9);
-                    "
+                <div class="card-content">
+                  <p class="spark-text">
+                    The way AI is reshaping workflows in 2025 is genuinely insane.
+                    Shoutout to everyone building in public — you inspire me more
+                    than you know. Keep going 💪
+                    <span class="ht">#BuildInPublic</span>
+                    <span class="ht">#AI</span> <span class="ht">#T1ERA</span>
+                  </p>
+                </div>
+                <div class="action-bar">
+                  <button
+                    class="act-btn like"
                     onclick="
                       event.stopPropagation();
-                      showProfile(
-                        'Luqman Faiz',
-                        'luqmanf',
-                        'LV 2 · Recruit',
-                        22,
-                        89,
-                        'Designer × developer. UI obsessed.',
-                        '#10b981',
-                        false,
+                      toggleLike(this);
+                    "
+                  >
+                    <i class="ph-bold ph-heart"></i><span>87</span>
+                  </button>
+                  <button
+                    class="act-btn reply"
+                    onclick="
+                      event.stopPropagation();
+                      openReply(
+                        'Wani Aisyah',
+                        'WA',
+                        '#f59e0b',
+                        'The way AI is reshaping workflows in 2025...',
                       );
                     "
                   >
-                    LF
-                  </div>
+                    <i class="ph-bold ph-chat-circle"></i><span>14</span>
+                  </button>
+                  <button
+                    class="act-btn repost reposted"
+                    onclick="
+                      event.stopPropagation();
+                      toggleRepost(this);
+                    "
+                  >
+                    <i class="ph-bold ph-repeat"></i><span>31</span>
+                  </button>
+                  <button
+                    class="act-btn share"
+                    onclick="
+                      event.stopPropagation();
+                      shareSpark();
+                    "
+                  >
+                    <i class="ph-bold ph-share-network"></i><span>4</span>
+                  </button>
+                  <button
+                    class="act-btn bookmark"
+                    onclick="
+                      event.stopPropagation();
+                      toggleBookmark(this);
+                    "
+                    style="margin-left: auto"
+                  >
+                    <i class="ph-bold ph-bookmark-simple"></i>
+                  </button>
                 </div>
-                <div class="card-meta">
-                  <div class="meta-row-1">
-                    <span
-                      class="author-name"
+              </article>
+
+              <!-- Card 3: double image grid -->
+              <article class="spark-card fu d2" onclick="openSparkDetail(this)">
+                <div class="card-head">
+                  <div class="av-wrap">
+                    <div
+                      class="spark-av"
+                      style="
+                        background: linear-gradient(135deg, #10b981, #0ea5e9);
+                      "
                       onclick="
                         event.stopPropagation();
                         showProfile(
@@ -3832,137 +3867,137 @@
                           false,
                         );
                       "
-                      >Luqman Faiz</span
                     >
-                    <span class="author-handle">@luqmanf</span>
-                    <button
-                      class="follow-pill"
-                      onclick="
-                        event.stopPropagation();
-                        toggleFollow(this);
-                      "
-                    >
-                      <i class="ph-bold ph-plus"></i> Follow
-                    </button>
-                    <span class="spark-time">1h ago</span>
+                      LF
+                    </div>
                   </div>
-                  <div class="badges-row">
-                    <span class="badge rank">LV 2</span>
+                  <div class="card-meta">
+                    <div class="meta-row-1">
+                      <span
+                        class="author-name"
+                        onclick="
+                          event.stopPropagation();
+                          showProfile(
+                            'Luqman Faiz',
+                            'luqmanf',
+                            'LV 2 · Recruit',
+                            22,
+                            89,
+                            'Designer × developer. UI obsessed.',
+                            '#10b981',
+                            false,
+                          );
+                        "
+                        >Luqman Faiz</span
+                      >
+                      <span class="author-handle">@luqmanf</span>
+                      <button
+                        class="follow-pill"
+                        onclick="
+                          event.stopPropagation();
+                          toggleFollow(this);
+                        "
+                      >
+                        <i class="ph-bold ph-plus"></i> Follow
+                      </button>
+                      <span class="spark-time">1h ago</span>
+                    </div>
+                    <div class="badges-row">
+                      <span class="badge rank">LV 2</span>
+                    </div>
+                  </div>
+                  <button class="dots-btn" onclick="event.stopPropagation()">
+                    <i class="ph-bold ph-dots-three-vertical"></i>
+                  </button>
+                </div>
+                <div class="card-content">
+                  <p class="spark-text">
+                    UI explorations this week — dark gradient interfaces with pink
+                    accent systems. Which direction do you prefer? Drop your
+                    thoughts 👇 <span class="ht">#UIDesign</span>
+                    <span class="ht">#DarkMode</span>
+                  </p>
+                  <div class="media-grid g2">
+                    <div class="mi">
+                      <img
+                        src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&q=80"
+                        alt="ui1"
+                        loading="lazy"
+                      />
+                    </div>
+                    <div class="mi">
+                      <img
+                        src="https://images.unsplash.com/photo-1551650975-87deedd944c3?w=400&q=80"
+                        alt="ui2"
+                        loading="lazy"
+                      />
+                    </div>
                   </div>
                 </div>
-                <button class="dots-btn" onclick="event.stopPropagation()">
-                  <i class="ph-bold ph-dots-three-vertical"></i>
-                </button>
-              </div>
-              <div class="card-content">
-                <p class="spark-text">
-                  UI explorations this week — dark gradient interfaces with pink
-                  accent systems. Which direction do you prefer? Drop your
-                  thoughts 👇 <span class="ht">#UIDesign</span>
-                  <span class="ht">#DarkMode</span>
-                </p>
-                <div class="media-grid g2">
-                  <div class="mi">
-                    <img
-                      src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&q=80"
-                      alt="ui1"
-                      loading="lazy"
-                    />
-                  </div>
-                  <div class="mi">
-                    <img
-                      src="https://images.unsplash.com/photo-1551650975-87deedd944c3?w=400&q=80"
-                      alt="ui2"
-                      loading="lazy"
-                    />
-                  </div>
-                </div>
-              </div>
-              <div class="action-bar">
-                <button
-                  class="act-btn like"
-                  onclick="
-                    event.stopPropagation();
-                    toggleLike(this);
-                  "
-                >
-                  <i class="ph-bold ph-heart"></i><span>56</span>
-                </button>
-                <button
-                  class="act-btn reply"
-                  onclick="
-                    event.stopPropagation();
-                    openReply(
-                      'Luqman Faiz',
-                      'LF',
-                      '#10b981',
-                      'UI explorations this week...',
-                    );
-                  "
-                >
-                  <i class="ph-bold ph-chat-circle"></i><span>9</span>
-                </button>
-                <button
-                  class="act-btn repost"
-                  onclick="
-                    event.stopPropagation();
-                    toggleRepost(this);
-                  "
-                >
-                  <i class="ph-bold ph-repeat"></i><span>12</span>
-                </button>
-                <button
-                  class="act-btn share"
-                  onclick="
-                    event.stopPropagation();
-                    shareSpark();
-                  "
-                >
-                  <i class="ph-bold ph-share-network"></i><span>3</span>
-                </button>
-                <button
-                  class="act-btn bookmark"
-                  onclick="
-                    event.stopPropagation();
-                    toggleBookmark(this);
-                  "
-                  style="margin-left: auto"
-                >
-                  <i class="ph-bold ph-bookmark-simple"></i>
-                </button>
-              </div>
-            </article>
-
-            <!-- Card 4: triple image grid -->
-            <article class="spark-card fu d3" onclick="openSparkDetail(this)">
-              <div class="card-head">
-                <div class="av-wrap">
-                  <div
-                    class="spark-av"
-                    style="
-                      background: linear-gradient(135deg, #8b5cf6, #c2185b);
-                    "
+                <div class="action-bar">
+                  <button
+                    class="act-btn like"
                     onclick="
                       event.stopPropagation();
-                      showProfile(
-                        'Danial L.',
-                        'danialL',
-                        'LV 4 · Operative',
-                        99,
-                        301,
-                        'Productivity nerd. Building the future. T1ERA power user.',
-                        '#8b5cf6',
-                        false,
+                      toggleLike(this);
+                    "
+                  >
+                    <i class="ph-bold ph-heart"></i><span>56</span>
+                  </button>
+                  <button
+                    class="act-btn reply"
+                    onclick="
+                      event.stopPropagation();
+                      openReply(
+                        'Luqman Faiz',
+                        'LF',
+                        '#10b981',
+                        'UI explorations this week...',
                       );
                     "
                   >
-                    DL
-                  </div>
+                    <i class="ph-bold ph-chat-circle"></i><span>9</span>
+                  </button>
+                  <button
+                    class="act-btn repost"
+                    onclick="
+                      event.stopPropagation();
+                      toggleRepost(this);
+                    "
+                  >
+                    <i class="ph-bold ph-repeat"></i><span>12</span>
+                  </button>
+                  <button
+                    class="act-btn share"
+                    onclick="
+                      event.stopPropagation();
+                      shareSpark();
+                    "
+                  >
+                    <i class="ph-bold ph-share-network"></i><span>3</span>
+                  </button>
+                  <button
+                    class="act-btn bookmark"
+                    onclick="
+                      event.stopPropagation();
+                      toggleBookmark(this);
+                    "
+                    style="margin-left: auto"
+                  >
+                    <i class="ph-bold ph-bookmark-simple"></i>
+                  </button>
                 </div>
-                <div class="card-meta">
-                  <div class="meta-row-1">
-                    <span
-                      class="author-name"
+              </article>
+
+              <!-- Card 4: triple image grid -->
+              <article class="spark-card fu d3" onclick="openSparkDetail(this)">
+                <div class="card-head">
+                  <div class="av-wrap">
+                    <div
+                      class="spark-av"
+                      style="
+                        background: linear-gradient(135deg, #8b5cf6, #c2185b);
+                      "
                       onclick="
                         event.stopPropagation();
                         showProfile(
@@ -3971,14 +4006,542 @@
                           'LV 4 · Operative',
                           99,
                           301,
-                          'Productivity nerd. Building the future.',
+                          'Productivity nerd. Building the future. T1ERA power user.',
                           '#8b5cf6',
                           false,
                         );
                       "
-                      >Danial L.</span
                     >
-                    <span class="author-handle">@danialL</span>
+                      DL
+                    </div>
+                  </div>
+                  <div class="card-meta">
+                    <div class="meta-row-1">
+                      <span
+                        class="author-name"
+                        onclick="
+                          event.stopPropagation();
+                          showProfile(
+                            'Danial L.',
+                            'danialL',
+                            'LV 4 · Operative',
+                            99,
+                            301,
+                            'Productivity nerd. Building the future.',
+                            '#8b5cf6',
+                            false,
+                          );
+                        "
+                        >Danial L.</span
+                      >
+                      <span class="author-handle">@danialL</span>
+                      <button
+                        class="follow-pill"
+                        onclick="
+                          event.stopPropagation();
+                          toggleFollow(this);
+                        "
+                      >
+                        <i class="ph-bold ph-plus"></i> Follow
+                      </button>
+                      <span class="spark-time">3h ago</span>
+                    </div>
+                    <div class="badges-row">
+                      <span class="badge rank">LV 4</span>
+                    </div>
+                  </div>
+                  <button class="dots-btn" onclick="event.stopPropagation()">
+                    <i class="ph-bold ph-dots-three-vertical"></i>
+                  </button>
+                </div>
+                <div class="card-content">
+                  <p class="spark-text">
+                    Workspace setup upgrade complete 🖥️ Three monitors, custom
+                    desk, ambient lighting. Focus level: maximum.
+                    <span class="ht">#SetupGoals</span>
+                    <span class="ht">#WorkFromHome</span>
+                  </p>
+                  <div class="media-grid g3">
+                    <div class="mi">
+                      <img
+                        src="https://images.unsplash.com/photo-1593640408182-31c228f2d2e1?w=500&q=80"
+                        alt="desk1"
+                        loading="lazy"
+                      />
+                    </div>
+                    <div class="mi">
+                      <img
+                        src="https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=400&q=80"
+                        alt="desk2"
+                        loading="lazy"
+                      />
+                    </div>
+                    <div class="mi">
+                      <img
+                        src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&q=80"
+                        alt="desk3"
+                        loading="lazy"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div class="action-bar">
+                  <button
+                    class="act-btn like"
+                    onclick="
+                      event.stopPropagation();
+                      toggleLike(this);
+                    "
+                  >
+                    <i class="ph-bold ph-heart"></i><span>203</span>
+                  </button>
+                  <button
+                    class="act-btn reply"
+                    onclick="
+                      event.stopPropagation();
+                      openReply(
+                        'Danial L.',
+                        'DL',
+                        '#8b5cf6',
+                        'Workspace setup upgrade complete 🖥️',
+                      );
+                    "
+                  >
+                    <i class="ph-bold ph-chat-circle"></i><span>41</span>
+                  </button>
+                  <button
+                    class="act-btn repost"
+                    onclick="
+                      event.stopPropagation();
+                      toggleRepost(this);
+                    "
+                  >
+                    <i class="ph-bold ph-repeat"></i><span>67</span>
+                  </button>
+                  <button
+                    class="act-btn share"
+                    onclick="
+                      event.stopPropagation();
+                      shareSpark();
+                    "
+                  >
+                    <i class="ph-bold ph-share-network"></i><span>18</span>
+                  </button>
+                  <button
+                    class="act-btn bookmark"
+                    onclick="
+                      event.stopPropagation();
+                      toggleBookmark(this);
+                    "
+                    style="margin-left: auto"
+                  >
+                    <i class="ph-bold ph-bookmark-simple"></i>
+                  </button>
+                </div>
+              </article>
+            </div>
+            <!-- end realFeed -->
+            <div class="search-no-results" id="searchNoResults">
+              <i class="ph-bold ph-magnifying-glass"></i>
+              No sparks found
+            </div>
+          </div>
+          <!-- end panel-0 -->
+
+          <!-- ════════════════════════
+               TAB 1 — SPARK PROMPT
+          ════════════════════════ -->
+          <div class="tab-panel" id="panel-1">
+
+            <!-- ── PROMPT FEED SKELETON (shown until data ready) ── -->
+            <div class="sk-page-overlay" id="skPromptFeed">
+              <div
+                class="sk-pulse sk-compose"
+                style="
+                  margin: 0;
+                  border-radius: 0;
+                  height: 64px;
+                  border-bottom: 1px solid var(--border);
+                "
+              ></div>
+              <div class="sk-card">
+                <div class="sk-card-head">
+                  <div class="sk-pulse sk-circle sk-card-av"></div>
+                  <div class="sk-card-meta">
+                    <div class="sk-pulse sk-line w60"></div>
+                    <div class="sk-pulse sk-line w40"></div>
+                  </div>
+                </div>
+                <div class="sk-pulse sk-line w90"></div>
+                <div class="sk-pulse sk-line w70"></div>
+                <div class="sk-card-acts">
+                  <div class="sk-pulse sk-act"></div>
+                  <div class="sk-pulse sk-act"></div>
+                  <div class="sk-pulse sk-act"></div>
+                  <div class="sk-pulse sk-act"></div>
+                </div>
+              </div>
+              <div class="sk-card">
+                <div class="sk-card-head">
+                  <div class="sk-pulse sk-circle sk-card-av"></div>
+                  <div class="sk-card-meta">
+                    <div class="sk-pulse sk-line w60"></div>
+                    <div class="sk-pulse sk-line w40"></div>
+                  </div>
+                </div>
+                <div class="sk-pulse sk-line w90"></div>
+                <div class="sk-pulse sk-line w70"></div>
+                <div class="sk-card-acts">
+                  <div class="sk-pulse sk-act"></div>
+                  <div class="sk-pulse sk-act"></div>
+                  <div class="sk-pulse sk-act"></div>
+                  <div class="sk-pulse sk-act"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ── REAL PROMPT FEED CONTENT ── -->
+            <div class="real-content sk-hidden" id="realPromptFeedWrap">
+
+              <!-- Feed Mini Header -->
+              <div class="feed-mini-header">
+                <div class="feed-mini-title">
+                  <i class="ph-bold ph-chat-teardrop-dots"></i>
+                  Spark Prompts
+                </div>
+                <button
+                  class="feed-refresh-btn"
+                  id="promptRefreshBtn"
+                  onclick="startPromptFeed()"
+                  title="Refresh prompts"
+                >
+                  <i class="ph-bold ph-arrows-clockwise" id="promptRefreshIcon"></i>
+                </button>
+              </div>
+
+              <!-- Compose toggle -->
+              <div
+                class="compose-toggle"
+                id="promptComposeToggle"
+                onclick="openPromptCompose()"
+              >
+                <div class="compose-mini-av" id="promptMiniAv">M</div>
+                <span class="compose-placeholder">Answer a prompt and spark the conversation…</span>
+                <button class="compose-plus-btn">
+                  <i class="ph-bold ph-plus"></i>
+                </button>
+              </div>
+
+              <!-- Compose box -->
+              <div class="compose-box" id="promptComposeBox">
+                <div class="compose-top">
+                  <span class="compose-label">
+                    <i class="ph-bold ph-chat-teardrop-dots"></i> PROMPT SPARK
+                  </span>
+                  <button class="compose-close-btn" onclick="closePromptCompose()">
+                    <i class="ph-bold ph-x"></i>
+                  </button>
+                </div>
+
+                <!-- Active prompt display — the question the user is answering -->
+                <div class="prompt-compose-block" id="promptComposeBlock">
+                  <div class="prompt-compose-nav">
+                    <button
+                      class="prompt-nav-btn"
+                      onclick="cyclePrompt(-1)"
+                      title="Previous prompt"
+                    >
+                      <i class="ph-bold ph-caret-left"></i>
+                    </button>
+                    <div class="prompt-compose-inner">
+                      <div class="prompt-label">
+                        <i class="ph-bold ph-chat-teardrop-dots"></i> Active Prompt
+                      </div>
+                      <p class="prompt-q" id="promptActiveQuestion">Loading prompt…</p>
+                      <p class="prompt-compose-hint" id="promptActiveHint"></p>
+                    </div>
+                    <button
+                      class="prompt-nav-btn"
+                      onclick="cyclePrompt(1)"
+                      title="Next prompt"
+                    >
+                      <i class="ph-bold ph-caret-right"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- User reply textarea -->
+                <div class="compose-body" style="margin-top: 10px;">
+                  <div class="compose-av" id="promptComposeAv">M</div>
+                  <div style="flex: 1; min-width: 0">
+                    <textarea
+                      class="compose-textarea"
+                      id="promptTa"
+                      placeholder="Write your answer… use #hashtags and @mentions"
+                      oninput="onPromptInput(this)"
+                      maxlength="1500"
+                    ></textarea>
+                  </div>
+                </div>
+
+                <!-- Prompt media strip -->
+                <div class="media-strip" id="promptMediaStrip"></div>
+
+                <!-- Footer -->
+                <div class="compose-footer">
+                  <div class="media-btns">
+                    <button class="media-btn" title="Photo">
+                      <i class="ph-bold ph-image"></i>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onchange="attachPromptMedia(this)"
+                      />
+                    </button>
+                    <button
+                      class="media-btn"
+                      title="Emoji"
+                      onclick="openEmojiPicker('promptTa')"
+                    >
+                      <i class="ph-bold ph-smiley"></i>
+                    </button>
+                    <button
+                      class="media-btn"
+                      title="Quote"
+                      onclick="insertPromptQuoteBlock()"
+                    >
+                      <i class="ph-bold ph-quotes"></i>
+                    </button>
+                  </div>
+                  <div class="compose-right">
+                    <span class="char-count" id="promptCharCount">0 / 1500</span>
+                    <button
+                      class="spark-submit-btn"
+                      id="promptSubmitBtn"
+                      disabled
+                      onclick="submitPromptSpark()"
+                    >
+                      Spark ⚡
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Live prompt feed — Firestore cards injected here -->
+              <div id="realPromptFeed">
+                <!-- filled by spark-prompt-module.js -->
+              </div>
+
+            </div>
+            <!-- end realPromptFeedWrap -->
+
+          </div>
+          <!-- end panel-1 -->
+
+          <!-- ════════════════════════
+               TAB 2 — TRENDING
+          ════════════════════════ -->
+          <div class="tab-panel" id="panel-2">
+            <!-- Trending topics header -->
+            <div class="trend-header">
+              <p class="trend-header-label">🔥 Trending in T1ERA · Right Now</p>
+              <div class="trend-topic">
+                <div class="trend-n hot">1</div>
+                <div class="trend-info">
+                  <div class="trend-tag">#T1ERA</div>
+                  <div class="trend-count">1,204 Sparks</div>
+                </div>
+                <span class="trend-icon">🔥</span>
+              </div>
+              <div class="trend-topic">
+                <div class="trend-n hot">2</div>
+                <div class="trend-info">
+                  <div class="trend-tag">#BuildInPublic</div>
+                  <div class="trend-count">847 Sparks</div>
+                </div>
+                <span class="trend-icon">🔥</span>
+              </div>
+              <div class="trend-topic">
+                <div class="trend-n">3</div>
+                <div class="trend-info">
+                  <div class="trend-tag">#UIDesign</div>
+                  <div class="trend-count">562 Sparks</div>
+                </div>
+              </div>
+              <div class="trend-topic">
+                <div class="trend-n">4</div>
+                <div class="trend-info">
+                  <div class="trend-tag">#AI</div>
+                  <div class="trend-count">489 Sparks</div>
+                </div>
+              </div>
+              <div class="trend-topic">
+                <div class="trend-n">5</div>
+                <div class="trend-info">
+                  <div class="trend-tag">#DarkMode</div>
+                  <div class="trend-count">317 Sparks</div>
+                </div>
+              </div>
+              <div class="trend-topic">
+                <div class="trend-n">6</div>
+                <div class="trend-info">
+                  <div class="trend-tag">#SetupGoals</div>
+                  <div class="trend-count">241 Sparks</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Top trending spark -->
+            <article class="spark-card fu" onclick="openSparkDetail(this)">
+              <div class="trending-pill">
+                <i class="ph-bold ph-fire"></i> Trending #1 · #T1ERA
+              </div>
+              <div class="card-head">
+                <div class="av-wrap">
+                  <div
+                    class="spark-av"
+                    style="background: linear-gradient(135deg, #c2185b, #8b5cf6)"
+                    onclick="
+                      event.stopPropagation();
+                      showProfile(
+                        'Ikram Basri',
+                        'ewm24k',
+                        'LV 5 · Operative',
+                        128,
+                        947,
+                        'Just shipped T1ERA. Building the future in public 🔥',
+                        '#c2185b',
+                        true,
+                      );
+                    "
+                  >
+                    IB
+                  </div>
+                  <span class="online-dot"></span>
+                </div>
+                <div class="card-meta">
+                  <div class="meta-row-1">
+                    <span class="author-name">Ikram Basri</span>
+                    <span class="author-handle">@ewm24k</span>
+                    <button
+                      class="follow-pill on"
+                      onclick="
+                        event.stopPropagation();
+                        toggleFollow(this);
+                      "
+                    >
+                      Following
+                    </button>
+                    <span class="spark-time">2h ago</span>
+                  </div>
+                  <div class="badges-row">
+                    <span class="badge rank">LV 5</span>
+                    <span class="badge verified">✓ Verified</span>
+                    <span class="badge hot"
+                      ><i class="ph-bold ph-fire"></i> Trending</span
+                    >
+                  </div>
+                </div>
+                <button class="dots-btn" onclick="event.stopPropagation()">
+                  <i class="ph-bold ph-dots-three-vertical"></i>
+                </button>
+              </div>
+              <div class="card-content">
+                <p class="spark-text">
+                  T1ERA just crossed <strong>1,000 signups</strong> in the first
+                  week of beta 🎉 This is only the beginning. Thank you to
+                  everyone who believed before there was anything to believe in.
+                  We build together. <span class="ht">#T1ERA</span>
+                  <span class="ht">#Milestone</span> 🚀
+                </p>
+              </div>
+              <div class="action-bar">
+                <button
+                  class="act-btn like liked"
+                  onclick="
+                    event.stopPropagation();
+                    toggleLike(this);
+                  "
+                >
+                  <i class="ph-fill ph-heart"></i><span>1.2k</span>
+                </button>
+                <button
+                  class="act-btn reply"
+                  onclick="
+                    event.stopPropagation();
+                    openReply(
+                      'Ikram Basri',
+                      'IB',
+                      '#c2185b',
+                      'T1ERA just crossed 1,000 signups...',
+                    );
+                  "
+                >
+                  <i class="ph-bold ph-chat-circle"></i><span>284</span>
+                </button>
+                <button
+                  class="act-btn repost reposted"
+                  onclick="
+                    event.stopPropagation();
+                    toggleRepost(this);
+                  "
+                >
+                  <i class="ph-bold ph-repeat"></i><span>401</span>
+                </button>
+                <button
+                  class="act-btn share"
+                  onclick="
+                    event.stopPropagation();
+                    shareSpark();
+                  "
+                >
+                  <i class="ph-bold ph-share-network"></i><span>88</span>
+                </button>
+                <button
+                  class="act-btn bookmark"
+                  onclick="
+                    event.stopPropagation();
+                    toggleBookmark(this);
+                  "
+                  style="margin-left: auto"
+                >
+                  <i class="ph-bold ph-bookmark-simple"></i>
+                </button>
+              </div>
+            </article>
+
+            <!-- Trending #2 -->
+            <article class="spark-card fu d1" onclick="openSparkDetail(this)">
+              <div class="trending-pill">
+                <i class="ph-bold ph-fire"></i> Trending #2 · #BuildInPublic
+              </div>
+              <div class="card-head">
+                <div class="av-wrap">
+                  <div
+                    class="spark-av"
+                    style="background: linear-gradient(135deg, #f59e0b, #f97316)"
+                    onclick="
+                      event.stopPropagation();
+                      showProfile(
+                        'Wani Aisyah',
+                        'waniaisyah',
+                        'LV 3 · Scout',
+                        64,
+                        210,
+                        'Tech enthusiast & T1ERA early adopter 🌟',
+                        '#f59e0b',
+                        false,
+                      );
+                    "
+                  >
+                    WA
+                  </div>
+                </div>
+                <div class="card-meta">
+                  <div class="meta-row-1">
+                    <span class="author-name">Wani Aisyah</span>
+                    <span class="author-handle">@waniaisyah</span>
                     <button
                       class="follow-pill"
                       onclick="
@@ -3988,10 +4551,13 @@
                     >
                       <i class="ph-bold ph-plus"></i> Follow
                     </button>
-                    <span class="spark-time">3h ago</span>
+                    <span class="spark-time">4h ago</span>
                   </div>
                   <div class="badges-row">
-                    <span class="badge rank">LV 4</span>
+                    <span class="badge rank">LV 3</span>
+                    <span class="badge hot"
+                      ><i class="ph-bold ph-fire"></i> Trending</span
+                    >
                   </div>
                 </div>
                 <button class="dots-btn" onclick="event.stopPropagation()">
@@ -4000,34 +4566,12 @@
               </div>
               <div class="card-content">
                 <p class="spark-text">
-                  Workspace setup upgrade complete 🖥️ Three monitors, custom
-                  desk, ambient lighting. Focus level: maximum.
-                  <span class="ht">#SetupGoals</span>
-                  <span class="ht">#WorkFromHome</span>
+                  Building in public taught me more in 3 months than 3 years of
+                  building alone ever did. The feedback loop is insane when people
+                  are watching. Share your journey — even the ugly parts.
+                  <span class="ht">#BuildInPublic</span>
+                  <span class="ht">#T1ERA</span>
                 </p>
-                <div class="media-grid g3">
-                  <div class="mi">
-                    <img
-                      src="https://images.unsplash.com/photo-1593640408182-31c228f2d2e1?w=500&q=80"
-                      alt="desk1"
-                      loading="lazy"
-                    />
-                  </div>
-                  <div class="mi">
-                    <img
-                      src="https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=400&q=80"
-                      alt="desk2"
-                      loading="lazy"
-                    />
-                  </div>
-                  <div class="mi">
-                    <img
-                      src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&q=80"
-                      alt="desk3"
-                      loading="lazy"
-                    />
-                  </div>
-                </div>
               </div>
               <div class="action-bar">
                 <button
@@ -4037,21 +4581,21 @@
                     toggleLike(this);
                   "
                 >
-                  <i class="ph-bold ph-heart"></i><span>203</span>
+                  <i class="ph-bold ph-heart"></i><span>342</span>
                 </button>
                 <button
                   class="act-btn reply"
                   onclick="
                     event.stopPropagation();
                     openReply(
-                      'Danial L.',
-                      'DL',
-                      '#8b5cf6',
-                      'Workspace setup upgrade complete 🖥️',
+                      'Wani Aisyah',
+                      'WA',
+                      '#f59e0b',
+                      'Building in public taught me more...',
                     );
                   "
                 >
-                  <i class="ph-bold ph-chat-circle"></i><span>41</span>
+                  <i class="ph-bold ph-chat-circle"></i><span>76</span>
                 </button>
                 <button
                   class="act-btn repost"
@@ -4060,7 +4604,7 @@
                     toggleRepost(this);
                   "
                 >
-                  <i class="ph-bold ph-repeat"></i><span>67</span>
+                  <i class="ph-bold ph-repeat"></i><span>118</span>
                 </button>
                 <button
                   class="act-btn share"
@@ -4069,7 +4613,7 @@
                     shareSpark();
                   "
                 >
-                  <i class="ph-bold ph-share-network"></i><span>18</span>
+                  <i class="ph-bold ph-share-network"></i><span>29</span>
                 </button>
                 <button
                   class="act-btn bookmark"
@@ -4084,495 +4628,17 @@
               </div>
             </article>
           </div>
-          <!-- end realFeed -->
-          <div class="search-no-results" id="searchNoResults">
-            <i class="ph-bold ph-magnifying-glass"></i>
-            No sparks found
-          </div>
-        </div>
-        <!-- end panel-0 -->
-
-        <!-- ════════════════════════
-         TAB 1 — SPARK PROMPT
-    ════════════════════════ -->
-        <div class="tab-panel" id="panel-1">
-
-          <!-- ── PROMPT FEED SKELETON (shown until data ready) ── -->
-          <div class="sk-page-overlay" id="skPromptFeed">
-            <div
-              class="sk-pulse sk-compose"
-              style="
-                margin: 0;
-                border-radius: 0;
-                height: 64px;
-                border-bottom: 1px solid var(--border);
-              "
-            ></div>
-            <div class="sk-card">
-              <div class="sk-card-head">
-                <div class="sk-pulse sk-circle sk-card-av"></div>
-                <div class="sk-card-meta">
-                  <div class="sk-pulse sk-line w60"></div>
-                  <div class="sk-pulse sk-line w40"></div>
-                </div>
-              </div>
-              <div class="sk-pulse sk-line w90"></div>
-              <div class="sk-pulse sk-line w70"></div>
-              <div class="sk-card-acts">
-                <div class="sk-pulse sk-act"></div>
-                <div class="sk-pulse sk-act"></div>
-                <div class="sk-pulse sk-act"></div>
-                <div class="sk-pulse sk-act"></div>
-              </div>
-            </div>
-            <div class="sk-card">
-              <div class="sk-card-head">
-                <div class="sk-pulse sk-circle sk-card-av"></div>
-                <div class="sk-card-meta">
-                  <div class="sk-pulse sk-line w60"></div>
-                  <div class="sk-pulse sk-line w40"></div>
-                </div>
-              </div>
-              <div class="sk-pulse sk-line w90"></div>
-              <div class="sk-pulse sk-line w70"></div>
-              <div class="sk-card-acts">
-                <div class="sk-pulse sk-act"></div>
-                <div class="sk-pulse sk-act"></div>
-                <div class="sk-pulse sk-act"></div>
-                <div class="sk-pulse sk-act"></div>
-              </div>
-            </div>
-          </div>
-
-          <!-- ── REAL PROMPT FEED CONTENT ── -->
-          <div class="real-content sk-hidden" id="realPromptFeedWrap">
-
-            <!-- Feed Mini Header -->
-            <div class="feed-mini-header">
-              <div class="feed-mini-title">
-                <i class="ph-bold ph-chat-teardrop-dots"></i>
-                Spark Prompts
-              </div>
-              <button
-                class="feed-refresh-btn"
-                id="promptRefreshBtn"
-                onclick="startPromptFeed()"
-                title="Refresh prompts"
-              >
-                <i class="ph-bold ph-arrows-clockwise" id="promptRefreshIcon"></i>
-              </button>
-            </div>
-
-            <!-- Compose toggle -->
-            <div
-              class="compose-toggle"
-              id="promptComposeToggle"
-              onclick="openPromptCompose()"
-            >
-              <div class="compose-mini-av" id="promptMiniAv">M</div>
-              <span class="compose-placeholder">Answer a prompt and spark the conversation…</span>
-              <button class="compose-plus-btn">
-                <i class="ph-bold ph-plus"></i>
-              </button>
-            </div>
-
-            <!-- Compose box -->
-            <div class="compose-box" id="promptComposeBox">
-              <div class="compose-top">
-                <span class="compose-label">
-                  <i class="ph-bold ph-chat-teardrop-dots"></i> PROMPT SPARK
-                </span>
-                <button class="compose-close-btn" onclick="closePromptCompose()">
-                  <i class="ph-bold ph-x"></i>
-                </button>
-              </div>
-
-              <!-- Active prompt display — the question the user is answering -->
-              <div class="prompt-compose-block" id="promptComposeBlock">
-                <div class="prompt-compose-nav">
-                  <button
-                    class="prompt-nav-btn"
-                    onclick="cyclePrompt(-1)"
-                    title="Previous prompt"
-                  >
-                    <i class="ph-bold ph-caret-left"></i>
-                  </button>
-                  <div class="prompt-compose-inner">
-                    <div class="prompt-label">
-                      <i class="ph-bold ph-chat-teardrop-dots"></i> Active Prompt
-                    </div>
-                    <p class="prompt-q" id="promptActiveQuestion">Loading prompt…</p>
-                    <p class="prompt-compose-hint" id="promptActiveHint"></p>
-                  </div>
-                  <button
-                    class="prompt-nav-btn"
-                    onclick="cyclePrompt(1)"
-                    title="Next prompt"
-                  >
-                    <i class="ph-bold ph-caret-right"></i>
-                  </button>
-                </div>
-              </div>
-
-              <!-- User reply textarea -->
-              <div class="compose-body" style="margin-top: 10px;">
-                <div class="compose-av" id="promptComposeAv">M</div>
-                <div style="flex: 1; min-width: 0">
-                  <textarea
-                    class="compose-textarea"
-                    id="promptTa"
-                    placeholder="Write your answer… use #hashtags and @mentions"
-                    oninput="onPromptInput(this)"
-                    maxlength="1500"
-                  ></textarea>
-                </div>
-              </div>
-
-              <!-- Prompt media strip -->
-              <div class="media-strip" id="promptMediaStrip"></div>
-
-              <!-- Footer -->
-              <div class="compose-footer">
-                <div class="media-btns">
-                  <button class="media-btn" title="Photo">
-                    <i class="ph-bold ph-image"></i>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      onchange="attachPromptMedia(this)"
-                    />
-                  </button>
-                  <button
-                    class="media-btn"
-                    title="Emoji"
-                    onclick="openEmojiPicker('promptTa')"
-                  >
-                    <i class="ph-bold ph-smiley"></i>
-                  </button>
-                  <button
-                    class="media-btn"
-                    title="Quote"
-                    onclick="insertPromptQuoteBlock()"
-                  >
-                    <i class="ph-bold ph-quotes"></i>
-                  </button>
-                </div>
-                <div class="compose-right">
-                  <span class="char-count" id="promptCharCount">0 / 1500</span>
-                  <button
-                    class="spark-submit-btn"
-                    id="promptSubmitBtn"
-                    disabled
-                    onclick="submitPromptSpark()"
-                  >
-                    Spark ⚡
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <!-- Live prompt feed — Firestore cards injected here -->
-            <div id="realPromptFeed">
-              <!-- filled by spark-prompt-module.js -->
-            </div>
-
-          </div>
-          <!-- end realPromptFeedWrap -->
+          <!-- end panel-2 -->
 
         </div>
-        <!-- end panel-1 -->
+        <!-- end super-panel-0 -->
 
-        <!-- ════════════════════════
-         TAB 2 — TRENDING
-    ════════════════════════ -->
-        <div class="tab-panel" id="panel-2">
-          <!-- Trending topics header -->
-          <div class="trend-header">
-            <p class="trend-header-label">🔥 Trending in T1ERA · Right Now</p>
-            <div class="trend-topic">
-              <div class="trend-n hot">1</div>
-              <div class="trend-info">
-                <div class="trend-tag">#T1ERA</div>
-                <div class="trend-count">1,204 Sparks</div>
-              </div>
-              <span class="trend-icon">🔥</span>
-            </div>
-            <div class="trend-topic">
-              <div class="trend-n hot">2</div>
-              <div class="trend-info">
-                <div class="trend-tag">#BuildInPublic</div>
-                <div class="trend-count">847 Sparks</div>
-              </div>
-              <span class="trend-icon">🔥</span>
-            </div>
-            <div class="trend-topic">
-              <div class="trend-n">3</div>
-              <div class="trend-info">
-                <div class="trend-tag">#UIDesign</div>
-                <div class="trend-count">562 Sparks</div>
-              </div>
-            </div>
-            <div class="trend-topic">
-              <div class="trend-n">4</div>
-              <div class="trend-info">
-                <div class="trend-tag">#AI</div>
-                <div class="trend-count">489 Sparks</div>
-              </div>
-            </div>
-            <div class="trend-topic">
-              <div class="trend-n">5</div>
-              <div class="trend-info">
-                <div class="trend-tag">#DarkMode</div>
-                <div class="trend-count">317 Sparks</div>
-              </div>
-            </div>
-            <div class="trend-topic">
-              <div class="trend-n">6</div>
-              <div class="trend-info">
-                <div class="trend-tag">#SetupGoals</div>
-                <div class="trend-count">241 Sparks</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Top trending spark -->
-          <article class="spark-card fu" onclick="openSparkDetail(this)">
-            <div class="trending-pill">
-              <i class="ph-bold ph-fire"></i> Trending #1 · #T1ERA
-            </div>
-            <div class="card-head">
-              <div class="av-wrap">
-                <div
-                  class="spark-av"
-                  style="background: linear-gradient(135deg, #c2185b, #8b5cf6)"
-                  onclick="
-                    event.stopPropagation();
-                    showProfile(
-                      'Ikram Basri',
-                      'ewm24k',
-                      'LV 5 · Operative',
-                      128,
-                      947,
-                      'Just shipped T1ERA. Building the future in public 🔥',
-                      '#c2185b',
-                      true,
-                    );
-                  "
-                >
-                  IB
-                </div>
-                <span class="online-dot"></span>
-              </div>
-              <div class="card-meta">
-                <div class="meta-row-1">
-                  <span class="author-name">Ikram Basri</span>
-                  <span class="author-handle">@ewm24k</span>
-                  <button
-                    class="follow-pill on"
-                    onclick="
-                      event.stopPropagation();
-                      toggleFollow(this);
-                    "
-                  >
-                    Following
-                  </button>
-                  <span class="spark-time">2h ago</span>
-                </div>
-                <div class="badges-row">
-                  <span class="badge rank">LV 5</span>
-                  <span class="badge verified">✓ Verified</span>
-                  <span class="badge hot"
-                    ><i class="ph-bold ph-fire"></i> Trending</span
-                  >
-                </div>
-              </div>
-              <button class="dots-btn" onclick="event.stopPropagation()">
-                <i class="ph-bold ph-dots-three-vertical"></i>
-              </button>
-            </div>
-            <div class="card-content">
-              <p class="spark-text">
-                T1ERA just crossed <strong>1,000 signups</strong> in the first
-                week of beta 🎉 This is only the beginning. Thank you to
-                everyone who believed before there was anything to believe in.
-                We build together. <span class="ht">#T1ERA</span>
-                <span class="ht">#Milestone</span> 🚀
-              </p>
-            </div>
-            <div class="action-bar">
-              <button
-                class="act-btn like liked"
-                onclick="
-                  event.stopPropagation();
-                  toggleLike(this);
-                "
-              >
-                <i class="ph-fill ph-heart"></i><span>1.2k</span>
-              </button>
-              <button
-                class="act-btn reply"
-                onclick="
-                  event.stopPropagation();
-                  openReply(
-                    'Ikram Basri',
-                    'IB',
-                    '#c2185b',
-                    'T1ERA just crossed 1,000 signups...',
-                  );
-                "
-              >
-                <i class="ph-bold ph-chat-circle"></i><span>284</span>
-              </button>
-              <button
-                class="act-btn repost reposted"
-                onclick="
-                  event.stopPropagation();
-                  toggleRepost(this);
-                "
-              >
-                <i class="ph-bold ph-repeat"></i><span>401</span>
-              </button>
-              <button
-                class="act-btn share"
-                onclick="
-                  event.stopPropagation();
-                  shareSpark();
-                "
-              >
-                <i class="ph-bold ph-share-network"></i><span>88</span>
-              </button>
-              <button
-                class="act-btn bookmark"
-                onclick="
-                  event.stopPropagation();
-                  toggleBookmark(this);
-                "
-                style="margin-left: auto"
-              >
-                <i class="ph-bold ph-bookmark-simple"></i>
-              </button>
-            </div>
-          </article>
-
-          <!-- Trending #2 -->
-          <article class="spark-card fu d1" onclick="openSparkDetail(this)">
-            <div class="trending-pill">
-              <i class="ph-bold ph-fire"></i> Trending #2 · #BuildInPublic
-            </div>
-            <div class="card-head">
-              <div class="av-wrap">
-                <div
-                  class="spark-av"
-                  style="background: linear-gradient(135deg, #f59e0b, #f97316)"
-                  onclick="
-                    event.stopPropagation();
-                    showProfile(
-                      'Wani Aisyah',
-                      'waniaisyah',
-                      'LV 3 · Scout',
-                      64,
-                      210,
-                      'Tech enthusiast & T1ERA early adopter 🌟',
-                      '#f59e0b',
-                      false,
-                    );
-                  "
-                >
-                  WA
-                </div>
-              </div>
-              <div class="card-meta">
-                <div class="meta-row-1">
-                  <span class="author-name">Wani Aisyah</span>
-                  <span class="author-handle">@waniaisyah</span>
-                  <button
-                    class="follow-pill"
-                    onclick="
-                      event.stopPropagation();
-                      toggleFollow(this);
-                    "
-                  >
-                    <i class="ph-bold ph-plus"></i> Follow
-                  </button>
-                  <span class="spark-time">4h ago</span>
-                </div>
-                <div class="badges-row">
-                  <span class="badge rank">LV 3</span>
-                  <span class="badge hot"
-                    ><i class="ph-bold ph-fire"></i> Trending</span
-                  >
-                </div>
-              </div>
-              <button class="dots-btn" onclick="event.stopPropagation()">
-                <i class="ph-bold ph-dots-three-vertical"></i>
-              </button>
-            </div>
-            <div class="card-content">
-              <p class="spark-text">
-                Building in public taught me more in 3 months than 3 years of
-                building alone ever did. The feedback loop is insane when people
-                are watching. Share your journey — even the ugly parts.
-                <span class="ht">#BuildInPublic</span>
-                <span class="ht">#T1ERA</span>
-              </p>
-            </div>
-            <div class="action-bar">
-              <button
-                class="act-btn like"
-                onclick="
-                  event.stopPropagation();
-                  toggleLike(this);
-                "
-              >
-                <i class="ph-bold ph-heart"></i><span>342</span>
-              </button>
-              <button
-                class="act-btn reply"
-                onclick="
-                  event.stopPropagation();
-                  openReply(
-                    'Wani Aisyah',
-                    'WA',
-                    '#f59e0b',
-                    'Building in public taught me more...',
-                  );
-                "
-              >
-                <i class="ph-bold ph-chat-circle"></i><span>76</span>
-              </button>
-              <button
-                class="act-btn repost"
-                onclick="
-                  event.stopPropagation();
-                  toggleRepost(this);
-                "
-              >
-                <i class="ph-bold ph-repeat"></i><span>118</span>
-              </button>
-              <button
-                class="act-btn share"
-                onclick="
-                  event.stopPropagation();
-                  shareSpark();
-                "
-              >
-                <i class="ph-bold ph-share-network"></i><span>29</span>
-              </button>
-              <button
-                class="act-btn bookmark"
-                onclick="
-                  event.stopPropagation();
-                  toggleBookmark(this);
-                "
-                style="margin-left: auto"
-              >
-                <i class="ph-bold ph-bookmark-simple"></i>
-              </button>
-            </div>
-          </article>
+        <!-- ══ SUPER PANEL 1 — T1ERA (future) ══ -->
+        <div class="super-tab-panel" id="super-panel-1">
+          <!-- T1ERA content — coming soon -->
         </div>
-        <!-- end panel-2 -->
+        <!-- end super-panel-1 -->
+
       </div>
       <!-- end feed-col -->
 
@@ -5198,5 +5264,22 @@
     </div>
 
     <script src="popup-announce.js"></script>
+
+    <!-- ═══════════════════════════
+     SUPER TAB SWITCH LOGIC
+═══════════════════════════ -->
+    <script>
+      function switchSuperTab(idx, btn) {
+        document.querySelectorAll('.super-tab-btn').forEach(function(b) {
+          b.classList.remove('active');
+        });
+        document.querySelectorAll('.super-tab-panel').forEach(function(p) {
+          p.classList.remove('active');
+        });
+        btn.classList.add('active');
+        document.getElementById('super-panel-' + idx).classList.add('active');
+      }
+    </script>
+
   </body>
 </html>
