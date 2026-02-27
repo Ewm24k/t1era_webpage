@@ -79,13 +79,12 @@ onAuthStateChanged(auth, async (user) => {
     const d = snap.exists() ? snap.data() : {};
     window._sparkUserData = d;
 
+    // ── FIX: always read fresh pref from Firestore doc ──
     window._displayNamePref = d.displayNamePref || "fullName";
 
     const photoURL = d.profilePicture?.url || user.photoURL || "";
-    const initial = resolveDisplayName(
-      d,
-      window._displayNamePref,
-    )[0].toUpperCase();
+    const resolvedName = resolveDisplayName(d, window._displayNamePref);
+    const initial = resolvedName[0].toUpperCase();
     applyComposeAvatar(photoURL, initial);
   } catch (e) {
     window._sparkUserData = {};
@@ -126,9 +125,9 @@ onAuthStateChanged(auth, async (user) => {
   renderAppearanceSettings();
 });
 
-// ══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════
 // APPEARANCE SETTINGS — Display Name toggle
-// ══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════
 
 function renderAppearanceSettings() {
   const container = document.getElementById("appearanceSettingsSlot");
@@ -137,9 +136,10 @@ function renderAppearanceSettings() {
   const ud = window._sparkUserData || {};
   const fullName = ud.fullName || "—";
   const nickname = ud.nickname || "—";
+
+  // ── FIX: always read from window._displayNamePref which was set fresh from Firestore ──
   const currentPref = window._displayNamePref || "fullName";
 
-  // Store pref state on container for tracking changes
   container.dataset.originalPref = currentPref;
   container.dataset.pendingPref = currentPref;
 
@@ -165,8 +165,13 @@ function renderAppearanceSettings() {
         </div>
       </div>
 
+      <!-- Current active indicator -->
+      <div style="padding:8px 16px 2px;font-size:10px;color:var(--text-3);font-family:var(--f-mono)">
+        Currently showing: <strong style="color:var(--pink-2)">${currentPref === "nickname" ? (nickname !== "—" ? nickname : "—") : fullName}</strong>
+      </div>
+
       <!-- Options -->
-      <div style="padding: 12px 16px; display: flex; flex-direction: column; gap: 8px;">
+      <div style="padding: 10px 16px; display: flex; flex-direction: column; gap: 8px;">
 
         <!-- Full Name option -->
         <div id="dnoption-fullName" style="
@@ -255,7 +260,6 @@ function renderAppearanceSettings() {
     </div>
   `;
 
-  // ── Wire up click handlers via JS (not inline onclick) ──
   document.getElementById("dnoption-fullName").addEventListener("click", () => {
     _selectDisplayNamePref("fullName");
   });
@@ -267,7 +271,6 @@ function renderAppearanceSettings() {
   });
 }
 
-// ── Select a display name pref option (UI only) ──
 function _selectDisplayNamePref(pref) {
   const container = document.getElementById("appearanceSettingsSlot");
   if (!container) return;
@@ -297,14 +300,13 @@ function _selectDisplayNamePref(pref) {
       : "";
   });
 
-  // Show/hide save button based on whether selection differs from stored pref
   const saveRow = document.getElementById("dnSaveRow");
   if (saveRow) {
     saveRow.style.display = pref !== originalPref ? "block" : "none";
   }
 }
 
-// ── Save display name preference to Firestore, close panel, reload ──
+// ── FIX: Save pref → update window state immediately → refresh UI without full reload ──
 async function _saveDisplayNamePref() {
   const user = window._sparkUser;
   if (!user) return;
@@ -320,14 +322,33 @@ async function _saveDisplayNamePref() {
   }
 
   try {
+    // 1. Write to Firestore and wait for confirmation
     await updateDoc(doc(db, "users", user.uid), {
       displayNamePref: pendingPref,
     });
 
-    if (typeof window.showToast === "function")
-      window.showToast("Display name updated ✓");
+    // 2. Immediately update in-memory state so everything re-renders correctly
+    window._displayNamePref = pendingPref;
+    if (window._sparkUserData) {
+      window._sparkUserData.displayNamePref = pendingPref;
+    }
 
-    // Close settings panel immediately
+    // 3. Re-resolve the display name with the new pref
+    const ud = window._sparkUserData || {};
+    const newName = resolveDisplayName(ud, pendingPref);
+    const newInitial = newName[0].toUpperCase();
+    const photoURL = ud.profilePicture?.url || user.photoURL || "";
+
+    // 4. Update compose avatars immediately (no reload needed)
+    applyComposeAvatar(photoURL, newInitial);
+
+    // 5. Update compose placeholder name text if visible
+    const composePlaceholder = document.querySelector(".compose-placeholder");
+    if (composePlaceholder) {
+      composePlaceholder.textContent = "What's sparking today…";
+    }
+
+    // 6. Close settings panel first
     if (typeof window.closeSettingsPanel === "function") {
       window.closeSettingsPanel();
     } else {
@@ -335,10 +356,25 @@ async function _saveDisplayNamePref() {
       document.getElementById("settingsBackdrop")?.classList.remove("open");
     }
 
-    // Reload page after brief toast visibility
-    setTimeout(() => {
-      window.location.reload();
-    }, 700);
+    // 7. Show success toast
+    if (typeof window.showToast === "function")
+      window.showToast(`Display name updated → ${newName} ✓`);
+
+    // 8. Re-render the settings panel so "Currently showing" label updates
+    renderAppearanceSettings();
+
+    // 9. Refresh the feed so cards owned by this user show the new name
+    //    We do a targeted DOM update first (instant) then a background fetch
+    _updateOwnCardsDisplayName(newName, newInitial, photoURL);
+
+    // 10. Full feed reload in background to sync everything from Firestore
+    setTimeout(async () => {
+      await startFeed();
+      if (typeof window.startPromptFeed === "function") {
+        await window.startPromptFeed();
+      }
+    }, 400);
+
   } catch (e) {
     console.error("_saveDisplayNamePref error:", e);
     if (saveBtn) {
@@ -351,7 +387,32 @@ async function _saveDisplayNamePref() {
   }
 }
 
-// Keep old window-exposed names as aliases for any external references
+// ── FIX: instantly update display name on own cards already in DOM ──
+function _updateOwnCardsDisplayName(newName, newInitial, photoURL) {
+  const uid = window._sparkUser?.uid;
+  if (!uid) return;
+
+  document.querySelectorAll(`.spark-card[data-owner-uid="${uid}"]`).forEach((card) => {
+    // Update author name text
+    const nameEl = card.querySelector(".author-name");
+    if (nameEl) nameEl.textContent = newName;
+
+    // Update avatar initial / photo
+    const avEl = card.querySelector(".spark-av");
+    if (avEl) {
+      if (photoURL) {
+        // Keep existing photo — just ensure fallback initial is updated
+        const img = avEl.querySelector("img");
+        if (!img) {
+          avEl.textContent = newInitial;
+        }
+      } else {
+        avEl.textContent = newInitial;
+      }
+    }
+  });
+}
+
 window.selectDisplayNamePref = _selectDisplayNamePref;
 window.saveDisplayNamePref = _saveDisplayNamePref;
 
@@ -394,7 +455,7 @@ async function ensurePointMap(uid) {
   }
 }
 
-// ── WHO TO FOLLOW — fetch real users from Firestore ──
+// ── WHO TO FOLLOW ──
 async function loadWhoToFollow(currentUid) {
   const container = document.getElementById("wtfList");
   if (!container) return;
@@ -486,9 +547,9 @@ window._wtfFollowClick = function (btn, ownerUid) {
 
 window._startFeedFn = startFeed;
 
-// ══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════
 // FOLLOW MODULE
-// ══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════
 
 window._followingSet = new Set();
 
@@ -1033,9 +1094,9 @@ async function markOneRead(uid, notifId, rowEl) {
 }
 window._markOneReadFn = markOneRead;
 
-// ══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════
 // REPLIES MODULE
-// ══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════
 
 window._loadRepliesFn = async function (sparkId) {
   const list = document.getElementById("repliesList");
@@ -1374,12 +1435,16 @@ async function startFeed() {
       ),
     ];
     const rankCache = {};
+    // ── FIX: also cache user data so we can resolve display name pref per author ──
+    const userDataCache = {};
+
     await Promise.all(
       uniqueUids.map(async (uid) => {
         try {
           const uSnap = await getDoc(doc(db, "users", uid));
           if (uSnap.exists()) {
             const ud = uSnap.data();
+            userDataCache[uid] = ud;
             const pt = ud.accountStatus?.point || ud.point || {};
             const totalXP =
               (pt.spark || 0) * 20 + (pt.like || 0) * 10 + (pt.reply || 0) * 40;
@@ -1401,12 +1466,7 @@ async function startFeed() {
             rankCache[uid] = "LV 1";
           }
         } catch (rankErr) {
-          console.warn(
-            "rank fetch error for uid",
-            uid,
-            rankErr?.code,
-            rankErr?.message,
-          );
+          console.warn("rank fetch error for uid", uid, rankErr?.code, rankErr?.message);
           rankCache[uid] = "LV 1";
         }
       }),
@@ -1415,7 +1475,7 @@ async function startFeed() {
     docs
       .slice(0, 50)
       .forEach(({ id, data }) =>
-        renderCard(id, data, rankCache[data.uid] || "LV 1"),
+        renderCard(id, data, rankCache[data.uid] || "LV 1", userDataCache[data.uid]),
       );
   } catch (e) {
     console.error("startFeed error:", e);
@@ -1456,13 +1516,35 @@ function buildMediaGridHtml(images) {
 }
 window._buildMediaGridHtml = buildMediaGridHtml;
 
-function renderCard(id, d, rankLabel) {
+// ── FIX: renderCard now accepts optional liveUserData to resolve name from current pref ──
+function renderCard(id, d, rankLabel, liveUserData) {
   const panel = document.getElementById("realFeed");
   if (!panel) return;
 
-  const authorPref = d.authorDisplayPref || "fullName";
-  const name = d.authorName || "T1ERA User";
-  const handle = d.authorHandle || "user";
+  const currentUid = window._sparkUser?.uid;
+  const isOwnCard = d.uid && currentUid && d.uid === currentUid;
+
+  // ── FIX: For own cards, ALWAYS use in-memory _sparkUserData + _displayNamePref
+  //    This bypasses Firestore cache and baked-in authorName in the spark doc.
+  //    For other users, use their stored authorName from the spark document.
+  let name, handle;
+  if (isOwnCard) {
+    // Always read from live in-memory state — updated immediately on pref save
+    const ud = window._sparkUserData || {};
+    name = resolveDisplayName(ud, window._displayNamePref);
+    handle = ud.nickname || window._sparkUser?.email?.split("@")[0] || d.authorHandle || "user";
+  } else {
+    // Other users — resolve from their live user doc if available, else spark doc fallback
+    if (liveUserData) {
+      const pref = liveUserData.displayNamePref || "fullName";
+      name = resolveDisplayName(liveUserData, pref);
+      handle = liveUserData.nickname || liveUserData.email?.split("@")[0] || d.authorHandle || "user";
+    } else {
+      name = d.authorName || "T1ERA User";
+      handle = d.authorHandle || "user";
+    }
+  }
+
   const photo = d.authorPhoto || "";
   const txt = d.text || "";
   const initial = name[0].toUpperCase();
@@ -1491,9 +1573,7 @@ function renderCard(id, d, rankLabel) {
   const safeText = txt.replace(/'/g, "\\'").slice(0, 80);
   const safePhoto = photo.replace(/'/g, "\\'");
 
-  const isOwner = d.uid && window._sparkUser && d.uid === window._sparkUser.uid;
-
-  const dotsOrDelete = isOwner
+  const dotsOrDelete = isOwnCard
     ? `<button class="dots-btn" onclick="event.stopPropagation();deleteSparkCard(this)" title="Delete Spark" style="color:var(--text-3)"><i class="ph-bold ph-trash"></i></button>`
     : `<button class="dots-btn" onclick="event.stopPropagation()"><i class="ph-bold ph-dots-three-vertical"></i></button>`;
 
@@ -1525,7 +1605,7 @@ function renderCard(id, d, rankLabel) {
             return "";
           })()}
           ${
-            !isOwner
+            !isOwnCard
               ? (() => {
                   const isFollowing =
                     window._followingSet &&
@@ -1582,7 +1662,6 @@ function renderCard(id, d, rankLabel) {
     panel.appendChild(article);
   }
 
-  const currentUid = window._sparkUser?.uid;
   getDocs(collection(db, "sparks", id, "likes"))
     .then((likesSnap) => {
       const countEl = document.getElementById("likecount-" + id);
