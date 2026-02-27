@@ -468,7 +468,7 @@
       }
 
       /* ══════════════════════════════════════════
-   SUPER TABS (SPARKS / T1ERA) — above inner tabs
+   SUPER TABS (SPARKS / T1ERA) — pill buttons centered
 ══════════════════════════════════════════ */
       .super-tabs-bar {
         position: sticky;
@@ -480,29 +480,33 @@
         display: flex;
         justify-content: center;
         align-items: center;
+        padding: 8px 16px;
+        gap: 8px;
       }
       .super-tab-btn {
-        flex: 1;
-        max-width: 200px;
-        padding: 13px 10px;
-        background: none;
-        border: none;
-        border-bottom: 2px solid transparent;
+        padding: 5px 18px;
+        border-radius: 100px;
+        background: var(--bg-3);
+        border: 1px solid var(--border-2);
         color: var(--text-3);
-        font-size: 13px;
+        font-size: 11px;
         font-weight: 700;
         letter-spacing: 0.06em;
         font-family: var(--f-display);
         text-transform: uppercase;
         transition: all 0.18s;
-        text-align: center;
-      }
-      .super-tab-btn.active {
-        color: var(--pink-2);
-        border-bottom-color: var(--pink-2);
+        white-space: nowrap;
       }
       .super-tab-btn:hover:not(.active) {
+        background: rgba(194, 24, 91, 0.08);
+        border-color: rgba(194, 24, 91, 0.25);
         color: var(--text-2);
+      }
+      .super-tab-btn.active {
+        background: linear-gradient(135deg, var(--pink), var(--pink-2));
+        border-color: transparent;
+        color: #fff;
+        box-shadow: 0 0 14px var(--pink-glow);
       }
       .super-tab-panel {
         display: none;
