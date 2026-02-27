@@ -369,10 +369,8 @@ async function _saveDisplayNamePref() {
 
     // 10. Full feed reload in background to sync everything from Firestore
     setTimeout(async () => {
-      await startFeed();
-      if (typeof window.startPromptFeed === "function") {
-        await window.startPromptFeed();
-      }
+      if (typeof window.startFeed === "function") await window.startFeed();
+      if (typeof window.startPromptFeed === "function") await window.startPromptFeed();
     }, 400);
 
   } catch (e) {
@@ -546,6 +544,7 @@ window._wtfFollowClick = function (btn, ownerUid) {
 };
 
 window._startFeedFn = startFeed;
+window.startFeed = startFeed;
 
 // ══════════════════════════════════════════════════════════════════════
 // FOLLOW MODULE
