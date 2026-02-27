@@ -420,8 +420,21 @@ function renderPromptCard(id, d, rankLabel) {
   const panel = document.getElementById("realPromptFeed");
   if (!panel) return;
 
-  const name = d.authorName || "T1ERA User";
-  const handle = d.authorHandle || "user";
+ 
+  const isOwnCard = d.uid && currentUid && d.uid === currentUid;
+  let name, handle;
+  if (isOwnCard) {
+    const ud = window._sparkUserData || {};
+    name = window._resolveDisplayName(ud, window._displayNamePref);
+    handle =
+      ud.nickname ||
+      window._sparkUser?.email?.split("@")[0] ||
+      d.authorHandle ||
+      "user";
+  } else {
+    name = d.authorName || "T1ERA User";
+    handle = d.authorHandle || "user";
+  }
   const photo = d.authorPhoto || "";
   const txt = d.text || "";
   const promptText = d.promptText || "";
