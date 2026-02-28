@@ -3577,21 +3577,24 @@
       /* PC omnibar */
       .ai-omnibar-pc { display: none; }
       @media (min-width: 1080px) {
-        /* ── T1ERA PC: full-height flex column so input sticks to bottom ── */
+        /* ── T1ERA PC: flex column, body scrolls, input locked to bottom ── */
         body.t1era-active #super-panel-1 {
           display: flex;
           flex-direction: column;
           height: calc(100vh - 52px);
           position: sticky;
           top: 52px;
+          overflow: hidden;
         }
-        body.t1era-active #super-panel-1 .t1era-page-wrap {
+        body.t1era-active .t1era-page-wrap {
           flex: 1;
           overflow-y: auto;
           overflow-x: hidden;
-          padding-bottom: 0;
           min-height: 0;
+          padding-bottom: 16px;
         }
+        /* hide scrollbar but keep scroll functional */
+        body.t1era-active .t1era-page-wrap::-webkit-scrollbar { width: 0; }
         .ai-omnibar-pc {
           display: block;
           flex-shrink: 0;
@@ -5262,28 +5265,29 @@
               </div>
             </div>
 
-            <!-- ── AI OMNIBAR — PC (sticky bottom of panel) ── -->
-            <div class="ai-omnibar-pc">
-              <div class="ai-omnibar-inner">
-                <input
-                  class="ai-omnibar-input"
-                  id="aiOmniInputPc"
-                  placeholder="Ask T1ERA AI anything…"
-                  autocomplete="off"
-                  onkeydown="if(event.key==='Enter')aiOmnibarSend('pc')"
-                />
-                <button class="ai-model-picker-btn" onclick="openModelPicker()" title="Choose model">
-                  <i class="ph-bold ph-robot"></i>
-                  <span id="pickerLabelPc">T1x.V1.1</span>
-                  <i class="ph-bold ph-caret-down"></i>
-                </button>
-                <button class="ai-omnibar-send" onclick="aiOmnibarSend('pc')" title="Send">
-                  <i class="ph-bold ph-paper-plane-tilt"></i>
-                </button>
-              </div>
-            </div>
-
           </div><!-- end t1era-page-wrap -->
+
+          <!-- ── AI OMNIBAR — PC (outside scroll area, sticks to bottom) ── -->
+          <div class="ai-omnibar-pc">
+            <div class="ai-omnibar-inner">
+              <input
+                class="ai-omnibar-input"
+                id="aiOmniInputPc"
+                placeholder="Ask T1ERA AI anything…"
+                autocomplete="off"
+                onkeydown="if(event.key==='Enter')aiOmnibarSend('pc')"
+              />
+              <button class="ai-model-picker-btn" onclick="openModelPicker()" title="Choose model">
+                <i class="ph-bold ph-robot"></i>
+                <span id="pickerLabelPc">T1x.V1.1</span>
+                <i class="ph-bold ph-caret-down"></i>
+              </button>
+              <button class="ai-omnibar-send" onclick="aiOmnibarSend('pc')" title="Send">
+                <i class="ph-bold ph-paper-plane-tilt"></i>
+              </button>
+            </div>
+          </div>
+
         </div>
         <!-- end super-panel-1 -->
 
