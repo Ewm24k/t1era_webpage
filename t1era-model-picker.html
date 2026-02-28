@@ -1,0 +1,524 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>T1ERA — Choose Model</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=Orbitron:wght@400;600;700;800;900&family=Fira+Code:wght@300;400;500&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/@phosphor-icons/web@2.1.1/src/index.js"></script>
+  <style>
+    :root {
+      --bg:        #000000;
+      --bg-2:      #090909;
+      --bg-3:      #111111;
+      --bg-4:      #181818;
+      --bg-card:   #141414;
+      --border:    rgba(255,255,255,0.08);
+      --border-2:  rgba(255,255,255,0.13);
+      --text:      #ffffff;
+      --text-2:    rgba(255,255,255,0.65);
+      --text-3:    rgba(255,255,255,0.35);
+      --pink:      #c2185b;
+      --pink-2:    #e91e8c;
+      --pink-glow: rgba(194,24,91,0.22);
+      --purple:    #8b5cf6;
+      --purple-glow: rgba(139,92,246,0.18);
+      --green:     #10b981;
+      --gold:      #f59e0b;
+      --r-sm:      8px;
+      --r:         14px;
+      --r-lg:      20px;
+      --f-display: "Orbitron", sans-serif;
+      --f-body:    "DM Sans", sans-serif;
+      --f-mono:    "Fira Code", monospace;
+
+      /* model accent colours */
+      --v1-color:  #10b981;
+      --v1-glow:   rgba(16,185,129,0.18);
+      --v2-color:  #8b5cf6;
+      --v2-glow:   rgba(139,92,246,0.18);
+      --v22-color: #e91e8c;
+      --v22-glow:  rgba(233,30,140,0.18);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 100%; height: 100%;
+      overflow-x: hidden;
+    }
+    body {
+      font-family: var(--f-body);
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── HEADER ── */
+    .picker-header {
+      padding: 20px 20px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .picker-logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--f-display);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--text-2);
+    }
+    .picker-logo-mark {
+      width: 26px; height: 26px;
+      border-radius: 7px;
+      background: linear-gradient(135deg, var(--pink), var(--purple));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 900;
+      box-shadow: 0 0 10px var(--pink-glow);
+    }
+    .picker-close {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: none;
+      color: var(--text-3);
+      font-size: 15px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+    }
+    .picker-close:hover { background: var(--bg-3); color: var(--text); }
+
+    /* ── TITLE ── */
+    .picker-title-wrap {
+      padding: 16px 20px 20px;
+      flex-shrink: 0;
+    }
+    .picker-title {
+      font-family: var(--f-display);
+      font-size: 18px;
+      font-weight: 900;
+      letter-spacing: 0.04em;
+      margin-bottom: 4px;
+    }
+    .picker-sub {
+      font-size: 12px;
+      color: var(--text-3);
+      font-family: var(--f-mono);
+    }
+
+    /* ── MODEL LIST ── */
+    .model-list {
+      flex: 1;
+      padding: 0 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow-y: auto;
+    }
+
+    .model-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      overflow: hidden;
+      cursor: pointer;
+      transition: border-color 0.18s, box-shadow 0.18s;
+      position: relative;
+    }
+    .model-card:hover { border-color: var(--border-2); }
+    .model-card.v1:hover  { border-color: rgba(16,185,129,0.4);  box-shadow: 0 0 20px var(--v1-glow); }
+    .model-card.v2:hover  { border-color: rgba(139,92,246,0.4);  box-shadow: 0 0 20px var(--v2-glow); }
+    .model-card.v22:hover { border-color: rgba(233,30,140,0.4);  box-shadow: 0 0 20px var(--v22-glow); }
+    .model-card.selected  { border-width: 1.5px; }
+    .model-card.v1.selected  { border-color: var(--v1-color);  box-shadow: 0 0 24px var(--v1-glow); }
+    .model-card.v2.selected  { border-color: var(--v2-color);  box-shadow: 0 0 24px var(--v2-glow); }
+    .model-card.v22.selected { border-color: var(--v22-color); box-shadow: 0 0 24px var(--v22-glow); }
+
+    /* top bar colour strip */
+    .model-card-strip {
+      height: 3px;
+    }
+    .model-card.v1  .model-card-strip { background: linear-gradient(90deg, var(--v1-color), transparent); }
+    .model-card.v2  .model-card-strip { background: linear-gradient(90deg, var(--v2-color), transparent); }
+    .model-card.v22 .model-card-strip { background: linear-gradient(90deg, var(--v22-color), transparent); }
+
+    .model-card-body {
+      padding: 16px;
+    }
+
+    /* header row */
+    .model-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .model-name-wrap { flex: 1; min-width: 0; }
+    .model-name {
+      font-family: var(--f-display);
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      margin-bottom: 3px;
+    }
+    .model-card.v1  .model-name { color: var(--v1-color); }
+    .model-card.v2  .model-name { color: var(--v2-color); }
+    .model-card.v22 .model-name { color: var(--v22-color); }
+
+    .model-version {
+      font-family: var(--f-mono);
+      font-size: 9px;
+      color: var(--text-3);
+      letter-spacing: 0.06em;
+    }
+    .model-badge {
+      font-family: var(--f-mono);
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      padding: 3px 8px;
+      border-radius: 100px;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+    .model-card.v1  .model-badge { background: rgba(16,185,129,0.1);  border: 1px solid rgba(16,185,129,0.25);  color: var(--v1-color); }
+    .model-card.v2  .model-badge { background: rgba(139,92,246,0.1);  border: 1px solid rgba(139,92,246,0.25);  color: var(--v2-color); }
+    .model-card.v22 .model-badge { background: rgba(233,30,140,0.1);  border: 1px solid rgba(233,30,140,0.3);   color: var(--v22-color); }
+
+    /* description (always visible) */
+    .model-desc {
+      font-size: 12px;
+      color: var(--text-2);
+      line-height: 1.55;
+      margin-bottom: 12px;
+    }
+
+    /* capability tags */
+    .model-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-bottom: 14px;
+    }
+    .model-tag {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 9px;
+      border-radius: 100px;
+      font-size: 9px;
+      font-family: var(--f-mono);
+      font-weight: 600;
+      border: 1px solid var(--border);
+      background: var(--bg-3);
+      color: var(--text-3);
+    }
+    .model-tag i { font-size: 10px; }
+
+    /* expandable details — visible on hover (PC) always on mobile */
+    .model-details {
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      transition: max-height 0.28s ease, opacity 0.2s ease;
+    }
+    .model-card:hover .model-details,
+    .model-card.expanded .model-details {
+      max-height: 120px;
+      opacity: 1;
+    }
+    .model-details-inner {
+      border-top: 1px solid var(--border);
+      padding-top: 12px;
+      margin-bottom: 2px;
+    }
+    .model-detail-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+      font-size: 11px;
+      color: var(--text-3);
+    }
+    .model-detail-row i { font-size: 12px; flex-shrink: 0; }
+    .model-detail-row strong { color: var(--text-2); font-weight: 600; }
+
+    /* select button */
+    .model-select-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      padding: 10px;
+      border-radius: var(--r-sm);
+      border: none;
+      font-family: var(--f-display);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      color: #fff;
+    }
+    .model-card.v1  .model-select-btn { background: linear-gradient(135deg, var(--v1-color), #059669); }
+    .model-card.v2  .model-select-btn { background: linear-gradient(135deg, var(--v2-color), #7c3aed); }
+    .model-card.v22 .model-select-btn { background: linear-gradient(135deg, var(--v22-color), var(--pink)); }
+    .model-select-btn.active-indicator::after {
+      content: "ACTIVE";
+      font-size: 8px;
+      letter-spacing: 0.1em;
+      opacity: 0.75;
+    }
+
+    /* selected check badge */
+    .model-selected-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: var(--green);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      color: #fff;
+    }
+    .model-card.selected .model-selected-badge { display: flex; }
+
+    /* ── FOOTER ── */
+    .picker-footer {
+      padding: 12px 20px 20px;
+      flex-shrink: 0;
+      text-align: center;
+      font-size: 10px;
+      color: var(--text-3);
+      font-family: var(--f-mono);
+      border-top: 1px solid var(--border);
+    }
+
+    /* toast */
+    .toast-msg {
+      position: fixed;
+      bottom: 24px; left: 50%;
+      transform: translateX(-50%) translateY(12px);
+      background: rgba(16,185,129,0.92);
+      color: #fff;
+      font-size: 12px; font-weight: 700;
+      padding: 8px 20px;
+      border-radius: 100px;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.2s, transform 0.2s;
+      z-index: 999;
+      white-space: nowrap;
+    }
+    .toast-msg.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div class="picker-header">
+    <div class="picker-logo">
+      <div class="picker-logo-mark">T1</div>
+      T1ERA AI
+    </div>
+    <button class="picker-close" onclick="window.close()">
+      <i class="ph-bold ph-x"></i>
+    </button>
+  </div>
+
+  <!-- TITLE -->
+  <div class="picker-title-wrap">
+    <div class="picker-title">Choose Model</div>
+    <div class="picker-sub">Select the T1ERA AI model for your session</div>
+  </div>
+
+  <!-- MODEL LIST -->
+  <div class="model-list">
+
+    <!-- ── T1x.V1.1 ── -->
+    <div class="model-card v1" id="card-v1" onclick="selectModel('T1x.V1.1', this)">
+      <div class="model-card-strip"></div>
+      <div class="model-selected-badge"><i class="ph-bold ph-check"></i></div>
+      <div class="model-card-body">
+        <div class="model-head">
+          <div class="model-name-wrap">
+            <div class="model-name">T1ERA T1x.V1.1</div>
+            <div class="model-version">Version 1.1 · Standard</div>
+          </div>
+          <span class="model-badge">EFFICIENT</span>
+        </div>
+        <p class="model-desc">
+          Optimised for structured thinking, in-depth analysis, web search, and summarising complex topics. Delivers accurate, concise answers at the lowest cost — ideal for research, fact-checking, and quick queries.
+        </p>
+        <div class="model-tags">
+          <span class="model-tag"><i class="ph-bold ph-magnifying-glass"></i> Search</span>
+          <span class="model-tag"><i class="ph-bold ph-brain"></i> Analyse</span>
+          <span class="model-tag"><i class="ph-bold ph-list-bullets"></i> Summarise</span>
+          <span class="model-tag"><i class="ph-bold ph-coin"></i> Low Cost</span>
+        </div>
+        <div class="model-details">
+          <div class="model-details-inner">
+            <div class="model-detail-row">
+              <i class="ph-bold ph-lightning"></i>
+              <span>Best for: <strong>Research, fact-checking, quick Q&A</strong></span>
+            </div>
+            <div class="model-detail-row">
+              <i class="ph-bold ph-chart-bar"></i>
+              <span>Strength: <strong>Accuracy & structured reasoning</strong></span>
+            </div>
+          </div>
+        </div>
+        <button class="model-select-btn" onclick="event.stopPropagation(); selectModel('T1x.V1.1', document.getElementById('card-v1'))">
+          <i class="ph-bold ph-check-circle"></i> Select T1x.V1.1
+        </button>
+      </div>
+    </div>
+
+    <!-- ── T1x.V2.1 ── -->
+    <div class="model-card v2" id="card-v2" onclick="selectModel('T1x.V2.1', this)">
+      <div class="model-card-strip"></div>
+      <div class="model-selected-badge"><i class="ph-bold ph-check"></i></div>
+      <div class="model-card-body">
+        <div class="model-head">
+          <div class="model-name-wrap">
+            <div class="model-name">T1ERA T1x.V2.1</div>
+            <div class="model-version">Version 2.1 · Dynamic</div>
+          </div>
+          <span class="model-badge">DYNAMIC</span>
+        </div>
+        <p class="model-desc">
+          Everything in V1.1, plus natural flowing conversation, copywriting, and storytelling. Understands proper pronunciation, vocabulary, and tone across Bahasa Malaysia, English, and other languages — your go-to for texting, creative writing, and content.
+        </p>
+        <div class="model-tags">
+          <span class="model-tag"><i class="ph-bold ph-chat-circle-text"></i> Conversation</span>
+          <span class="model-tag"><i class="ph-bold ph-pencil-simple-line"></i> Copywriting</span>
+          <span class="model-tag"><i class="ph-bold ph-book-open"></i> Storytelling</span>
+          <span class="model-tag"><i class="ph-bold ph-globe"></i> Multilingual</span>
+        </div>
+        <div class="model-details">
+          <div class="model-details-inner">
+            <div class="model-detail-row">
+              <i class="ph-bold ph-lightning"></i>
+              <span>Best for: <strong>Content, copywriting, BM/EN texting</strong></span>
+            </div>
+            <div class="model-detail-row">
+              <i class="ph-bold ph-chart-bar"></i>
+              <span>Strength: <strong>Natural language & multilingual tone</strong></span>
+            </div>
+          </div>
+        </div>
+        <button class="model-select-btn" onclick="event.stopPropagation(); selectModel('T1x.V2.1', document.getElementById('card-v2'))">
+          <i class="ph-bold ph-check-circle"></i> Select T1x.V2.1
+        </button>
+      </div>
+    </div>
+
+    <!-- ── T1x.V2.2 Pro ── -->
+    <div class="model-card v22" id="card-v22" onclick="selectModel('T1x.V2.2 Pro', this)">
+      <div class="model-card-strip"></div>
+      <div class="model-selected-badge"><i class="ph-bold ph-check"></i></div>
+      <div class="model-card-body">
+        <div class="model-head">
+          <div class="model-name-wrap">
+            <div class="model-name">T1ERA T1x.V2.2 Pro</div>
+            <div class="model-version">Version 2.2 Pro · Advanced</div>
+          </div>
+          <span class="model-badge">PRO</span>
+        </div>
+        <p class="model-desc">
+          The most capable T1ERA model. Builds on all of V2.1's strengths with deeper reasoning, richer output, and higher precision across every task — from complex analysis to premium creative work. Built for users who need the best.
+        </p>
+        <div class="model-tags">
+          <span class="model-tag"><i class="ph-bold ph-sparkle"></i> Advanced</span>
+          <span class="model-tag"><i class="ph-bold ph-brain"></i> Deep Reasoning</span>
+          <span class="model-tag"><i class="ph-bold ph-star"></i> Premium Output</span>
+          <span class="model-tag"><i class="ph-bold ph-rocket-launch"></i> High Precision</span>
+        </div>
+        <div class="model-details">
+          <div class="model-details-inner">
+            <div class="model-detail-row">
+              <i class="ph-bold ph-lightning"></i>
+              <span>Best for: <strong>Complex tasks, premium creative work</strong></span>
+            </div>
+            <div class="model-detail-row">
+              <i class="ph-bold ph-chart-bar"></i>
+              <span>Strength: <strong>Highest capability across all domains</strong></span>
+            </div>
+          </div>
+        </div>
+        <button class="model-select-btn" onclick="event.stopPropagation(); selectModel('T1x.V2.2 Pro', document.getElementById('card-v22'))">
+          <i class="ph-bold ph-check-circle"></i> Select T1x.V2.2 Pro
+        </button>
+      </div>
+    </div>
+
+  </div><!-- end model-list -->
+
+  <!-- FOOTER -->
+  <div class="picker-footer">
+    T1ERA AI Models · All models are templates — integrations coming soon
+  </div>
+
+  <div class="toast-msg" id="globalToast"></div>
+
+  <script>
+    var _currentModel = 'T1x.V1.1';
+
+    /* on load, mark V1 as selected by default */
+    window.addEventListener('DOMContentLoaded', function() {
+      /* check if opener already has an active model */
+      try {
+        if (window.opener && window.opener._activeModel) {
+          _currentModel = window.opener._activeModel;
+        }
+      } catch(e) {}
+      markSelected(_currentModel);
+    });
+
+    function markSelected(modelId) {
+      var map = {
+        'T1x.V1.1':     'card-v1',
+        'T1x.V2.1':     'card-v2',
+        'T1x.V2.2 Pro': 'card-v22'
+      };
+      document.querySelectorAll('.model-card').forEach(function(c) { c.classList.remove('selected'); });
+      var cardId = map[modelId];
+      if (cardId) document.getElementById(cardId).classList.add('selected');
+    }
+
+    function selectModel(modelId, cardEl) {
+      _currentModel = modelId;
+      markSelected(modelId);
+
+      /* tell the opener (spark22) which model was chosen */
+      try {
+        if (window.opener && typeof window.opener.setActiveModel === 'function') {
+          window.opener.setActiveModel(modelId);
+        }
+      } catch(e) {}
+
+      showToast(modelId + ' selected ✓');
+      setTimeout(function() { window.close(); }, 900);
+    }
+
+    function showToast(msg) {
+      var t = document.getElementById('globalToast');
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(t._t);
+      t._t = setTimeout(function() { t.classList.remove('show'); }, 2400);
+    }
+  </script>
+</body>
+</html>
