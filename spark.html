@@ -42,6 +42,9 @@
         --f-body: "DM Sans", sans-serif;
         --f-mono: "Fira Code", monospace;
         --ease: cubic-bezier(0.4, 0, 0.2, 1);
+        /* T1ERA AI brand colours */
+        --blue: #3b82f6;
+        --cyan: #06b6d4;
       }
       *,
       *::before,
@@ -3223,15 +3226,6 @@
       /* ══════════════════════════════════════════
    T1ERA AI COMMAND PANEL (super-panel-1)
 ══════════════════════════════════════════ */
-      /* AI brand colors */
-      --grok-color: #1da1f2;
-      --grok-glow: rgba(29,161,242,0.2);
-      --gemini-color: #4285f4;
-      --gemini-glow: rgba(66,133,244,0.2);
-      --gpt-color: #10a37f;
-      --gpt-glow: rgba(16,163,127,0.2);
-      --blue: #3b82f6;
-      --cyan: #06b6d4;
 
       #super-panel-1 {
         overflow-x: hidden;
@@ -5766,6 +5760,7 @@
       </div>
     </div>
 
+    <script src="t1era-model-picker.js"></script>
     <script src="spark-core.js"></script>
     <script type="module" src="spark-module.js"></script>
     <script type="module" src="spark-prompt-module.js"></script>
@@ -5937,13 +5932,7 @@
       /* ── AI Omnibar ── */
       var _activeModel = 'T1x.V1.1';
 
-      function openModelPicker() {
-        var popup = window.open('t1era-model-picker.html','_blank','width=520,height=600,left='+(screen.width/2-260)+',top='+(screen.height/2-300));
-        /* fallback if popup blocked — show toast */
-        if (!popup) {
-          if (typeof window.showToast === 'function') window.showToast('Enable popups to open model picker');
-        }
-      }
+      /* openModelPicker() is provided by t1era-model-picker.js */
 
       /* called by picker popup after user selects a model */
       function setActiveModel(modelId) {
