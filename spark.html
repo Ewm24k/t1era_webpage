@@ -52,6 +52,7 @@
       }
       html {
         scroll-behavior: smooth;
+        overflow-x: hidden;
       }
       body {
         font-family: var(--f-body);
@@ -3232,9 +3233,18 @@
       --blue: #3b82f6;
       --cyan: #06b6d4;
 
-      #super-panel-1 .t1era-page-wrap {
+      #super-panel-1 {
+        overflow-x: hidden;
+        width: 100%;
         max-width: 100%;
+        box-sizing: border-box;
+      }
+      #super-panel-1 .t1era-page-wrap {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
         padding: 0 0 80px;
+        box-sizing: border-box;
       }
       #super-panel-1 .hero {
         text-align: center;
@@ -3245,7 +3255,7 @@
         content: "";
         position: absolute;
         top: 0; left: 50%; transform: translateX(-50%);
-        width: 600px; height: 200px;
+        width: min(600px, 100vw); height: 200px;
         background: radial-gradient(ellipse at center, rgba(194,24,91,0.12) 0%, transparent 70%);
         pointer-events: none;
       }
@@ -3307,7 +3317,7 @@
       }
       #super-panel-1 .ai-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
         gap: 14px; margin-bottom: 28px; padding: 0 16px;
       }
       #super-panel-1 .ai-card {
@@ -3433,7 +3443,7 @@
       }
       #super-panel-1 .notify-btn:hover { background: rgba(245,158,11,0.2); }
       #super-panel-1 .quick-grid {
-        display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        display: grid; grid-template-columns: repeat(auto-fill, minmax(min(150px, 45%), 1fr));
         gap: 10px; margin-bottom: 28px; padding: 0 16px;
       }
       #super-panel-1 .quick-card {
@@ -3446,7 +3456,7 @@
       #super-panel-1 .quick-title { font-size: 12px; font-weight: 700; color: var(--text); }
       #super-panel-1 .quick-sub { font-size: 10px; color: var(--text-3); font-family: var(--f-mono); line-height: 1.4; }
       #super-panel-1 .stats-row {
-        display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(min(120px, 45%), 1fr));
         gap: 10px; margin-bottom: 28px; padding: 0 16px;
       }
       #super-panel-1 .stat-card {
