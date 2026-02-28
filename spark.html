@@ -3483,15 +3483,10 @@
       #super-panel-1 .activity-time { font-size: 10px; color: var(--text-3); font-family: var(--f-mono); white-space: nowrap; }
 
       /* ══════════════════════════════════════════
-   AI OMNIBAR — mobile fixed bottom + PC inline
+   AI OMNIBAR — mobile fixed + PC inline
 ══════════════════════════════════════════ */
 
-      /* ══════════════════════════════════════════
-   AI OMNIBAR — MOBILE fixed + PC inline
-══════════════════════════════════════════ */
-
-      /* ── MOBILE: fixed bar sits above mob-nav ── */
-      /* outer wrapper — no side padding, mirrors mob-nav exactly */
+      /* MOBILE: fixed bar above mob-nav — input only, no model row */
       .ai-omnibar-mobile {
         display: none;
         position: fixed;
@@ -3499,22 +3494,18 @@
         left: 0;
         right: 0;
         z-index: 240;
+        padding: 8px 12px;
         background: rgba(0,0,0,0.92);
         backdrop-filter: blur(20px);
         border-top: 1px solid var(--border);
       }
-      body.t1era-active .ai-omnibar-mobile {
-        display: block;
-      }
-      @media (min-width: 1080px) {
-        .ai-omnibar-mobile { display: none !important; }
-      }
+      body.t1era-active .ai-omnibar-mobile { display: block; }
+      @media (min-width: 1080px) { .ai-omnibar-mobile { display: none !important; } }
 
-      /* input row — full width, contained, no overflow */
+      /* shared input row */
       .ai-omnibar-input-row {
         display: flex;
         align-items: center;
-        margin: 8px 12px 0;
         background: var(--bg-3);
         border: 1px solid var(--border-2);
         border-radius: var(--r-sm);
@@ -3524,7 +3515,7 @@
       .ai-omnibar-input {
         flex: 1;
         min-width: 0;
-        width: 0; /* force flex shrink to work */
+        width: 0;
         background: transparent;
         border: none;
         outline: none;
@@ -3535,6 +3526,29 @@
       }
       .ai-omnibar-input::placeholder { color: var(--text-3); }
 
+      /* model picker button — inside input row */
+      .ai-model-picker-btn {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 8px;
+        border-radius: var(--r-sm);
+        border: 1px solid var(--border-2);
+        background: var(--bg-4);
+        color: var(--text-2);
+        font-family: var(--f-mono);
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        cursor: pointer;
+        white-space: nowrap;
+        flex-shrink: 0;
+        margin-right: 4px;
+      }
+      .ai-model-picker-btn:hover { border-color: var(--pink-2); color: var(--pink-2); }
+      .ai-model-picker-btn i { font-size: 11px; }
+
+      /* send button */
       .ai-omnibar-send {
         width: 30px;
         height: 30px;
@@ -3549,54 +3563,7 @@
         background: linear-gradient(135deg, var(--pink), var(--purple));
       }
 
-      /* AI model row — exact copy of mob-nav:
-         height:60px, flex, align-items:center, justify-content:space-around
-         .mob-btn pattern: flex-col, align-items:center, gap:2px, padding:6px 12px */
-      .ai-omnibar-models {
-        height: 60px;
-        display: flex;
-        align-items: center;
-        justify-content: space-around;
-      }
-      .ai-model-item {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 2px;
-        padding: 6px 12px;
-        cursor: pointer;
-        background: none;
-        border: none;
-      }
-      .ai-model-dot {
-        width: 22px;
-        height: 22px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 11px;
-        font-weight: 900;
-        border: 1.5px solid transparent;
-      }
-      .ai-model-label {
-        font-size: 10px;
-        font-family: var(--f-body);
-        color: var(--text-3);
-      }
-      .ai-model-item.selected .ai-model-label { color: var(--pink-2); }
-
-      .ai-model-dot[data-ai="grok"]   { background: rgba(29,161,242,0.12); color: #1da1f2; border-color: rgba(29,161,242,0.3); }
-      .ai-model-dot[data-ai="gemini"] { background: rgba(66,133,244,0.12); color: #4285f4; border-color: rgba(66,133,244,0.3); }
-      .ai-model-dot[data-ai="gpt"]    { background: rgba(16,163,127,0.12); color: #10a37f; border-color: rgba(16,163,127,0.3); }
-      .ai-model-dot[data-ai="claude"] { background: rgba(194,24,91,0.12);  color: var(--pink-2); border-color: rgba(194,24,91,0.3); }
-      .ai-model-dot.selected[data-ai="grok"]   { background: rgba(29,161,242,0.25); border-color: #1da1f2; }
-      .ai-model-dot.selected[data-ai="gemini"] { background: rgba(66,133,244,0.25); border-color: #4285f4; }
-      .ai-model-dot.selected[data-ai="gpt"]    { background: rgba(16,163,127,0.25); border-color: #10a37f; }
-      .ai-model-dot.selected[data-ai="claude"] { background: rgba(194,24,91,0.25);  border-color: var(--pink-2); }
-      .ai-model-item.selected .ai-model-dot[data-ai="claude"] { color: var(--pink-2); }
-
-      /* ── PC: inline sticky bar at bottom of panel ── */
+      /* PC omnibar */
       .ai-omnibar-pc { display: none; }
       @media (min-width: 1080px) {
         .ai-omnibar-pc {
@@ -3614,21 +3581,34 @@
         width: 100%;
         box-sizing: border-box;
         min-width: 0;
-        border-radius: 100px;
-        padding: 4px 4px 4px 16px;
+        border-radius: var(--r-sm);
+        padding: 0 6px 0 14px;
         background: var(--bg-3);
         border: 1px solid var(--border-2);
-        gap: 8px;
-      }
-      .ai-omnibar-divider {
-        width: 1px; height: 20px;
-        background: var(--border-2);
-        flex-shrink: 0;
+        gap: 6px;
       }
 
-      /* body padding: mob-nav(60) + input-row(~52) + model-row(60) */
+      /* T1ERA mob-nav — compact when AI bar is visible */
       @media (max-width: 1079px) {
-        body.t1era-active { padding-bottom: 172px; }
+        body.t1era-active .mob-nav {
+          height: 44px;
+        }
+        body.t1era-active .mob-nav .mob-btn {
+          padding: 4px 10px;
+        }
+        body.t1era-active .mob-nav .mob-btn i {
+          font-size: 18px;
+        }
+        body.t1era-active .mob-nav .mob-post {
+          width: 36px;
+          height: 36px;
+          font-size: 18px;
+        }
+        body.t1era-active .ai-omnibar-mobile {
+          bottom: 44px;
+        }
+        /* body padding: compact mob-nav(44) + omnibar input(~50) */
+        body.t1era-active { padding-bottom: 100px; }
       }
     </style>
   </head>
@@ -5259,21 +5239,19 @@
 
             <!-- ── AI OMNIBAR — PC (sticky bottom of panel) ── -->
             <div class="ai-omnibar-pc">
-              <div class="ai-omnibar-inner" id="aiOmnibarPc">
+              <div class="ai-omnibar-inner">
                 <input
                   class="ai-omnibar-input"
                   id="aiOmniInputPc"
-                  placeholder="Ask Grok, Gemini, ChatGPT or Claude anything…"
+                  placeholder="Ask T1ERA AI anything…"
                   autocomplete="off"
                   onkeydown="if(event.key==='Enter')aiOmnibarSend('pc')"
                 />
-                <div class="ai-omnibar-models" id="aiModelsPc">
-                  <div class="ai-model-dot" data-ai="grok"   data-label="GROK"    title="Grok · xAI"    onclick="selectAiModel('grok','pc')">𝕏</div>
-                  <div class="ai-model-dot" data-ai="gemini" data-label="GEMINI"  title="Gemini · Google" onclick="selectAiModel('gemini','pc')">✦</div>
-                  <div class="ai-model-dot" data-ai="gpt"    data-label="CHATGPT" title="ChatGPT · OpenAI" onclick="selectAiModel('gpt','pc')">⬡</div>
-                  <div class="ai-model-dot selected" data-ai="claude" data-label="CLAUDE" title="Claude · Anthropic" onclick="selectAiModel('claude','pc')">◆</div>
-                </div>
-                <div class="ai-omnibar-divider"></div>
+                <button class="ai-model-picker-btn" onclick="openModelPicker()" title="Choose model">
+                  <i class="ph-bold ph-robot"></i>
+                  <span id="pickerLabelPc">T1x.V1.1</span>
+                  <i class="ph-bold ph-caret-down"></i>
+                </button>
                 <button class="ai-omnibar-send" onclick="aiOmnibarSend('pc')" title="Send">
                   <i class="ph-bold ph-paper-plane-tilt"></i>
                 </button>
@@ -5570,37 +5548,22 @@
      AI OMNIBAR — MOBILE FIXED (shown only on T1ERA tab)
 ═══════════════════════════ -->
     <div class="ai-omnibar-mobile" id="aiOmnibarMobile">
-      <!-- Row 1: text input + send -->
       <div class="ai-omnibar-input-row">
         <input
           class="ai-omnibar-input"
           id="aiOmniInputMob"
-          placeholder="Ask any AI…"
+          placeholder="Ask T1ERA AI…"
           autocomplete="off"
           onkeydown="if(event.key==='Enter')aiOmnibarSend('mob')"
         />
+        <button class="ai-model-picker-btn" onclick="openModelPicker()" title="Choose model">
+          <i class="ph-bold ph-robot"></i>
+          <span id="pickerLabelMob">T1x.V1.1</span>
+          <i class="ph-bold ph-caret-down"></i>
+        </button>
         <button class="ai-omnibar-send" onclick="aiOmnibarSend('mob')" title="Send">
           <i class="ph-bold ph-paper-plane-tilt"></i>
         </button>
-      </div>
-      <!-- Row 2: AI model selector icons -->
-      <div class="ai-omnibar-models" id="aiModelsMob">
-        <div class="ai-model-item selected" onclick="selectAiModel('claude','mob')">
-          <div class="ai-model-dot selected" data-ai="claude">◆</div>
-          <span class="ai-model-label">Claude</span>
-        </div>
-        <div class="ai-model-item" onclick="selectAiModel('grok','mob')">
-          <div class="ai-model-dot" data-ai="grok">𝕏</div>
-          <span class="ai-model-label">Grok</span>
-        </div>
-        <div class="ai-model-item" onclick="selectAiModel('gemini','mob')">
-          <div class="ai-model-dot" data-ai="gemini">✦</div>
-          <span class="ai-model-label">Gemini</span>
-        </div>
-        <div class="ai-model-item" onclick="selectAiModel('gpt','mob')">
-          <div class="ai-model-dot" data-ai="gpt">⬡</div>
-          <span class="ai-model-label">ChatGPT</span>
-        </div>
       </div>
     </div>
 
@@ -5971,47 +5934,33 @@
         }
       }
 
-      /* ── AI Omnibar: model selection ── */
-      var _aiSelected = { mob: 'claude', pc: 'claude' };
+      /* ── AI Omnibar ── */
+      var _activeModel = 'T1x.V1.1';
 
-      function selectAiModel(ai, ctx) {
-        _aiSelected[ctx] = ai;
-        if (ctx === 'mob') {
-          /* mobile: toggle on .ai-model-item wrappers */
-          var mob = document.getElementById('aiModelsMob');
-          if (mob) {
-            mob.querySelectorAll('.ai-model-item').forEach(function(item) {
-              var dot = item.querySelector('.ai-model-dot');
-              var isMatch = dot && dot.dataset.ai === ai;
-              item.classList.toggle('selected', isMatch);
-              if (dot) dot.classList.toggle('selected', isMatch);
-            });
-          }
-        } else {
-          /* pc: toggle on .ai-model-dot directly */
-          var pc = document.getElementById('aiModelsPc');
-          if (pc) {
-            pc.querySelectorAll('.ai-model-dot').forEach(function(dot) {
-              dot.classList.toggle('selected', dot.dataset.ai === ai);
-            });
-          }
+      function openModelPicker() {
+        var popup = window.open('t1era-model-picker.html','_blank','width=520,height=600,left='+(screen.width/2-260)+',top='+(screen.height/2-300));
+        /* fallback if popup blocked — show toast */
+        if (!popup) {
+          if (typeof window.showToast === 'function') window.showToast('Enable popups to open model picker');
         }
       }
 
-      /* ── AI Omnibar: send handler ── */
+      /* called by picker popup after user selects a model */
+      function setActiveModel(modelId) {
+        _activeModel = modelId;
+        document.querySelectorAll('[id^="pickerLabel"]').forEach(function(el) {
+          el.textContent = modelId;
+        });
+      }
+
       function aiOmnibarSend(ctx) {
         var inputId = ctx === 'mob' ? 'aiOmniInputMob' : 'aiOmniInputPc';
         var input = document.getElementById(inputId);
         if (!input) return;
         var txt = input.value.trim();
         if (!txt) return;
-
-        var ai = _aiSelected[ctx] || 'claude';
-        var labels = { grok: 'Grok', gemini: 'Gemini', gpt: 'ChatGPT', claude: 'Claude' };
-        var label = labels[ai] || ai;
-
         if (typeof window.showToast === 'function') {
-          window.showToast(label + ' integration coming soon ⚡');
+          window.showToast(_activeModel + ' — coming soon ⚡');
         }
         input.value = '';
         input.focus();
