@@ -260,6 +260,23 @@
         }
       }
 
+      /* ── PC T1ERA: full-width, no sidebars ── */
+      @media (min-width: 1080px) {
+        body.t1era-active .page-wrap {
+          grid-template-columns: 1fr;
+          max-width: 900px;
+          padding: 0 32px;
+        }
+        body.t1era-active .sidebar-left,
+        body.t1era-active .sidebar-right {
+          display: none;
+        }
+        body.t1era-active .feed-col {
+          border-left: none;
+          border-right: none;
+        }
+      }
+
       /* ══════════════════════════════════════════
    LEFT SIDEBAR — desktop only
 ══════════════════════════════════════════ */
