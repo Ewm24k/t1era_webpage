@@ -3476,30 +3476,31 @@
    AI OMNIBAR — mobile fixed bottom + PC inline
 ══════════════════════════════════════════ */
 
-      /* ── MOBILE: fixed bar sits above mob-nav, hidden by default ── */
+      /* ── MOBILE: fixed bar sits above mob-nav ── */
       .ai-omnibar-mobile {
-        display: none; /* hidden when Sparks tab active */
+        display: none;
         position: fixed;
-        bottom: 60px; /* right above the 60px mob-nav */
-        left: 0; right: 0;
+        bottom: 60px;
+        left: 0;
+        right: 0;
+        width: 100%;
+        box-sizing: border-box;
         z-index: 240;
-        padding: 10px 12px;
-        background: rgba(0,0,0,0.96);
-        backdrop-filter: blur(24px);
-        border-top: 1px solid rgba(255,255,255,0.07);
+        padding: 8px 12px;
+        background: rgba(0,0,0,0.92);
+        backdrop-filter: blur(20px);
+        border-top: 1px solid var(--border);
       }
-      /* show only when T1ERA super-panel is active (toggled via JS class on body) */
       body.t1era-active .ai-omnibar-mobile {
         display: block;
       }
-      /* on PC: hide the mobile bar entirely */
       @media (min-width: 1080px) {
         .ai-omnibar-mobile { display: none !important; }
       }
 
-      /* ── PC: inline bar inside super-panel-1 ── */
+      /* ── PC: inline sticky bar at bottom of panel ── */
       .ai-omnibar-pc {
-        display: none; /* hidden on mobile */
+        display: none;
       }
       @media (min-width: 1080px) {
         .ai-omnibar-pc {
@@ -3516,18 +3517,17 @@
       .ai-omnibar-inner {
         display: flex;
         align-items: center;
-        gap: 0;
+        width: 100%;
+        box-sizing: border-box;
+        min-width: 0;
         border-radius: 100px;
-        padding: 4px 4px 4px 16px;
+        padding: 4px 4px 4px 14px;
         position: relative;
-        overflow: hidden;
-        /* multi-AI gradient border */
+        overflow: visible;
         background: var(--bg-3);
         border: 1.5px solid transparent;
         background-clip: padding-box;
-        box-shadow:
-          0 0 0 1.5px transparent,
-          0 4px 24px rgba(0,0,0,0.5);
+        box-shadow: 0 4px 24px rgba(0,0,0,0.5);
       }
       /* animated rainbow-AI border via pseudo element */
       .ai-omnibar-inner::before {
@@ -3537,16 +3537,17 @@
         border-radius: 100px;
         background: conic-gradient(
           from 0deg,
-          #1da1f2,   /* Grok blue */
-          #4285f4,   /* Gemini blue */
-          #10a37f,   /* GPT green */
-          #c2185b,   /* Claude pink */
-          #8b5cf6,   /* Claude purple */
-          #1da1f2    /* loop back */
+          #1da1f2,
+          #4285f4,
+          #10a37f,
+          #c2185b,
+          #8b5cf6,
+          #1da1f2
         );
-        z-index: -1;
+        z-index: 0;
         animation: ai-border-spin 6s linear infinite;
         opacity: 0.55;
+        pointer-events: none;
       }
       .ai-omnibar-inner:focus-within::before {
         opacity: 1;
@@ -3563,7 +3564,17 @@
         inset: 1.5px;
         border-radius: 100px;
         background: var(--bg-3);
-        z-index: -1;
+        z-index: 1;
+        pointer-events: none;
+      }
+
+      /* all children must sit above ::after */
+      .ai-omnibar-input,
+      .ai-omnibar-models,
+      .ai-omnibar-divider,
+      .ai-omnibar-send {
+        position: relative;
+        z-index: 2;
       }
 
       .ai-omnibar-input {
@@ -3660,9 +3671,11 @@
       }
       .ai-model-dot:hover::after { opacity: 1; }
 
-      /* on mobile: give T1ERA panel bottom padding so content isn't hidden behind the bar */
-      body.t1era-active #super-panel-1 .t1era-page-wrap {
-        padding-bottom: 120px;
+      /* on mobile T1ERA: body needs extra padding for both the omnibar + mob-nav */
+      @media (max-width: 1079px) {
+        body.t1era-active {
+          padding-bottom: 120px;
+        }
       }
     </style>
   </head>
