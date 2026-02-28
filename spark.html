@@ -3218,6 +3218,259 @@
         margin-top: 6px;
         line-height: 1.5;
       }
+
+      /* ══════════════════════════════════════════
+   T1ERA AI COMMAND PANEL (super-panel-1)
+══════════════════════════════════════════ */
+      /* AI brand colors */
+      --grok-color: #1da1f2;
+      --grok-glow: rgba(29,161,242,0.2);
+      --gemini-color: #4285f4;
+      --gemini-glow: rgba(66,133,244,0.2);
+      --gpt-color: #10a37f;
+      --gpt-glow: rgba(16,163,127,0.2);
+      --blue: #3b82f6;
+      --cyan: #06b6d4;
+
+      #super-panel-1 .t1era-page-wrap {
+        max-width: 100%;
+        padding: 0 0 80px;
+      }
+      #super-panel-1 .hero {
+        text-align: center;
+        padding: 36px 20px 28px;
+        position: relative;
+      }
+      #super-panel-1 .hero::before {
+        content: "";
+        position: absolute;
+        top: 0; left: 50%; transform: translateX(-50%);
+        width: 600px; height: 200px;
+        background: radial-gradient(ellipse at center, rgba(194,24,91,0.12) 0%, transparent 70%);
+        pointer-events: none;
+      }
+      #super-panel-1 .hero-badge {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 4px 14px; border-radius: 100px;
+        background: rgba(194,24,91,0.1);
+        border: 1px solid rgba(194,24,91,0.25);
+        font-size: 10px; font-weight: 700;
+        letter-spacing: 0.12em; text-transform: uppercase;
+        color: var(--pink-2); font-family: var(--f-mono);
+        margin-bottom: 16px;
+      }
+      #super-panel-1 .hero-title {
+        font-family: var(--f-display);
+        font-size: clamp(22px, 4vw, 44px);
+        font-weight: 900; letter-spacing: 0.04em; line-height: 1.1;
+        margin-bottom: 12px;
+        background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.6) 100%);
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      }
+      #super-panel-1 .hero-sub {
+        font-size: 14px; color: var(--text-3);
+        max-width: 440px; margin: 0 auto 24px; line-height: 1.6;
+      }
+      #super-panel-1 .ai-status-row {
+        display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 32px;
+      }
+      #super-panel-1 .ai-status-chip {
+        display: flex; align-items: center; gap: 8px;
+        padding: 7px 14px; border-radius: 100px;
+        border: 1px solid var(--border-2); background: var(--bg-card);
+        font-size: 12px; font-weight: 600; transition: all 0.18s; cursor: default;
+      }
+      #super-panel-1 .ai-status-chip:hover { transform: translateY(-2px); }
+      #super-panel-1 .ai-status-chip .dot {
+        width: 7px; height: 7px; border-radius: 50%;
+        animation: t1ai-pulse 2s ease infinite;
+      }
+      #super-panel-1 .ai-status-chip.grok { border-color: rgba(29,161,242,0.3); color: #1da1f2; }
+      #super-panel-1 .ai-status-chip.grok .dot { background: #1da1f2; box-shadow: 0 0 6px #1da1f2; }
+      #super-panel-1 .ai-status-chip.gemini { border-color: rgba(66,133,244,0.3); color: #4285f4; }
+      #super-panel-1 .ai-status-chip.gemini .dot { background: #4285f4; box-shadow: 0 0 6px #4285f4; animation-delay: 0.4s; }
+      #super-panel-1 .ai-status-chip.gpt { border-color: rgba(16,163,127,0.3); color: #10a37f; }
+      #super-panel-1 .ai-status-chip.gpt .dot { background: #10a37f; box-shadow: 0 0 6px #10a37f; animation-delay: 0.8s; }
+      @keyframes t1ai-pulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.5; transform: scale(0.7); }
+      }
+      #super-panel-1 .t1ai-section-label {
+        font-size: 9px; font-weight: 700;
+        text-transform: uppercase; letter-spacing: 0.14em;
+        color: var(--text-3); font-family: var(--f-mono);
+        margin-bottom: 16px; padding: 0 16px;
+        display: flex; align-items: center; gap: 10px;
+      }
+      #super-panel-1 .t1ai-section-label::after {
+        content: ""; flex: 1; height: 1px; background: var(--border);
+      }
+      #super-panel-1 .ai-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 14px; margin-bottom: 28px; padding: 0 16px;
+      }
+      #super-panel-1 .ai-card {
+        background: var(--bg-card); border: 1px solid var(--border);
+        border-radius: var(--r-lg); overflow: hidden;
+        transition: all 0.22s var(--ease); position: relative;
+      }
+      #super-panel-1 .ai-card:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,0.4); }
+      #super-panel-1 .ai-card.grok { border-color: rgba(29,161,242,0.15); }
+      #super-panel-1 .ai-card.grok:hover { border-color: rgba(29,161,242,0.35); box-shadow: 0 12px 40px rgba(29,161,242,0.12); }
+      #super-panel-1 .ai-card.gemini { border-color: rgba(66,133,244,0.15); }
+      #super-panel-1 .ai-card.gemini:hover { border-color: rgba(66,133,244,0.35); box-shadow: 0 12px 40px rgba(66,133,244,0.12); }
+      #super-panel-1 .ai-card.gpt { border-color: rgba(16,163,127,0.15); }
+      #super-panel-1 .ai-card.gpt:hover { border-color: rgba(16,163,127,0.35); box-shadow: 0 12px 40px rgba(16,163,127,0.12); }
+      #super-panel-1 .ai-card-glow {
+        position: absolute; top: 0; left: 0; right: 0; height: 120px;
+        opacity: 0.06; pointer-events: none;
+      }
+      #super-panel-1 .ai-card.grok .ai-card-glow { background: linear-gradient(180deg, #1da1f2, transparent); }
+      #super-panel-1 .ai-card.gemini .ai-card-glow { background: linear-gradient(180deg, #4285f4, transparent); }
+      #super-panel-1 .ai-card.gpt .ai-card-glow { background: linear-gradient(180deg, #10a37f, transparent); }
+      #super-panel-1 .ai-card-header {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 16px 16px 12px; border-bottom: 1px solid var(--border); position: relative;
+      }
+      #super-panel-1 .ai-card-brand { display: flex; align-items: center; gap: 10px; }
+      #super-panel-1 .ai-logo {
+        width: 34px; height: 34px; border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 17px; font-weight: 900; flex-shrink: 0;
+      }
+      #super-panel-1 .ai-card.grok .ai-logo { background: rgba(29,161,242,0.12); color: #1da1f2; border: 1px solid rgba(29,161,242,0.2); }
+      #super-panel-1 .ai-card.gemini .ai-logo { background: rgba(66,133,244,0.12); color: #4285f4; border: 1px solid rgba(66,133,244,0.2); }
+      #super-panel-1 .ai-card.gpt .ai-logo { background: rgba(16,163,127,0.12); color: #10a37f; border: 1px solid rgba(16,163,127,0.2); }
+      #super-panel-1 .ai-brand-name { font-family: var(--f-display); font-size: 12px; font-weight: 700; letter-spacing: 0.06em; }
+      #super-panel-1 .ai-brand-sub { font-size: 10px; color: var(--text-3); font-family: var(--f-mono); margin-top: 2px; }
+      #super-panel-1 .ai-card-status {
+        display: flex; align-items: center; gap: 5px;
+        font-size: 9px; font-weight: 700; font-family: var(--f-mono);
+        text-transform: uppercase; letter-spacing: 0.08em;
+        padding: 3px 9px; border-radius: 100px;
+      }
+      #super-panel-1 .ai-card-status.coming {
+        background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); color: var(--gold);
+      }
+      #super-panel-1 .ai-chat-area {
+        padding: 14px 16px; min-height: 150px;
+        display: flex; flex-direction: column; gap: 10px;
+      }
+      #super-panel-1 .chat-bubble { display: flex; gap: 8px; align-items: flex-start; }
+      #super-panel-1 .chat-bubble.user { flex-direction: row-reverse; }
+      #super-panel-1 .chat-av {
+        width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 9px; font-weight: 800; font-family: var(--f-display); color: #fff;
+        background: linear-gradient(135deg, var(--pink), var(--purple));
+      }
+      #super-panel-1 .chat-ai-av {
+        width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center; font-size: 13px;
+      }
+      #super-panel-1 .chat-text {
+        max-width: 80%; padding: 8px 12px; border-radius: 12px;
+        font-size: 11.5px; line-height: 1.55; color: var(--text-2);
+      }
+      #super-panel-1 .chat-bubble.user .chat-text {
+        background: rgba(194,24,91,0.12); border: 1px solid rgba(194,24,91,0.2);
+        color: var(--text); border-radius: 12px 12px 4px 12px;
+      }
+      #super-panel-1 .chat-bubble.ai .chat-text {
+        background: var(--bg-3); border: 1px solid var(--border);
+        border-radius: 12px 12px 12px 4px;
+      }
+      #super-panel-1 .typing-indicator {
+        display: flex; align-items: center; gap: 4px;
+        padding: 9px 13px; background: var(--bg-3); border: 1px solid var(--border);
+        border-radius: 12px 12px 12px 4px; width: fit-content;
+      }
+      #super-panel-1 .typing-indicator span {
+        width: 5px; height: 5px; border-radius: 50%; background: var(--text-3);
+        animation: t1ai-typing 1.2s ease infinite;
+      }
+      #super-panel-1 .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+      #super-panel-1 .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+      @keyframes t1ai-typing {
+        0%, 100% { transform: translateY(0); opacity: 0.4; }
+        50% { transform: translateY(-4px); opacity: 1; }
+      }
+      #super-panel-1 .ai-input-row {
+        display: flex; gap: 8px; align-items: center;
+        padding: 10px 16px 14px; border-top: 1px solid var(--border);
+      }
+      #super-panel-1 .ai-input {
+        flex: 1; background: var(--bg-3); border: 1px solid var(--border);
+        border-radius: var(--r-sm); padding: 8px 12px;
+        color: var(--text); font-family: var(--f-body); font-size: 12px;
+        outline: none; transition: border-color 0.18s;
+      }
+      #super-panel-1 .ai-input::placeholder { color: var(--text-3); }
+      #super-panel-1 .ai-input:focus { border-color: rgba(194,24,91,0.35); }
+      #super-panel-1 .ai-send-btn {
+        width: 32px; height: 32px; border-radius: var(--r-sm); border: none;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 15px; color: #fff; flex-shrink: 0; transition: all 0.18s;
+      }
+      #super-panel-1 .ai-card.grok .ai-send-btn { background: #1da1f2; }
+      #super-panel-1 .ai-card.gemini .ai-send-btn { background: #4285f4; }
+      #super-panel-1 .ai-card.gpt .ai-send-btn { background: #10a37f; }
+      #super-panel-1 .ai-send-btn:hover { filter: brightness(1.15); transform: scale(1.05); }
+      #super-panel-1 .coming-overlay {
+        position: absolute; inset: 0; background: rgba(0,0,0,0.75);
+        backdrop-filter: blur(4px);
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        gap: 10px; border-radius: var(--r-lg); z-index: 10;
+      }
+      #super-panel-1 .coming-overlay i { font-size: 28px; color: var(--gold); opacity: 0.7; }
+      #super-panel-1 .coming-overlay p { font-size: 12px; font-weight: 700; color: var(--text-2); font-family: var(--f-display); letter-spacing: 0.06em; }
+      #super-panel-1 .coming-overlay small { font-size: 10px; color: var(--text-3); font-family: var(--f-mono); }
+      #super-panel-1 .notify-btn {
+        padding: 6px 16px; border-radius: 100px;
+        background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3);
+        color: var(--gold); font-size: 11px; font-weight: 700; transition: all 0.18s;
+      }
+      #super-panel-1 .notify-btn:hover { background: rgba(245,158,11,0.2); }
+      #super-panel-1 .quick-grid {
+        display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 10px; margin-bottom: 28px; padding: 0 16px;
+      }
+      #super-panel-1 .quick-card {
+        background: var(--bg-card); border: 1px solid var(--border);
+        border-radius: var(--r); padding: 14px; cursor: pointer;
+        transition: all 0.18s; display: flex; flex-direction: column; gap: 8px;
+      }
+      #super-panel-1 .quick-card:hover { background: var(--bg-3); border-color: var(--border-2); transform: translateY(-2px); }
+      #super-panel-1 .quick-icon { width: 36px; height: 36px; border-radius: var(--r-sm); display: flex; align-items: center; justify-content: center; font-size: 17px; }
+      #super-panel-1 .quick-title { font-size: 12px; font-weight: 700; color: var(--text); }
+      #super-panel-1 .quick-sub { font-size: 10px; color: var(--text-3); font-family: var(--f-mono); line-height: 1.4; }
+      #super-panel-1 .stats-row {
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 10px; margin-bottom: 28px; padding: 0 16px;
+      }
+      #super-panel-1 .stat-card {
+        background: var(--bg-card); border: 1px solid var(--border);
+        border-radius: var(--r); padding: 14px; text-align: center;
+      }
+      #super-panel-1 .stat-num {
+        font-family: var(--f-display); font-size: 22px; font-weight: 900;
+        background: linear-gradient(135deg, var(--pink-2), var(--purple));
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        margin-bottom: 4px;
+      }
+      #super-panel-1 .stat-label { font-size: 10px; color: var(--text-3); font-family: var(--f-mono); text-transform: uppercase; letter-spacing: 0.08em; }
+      #super-panel-1 .activity-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 28px; padding: 0 16px; }
+      #super-panel-1 .activity-item {
+        display: flex; align-items: center; gap: 12px;
+        padding: 12px 14px; background: var(--bg-card);
+        border: 1px solid var(--border); border-radius: var(--r); transition: background 0.15s;
+      }
+      #super-panel-1 .activity-item:hover { background: var(--bg-3); }
+      #super-panel-1 .activity-icon { width: 32px; height: 32px; border-radius: var(--r-sm); display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+      #super-panel-1 .activity-text { flex: 1; font-size: 13px; color: var(--text-2); line-height: 1.4; }
+      #super-panel-1 .activity-text strong { color: var(--text); font-weight: 600; }
+      #super-panel-1 .activity-time { font-size: 10px; color: var(--text-3); font-family: var(--f-mono); white-space: nowrap; }
     </style>
   </head>
   <body>
@@ -4639,7 +4892,213 @@
 
         <!-- ══ SUPER PANEL 1 — T1ERA (future) ══ -->
         <div class="super-tab-panel" id="super-panel-1">
-          <!-- T1ERA content — coming soon -->
+          <div class="t1era-page-wrap">
+
+            <!-- HERO -->
+            <div class="hero fu">
+              <div class="hero-badge">
+                <i class="ph-bold ph-sparkle"></i>
+                T1ERA AI Command Centre
+              </div>
+              <h1 class="hero-title">Your AI, One Place</h1>
+              <p class="hero-sub">
+                Chat with Grok, Gemini and ChatGPT — all from inside T1ERA. One workspace, three engines.
+              </p>
+              <div class="ai-status-row">
+                <div class="ai-status-chip grok"><span class="dot"></span> Grok · xAI</div>
+                <div class="ai-status-chip gemini"><span class="dot"></span> Gemini · Google</div>
+                <div class="ai-status-chip gpt"><span class="dot"></span> ChatGPT · OpenAI</div>
+              </div>
+            </div>
+
+            <!-- STATS -->
+            <div class="t1ai-section-label fu d1">Overview</div>
+            <div class="stats-row fu d1">
+              <div class="stat-card"><div class="stat-num">3</div><div class="stat-label">AI Models</div></div>
+              <div class="stat-card"><div class="stat-num">—</div><div class="stat-label">Queries Today</div></div>
+              <div class="stat-card"><div class="stat-num">—</div><div class="stat-label">Saved Chats</div></div>
+              <div class="stat-card"><div class="stat-num">—</div><div class="stat-label">Templates Used</div></div>
+            </div>
+
+            <!-- QUICK ACTIONS -->
+            <div class="t1ai-section-label fu d2">Quick Actions</div>
+            <div class="quick-grid fu d2">
+              <div class="quick-card" onclick="showToast('Coming soon ⚡')">
+                <div class="quick-icon" style="background:rgba(194,24,91,0.1);color:var(--pink-2)"><i class="ph-bold ph-lightning"></i></div>
+                <div class="quick-title">Spark with AI</div>
+                <div class="quick-sub">Generate a post idea from AI</div>
+              </div>
+              <div class="quick-card" onclick="showToast('Coming soon ⚡')">
+                <div class="quick-icon" style="background:rgba(139,92,246,0.1);color:var(--purple)"><i class="ph-bold ph-pencil-simple"></i></div>
+                <div class="quick-title">Rewrite My Spark</div>
+                <div class="quick-sub">Polish your draft with AI</div>
+              </div>
+              <div class="quick-card" onclick="showToast('Coming soon ⚡')">
+                <div class="quick-icon" style="background:rgba(16,185,129,0.1);color:var(--green)"><i class="ph-bold ph-hash"></i></div>
+                <div class="quick-title">Hashtag Suggest</div>
+                <div class="quick-sub">Find best tags for your post</div>
+              </div>
+              <div class="quick-card" onclick="showToast('Coming soon ⚡')">
+                <div class="quick-icon" style="background:rgba(245,158,11,0.1);color:var(--gold)"><i class="ph-bold ph-translate"></i></div>
+                <div class="quick-title">Translate Post</div>
+                <div class="quick-sub">Translate spark to any language</div>
+              </div>
+              <div class="quick-card" onclick="showToast('Coming soon ⚡')">
+                <div class="quick-icon" style="background:rgba(59,130,246,0.1);color:#3b82f6"><i class="ph-bold ph-chat-teardrop-dots"></i></div>
+                <div class="quick-title">Reply Writer</div>
+                <div class="quick-sub">AI-suggested spark replies</div>
+              </div>
+              <div class="quick-card" onclick="showToast('Coming soon ⚡')">
+                <div class="quick-icon" style="background:rgba(6,182,212,0.1);color:#06b6d4"><i class="ph-bold ph-brain"></i></div>
+                <div class="quick-title">Summarise Feed</div>
+                <div class="quick-sub">TL;DR your trending sparks</div>
+              </div>
+            </div>
+
+            <!-- AI CARDS -->
+            <div class="t1ai-section-label fu d3">AI Models</div>
+            <div class="ai-grid">
+
+              <!-- GROK -->
+              <div class="ai-card grok fu d3">
+                <div class="ai-card-glow"></div>
+                <div class="ai-card-header">
+                  <div class="ai-card-brand">
+                    <div class="ai-logo">𝕏</div>
+                    <div>
+                      <div class="ai-brand-name" style="color:#1da1f2">GROK</div>
+                      <div class="ai-brand-sub">by xAI · Real-time web</div>
+                    </div>
+                  </div>
+                  <div class="ai-card-status coming">Soon</div>
+                </div>
+                <div class="ai-chat-area">
+                  <div class="chat-bubble ai">
+                    <div class="chat-ai-av">🤖</div>
+                    <div class="chat-text">Hey! I'm Grok. I can search the web in real-time and answer anything. What's on your mind?</div>
+                  </div>
+                  <div class="chat-bubble user">
+                    <div class="chat-av">M</div>
+                    <div class="chat-text">What's trending on X right now?</div>
+                  </div>
+                  <div class="chat-bubble ai">
+                    <div class="chat-ai-av">🤖</div>
+                    <div class="typing-indicator"><span></span><span></span><span></span></div>
+                  </div>
+                </div>
+                <div class="ai-input-row">
+                  <input class="ai-input" placeholder="Ask Grok anything…" disabled />
+                  <button class="ai-send-btn" onclick="showToast('Grok integration coming soon!')"><i class="ph-bold ph-paper-plane-tilt"></i></button>
+                </div>
+                <div class="coming-overlay">
+                  <i class="ph-bold ph-lock-simple"></i>
+                  <p>GROK</p>
+                  <small>Integration in progress</small>
+                  <button class="notify-btn" onclick="showToast('You\'ll be notified when Grok is live! 🔔')">Notify Me</button>
+                </div>
+              </div>
+
+              <!-- GEMINI -->
+              <div class="ai-card gemini fu d4">
+                <div class="ai-card-glow"></div>
+                <div class="ai-card-header">
+                  <div class="ai-card-brand">
+                    <div class="ai-logo">✦</div>
+                    <div>
+                      <div class="ai-brand-name" style="color:#4285f4">GEMINI</div>
+                      <div class="ai-brand-sub">by Google · Multimodal</div>
+                    </div>
+                  </div>
+                  <div class="ai-card-status coming">Soon</div>
+                </div>
+                <div class="ai-chat-area">
+                  <div class="chat-bubble ai">
+                    <div class="chat-ai-av">✦</div>
+                    <div class="chat-text">Hello! I'm Gemini. I can understand text, images, and code. How can I help you today?</div>
+                  </div>
+                  <div class="chat-bubble user">
+                    <div class="chat-av">M</div>
+                    <div class="chat-text">Help me write a better spark post about productivity.</div>
+                  </div>
+                  <div class="chat-bubble ai">
+                    <div class="chat-ai-av">✦</div>
+                    <div class="typing-indicator"><span></span><span></span><span></span></div>
+                  </div>
+                </div>
+                <div class="ai-input-row">
+                  <input class="ai-input" placeholder="Ask Gemini anything…" disabled />
+                  <button class="ai-send-btn" onclick="showToast('Gemini integration coming soon!')"><i class="ph-bold ph-paper-plane-tilt"></i></button>
+                </div>
+                <div class="coming-overlay">
+                  <i class="ph-bold ph-lock-simple"></i>
+                  <p>GEMINI</p>
+                  <small>Integration in progress</small>
+                  <button class="notify-btn" onclick="showToast('You\'ll be notified when Gemini is live! 🔔')">Notify Me</button>
+                </div>
+              </div>
+
+              <!-- CHATGPT -->
+              <div class="ai-card gpt fu d5">
+                <div class="ai-card-glow"></div>
+                <div class="ai-card-header">
+                  <div class="ai-card-brand">
+                    <div class="ai-logo">⬡</div>
+                    <div>
+                      <div class="ai-brand-name" style="color:#10a37f">CHATGPT</div>
+                      <div class="ai-brand-sub">by OpenAI · GPT-4o</div>
+                    </div>
+                  </div>
+                  <div class="ai-card-status coming">Soon</div>
+                </div>
+                <div class="ai-chat-area">
+                  <div class="chat-bubble ai">
+                    <div class="chat-ai-av">⬡</div>
+                    <div class="chat-text">Hi there! I'm ChatGPT. I'm great at writing, analysis, and brainstorming. What would you like to work on?</div>
+                  </div>
+                  <div class="chat-bubble user">
+                    <div class="chat-av">M</div>
+                    <div class="chat-text">Suggest 3 hashtags for my tech post.</div>
+                  </div>
+                  <div class="chat-bubble ai">
+                    <div class="chat-ai-av">⬡</div>
+                    <div class="typing-indicator"><span></span><span></span><span></span></div>
+                  </div>
+                </div>
+                <div class="ai-input-row">
+                  <input class="ai-input" placeholder="Ask ChatGPT anything…" disabled />
+                  <button class="ai-send-btn" onclick="showToast('ChatGPT integration coming soon!')"><i class="ph-bold ph-paper-plane-tilt"></i></button>
+                </div>
+                <div class="coming-overlay">
+                  <i class="ph-bold ph-lock-simple"></i>
+                  <p>CHATGPT</p>
+                  <small>Integration in progress</small>
+                  <button class="notify-btn" onclick="showToast('You\'ll be notified when ChatGPT is live! 🔔')">Notify Me</button>
+                </div>
+              </div>
+
+            </div><!-- end ai-grid -->
+
+            <!-- RECENT ACTIVITY -->
+            <div class="t1ai-section-label fu d5">Recent AI Activity</div>
+            <div class="activity-list fu d5">
+              <div class="activity-item">
+                <div class="activity-icon" style="background:rgba(194,24,91,0.1);color:var(--pink-2)"><i class="ph-bold ph-sparkle"></i></div>
+                <div class="activity-text"><strong>AI Command Centre</strong> is live — connect your first AI model to get started</div>
+                <div class="activity-time">just now</div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-icon" style="background:rgba(245,158,11,0.1);color:var(--gold)"><i class="ph-bold ph-star"></i></div>
+                <div class="activity-text"><strong>3 AI integrations</strong> queued — Grok, Gemini and ChatGPT coming soon</div>
+                <div class="activity-time">today</div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-icon" style="background:rgba(139,92,246,0.1);color:var(--purple)"><i class="ph-bold ph-rocket-launch"></i></div>
+                <div class="activity-text"><strong>T1ERA AI</strong> roadmap — Spark Writer, Reply Assistant and Feed Summariser planned</div>
+                <div class="activity-time">this week</div>
+              </div>
+            </div>
+
+          </div><!-- end t1era-page-wrap -->
         </div>
         <!-- end super-panel-1 -->
 
