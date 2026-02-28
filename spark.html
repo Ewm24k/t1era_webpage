@@ -3481,16 +3481,14 @@
 ══════════════════════════════════════════ */
 
       /* ── MOBILE: fixed bar sits above mob-nav ── */
+      /* outer wrapper — no side padding, mirrors mob-nav exactly */
       .ai-omnibar-mobile {
         display: none;
         position: fixed;
         bottom: 60px;
         left: 0;
         right: 0;
-        width: 100%;
-        box-sizing: border-box;
         z-index: 240;
-        padding: 8px 12px 6px;
         background: rgba(0,0,0,0.92);
         backdrop-filter: blur(20px);
         border-top: 1px solid var(--border);
@@ -3502,37 +3500,21 @@
         .ai-omnibar-mobile { display: none !important; }
       }
 
-      /* ── PC: inline sticky bar at bottom of panel ── */
-      .ai-omnibar-pc {
-        display: none;
-      }
-      @media (min-width: 1080px) {
-        .ai-omnibar-pc {
-          display: block;
-          position: sticky;
-          bottom: 0;
-          z-index: 50;
-          padding: 14px 16px 18px;
-          background: linear-gradient(to top, var(--bg) 60%, transparent);
-        }
-      }
-
-      /* ── Input row: text field + send button ── */
+      /* input row — full width, contained, no overflow */
       .ai-omnibar-input-row {
         display: flex;
         align-items: center;
-        width: 100%;
-        box-sizing: border-box;
-        gap: 8px;
+        margin: 8px 12px 0;
         background: var(--bg-3);
         border: 1px solid var(--border-2);
-        border-radius: var(--r);
+        border-radius: var(--r-sm);
         padding: 0 6px 0 12px;
-        margin-bottom: 8px;
+        overflow: hidden;
       }
       .ai-omnibar-input {
         flex: 1;
         min-width: 0;
+        width: 0; /* force flex shrink to work */
         background: transparent;
         border: none;
         outline: none;
@@ -3541,14 +3523,11 @@
         font-size: 13px;
         padding: 9px 0;
       }
-      .ai-omnibar-input::placeholder {
-        color: var(--text-3);
-      }
+      .ai-omnibar-input::placeholder { color: var(--text-3); }
 
-      /* Send button */
       .ai-omnibar-send {
-        width: 32px;
-        height: 32px;
+        width: 30px;
+        height: 30px;
         border-radius: var(--r-sm);
         border: none;
         display: flex;
@@ -3560,18 +3539,28 @@
         background: linear-gradient(135deg, var(--pink), var(--purple));
       }
 
-      /* ── Model icons row: below input, space-around like mob-nav ── */
+      /* AI model row — exact copy of mob-nav:
+         height:60px, flex, align-items:center, justify-content:space-around
+         .mob-btn pattern: flex-col, align-items:center, gap:2px, padding:6px 12px */
       .ai-omnibar-models {
+        height: 60px;
         display: flex;
         align-items: center;
         justify-content: space-around;
-        width: 100%;
-        box-sizing: border-box;
-        padding: 0 4px;
+      }
+      .ai-model-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        padding: 6px 12px;
+        cursor: pointer;
+        background: none;
+        border: none;
       }
       .ai-model-dot {
-        width: 28px;
-        height: 28px;
+        width: 22px;
+        height: 22px;
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -3579,39 +3568,36 @@
         font-size: 11px;
         font-weight: 900;
         border: 1.5px solid transparent;
-        cursor: pointer;
-        flex-shrink: 0;
       }
+      .ai-model-label {
+        font-size: 10px;
+        font-family: var(--f-body);
+        color: var(--text-3);
+      }
+      .ai-model-item.selected .ai-model-label { color: var(--pink-2); }
+
       .ai-model-dot[data-ai="grok"]   { background: rgba(29,161,242,0.12); color: #1da1f2; border-color: rgba(29,161,242,0.3); }
       .ai-model-dot[data-ai="gemini"] { background: rgba(66,133,244,0.12); color: #4285f4; border-color: rgba(66,133,244,0.3); }
       .ai-model-dot[data-ai="gpt"]    { background: rgba(16,163,127,0.12); color: #10a37f; border-color: rgba(16,163,127,0.3); }
       .ai-model-dot[data-ai="claude"] { background: rgba(194,24,91,0.12);  color: var(--pink-2); border-color: rgba(194,24,91,0.3); }
-      .ai-model-dot.selected[data-ai="grok"]   { background: rgba(29,161,242,0.25); border-color: #1da1f2; box-shadow: 0 0 6px rgba(29,161,242,0.4); }
-      .ai-model-dot.selected[data-ai="gemini"] { background: rgba(66,133,244,0.25); border-color: #4285f4; box-shadow: 0 0 6px rgba(66,133,244,0.4); }
-      .ai-model-dot.selected[data-ai="gpt"]    { background: rgba(16,163,127,0.25); border-color: #10a37f; box-shadow: 0 0 6px rgba(16,163,127,0.4); }
-      .ai-model-dot.selected[data-ai="claude"] { background: rgba(194,24,91,0.25);  border-color: var(--pink-2); box-shadow: 0 0 6px rgba(194,24,91,0.4); }
+      .ai-model-dot.selected[data-ai="grok"]   { background: rgba(29,161,242,0.25); border-color: #1da1f2; }
+      .ai-model-dot.selected[data-ai="gemini"] { background: rgba(66,133,244,0.25); border-color: #4285f4; }
+      .ai-model-dot.selected[data-ai="gpt"]    { background: rgba(16,163,127,0.25); border-color: #10a37f; }
+      .ai-model-dot.selected[data-ai="claude"] { background: rgba(194,24,91,0.25);  border-color: var(--pink-2); }
+      .ai-model-item.selected .ai-model-dot[data-ai="claude"] { color: var(--pink-2); }
 
-      /* model name label under each icon */
-      .ai-model-item {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 2px;
-        cursor: pointer;
+      /* ── PC: inline sticky bar at bottom of panel ── */
+      .ai-omnibar-pc { display: none; }
+      @media (min-width: 1080px) {
+        .ai-omnibar-pc {
+          display: block;
+          position: sticky;
+          bottom: 0;
+          z-index: 50;
+          padding: 14px 16px 18px;
+          background: linear-gradient(to top, var(--bg) 60%, transparent);
+        }
       }
-      .ai-model-label {
-        font-size: 8px;
-        font-family: var(--f-mono);
-        font-weight: 700;
-        letter-spacing: 0.04em;
-        color: var(--text-3);
-        text-transform: uppercase;
-      }
-      .ai-model-item.selected .ai-model-label {
-        color: var(--text-2);
-      }
-
-      /* PC omnibar uses the original single-row inner shell */
       .ai-omnibar-inner {
         display: flex;
         align-items: center;
@@ -3630,11 +3616,9 @@
         flex-shrink: 0;
       }
 
-      /* on mobile T1ERA: extra body padding for omnibar + mob-nav */
+      /* body padding: mob-nav(60) + input-row(~52) + model-row(60) */
       @media (max-width: 1079px) {
-        body.t1era-active {
-          padding-bottom: 135px;
-        }
+        body.t1era-active { padding-bottom: 172px; }
       }
     </style>
   </head>
