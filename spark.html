@@ -3476,6 +3476,10 @@
    AI OMNIBAR — mobile fixed bottom + PC inline
 ══════════════════════════════════════════ */
 
+      /* ══════════════════════════════════════════
+   AI OMNIBAR — MOBILE fixed + PC inline
+══════════════════════════════════════════ */
+
       /* ── MOBILE: fixed bar sits above mob-nav ── */
       .ai-omnibar-mobile {
         display: none;
@@ -3486,7 +3490,7 @@
         width: 100%;
         box-sizing: border-box;
         z-index: 240;
-        padding: 8px 12px;
+        padding: 8px 12px 6px;
         background: rgba(0,0,0,0.92);
         backdrop-filter: blur(20px);
         border-top: 1px solid var(--border);
@@ -3513,7 +3517,101 @@
         }
       }
 
-      /* ── SHARED omnibar inner shell ── */
+      /* ── Input row: text field + send button ── */
+      .ai-omnibar-input-row {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        box-sizing: border-box;
+        gap: 8px;
+        background: var(--bg-3);
+        border: 1px solid var(--border-2);
+        border-radius: var(--r);
+        padding: 0 6px 0 12px;
+        margin-bottom: 8px;
+      }
+      .ai-omnibar-input {
+        flex: 1;
+        min-width: 0;
+        background: transparent;
+        border: none;
+        outline: none;
+        color: var(--text);
+        font-family: var(--f-body);
+        font-size: 13px;
+        padding: 9px 0;
+      }
+      .ai-omnibar-input::placeholder {
+        color: var(--text-3);
+      }
+
+      /* Send button */
+      .ai-omnibar-send {
+        width: 32px;
+        height: 32px;
+        border-radius: var(--r-sm);
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        color: #fff;
+        flex-shrink: 0;
+        background: linear-gradient(135deg, var(--pink), var(--purple));
+      }
+
+      /* ── Model icons row: below input, space-around like mob-nav ── */
+      .ai-omnibar-models {
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        width: 100%;
+        box-sizing: border-box;
+        padding: 0 4px;
+      }
+      .ai-model-dot {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 900;
+        border: 1.5px solid transparent;
+        cursor: pointer;
+        flex-shrink: 0;
+      }
+      .ai-model-dot[data-ai="grok"]   { background: rgba(29,161,242,0.12); color: #1da1f2; border-color: rgba(29,161,242,0.3); }
+      .ai-model-dot[data-ai="gemini"] { background: rgba(66,133,244,0.12); color: #4285f4; border-color: rgba(66,133,244,0.3); }
+      .ai-model-dot[data-ai="gpt"]    { background: rgba(16,163,127,0.12); color: #10a37f; border-color: rgba(16,163,127,0.3); }
+      .ai-model-dot[data-ai="claude"] { background: rgba(194,24,91,0.12);  color: var(--pink-2); border-color: rgba(194,24,91,0.3); }
+      .ai-model-dot.selected[data-ai="grok"]   { background: rgba(29,161,242,0.25); border-color: #1da1f2; box-shadow: 0 0 6px rgba(29,161,242,0.4); }
+      .ai-model-dot.selected[data-ai="gemini"] { background: rgba(66,133,244,0.25); border-color: #4285f4; box-shadow: 0 0 6px rgba(66,133,244,0.4); }
+      .ai-model-dot.selected[data-ai="gpt"]    { background: rgba(16,163,127,0.25); border-color: #10a37f; box-shadow: 0 0 6px rgba(16,163,127,0.4); }
+      .ai-model-dot.selected[data-ai="claude"] { background: rgba(194,24,91,0.25);  border-color: var(--pink-2); box-shadow: 0 0 6px rgba(194,24,91,0.4); }
+
+      /* model name label under each icon */
+      .ai-model-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        cursor: pointer;
+      }
+      .ai-model-label {
+        font-size: 8px;
+        font-family: var(--f-mono);
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        color: var(--text-3);
+        text-transform: uppercase;
+      }
+      .ai-model-item.selected .ai-model-label {
+        color: var(--text-2);
+      }
+
+      /* PC omnibar uses the original single-row inner shell */
       .ai-omnibar-inner {
         display: flex;
         align-items: center;
@@ -3521,160 +3619,21 @@
         box-sizing: border-box;
         min-width: 0;
         border-radius: 100px;
-        padding: 4px 4px 4px 14px;
-        position: relative;
-        overflow: visible;
+        padding: 4px 4px 4px 16px;
         background: var(--bg-3);
-        border: 1.5px solid transparent;
-        background-clip: padding-box;
-        box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+        border: 1px solid var(--border-2);
+        gap: 8px;
       }
-      /* animated rainbow-AI border via pseudo element */
-      .ai-omnibar-inner::before {
-        content: "";
-        position: absolute;
-        inset: -2px;
-        border-radius: 100px;
-        background: conic-gradient(
-          from 0deg,
-          #1da1f2,
-          #4285f4,
-          #10a37f,
-          #c2185b,
-          #8b5cf6,
-          #1da1f2
-        );
-        z-index: 0;
-        animation: ai-border-spin 6s linear infinite;
-        opacity: 0.55;
-        pointer-events: none;
-      }
-      .ai-omnibar-inner:focus-within::before {
-        opacity: 1;
-        animation-duration: 3s;
-      }
-      @keyframes ai-border-spin {
-        to { transform: rotate(360deg); }
-      }
-
-      /* background fill so content sits on top */
-      .ai-omnibar-inner::after {
-        content: "";
-        position: absolute;
-        inset: 1.5px;
-        border-radius: 100px;
-        background: var(--bg-3);
-        z-index: 1;
-        pointer-events: none;
-      }
-
-      /* all children must sit above ::after */
-      .ai-omnibar-input,
-      .ai-omnibar-models,
-      .ai-omnibar-divider,
-      .ai-omnibar-send {
-        position: relative;
-        z-index: 2;
-      }
-
-      .ai-omnibar-input {
-        flex: 1;
-        background: transparent;
-        border: none;
-        outline: none;
-        color: var(--text);
-        font-family: var(--f-body);
-        font-size: 13px;
-        line-height: 1;
-        padding: 8px 0;
-        min-width: 0;
-      }
-      .ai-omnibar-input::placeholder {
-        color: var(--text-3);
-        font-style: italic;
-      }
-
-      /* AI model selector pills inside bar */
-      .ai-omnibar-models {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        padding: 0 8px;
-        flex-shrink: 0;
-      }
-      .ai-model-dot {
-        width: 22px; height: 22px;
-        border-radius: 50%;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 10px; font-weight: 900;
-        border: 1.5px solid transparent;
-        cursor: pointer;
-        transition: all 0.18s;
-        position: relative;
-      }
-      .ai-model-dot[data-ai="grok"]   { background: rgba(29,161,242,0.12); color: #1da1f2; border-color: rgba(29,161,242,0.25); }
-      .ai-model-dot[data-ai="gemini"] { background: rgba(66,133,244,0.12); color: #4285f4; border-color: rgba(66,133,244,0.25); }
-      .ai-model-dot[data-ai="gpt"]    { background: rgba(16,163,127,0.12); color: #10a37f; border-color: rgba(16,163,127,0.25); }
-      .ai-model-dot[data-ai="claude"] { background: rgba(194,24,91,0.12);  color: var(--pink-2); border-color: rgba(194,24,91,0.25); }
-      .ai-model-dot:hover { transform: scale(1.18); filter: brightness(1.3); }
-      .ai-model-dot.selected {
-        transform: scale(1.12);
-        box-shadow: 0 0 8px currentColor;
-      }
-      .ai-model-dot[data-ai="grok"].selected   { background: rgba(29,161,242,0.25); border-color: #1da1f2; }
-      .ai-model-dot[data-ai="gemini"].selected { background: rgba(66,133,244,0.25); border-color: #4285f4; }
-      .ai-model-dot[data-ai="gpt"].selected    { background: rgba(16,163,127,0.25); border-color: #10a37f; }
-      .ai-model-dot[data-ai="claude"].selected { background: rgba(194,24,91,0.25);  border-color: var(--pink-2); }
-
-      /* Divider */
       .ai-omnibar-divider {
         width: 1px; height: 20px;
         background: var(--border-2);
         flex-shrink: 0;
-        margin: 0 2px;
       }
 
-      /* Send button */
-      .ai-omnibar-send {
-        width: 36px; height: 36px;
-        border-radius: 50%;
-        border: none;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 15px; color: #fff; flex-shrink: 0;
-        background: linear-gradient(135deg, var(--pink), var(--purple));
-        box-shadow: 0 0 12px var(--pink-glow);
-        transition: all 0.2s;
-      }
-      .ai-omnibar-send:hover {
-        transform: scale(1.08);
-        box-shadow: 0 0 20px var(--pink-glow);
-      }
-
-      /* model label tooltip on hover */
-      .ai-model-dot::after {
-        content: attr(data-label);
-        position: absolute;
-        bottom: calc(100% + 6px);
-        left: 50%; transform: translateX(-50%);
-        background: var(--bg-4);
-        border: 1px solid var(--border-2);
-        color: var(--text-2);
-        font-size: 9px; font-weight: 700;
-        font-family: var(--f-mono);
-        letter-spacing: 0.06em;
-        padding: 3px 7px;
-        border-radius: 6px;
-        white-space: nowrap;
-        opacity: 0; pointer-events: none;
-        transition: opacity 0.15s;
-        z-index: 10;
-      }
-      .ai-model-dot:hover::after { opacity: 1; }
-
-      /* on mobile T1ERA: body needs extra padding for both the omnibar + mob-nav */
+      /* on mobile T1ERA: extra body padding for omnibar + mob-nav */
       @media (max-width: 1079px) {
         body.t1era-active {
-          padding-bottom: 120px;
+          padding-bottom: 135px;
         }
       }
     </style>
@@ -5617,7 +5576,8 @@
      AI OMNIBAR — MOBILE FIXED (shown only on T1ERA tab)
 ═══════════════════════════ -->
     <div class="ai-omnibar-mobile" id="aiOmnibarMobile">
-      <div class="ai-omnibar-inner" id="aiOmnibarMob">
+      <!-- Row 1: text input + send -->
+      <div class="ai-omnibar-input-row">
         <input
           class="ai-omnibar-input"
           id="aiOmniInputMob"
@@ -5625,16 +5585,28 @@
           autocomplete="off"
           onkeydown="if(event.key==='Enter')aiOmnibarSend('mob')"
         />
-        <div class="ai-omnibar-models" id="aiModelsMob">
-          <div class="ai-model-dot" data-ai="grok"   data-label="GROK"    onclick="selectAiModel('grok','mob')">𝕏</div>
-          <div class="ai-model-dot" data-ai="gemini" data-label="GEMINI"  onclick="selectAiModel('gemini','mob')">✦</div>
-          <div class="ai-model-dot" data-ai="gpt"    data-label="CHATGPT" onclick="selectAiModel('gpt','mob')">⬡</div>
-          <div class="ai-model-dot selected" data-ai="claude" data-label="CLAUDE" onclick="selectAiModel('claude','mob')">◆</div>
-        </div>
-        <div class="ai-omnibar-divider"></div>
         <button class="ai-omnibar-send" onclick="aiOmnibarSend('mob')" title="Send">
           <i class="ph-bold ph-paper-plane-tilt"></i>
         </button>
+      </div>
+      <!-- Row 2: AI model selector icons -->
+      <div class="ai-omnibar-models" id="aiModelsMob">
+        <div class="ai-model-item selected" onclick="selectAiModel('claude','mob')">
+          <div class="ai-model-dot selected" data-ai="claude">◆</div>
+          <span class="ai-model-label">Claude</span>
+        </div>
+        <div class="ai-model-item" onclick="selectAiModel('grok','mob')">
+          <div class="ai-model-dot" data-ai="grok">𝕏</div>
+          <span class="ai-model-label">Grok</span>
+        </div>
+        <div class="ai-model-item" onclick="selectAiModel('gemini','mob')">
+          <div class="ai-model-dot" data-ai="gemini">✦</div>
+          <span class="ai-model-label">Gemini</span>
+        </div>
+        <div class="ai-model-item" onclick="selectAiModel('gpt','mob')">
+          <div class="ai-model-dot" data-ai="gpt">⬡</div>
+          <span class="ai-model-label">ChatGPT</span>
+        </div>
       </div>
     </div>
 
@@ -6010,12 +5982,26 @@
 
       function selectAiModel(ai, ctx) {
         _aiSelected[ctx] = ai;
-        var containerId = ctx === 'mob' ? 'aiModelsMob' : 'aiModelsPc';
-        var container = document.getElementById(containerId);
-        if (!container) return;
-        container.querySelectorAll('.ai-model-dot').forEach(function(dot) {
-          dot.classList.toggle('selected', dot.dataset.ai === ai);
-        });
+        if (ctx === 'mob') {
+          /* mobile: toggle on .ai-model-item wrappers */
+          var mob = document.getElementById('aiModelsMob');
+          if (mob) {
+            mob.querySelectorAll('.ai-model-item').forEach(function(item) {
+              var dot = item.querySelector('.ai-model-dot');
+              var isMatch = dot && dot.dataset.ai === ai;
+              item.classList.toggle('selected', isMatch);
+              if (dot) dot.classList.toggle('selected', isMatch);
+            });
+          }
+        } else {
+          /* pc: toggle on .ai-model-dot directly */
+          var pc = document.getElementById('aiModelsPc');
+          if (pc) {
+            pc.querySelectorAll('.ai-model-dot').forEach(function(dot) {
+              dot.classList.toggle('selected', dot.dataset.ai === ai);
+            });
+          }
+        }
       }
 
       /* ── AI Omnibar: send handler ── */
