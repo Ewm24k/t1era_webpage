@@ -2,6 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
       import {
         getAuth,
         onAuthStateChanged,
+        signOut,
       } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
       import {
         getFirestore,
@@ -49,6 +50,17 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
         serverTimestamp,
         addDoc,
         updateDoc,
+      };
+
+      // ── SIGN OUT ──
+      window.handleSignOut = async function () {
+        try {
+          await signOut(auth);
+          window.location.replace("home.html");
+        } catch (e) {
+          console.error("Sign out error:", e);
+          alert("Sign out failed. Please try again.");
+        }
       };
 
       // ── POPULATE FROM FIREBASE ──
@@ -302,9 +314,10 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
         }
 
         // ── Apply saved profile ring color ──
-        const savedRing = d.profileRing || "pink-purple";
-        _currentRingKey = savedRing;
-        applyRingColor(savedRing);
+        // Users below level 20: default is no ring. They can choose white or white-grey only.
+        // Users level 20+: full ring options unlocked.
+        const savedRing = d.profileRing || (computedLevel >= 20 ? "pink-purple" : "none");
+        if (typeof window.applyRingColor === "function") window.applyRingColor(savedRing);
 
         // Account status
         const acctStatus = d.accountStatus || {};
