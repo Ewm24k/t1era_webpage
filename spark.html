@@ -11,6 +11,7 @@
       rel="stylesheet"
     />
     <script src="https://unpkg.com/@phosphor-icons/web@2.1.1/src/index.js"></script>
+    <link rel="stylesheet" href="t1era-chat.css" />
     <style>
       /* ══════════════════════════════════════════
    ROOT — T1ERA design system
@@ -5066,7 +5067,7 @@
 
         <!-- ══ SUPER PANEL 1 — T1ERA (future) ══ -->
         <div class="super-tab-panel" id="super-panel-1">
-          <div class="t1era-page-wrap">
+          <div class="t1era-page-wrap" id="t1eraChatBody">
 
             <!-- HERO -->
             <div class="hero fu">
@@ -5803,6 +5804,7 @@
     </div>
 
     <script src="t1era-model-picker.js"></script>
+    <script src="t1era-chat.js"></script>
     <script src="spark-core.js"></script>
     <script type="module" src="spark-module.js"></script>
     <script type="module" src="spark-prompt-module.js"></script>
@@ -5990,11 +5992,12 @@
         if (!input) return;
         var txt = input.value.trim();
         if (!txt) return;
-        if (typeof window.showToast === 'function') {
-          window.showToast(_activeModel + ' — coming soon ⚡');
-        }
         input.value = '';
         input.focus();
+        // Route to chat handler
+        if (window.t1eraChat && typeof window.t1eraChat.send === 'function') {
+          window.t1eraChat.send(txt, ctx);
+        }
       }
     </script>
 
