@@ -1,0 +1,323 @@
+/* ══════════════════════════════════════════════════════
+   T1ERA CHAT — MESSAGE BUBBLES
+   Scoped to #t1eraChatBody — zero conflict with existing CSS
+══════════════════════════════════════════════════════ */
+
+/* ── Chat body container ── */
+#t1eraChatBody {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  padding: 24px 16px 120px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Hide the hero/dashboard content when chat is active */
+#t1eraChatBody.chat-active .t1era-hero-content {
+  display: none;
+}
+
+/* ── Conversation stream ── */
+#t1eraConversation {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  max-width: 680px;
+}
+
+/* ── Message row — wraps the full bubble card ── */
+.t1c-row {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  opacity: 0;
+  transform: translateY(14px);
+  animation: t1cFadeUp 0.32s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes t1cFadeUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Message card ── */
+.t1c-card {
+  width: 100%;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  transition: border-color 0.2s;
+}
+
+.t1c-card:hover {
+  border-color: var(--border-2);
+}
+
+/* User card variant */
+.t1c-row.t1c-user .t1c-card {
+  background: rgba(194, 24, 91, 0.06);
+  border-color: rgba(194, 24, 91, 0.18);
+}
+
+/* AI card variant */
+.t1c-row.t1c-ai .t1c-card {
+  background: var(--bg-card);
+  border-color: rgba(139, 92, 246, 0.18);
+}
+
+/* ── Card header ── */
+.t1c-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px 9px;
+  border-bottom: 1px solid var(--border);
+}
+
+.t1c-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.t1c-avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 800;
+  font-family: var(--f-display);
+  flex-shrink: 0;
+}
+
+.t1c-row.t1c-user .t1c-avatar {
+  background: linear-gradient(135deg, var(--pink), var(--purple));
+  color: #fff;
+}
+
+.t1c-row.t1c-ai .t1c-avatar {
+  background: rgba(139, 92, 246, 0.15);
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  font-size: 12px;
+}
+
+.t1c-sender {
+  font-size: 10px;
+  font-weight: 700;
+  font-family: var(--f-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.t1c-row.t1c-user .t1c-sender {
+  color: var(--pink-2);
+}
+
+.t1c-row.t1c-ai .t1c-sender {
+  color: var(--purple);
+}
+
+.t1c-model-tag {
+  font-size: 9px;
+  font-family: var(--f-mono);
+  color: var(--text-3);
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  padding: 1px 7px;
+  letter-spacing: 0.04em;
+}
+
+/* ── Card body — message content ── */
+.t1c-body {
+  padding: 13px 16px;
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--text-2);
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+.t1c-row.t1c-user .t1c-body {
+  color: var(--text);
+  font-size: 13.5px;
+}
+
+/* ── Card footer ── */
+.t1c-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 12px 8px;
+  border-top: 1px solid var(--border);
+}
+
+.t1c-timestamp {
+  font-size: 9px;
+  font-family: var(--f-mono);
+  color: var(--text-3);
+  letter-spacing: 0.04em;
+}
+
+.t1c-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.t1c-action-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: none;
+  border: none;
+  color: var(--text-3);
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.16s;
+}
+
+.t1c-action-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-2);
+}
+
+.t1c-action-btn.copied {
+  color: var(--green);
+}
+
+/* ── Typing / loading indicator ── */
+.t1c-row.t1c-ai.t1c-loading .t1c-body {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 16px;
+  min-height: 52px;
+}
+
+.t1c-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--purple);
+  opacity: 0.4;
+  animation: t1cDotPulse 1.3s ease-in-out infinite;
+}
+
+.t1c-dot:nth-child(2) { animation-delay: 0.18s; }
+.t1c-dot:nth-child(3) { animation-delay: 0.36s; }
+
+@keyframes t1cDotPulse {
+  0%, 80%, 100% { opacity: 0.25; transform: scale(0.85); }
+  40% { opacity: 1; transform: scale(1.15); }
+}
+
+/* ── Divider between sessions ── */
+.t1c-session-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 680px;
+  margin: 4px 0;
+}
+
+.t1c-session-divider::before,
+.t1c-session-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.t1c-session-divider span {
+  font-size: 9px;
+  font-family: var(--f-mono);
+  color: var(--text-3);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* ── Cleared state toast ── */
+.t1c-clear-notice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 28px 16px 8px;
+  opacity: 0;
+  animation: t1cFadeUp 0.3s 0.05s forwards;
+}
+
+.t1c-clear-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(194, 24, 91, 0.08);
+  border: 1px solid rgba(194, 24, 91, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: var(--pink-2);
+  margin-bottom: 2px;
+}
+
+.t1c-clear-label {
+  font-size: 11px;
+  font-family: var(--f-mono);
+  color: var(--text-3);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ── Copy toast notification ── */
+.t1c-copy-toast {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%) translateY(8px);
+  background: var(--bg-3);
+  border: 1px solid var(--border-2);
+  border-radius: 100px;
+  padding: 7px 16px;
+  font-size: 11px;
+  font-family: var(--f-mono);
+  color: var(--green);
+  letter-spacing: 0.06em;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.22s;
+  z-index: 999;
+  white-space: nowrap;
+}
+
+.t1c-copy-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ── Responsive ── */
+@media (max-width: 480px) {
+  #t1eraChatBody {
+    padding: 16px 10px 120px;
+  }
+  .t1c-body {
+    font-size: 13px;
+  }
+}
