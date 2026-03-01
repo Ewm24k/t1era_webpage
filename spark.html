@@ -505,6 +505,27 @@
         padding: 8px 16px;
         gap: 8px;
       }
+
+      /* ── T1ERA tab: fix topbar + super-tabs-bar so they never scroll away ──
+         Scoped strictly to body.t1era-active — Sparks tab completely unaffected */
+      body.t1era-active .topbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+      }
+      body.t1era-active .super-tabs-bar {
+        position: fixed;
+        top: 52px;
+        left: 0;
+        right: 0;
+        width: 100%;
+      }
+      /* Push content down so it starts below the now-fixed bars */
+      body.t1era-active #super-panel-1 {
+        padding-top: 46px;
+      }
       .super-tab-btn {
         padding: 3px 12px;
         border-radius: 100px;
@@ -3582,10 +3603,11 @@
         body.t1era-active #super-panel-1 {
           display: flex;
           flex-direction: column;
-          height: calc(100vh - 52px);
+          height: calc(100vh - 98px);
           position: sticky;
-          top: 52px;
+          top: 98px;
           overflow: hidden;
+          padding-top: 0;
         }
         body.t1era-active .t1era-page-wrap {
           flex: 1;
