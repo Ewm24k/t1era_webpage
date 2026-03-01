@@ -42,16 +42,15 @@
       </a>
       <div style="width: 52px; display: flex; align-items: center; justify-content: flex-end;">
         <button
-          onclick="openProfileSettingsPanel()"
-          title="Settings"
-          style="width:36px;height:36px;border-radius:50%;background:none;border:1px solid var(--border);color:var(--text-3);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;"
-          onmouseover="this.style.background='rgba(255,255,255,0.06)';this.style.color='var(--text)'"
-          onmouseout="this.style.background='none';this.style.color='var(--text-3)'"
+          onclick="window.handleSignOut()"
+          title="Sign Out"
+          style="width:36px;height:36px;border-radius:50%;background:none;border:1px solid rgba(239,68,68,0.25);color:rgba(239,68,68,0.6);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;"
+          onmouseover="this.style.background='rgba(239,68,68,0.08)';this.style.borderColor='rgba(239,68,68,0.5)';this.style.color='rgba(239,68,68,0.9)'"
+          onmouseout="this.style.background='none';this.style.borderColor='rgba(239,68,68,0.25)';this.style.color='rgba(239,68,68,0.6)'"
         >
-          <i class="ph-bold ph-gear"></i>
+          <i class="ph-bold ph-sign-out"></i>
         </button>
       </div>
-      <!-- spacer -->
     </nav>
 
     <!-- PROFILE WRAPPER -->
@@ -155,7 +154,7 @@
             class="dots-btn"
             id="settingsBtn"
             title="Settings"
-            onclick="window.location.href = 'settings.html'"
+            onclick="openProfileSettingsPanel()"
           >
             <i class="ph-bold ph-gear"></i>
           </button>
@@ -177,6 +176,7 @@
             </button>
             <button
               class="dots-menu-item"
+              onclick="window.handleSignOut()"
               style="color: rgba(239, 68, 68, 0.65)"
             >
               <i
@@ -1435,7 +1435,7 @@
             <!-- filled by JS -->
           </div>
           <div class="ring-lock-tip" id="ringLockTip" style="display:none;">
-            🔒 Reach Level 3 to unlock gradient rings
+            🔒 Reach Level 20 to unlock gradient rings
           </div>
         </div>
 
