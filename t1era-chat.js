@@ -95,6 +95,9 @@
     // Clear all existing page content (hero, stats, quick actions, AI cards)
     _wrap.innerHTML = '';
 
+    // Engage chat-mode layout via CSS class
+    _wrap.classList.add('chat-active');
+
     // Add cleared session divider
     var notice = document.createElement('div');
     notice.className = 't1c-clear-notice';
@@ -115,10 +118,10 @@
   function clearChat() {
     _chatActive = false;
     _msgCount = 0;
+    var wrap = document.getElementById('t1eraChatBody');
+    if (wrap) wrap.classList.remove('chat-active');
     _wrap = null;
     _convo = null;
-    // Page will reload hero content on next tab switch
-    // or caller can refresh super-panel-1 manually
   }
 
   /* ══════════════════════════════════════════════════
