@@ -89,7 +89,16 @@ const dotsMenu = document.getElementById("dotsMenu");
       // PROFILE SETTINGS PANEL — Ring Border Customization
       // ══════════════════════════════════════════════════════
 
+      // "none" = no ring (invisible). White & White-Grey unlock at level 1.
+      // All gradient/colour rings require level 20+.
       const RING_OPTIONS = [
+        {
+          key: "none",
+          label: "No Ring",
+          gradient: "transparent",
+          solid: true,
+          minLevel: 1,
+        },
         {
           key: "white",
           label: "White",
@@ -109,54 +118,55 @@ const dotsMenu = document.getElementById("dotsMenu");
           label: "Pink Purple",
           gradient: "linear-gradient(135deg,var(--pink),var(--purple))",
           solid: false,
-          minLevel: 3,
+          minLevel: 20,
         },
         {
           key: "gold",
           label: "Gold",
           gradient: "linear-gradient(135deg,#f59e0b,#fbbf24)",
           solid: false,
-          minLevel: 3,
+          minLevel: 20,
         },
         {
           key: "green",
           label: "Cyber Green",
           gradient: "linear-gradient(135deg,#10b981,#34d399)",
           solid: false,
-          minLevel: 3,
+          minLevel: 20,
         },
         {
           key: "blue",
           label: "Ice Blue",
           gradient: "linear-gradient(135deg,#3b82f6,#60a5fa)",
           solid: false,
-          minLevel: 3,
+          minLevel: 20,
         },
         {
           key: "red",
           label: "Crimson",
           gradient: "linear-gradient(135deg,#ef4444,#f87171)",
           solid: false,
-          minLevel: 3,
+          minLevel: 20,
         },
         {
           key: "orange",
           label: "Inferno",
           gradient: "linear-gradient(135deg,#f97316,#fb923c)",
           solid: false,
-          minLevel: 3,
+          minLevel: 20,
         },
         {
           key: "rainbow",
           label: "Rainbow",
           gradient: "conic-gradient(#f59e0b,#ef4444,#8b5cf6,#3b82f6,#10b981,#f59e0b)",
           solid: false,
-          minLevel: 3,
+          minLevel: 20,
         },
       ];
 
       // The gradient string applied to .avatar-ring background
       const RING_GRADIENTS = {
+        "none":        "transparent",
         "white":       "#ffffff",
         "white-grey":  "linear-gradient(135deg,#ffffff,#888888)",
         "pink-purple": "conic-gradient(var(--pink) 0deg,var(--purple) 90deg,var(--pink-2) 180deg,var(--pink) 360deg)",
@@ -170,12 +180,18 @@ const dotsMenu = document.getElementById("dotsMenu");
 
       const DEV_RING_EMAIL = "ewm24k@gmail.com";
       let _pendingRingKey = null;
-      let _currentRingKey = "pink-purple"; // default
+      let _currentRingKey = "none"; // default — no ring until user picks one
 
       function applyRingColor(key) {
-        const gradient = RING_GRADIENTS[key] || RING_GRADIENTS["pink-purple"];
+        const gradient = RING_GRADIENTS[key] !== undefined ? RING_GRADIENTS[key] : RING_GRADIENTS["none"];
         document.querySelectorAll(".avatar-ring").forEach((el) => {
-          el.style.background = gradient;
+          if (key === "none") {
+            el.style.background = "transparent";
+            el.style.opacity = "0";
+          } else {
+            el.style.background = gradient;
+            el.style.opacity = "1";
+          }
         });
         _currentRingKey = key;
       }
@@ -194,8 +210,12 @@ const dotsMenu = document.getElementById("dotsMenu");
           const div = document.createElement("div");
           div.className = "ring-option" + (isSelected ? " selected" : "") + (locked ? " locked" : "");
           div.dataset.key = opt.key;
+          // For "none" option show a dashed circle preview
+          const previewStyle = opt.key === "none"
+            ? 'border:2px dashed rgba(255,255,255,0.2);background:transparent;'
+            : `--ring-gradient:${opt.gradient};`;
           div.innerHTML = `
-            <div class="ring-preview" style="--ring-gradient:${opt.gradient};">
+            <div class="ring-preview" style="${previewStyle}">
               <div class="ring-preview-inner"></div>
               ${locked ? '<div class="ring-lock-overlay"><i class="ph-bold ph-lock"></i></div>' : ""}
             </div>
@@ -214,7 +234,7 @@ const dotsMenu = document.getElementById("dotsMenu");
         document.querySelectorAll(".ring-option").forEach((el) => {
           el.classList.toggle("selected", el.dataset.key === key);
         });
-        // Show save footer
+        // Always show save footer after any selection
         const footer = document.getElementById("profSettingsFooter");
         if (footer) footer.classList.add("visible");
       }
@@ -226,16 +246,20 @@ const dotsMenu = document.getElementById("dotsMenu");
         try {
           const uid = window._currentUid;
           if (uid) {
-            await updateDoc(doc(db, "users", uid), {
-              "profileRing": _pendingRingKey,
-            });
+            // Use fetch-then-update via window._t1FirestoreFns if available
+            const fns = window._t1FirestoreFns;
+            const db = window._t1db;
+            if (fns && db) {
+              await fns.updateDoc(fns.doc(db, "users", uid), {
+                "profileRing": _pendingRingKey,
+              });
+            }
           }
-          applyRingColor(_pendingRingKey);
           _currentRingKey = _pendingRingKey;
           _pendingRingKey = null;
-          const footer = document.getElementById("profSettingsFooter");
-          if (footer) footer.classList.remove("visible");
-          if (btn) { btn.disabled = false; btn.textContent = "Save Changes"; }
+          // Close settings panel, then reload to apply new ring across the full page
+          closeProfileSettingsPanel();
+          window.location.reload();
         } catch (e) {
           console.warn("saveRingColor error:", e);
           if (btn) { btn.disabled = false; btn.textContent = "Save Changes"; }
@@ -245,6 +269,10 @@ const dotsMenu = document.getElementById("dotsMenu");
       function openProfileSettingsPanel() {
         document.getElementById("profSettingsPanel").classList.add("open");
         document.getElementById("profSettingsBackdrop").classList.add("open");
+        // Reset pending selection and hide footer on open
+        _pendingRingKey = null;
+        const footer = document.getElementById("profSettingsFooter");
+        if (footer) footer.classList.remove("visible");
         // Build grid using current level and email
         const level = window._computedLevel || 1;
         const email = window._currentUserEmail || "";
@@ -259,3 +287,4 @@ const dotsMenu = document.getElementById("dotsMenu");
       window.saveRingColor = saveRingColor;
       window.openProfileSettingsPanel = openProfileSettingsPanel;
       window.closeProfileSettingsPanel = closeProfileSettingsPanel;
+      window.applyRingColor = applyRingColor;
