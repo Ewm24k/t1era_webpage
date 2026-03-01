@@ -4,7 +4,8 @@
 ══════════════════════════════════════════════════════ */
 
 /* ── Chat body container ── */
-#t1eraChatBody {
+/* ── Chat body container — only layout when chat mode is active ── */
+#t1eraChatBody.chat-active {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -314,7 +315,7 @@
 
 /* ── Responsive ── */
 @media (max-width: 480px) {
-  #t1eraChatBody {
+  #t1eraChatBody.chat-active {
     padding: 16px 10px 120px;
   }
   .t1c-body {
