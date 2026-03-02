@@ -256,8 +256,7 @@ window._copyQuoteText = function (encodedText) {
     ta.select();
     document.execCommand("copy");
     ta.remove();
-    if (typeof window.showToast === "function")
-      window.showToast("Copied ✓");
+    if (typeof window.showToast === "function") window.showToast("Copied ✓");
   };
   if (navigator.clipboard) {
     navigator.clipboard
@@ -514,6 +513,11 @@ function renderPromptCard(id, d, rankLabel) {
   firstDemo
     ? panel.insertBefore(article, firstDemo)
     : panel.appendChild(article);
+
+  // ── Apply saved profile ring to own prompt spark cards ──
+  if (isOwnCard && typeof window._applyRingToOwnFeedCards === 'function') {
+    window._applyRingToOwnFeedCards(window._userRingKey || 'none');
+  }
 
   // Fetch real like count + check if current user already liked
   getDocs(collection(db, SPARKS_COL, id, "likes"))
