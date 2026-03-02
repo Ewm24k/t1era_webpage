@@ -35,6 +35,10 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+// ── Expose Firebase globals required by user-peek.js ──
+window._t1db = db;
+window._t1FirestoreFns = { doc, getDoc, collection, getDocs, query, where };
+
 const DAILY_LIMIT = 3;
 const DEV_EMAIL = "ewm24k@gmail.com";
 const SPARKS_COL = "sparks";
@@ -73,6 +77,8 @@ onAuthStateChanged(auth, async (user) => {
   }
 
   window._sparkUser = user;
+  window._currentUid = user.uid;  // alias for user-peek.js
+  window._myFollowingSet = window._followingSet; // alias — updated again after loadFollowingSet
 
   try {
     const snap = await getDoc(doc(db, "users", user.uid));
@@ -370,9 +376,9 @@ async function _saveDisplayNamePref() {
     // 10. Full feed reload in background to sync everything from Firestore
     setTimeout(async () => {
       if (typeof window.startFeed === "function") await window.startFeed();
-      if (typeof window.startPromptFeed === "function") await window.startPromptFeed();
+      if (typeof window.startPromptFeed === "function")
+        await window.startPromptFeed();
     }, 400);
-
   } catch (e) {
     console.error("_saveDisplayNamePref error:", e);
     if (saveBtn) {
@@ -390,25 +396,27 @@ function _updateOwnCardsDisplayName(newName, newInitial, photoURL) {
   const uid = window._sparkUser?.uid;
   if (!uid) return;
 
-  document.querySelectorAll(`.spark-card[data-owner-uid="${uid}"]`).forEach((card) => {
-    // Update author name text
-    const nameEl = card.querySelector(".author-name");
-    if (nameEl) nameEl.textContent = newName;
+  document
+    .querySelectorAll(`.spark-card[data-owner-uid="${uid}"]`)
+    .forEach((card) => {
+      // Update author name text
+      const nameEl = card.querySelector(".author-name");
+      if (nameEl) nameEl.textContent = newName;
 
-    // Update avatar initial / photo
-    const avEl = card.querySelector(".spark-av");
-    if (avEl) {
-      if (photoURL) {
-        // Keep existing photo — just ensure fallback initial is updated
-        const img = avEl.querySelector("img");
-        if (!img) {
+      // Update avatar initial / photo
+      const avEl = card.querySelector(".spark-av");
+      if (avEl) {
+        if (photoURL) {
+          // Keep existing photo — just ensure fallback initial is updated
+          const img = avEl.querySelector("img");
+          if (!img) {
+            avEl.textContent = newInitial;
+          }
+        } else {
           avEl.textContent = newInitial;
         }
-      } else {
-        avEl.textContent = newInitial;
       }
-    }
-  });
+    });
 }
 
 window.selectDisplayNamePref = _selectDisplayNamePref;
@@ -558,6 +566,7 @@ async function loadFollowingSet(uid) {
       query(collection(db, "follows"), where("followerId", "==", uid)),
     );
     window._followingSet = new Set(snap.docs.map((d) => d.data().followedId));
+    window._myFollowingSet = window._followingSet; // keep alias in sync
   } catch (e) {
     console.warn("loadFollowingSet error:", e.code, e.message);
     window._followingSet = new Set();
@@ -1465,7 +1474,12 @@ async function startFeed() {
             rankCache[uid] = "LV 1";
           }
         } catch (rankErr) {
-          console.warn("rank fetch error for uid", uid, rankErr?.code, rankErr?.message);
+          console.warn(
+            "rank fetch error for uid",
+            uid,
+            rankErr?.code,
+            rankErr?.message,
+          );
           rankCache[uid] = "LV 1";
         }
       }),
@@ -1474,7 +1488,12 @@ async function startFeed() {
     docs
       .slice(0, 50)
       .forEach(({ id, data }) =>
-        renderCard(id, data, rankCache[data.uid] || "LV 1", userDataCache[data.uid]),
+        renderCard(
+          id,
+          data,
+          rankCache[data.uid] || "LV 1",
+          userDataCache[data.uid],
+        ),
       );
   } catch (e) {
     console.error("startFeed error:", e);
@@ -1531,13 +1550,21 @@ function renderCard(id, d, rankLabel, liveUserData) {
     // Always read from live in-memory state — updated immediately on pref save
     const ud = window._sparkUserData || {};
     name = resolveDisplayName(ud, window._displayNamePref);
-    handle = ud.nickname || window._sparkUser?.email?.split("@")[0] || d.authorHandle || "user";
+    handle =
+      ud.nickname ||
+      window._sparkUser?.email?.split("@")[0] ||
+      d.authorHandle ||
+      "user";
   } else {
     // Other users — resolve from their live user doc if available, else spark doc fallback
     if (liveUserData) {
       const pref = liveUserData.displayNamePref || "fullName";
       name = resolveDisplayName(liveUserData, pref);
-      handle = liveUserData.nickname || liveUserData.email?.split("@")[0] || d.authorHandle || "user";
+      handle =
+        liveUserData.nickname ||
+        liveUserData.email?.split("@")[0] ||
+        d.authorHandle ||
+        "user";
     } else {
       name = d.authorName || "T1ERA User";
       handle = d.authorHandle || "user";
@@ -1584,7 +1611,7 @@ function renderCard(id, d, rankLabel, liveUserData) {
   article.innerHTML = `
     <div class="card-head">
       <div class="av-wrap">
-        <div class="spark-av" style="${avBg}">${avInner}</div>
+        <div class="spark-av" style="${avBg}" onclick="event.stopPropagation();if(typeof window.openPeekCard==='function'&&'${d.uid || ''}'&&'${d.uid || ''}'!=='undefined')window.openPeekCard('${d.uid || ''}')">${avInner}</div>
       </div>
       <div class="card-meta">
         <div class="meta-row-1">
@@ -1930,3 +1957,37 @@ function applyComposeAvatar(photoURL, initial) {
     });
   }
 }
+
+
+// ══════════════════════════════════════════════════════════════════════
+// BRIDGES FOR user-peek.js
+// ══════════════════════════════════════════════════════════════════════
+
+// Profile cache — user-peek.js reads/writes this
+if (!window._profileCache) window._profileCache = {};
+
+// modalToggleFollow — user-peek.js calls this to follow/unfollow
+// Delegates to window._followFn which is the full follow handler
+window.modalToggleFollow = async function (_proxyBtn, uid, action) {
+  if (!uid || !window._currentUid) return;
+  const isCurrentlyFollowing = window._myFollowingSet && window._myFollowingSet.has(uid);
+  const shouldFollow = action === 'follow' || (!isCurrentlyFollowing && action !== 'unfollow');
+  if (shouldFollow === isCurrentlyFollowing) return; // no-op
+  // Build a minimal proxy button that _followFn can update without errors
+  const fakeBtn = {
+    disabled: false,
+    style: {},
+    className: '',
+    innerHTML: '',
+    classList: {
+      add: () => {},
+      remove: () => {},
+      toggle: () => {},
+    },
+  };
+  if (typeof window._followFn === 'function') {
+    await window._followFn({ ownerUid: uid, btn: fakeBtn, type: 'badge' });
+    // Keep _myFollowingSet alias in sync
+    window._myFollowingSet = window._followingSet;
+  }
+};
