@@ -92,7 +92,6 @@ onAuthStateChanged(auth, async (user) => {
     const resolvedName = resolveDisplayName(d, window._displayNamePref);
     const initial = resolvedName[0].toUpperCase();
     applyComposeAvatar(photoURL, initial);
-    // ── Apply saved profile ring to compose avatars ──
     if (typeof window._applySparkRing === "function") window._applySparkRing(d.profileRing || "none");
   } catch (e) {
     window._sparkUserData = {};
@@ -1614,6 +1613,7 @@ function renderCard(id, d, rankLabel, liveUserData) {
   article.innerHTML = `
     <div class="card-head">
       <div class="av-wrap">
+        <span class="spark-ring" id="sring-${id}"></span>
         <div class="spark-av" style="${avBg}" onclick="event.stopPropagation();if(typeof window.openPeekCard==='function'&&'${d.uid || ""}'&&'${d.uid || ""}'!=='undefined')window.openPeekCard('${d.uid || ""}')">${avInner}</div>
       </div>
       <div class="card-meta">
@@ -1690,7 +1690,6 @@ function renderCard(id, d, rankLabel, liveUserData) {
   } else {
     panel.appendChild(article);
   }
-  // ── Apply saved ring to own spark card immediately after insertion ──
   if (isOwnCard && typeof window._applyRingToOwnFeedCards === "function") {
     window._applyRingToOwnFeedCards(window._userRingKey || "none");
   }
