@@ -77,7 +77,7 @@ onAuthStateChanged(auth, async (user) => {
   }
 
   window._sparkUser = user;
-  window._currentUid = user.uid;  // alias for user-peek.js
+  window._currentUid = user.uid; // alias for user-peek.js
   window._myFollowingSet = window._followingSet; // alias — updated again after loadFollowingSet
 
   try {
@@ -92,6 +92,8 @@ onAuthStateChanged(auth, async (user) => {
     const resolvedName = resolveDisplayName(d, window._displayNamePref);
     const initial = resolvedName[0].toUpperCase();
     applyComposeAvatar(photoURL, initial);
+    // ── Apply saved profile ring to compose avatars ──
+    if (typeof window._applySparkRing === "function") window._applySparkRing(d.profileRing || "none");
   } catch (e) {
     window._sparkUserData = {};
     window._displayNamePref = "fullName";
@@ -99,6 +101,7 @@ onAuthStateChanged(auth, async (user) => {
       "",
       (user.displayName || user.email || "U")[0].toUpperCase(),
     );
+    if (typeof window._applySparkRing === "function") window._applySparkRing("none");
   }
 
   ensurePointMap(user.uid);
@@ -1611,7 +1614,7 @@ function renderCard(id, d, rankLabel, liveUserData) {
   article.innerHTML = `
     <div class="card-head">
       <div class="av-wrap">
-        <div class="spark-av" style="${avBg}" onclick="event.stopPropagation();if(typeof window.openPeekCard==='function'&&'${d.uid || ''}'&&'${d.uid || ''}'!=='undefined')window.openPeekCard('${d.uid || ''}')">${avInner}</div>
+        <div class="spark-av" style="${avBg}" onclick="event.stopPropagation();if(typeof window.openPeekCard==='function'&&'${d.uid || ""}'&&'${d.uid || ""}'!=='undefined')window.openPeekCard('${d.uid || ""}')">${avInner}</div>
       </div>
       <div class="card-meta">
         <div class="meta-row-1">
@@ -1686,6 +1689,10 @@ function renderCard(id, d, rankLabel, liveUserData) {
     panel.insertBefore(article, firstDemo);
   } else {
     panel.appendChild(article);
+  }
+  // ── Apply saved ring to own spark card immediately after insertion ──
+  if (isOwnCard && typeof window._applyRingToOwnFeedCards === "function") {
+    window._applyRingToOwnFeedCards(window._userRingKey || "none");
   }
 
   getDocs(collection(db, "sparks", id, "likes"))
@@ -1958,7 +1965,6 @@ function applyComposeAvatar(photoURL, initial) {
   }
 }
 
-
 // ══════════════════════════════════════════════════════════════════════
 // BRIDGES FOR user-peek.js
 // ══════════════════════════════════════════════════════════════════════
@@ -1970,23 +1976,25 @@ if (!window._profileCache) window._profileCache = {};
 // Delegates to window._followFn which is the full follow handler
 window.modalToggleFollow = async function (_proxyBtn, uid, action) {
   if (!uid || !window._currentUid) return;
-  const isCurrentlyFollowing = window._myFollowingSet && window._myFollowingSet.has(uid);
-  const shouldFollow = action === 'follow' || (!isCurrentlyFollowing && action !== 'unfollow');
+  const isCurrentlyFollowing =
+    window._myFollowingSet && window._myFollowingSet.has(uid);
+  const shouldFollow =
+    action === "follow" || (!isCurrentlyFollowing && action !== "unfollow");
   if (shouldFollow === isCurrentlyFollowing) return; // no-op
   // Build a minimal proxy button that _followFn can update without errors
   const fakeBtn = {
     disabled: false,
     style: {},
-    className: '',
-    innerHTML: '',
+    className: "",
+    innerHTML: "",
     classList: {
       add: () => {},
       remove: () => {},
       toggle: () => {},
     },
   };
-  if (typeof window._followFn === 'function') {
-    await window._followFn({ ownerUid: uid, btn: fakeBtn, type: 'badge' });
+  if (typeof window._followFn === "function") {
+    await window._followFn({ ownerUid: uid, btn: fakeBtn, type: "badge" });
     // Keep _myFollowingSet alias in sync
     window._myFollowingSet = window._followingSet;
   }
