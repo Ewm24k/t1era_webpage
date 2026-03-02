@@ -950,6 +950,17 @@
         border: 2px solid var(--bg);
         box-shadow: 0 0 6px var(--green);
       }
+      .spark-ring {
+        position: absolute;
+        inset: -3px;
+        border-radius: 50%;
+        background: transparent;
+        opacity: 0;
+        pointer-events: none;
+        z-index: 1;
+        transition: opacity 0.2s;
+      }
+      .spark-ring.visible { opacity: 1; }
 
       /* Meta */
       .card-meta {
@@ -4174,6 +4185,7 @@
               <article class="spark-card fu" onclick="openSparkDetail(this)">
                 <div class="card-head">
                   <div class="av-wrap">
+                    <span class="spark-ring" id="demo-ring-std-1"></span>
                     <div
                       class="spark-av"
                       style="
@@ -4321,6 +4333,7 @@
                 </div>
                 <div class="card-head">
                   <div class="av-wrap">
+                    <span class="spark-ring" id="demo-ring-std-2"></span>
                     <div
                       class="spark-av"
                       style="
@@ -4450,6 +4463,7 @@
               <article class="spark-card fu d2" onclick="openSparkDetail(this)">
                 <div class="card-head">
                   <div class="av-wrap">
+                    <span class="spark-ring" id="demo-ring-std-3"></span>
                     <div
                       class="spark-av"
                       style="
@@ -4594,6 +4608,7 @@
               <article class="spark-card fu d3" onclick="openSparkDetail(this)">
                 <div class="card-head">
                   <div class="av-wrap">
+                    <span class="spark-ring" id="demo-ring-std-4"></span>
                     <div
                       class="spark-av"
                       style="
@@ -5000,6 +5015,7 @@
               </div>
               <div class="card-head">
                 <div class="av-wrap">
+                  <span class="spark-ring" id="demo-ring-pmt-1"></span>
                   <div
                     class="spark-av"
                     style="background: linear-gradient(135deg, #c2185b, #8b5cf6)"
@@ -5119,6 +5135,7 @@
               </div>
               <div class="card-head">
                 <div class="av-wrap">
+                  <span class="spark-ring" id="demo-ring-pmt-2"></span>
                   <div
                     class="spark-av"
                     style="background: linear-gradient(135deg, #f59e0b, #f97316)"
