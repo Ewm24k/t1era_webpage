@@ -1,153 +1,152 @@
 /**
  * spark-ring.js — T1ERA
- * Loads the saved profileRing from Firestore (via window._sparkUserData)
- * and applies it to the current user's own avatars on the Spark page.
+ * Reads profileRing saved by profile.html and applies it to the current
+ * user's own profile photo circles on the Spark page.
  *
- * Must be loaded BEFORE spark-module.js (as a plain <script>, not type="module").
- * Does NOT modify spark-module.js at all.
+ * Targets:
+ *   - .spark-ring spans inside .av-wrap (static demo cards + dynamic Firestore cards)
+ *   - #composeAv, #promptComposeAv, .reply-av (compose/reply avatars)
  *
- * Applies ring to:
- *   • #composeAv      — Standard Spark compose avatar
- *   • #promptComposeAv — Prompt Spark compose avatar
- *   • .reply-av        — Reply sheet avatar (applied on open)
- *   • .spark-card[data-owner-uid="{uid}"] .spark-av — own feed cards
+ * Load BEFORE spark-module.js as a plain <script> (not type="module").
  */
 (function () {
   'use strict';
 
-  // ── Ring box-shadow map — matches profile.js RING_GRADIENTS keys exactly ──
-  const RING_SHADOWS = {
-    'none':        'none',
-    'white':       '0 0 0 3px #ffffff',
-    'white-grey':  '0 0 0 3px #aaaaaa',
-    'pink-purple': '0 0 0 3px #c2185b',
-    'gold':        '0 0 0 3px #f59e0b',
-    'green':       '0 0 0 3px #10b981',
-    'blue':        '0 0 0 3px #3b82f6',
-    'red':         '0 0 0 3px #ef4444',
-    'orange':      '0 0 0 3px #f97316',
-    'rainbow':     '0 0 0 3px #8b5cf6',
+  // Exact same gradients as profile.js RING_GRADIENTS
+  window._SPARK_RING_GRADIENTS = {
+    'none':        'transparent',
+    'white':       '#ffffff',
+    'white-grey':  'linear-gradient(135deg,#ffffff,#888888)',
+    'pink-purple': 'conic-gradient(var(--pink) 0deg,var(--purple) 90deg,var(--pink-2) 180deg,var(--pink) 360deg)',
+    'gold':        'linear-gradient(135deg,#f59e0b,#fbbf24)',
+    'green':       'linear-gradient(135deg,#10b981,#34d399)',
+    'blue':        'linear-gradient(135deg,#3b82f6,#60a5fa)',
+    'red':         'linear-gradient(135deg,#ef4444,#f87171)',
+    'orange':      'linear-gradient(135deg,#f97316,#fb923c)',
+    'rainbow':     'conic-gradient(#f59e0b,#ef4444,#8b5cf6,#3b82f6,#10b981,#f59e0b)',
   };
 
-  // Active ring key — updated when _sparkUserData is set
+  // Solid accent colour per key — for outline on compose/reply avatars
+  var _SOLID = {
+    'white':       '#ffffff',
+    'white-grey':  '#aaaaaa',
+    'pink-purple': '#c2185b',
+    'gold':        '#f59e0b',
+    'green':       '#10b981',
+    'blue':        '#3b82f6',
+    'red':         '#ef4444',
+    'orange':      '#f97316',
+    'rainbow':     '#8b5cf6',
+  };
+
   window._userRingKey = 'none';
 
-  // ── Apply ring box-shadow to a single element ──
-  function _applyRingToEl(el, key) {
-    if (!el) return;
-    el.style.boxShadow = RING_SHADOWS[key] || 'none';
+  // ── Set gradient on one .spark-ring span ──
+  function _applySpan(span, key) {
+    if (!span) return;
+    var g = window._SPARK_RING_GRADIENTS[key] || 'transparent';
+    span.style.background = g;
+    if (key === 'none') span.classList.remove('visible');
+    else span.classList.add('visible');
   }
 
-  // ── Apply ring to all compose/reply avatars ──
-  function _applyRingToComposeAvatars(key) {
-    _applyRingToEl(document.getElementById('composeAv'), key);
-    _applyRingToEl(document.getElementById('promptComposeAv'), key);
-    document.querySelectorAll('.reply-av').forEach((el) => _applyRingToEl(el, key));
-  }
-
-  // ── Apply ring to own spark-av in feed cards (called after cards mount) ──
+  // ── Apply ring to all .spark-ring spans in own Firestore cards ──
   window._applyRingToOwnFeedCards = function (key) {
-    const uid = window._sparkUser && window._sparkUser.uid;
+    var uid = window._sparkUser && window._sparkUser.uid;
     if (!uid) return;
-    const shadow = RING_SHADOWS[key] || 'none';
-    document
-      .querySelectorAll(`.spark-card[data-owner-uid="${uid}"] .spark-av`)
-      .forEach(function (el) {
-        el.style.boxShadow = shadow;
-      });
+    document.querySelectorAll('.spark-card[data-owner-uid="' + uid + '"] .spark-ring')
+      .forEach(function (s) { _applySpan(s, key); });
   };
 
-  // ── Main: apply ring from a key ──
-  window._applySparkRing = function (key) {
-    const ringKey = RING_SHADOWS[key] !== undefined ? key : 'none';
-    window._userRingKey = ringKey;
-    _applyRingToComposeAvatars(ringKey);
-    window._applyRingToOwnFeedCards(ringKey);
-  };
+  // ── Apply ring to static demo cards that belong to the current user ──
+  // Matches by @handle text inside .author-handle in each demo card
+  function _applyRingToDemoCards(key) {
+    var ud = window._sparkUserData || {};
+    var handle = ud.nickname || (window._sparkUser && window._sparkUser.email
+      ? window._sparkUser.email.split('@')[0] : '');
+    if (!handle) return;
 
-  // ── Intercept window._sparkUserData being set by spark-module.js ──
-  // When spark-module.js writes `window._sparkUserData = d` (after Firestore fetch),
-  // this fires synchronously, reads d.profileRing, and applies the ring.
-  let _storedUserData = undefined;
-  Object.defineProperty(window, '_sparkUserData', {
-    configurable: true,
-    enumerable: true,
-    get: function () {
-      return _storedUserData;
-    },
-    set: function (val) {
-      _storedUserData = val;
-      // Apply ring as soon as user data is available
-      if (val && typeof val === 'object') {
-        const key = val.profileRing || 'none';
-        window._applySparkRing(key);
+    // Static demo cards have no data-spark-id — find ones whose handle matches
+    document.querySelectorAll('.spark-card:not([data-spark-id])').forEach(function (card) {
+      var handleEl = card.querySelector('.author-handle');
+      // Demo cards may not have .author-handle — fall back to showProfile onclick text
+      var cardHandle = '';
+      if (handleEl) {
+        cardHandle = handleEl.textContent.replace('@', '').trim();
+      } else {
+        // Extract handle from onclick attribute of spark-av (e.g., 'ewm24k')
+        var av = card.querySelector('.spark-av');
+        if (av) {
+          var m = (av.getAttribute('onclick') || '').match(/'([^']+)',\s*\n?\s*'LV/);
+          if (m) cardHandle = m[1];
+        }
       }
-    },
-  });
+      if (cardHandle === handle) {
+        var span = card.querySelector('.spark-ring');
+        if (span) _applySpan(span, key);
+      }
+    });
+  }
 
-  // ── Watch feed containers for new cards — apply ring to own cards as they mount ──
-  // This covers spark-module.js renderCard() without needing to edit that file.
-  function _watchFeedContainers() {
-    var feedIds = ['realFeed', 'realPromptFeed'];
-    feedIds.forEach(function (feedId) {
-      var container = document.getElementById(feedId);
-      if (!container) return;
-      var observer = new MutationObserver(function (mutations) {
+  // ── Apply ring to compose + reply avatars ──
+  function _applyCompose(key) {
+    var isNone = (key === 'none');
+    var solid = _SOLID[key] || '#c2185b';
+    ['composeAv', 'promptComposeAv'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      el.style.outline = isNone ? '' : '3px solid ' + solid;
+      el.style.outlineOffset = isNone ? '' : '2px';
+    });
+    document.querySelectorAll('.reply-av').forEach(function (el) {
+      el.style.outline = isNone ? '' : '3px solid ' + solid;
+      el.style.outlineOffset = isNone ? '' : '2px';
+    });
+  }
+
+  // ── Main — called by spark-module.js after Firestore user doc is loaded ──
+  window._applySparkRing = function (key) {
+    var k = (window._SPARK_RING_GRADIENTS[key] !== undefined) ? key : 'none';
+    window._userRingKey = k;
+    _applyCompose(k);
+    _applyRingToDemoCards(k);
+    window._applyRingToOwnFeedCards(k);
+  };
+
+  // ── Watch feed containers for newly inserted own Firestore cards ──
+  function _watchFeeds() {
+    ['realFeed', 'realPromptFeed'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      new MutationObserver(function (muts) {
         if (window._userRingKey === 'none') return;
         var uid = window._sparkUser && window._sparkUser.uid;
         if (!uid) return;
-        mutations.forEach(function (mutation) {
-          mutation.addedNodes.forEach(function (node) {
-            if (node.nodeType !== 1) return; // element nodes only
-            // Check if this node itself is an own spark card
-            if (
-              node.classList &&
-              node.classList.contains('spark-card') &&
-              node.dataset.ownerUid === uid
-            ) {
-              var av = node.querySelector('.spark-av');
-              if (av) av.style.boxShadow = RING_SHADOWS[window._userRingKey] || 'none';
-            }
-            // Also check any spark-cards nested inside (e.g. wrapped in a fragment)
-            if (node.querySelectorAll) {
-              node
-                .querySelectorAll(`.spark-card[data-owner-uid="${uid}"] .spark-av`)
-                .forEach(function (av) {
-                  av.style.boxShadow = RING_SHADOWS[window._userRingKey] || 'none';
-                });
+        muts.forEach(function (m) {
+          m.addedNodes.forEach(function (node) {
+            if (node.nodeType !== 1) return;
+            if (node.classList.contains('spark-card') && node.dataset.ownerUid === uid) {
+              _applySpan(node.querySelector('.spark-ring'), window._userRingKey);
             }
           });
         });
-      });
-      observer.observe(container, { childList: true, subtree: true });
+      }).observe(el, { childList: true });
     });
   }
 
-  // ── Watch reply overlay opening — re-apply ring to .reply-av ──
-  function _watchReplySheet() {
-    var overlay = document.getElementById('replyOverlay');
-    if (!overlay) {
-      setTimeout(_watchReplySheet, 300);
-      return;
-    }
-    var observer = new MutationObserver(function () {
-      if (overlay.classList.contains('open') && window._userRingKey !== 'none') {
-        document.querySelectorAll('.reply-av').forEach(function (el) {
-          el.style.boxShadow = RING_SHADOWS[window._userRingKey] || 'none';
-        });
-      }
-    });
-    observer.observe(overlay, { attributes: true, attributeFilter: ['class'] });
+  // ── Watch reply overlay to re-apply ring when it opens ──
+  function _watchReply() {
+    var ov = document.getElementById('replyOverlay');
+    if (!ov) { setTimeout(_watchReply, 200); return; }
+    new MutationObserver(function () {
+      if (ov.classList.contains('open') && window._userRingKey !== 'none')
+        _applyCompose(window._userRingKey);
+    }).observe(ov, { attributes: true, attributeFilter: ['class'] });
   }
 
-  function _initObservers() {
-    _watchFeedContainers();
-    _watchReplySheet();
-  }
+  function _init() { _watchFeeds(); _watchReply(); }
 
-  if (document.readyState !== 'loading') {
-    _initObservers();
-  } else {
-    document.addEventListener('DOMContentLoaded', _initObservers);
-  }
+  if (document.readyState !== 'loading') _init();
+  else document.addEventListener('DOMContentLoaded', _init);
+
 })();
