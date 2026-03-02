@@ -125,18 +125,60 @@
 
       // Compute rank level from XP — same formula as profile.html and spark.html
       const _pt = d.accountStatus?.point || d.point || {};
-      const _totalXP = (_pt.spark||0)*20 + (_pt.like||0)*10 + (_pt.reply||0)*40;
-      const _XP_T = [0,550,1650,3300,5500,8250,11550,15400,19800,24750,30250,36300,42900,50050,57750,66000,74800,84150,94050,104500,115500,127050,139150,151800,165000,178750,193050,207900,223300,239250];
-      const _TITLES = ["Recruit","Recruit","Recruit","Recruit","Recruit","Recruit","Operative","Operative","Operative","Operative","Operative","Operative","Guardian","Guardian","Guardian","Guardian","Guardian","Guardian","Inferno","Inferno","Inferno","Inferno","Inferno","Inferno","Elite","Elite","Elite","Elite","Elite","Elite"];
+      const _totalXP =
+        (_pt.spark || 0) * 20 + (_pt.like || 0) * 10 + (_pt.reply || 0) * 40;
+      const _XP_T = [
+        0, 550, 1650, 3300, 5500, 8250, 11550, 15400, 19800, 24750, 30250,
+        36300, 42900, 50050, 57750, 66000, 74800, 84150, 94050, 104500, 115500,
+        127050, 139150, 151800, 165000, 178750, 193050, 207900, 223300, 239250,
+      ];
+      const _TITLES = [
+        "Recruit",
+        "Recruit",
+        "Recruit",
+        "Recruit",
+        "Recruit",
+        "Recruit",
+        "Operative",
+        "Operative",
+        "Operative",
+        "Operative",
+        "Operative",
+        "Operative",
+        "Guardian",
+        "Guardian",
+        "Guardian",
+        "Guardian",
+        "Guardian",
+        "Guardian",
+        "Inferno",
+        "Inferno",
+        "Inferno",
+        "Inferno",
+        "Inferno",
+        "Inferno",
+        "Elite",
+        "Elite",
+        "Elite",
+        "Elite",
+        "Elite",
+        "Elite",
+      ];
       let _computedLevel = 1;
-      for (let i = _XP_T.length-1; i >= 0; i--) { if (_totalXP >= _XP_T[i]) { _computedLevel = i+1; break; } }
-      const _computedTitle = _TITLES[_computedLevel-1] || 'Recruit';
+      for (let i = _XP_T.length - 1; i >= 0; i--) {
+        if (_totalXP >= _XP_T[i]) {
+          _computedLevel = i + 1;
+          break;
+        }
+      }
+      const _computedTitle = _TITLES[_computedLevel - 1] || "Recruit";
 
       const profile = {
         uid,
         name: d.fullName || d.nickname || "T1ERA User",
         handle: d.nickname || "",
-        photo: d.accountStatus?.profilePicture?.url || d.profilePicture?.url || "",
+        photo:
+          d.accountStatus?.profilePicture?.url || d.profilePicture?.url || "",
         rank: _computedTitle,
         level: _computedLevel,
         callsign: d.accountStatus?.callsign || d.callsign || "",
@@ -149,8 +191,10 @@
         city: d.accountStatus?.city || d.city || "",
         country: d.accountStatus?.country || d.country || "",
         aiLevel: d.accountStatus?.aiLevel || d.aiLevel || "",
-        bannerPreset: d.accountStatus?.bannerImage?.preset || d.bannerImage?.preset || null,
-        bannerUrl: d.accountStatus?.bannerImage?.url || d.bannerImage?.url || null,
+        bannerPreset:
+          d.accountStatus?.bannerImage?.preset || d.bannerImage?.preset || null,
+        bannerUrl:
+          d.accountStatus?.bannerImage?.url || d.bannerImage?.url || null,
         followersCount,
         followingCount,
         sparkCount,
