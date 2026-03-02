@@ -170,8 +170,11 @@
    TOPBAR
 ══════════════════════════════════════════ */
       .topbar {
-        position: sticky;
+        position: fixed;
         top: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
         z-index: 300;
         height: 52px;
         display: flex;
@@ -247,6 +250,7 @@
         display: block;
         max-width: 680px;
         margin: 0 auto;
+        padding-top: 98px;
       }
 
       /* PC 3-column */
@@ -493,8 +497,11 @@
    SUPER TABS (SPARKS / T1ERA) — pill buttons centered
 ══════════════════════════════════════════ */
       .super-tabs-bar {
-        position: sticky;
+        position: fixed;
         top: 52px;
+        left: 0;
+        right: 0;
+        width: 100%;
         z-index: 310;
         background: rgba(0, 0, 0, 0.95);
         backdrop-filter: blur(20px);
@@ -506,23 +513,7 @@
         gap: 8px;
       }
 
-      /* ── T1ERA tab: fix topbar + super-tabs-bar so they never scroll away ──
-         Scoped strictly to body.t1era-active — Sparks tab completely unaffected */
-      body.t1era-active .topbar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        width: 100%;
-      }
-      body.t1era-active .super-tabs-bar {
-        position: fixed;
-        top: 52px;
-        left: 0;
-        right: 0;
-        width: 100%;
-      }
-      /* Push content down so it starts below the now-fixed bars */
+      /* ── Push super-panel-1 content below the fixed bars on T1ERA tab ── */
       body.t1era-active #super-panel-1 {
         padding-top: 46px;
       }
