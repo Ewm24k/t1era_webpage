@@ -100,7 +100,6 @@ onAuthStateChanged(auth, async (user) => {
       "",
       (user.displayName || user.email || "U")[0].toUpperCase(),
     );
-    if (typeof window._applySparkRing === "function") window._applySparkRing("none");
   }
 
   ensurePointMap(user.uid);
@@ -1613,7 +1612,6 @@ function renderCard(id, d, rankLabel, liveUserData) {
   article.innerHTML = `
     <div class="card-head">
       <div class="av-wrap">
-        <span class="spark-ring" id="sring-${id}"></span>
         <div class="spark-av" style="${avBg}" onclick="event.stopPropagation();if(typeof window.openPeekCard==='function'&&'${d.uid || ""}'&&'${d.uid || ""}'!=='undefined')window.openPeekCard('${d.uid || ""}')">${avInner}</div>
       </div>
       <div class="card-meta">
@@ -1689,9 +1687,6 @@ function renderCard(id, d, rankLabel, liveUserData) {
     panel.insertBefore(article, firstDemo);
   } else {
     panel.appendChild(article);
-  }
-  if (isOwnCard && typeof window._applyRingToOwnFeedCards === "function") {
-    window._applyRingToOwnFeedCards(window._userRingKey || "none");
   }
 
   getDocs(collection(db, "sparks", id, "likes"))
