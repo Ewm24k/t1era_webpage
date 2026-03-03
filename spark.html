@@ -574,6 +574,11 @@
         border-bottom: 1px solid var(--border);
         display: flex;
       }
+      @media (min-width: 1080px) {
+        .tabs-bar {
+          top: 0;
+        }
+      }
       .tab-btn {
         flex: 1;
         padding: 14px 6px;
@@ -2044,9 +2049,9 @@
         z-index: 100;
         backdrop-filter: blur(12px);
       }
-      @media (min-width: 900px) {
+      @media (min-width: 1080px) {
         .feed-mini-header {
-          top: 147px;
+          top: 42px;
         }
       }
       .feed-mini-title {
