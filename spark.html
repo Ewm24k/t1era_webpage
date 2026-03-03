@@ -617,7 +617,6 @@
         font-weight: 800;
         font-family: var(--f-display);
         color: #fff;
-        position: relative;
       }
       .compose-placeholder {
         flex: 1;
@@ -719,7 +718,6 @@
         font-family: var(--f-display);
         color: #fff;
         border: 2px solid rgba(194, 24, 91, 0.3);
-        position: relative;
       }
       .compose-textarea {
         flex: 1;
@@ -956,7 +954,7 @@
       }
       .spark-ring {
         position: absolute;
-        inset: -2px;
+        inset: -3px;
         border-radius: 50%;
         background: transparent;
         opacity: 0;
@@ -2032,6 +2030,11 @@
         top: 52px;
         z-index: 100;
         backdrop-filter: blur(12px);
+      }
+      @media (min-width: 900px) {
+        .feed-mini-header {
+          top: 147px;
+        }
       }
       .feed-mini-title {
         font-family: var(--f-display);
