@@ -918,6 +918,8 @@
         flex-shrink: 0;
       }
       .spark-av {
+        position: relative;
+        z-index: 1;
         width: 42px;
         height: 42px;
         border-radius: 50%;
@@ -957,7 +959,7 @@
         background: transparent;
         opacity: 0;
         pointer-events: none;
-        z-index: -1;
+        z-index: 0;
         transition: opacity 0.2s;
       }
       .spark-ring.visible { opacity: 1; }
