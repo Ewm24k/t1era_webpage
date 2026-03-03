@@ -89,17 +89,21 @@
   }
 
   // ── Apply ring to compose + reply avatars (mobile AND PC) ──
+  // Uses .spark-ring span siblings (ring-miniAv etc.) for PC toggle avatars,
+  // and .spark-ring span siblings (ring-composeAv etc.) for compose box avatars.
+  // Falls back to outline for .reply-av which has no span wrapper.
   function _applyCompose(key) {
     var isNone = (key === 'none');
     var solid = _SOLID[key] || '#c2185b';
-    // composeAv/promptComposeAv = full compose box avatars
-    // miniAv/promptMiniAv = collapsed compose toggle avatars visible on PC
-    ['composeAv', 'promptComposeAv', 'miniAv', 'promptMiniAv'].forEach(function (id) {
-      var el = document.getElementById(id);
-      if (!el) return;
-      el.style.outline = isNone ? '' : '3px solid ' + solid;
-      el.style.outlineOffset = isNone ? '' : '2px';
+
+    // Compose toggle avatars (PC: miniAv, promptMiniAv) and
+    // compose box avatars (mobile: composeAv, promptComposeAv)
+    // — each now has a sibling .spark-ring span with id="ring-<avatarId>"
+    ['miniAv', 'promptMiniAv', 'composeAv', 'promptComposeAv'].forEach(function (id) {
+      _applySpan(document.getElementById('ring-' + id), key);
     });
+
+    // reply-av elements (inside reply overlay) — use outline as fallback
     document.querySelectorAll('.reply-av').forEach(function (el) {
       el.style.outline = isNone ? '' : '3px solid ' + solid;
       el.style.outlineOffset = isNone ? '' : '2px';
