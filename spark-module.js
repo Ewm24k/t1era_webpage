@@ -43,6 +43,26 @@ const DAILY_LIMIT = 3;
 const DEV_EMAIL = "ewm24k@gmail.com";
 const SPARKS_COL = "sparks";
 
+// ── RING GRADIENTS (mirrors profile.js RING_GRADIENTS) ──
+const RING_GRADIENTS = {
+  none: null,
+  white: "#ffffff",
+  "white-grey": "linear-gradient(135deg,#ffffff,#888888)",
+  "pink-purple": "conic-gradient(var(--pink) 0deg,var(--purple) 90deg,var(--pink-2) 180deg,var(--pink) 360deg)",
+  gold: "linear-gradient(135deg,#f59e0b,#fbbf24)",
+  green: "linear-gradient(135deg,#10b981,#34d399)",
+  blue: "linear-gradient(135deg,#3b82f6,#60a5fa)",
+  red: "linear-gradient(135deg,#ef4444,#f87171)",
+  orange: "linear-gradient(135deg,#f97316,#fb923c)",
+  rainbow: "conic-gradient(#f59e0b,#ef4444,#8b5cf6,#3b82f6,#10b981,#f59e0b)",
+};
+
+function getRingGradient(key) {
+  if (!key || key === "none") return null;
+  return RING_GRADIENTS[key] || null;
+}
+window._getRingGradient = getRingGradient;
+
 // ══════════════════════════════════════════════════════
 // DISPLAY NAME PREFERENCE
 // ══════════════════════════════════════════════════════
@@ -92,7 +112,6 @@ onAuthStateChanged(auth, async (user) => {
     const resolvedName = resolveDisplayName(d, window._displayNamePref);
     const initial = resolvedName[0].toUpperCase();
     applyComposeAvatar(photoURL, initial);
-    if (typeof window._applySparkRing === "function") window._applySparkRing(d.profileRing || "none");
   } catch (e) {
     window._sparkUserData = {};
     window._displayNamePref = "fullName";
@@ -1581,6 +1600,18 @@ function renderCard(id, d, rankLabel, liveUserData) {
     ? `<img src="${photo}" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;" onerror="this.style.display='none'">`
     : initial;
 
+  // ── RING: resolve profileRing from live user data or own data ──
+  let ringKey = "none";
+  if (isOwnCard) {
+    ringKey = (window._sparkUserData || {}).profileRing || "none";
+  } else if (liveUserData) {
+    ringKey = liveUserData.profileRing || "none";
+  }
+  const ringGradient = getRingGradient(ringKey);
+  const ringSpanHtml = ringGradient
+    ? `<span class="spark-ring visible" style="background:${ringGradient};"></span>`
+    : `<span class="spark-ring"></span>`;
+
   const linkedTxt = txt
     .replace(/(#\w+)/g, '<span class="ht">$1</span>')
     .replace(/(@\w+)/g, '<span class="mn">$1</span>');
@@ -1612,7 +1643,7 @@ function renderCard(id, d, rankLabel, liveUserData) {
   article.innerHTML = `
     <div class="card-head">
       <div class="av-wrap">
-        <span class="spark-ring"></span>
+        ${ringSpanHtml}
         <div class="spark-av" style="${avBg}" onclick="event.stopPropagation();if(typeof window.openPeekCard==='function'&&'${d.uid || ""}'&&'${d.uid || ""}'!=='undefined')window.openPeekCard('${d.uid || ""}')">${avInner}</div>
       </div>
       <div class="card-meta">
@@ -1958,6 +1989,41 @@ function applyComposeAvatar(photoURL, initial) {
       el.textContent = initial;
     });
   }
+
+  // ── Apply own profile ring to compose/mini avatars ──
+  applyOwnRingToCompose();
+}
+
+function applyOwnRingToCompose() {
+  const ringKey = (window._sparkUserData || {}).profileRing || "none";
+  const gradient = getRingGradient(ringKey);
+  // Wrap miniAv and composeAv with ring if not already wrapped
+  ["miniAv", "composeAv", "promptMiniAv", "promptComposeAv"].forEach((elId) => {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    const parent = el.parentElement;
+    if (!parent) return;
+    // Ensure parent has position:relative for ring overlay
+    if (getComputedStyle(parent).position === "static") {
+      parent.style.position = "relative";
+    }
+    // Find or create ring span inside parent
+    let ring = parent.querySelector(".compose-ring-overlay");
+    if (!ring) {
+      ring = document.createElement("span");
+      ring.className = "compose-ring-overlay";
+      ring.style.cssText =
+        "position:absolute;inset:-3px;border-radius:50%;pointer-events:none;z-index:0;transition:opacity 0.2s;";
+      parent.insertBefore(ring, el);
+    }
+    if (gradient) {
+      ring.style.background = gradient;
+      ring.style.opacity = "1";
+    } else {
+      ring.style.background = "transparent";
+      ring.style.opacity = "0";
+    }
+  });
 }
 
 // ══════════════════════════════════════════════════════════════════════
