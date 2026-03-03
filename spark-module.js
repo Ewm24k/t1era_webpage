@@ -1612,6 +1612,7 @@ function renderCard(id, d, rankLabel, liveUserData) {
   article.innerHTML = `
     <div class="card-head">
       <div class="av-wrap">
+        <span class="spark-ring"></span>
         <div class="spark-av" style="${avBg}" onclick="event.stopPropagation();if(typeof window.openPeekCard==='function'&&'${d.uid || ""}'&&'${d.uid || ""}'!=='undefined')window.openPeekCard('${d.uid || ""}')">${avInner}</div>
       </div>
       <div class="card-meta">
