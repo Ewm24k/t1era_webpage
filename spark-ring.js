@@ -88,11 +88,13 @@
     });
   }
 
-  // ── Apply ring to compose + reply avatars ──
+  // ── Apply ring to compose + reply avatars (mobile AND PC) ──
   function _applyCompose(key) {
     var isNone = (key === 'none');
     var solid = _SOLID[key] || '#c2185b';
-    ['composeAv', 'promptComposeAv'].forEach(function (id) {
+    // composeAv/promptComposeAv = full compose box avatars
+    // miniAv/promptMiniAv = collapsed compose toggle avatars visible on PC
+    ['composeAv', 'promptComposeAv', 'miniAv', 'promptMiniAv'].forEach(function (id) {
       var el = document.getElementById(id);
       if (!el) return;
       el.style.outline = isNone ? '' : '3px solid ' + solid;
