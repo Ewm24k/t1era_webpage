@@ -605,8 +605,6 @@
         background: rgba(255, 255, 255, 0.015);
       }
       .compose-mini-av {
-        position: relative;
-        z-index: 1;
         width: 36px;
         height: 36px;
         border-radius: 50%;
@@ -619,6 +617,7 @@
         font-weight: 800;
         font-family: var(--f-display);
         color: #fff;
+        position: relative;
       }
       .compose-placeholder {
         flex: 1;
@@ -707,8 +706,6 @@
         min-width: 0;
       }
       .compose-av {
-        position: relative;
-        z-index: 1;
         width: 40px;
         height: 40px;
         border-radius: 50%;
@@ -722,6 +719,7 @@
         font-family: var(--f-display);
         color: #fff;
         border: 2px solid rgba(194, 24, 91, 0.3);
+        position: relative;
       }
       .compose-textarea {
         flex: 1;
@@ -4075,10 +4073,7 @@
                 id="composeToggle"
                 onclick="openCompose()"
               >
-                <div class="av-wrap" style="flex-shrink:0">
-                  <span class="spark-ring" id="ring-miniAv"></span>
-                  <div class="compose-mini-av" id="miniAv">M</div>
-                </div>
+                <div class="compose-mini-av" id="miniAv">M</div>
                 <span class="compose-placeholder">What's sparking today…</span>
                 <button class="compose-plus-btn">
                   <i class="ph-bold ph-plus"></i>
@@ -4103,10 +4098,7 @@
                   </button>
                 </div>
                 <div class="compose-body">
-                  <div class="av-wrap" style="flex-shrink:0">
-                    <span class="spark-ring" id="ring-composeAv"></span>
-                    <div class="compose-av" id="composeAv">M</div>
-                  </div>
+                  <div class="compose-av" id="composeAv">M</div>
                   <div style="flex: 1; min-width: 0">
                     <textarea
                       class="compose-textarea"
@@ -4853,10 +4845,7 @@
                 id="promptComposeToggle"
                 onclick="openPromptCompose()"
               >
-                <div class="av-wrap" style="flex-shrink:0">
-                  <span class="spark-ring" id="ring-promptMiniAv"></span>
-                  <div class="compose-mini-av" id="promptMiniAv">M</div>
-                </div>
+                <div class="compose-mini-av" id="promptMiniAv">M</div>
                 <span class="compose-placeholder">Answer a prompt and spark the conversation…</span>
                 <button class="compose-plus-btn">
                   <i class="ph-bold ph-plus"></i>
@@ -4903,10 +4892,7 @@
 
                 <!-- User reply textarea -->
                 <div class="compose-body" style="margin-top: 10px;">
-                  <div class="av-wrap" style="flex-shrink:0">
-                    <span class="spark-ring" id="ring-promptComposeAv"></span>
-                    <div class="compose-av" id="promptComposeAv">M</div>
-                  </div>
+                  <div class="compose-av" id="promptComposeAv">M</div>
                   <div style="flex: 1; min-width: 0">
                     <textarea
                       class="compose-textarea"
