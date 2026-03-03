@@ -1595,7 +1595,7 @@ function renderCard(id, d, rankLabel, liveUserData) {
   const txt = d.text || "";
   const initial = name[0].toUpperCase();
 
-  const avBg = "background:linear-gradient(135deg,var(--pink),var(--purple))";
+  const avBg = "background:linear-gradient(135deg,var(--pink),var(--purple))"; // kept for non-ring fallback label display
   const avInner = photo
     ? `<img src="${photo}" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;" onerror="this.style.display='none'">`
     : initial;
@@ -1611,6 +1611,12 @@ function renderCard(id, d, rankLabel, liveUserData) {
   const ringSpanHtml = ringGradient
     ? `<span class="spark-ring visible" style="background:${ringGradient};"></span>`
     : `<span class="spark-ring"></span>`;
+
+  // When no ring: neutral dark bg + no border so zero ring effect shows
+  // When ring set: keep gradient bg (shows through as ring behind photo) + hide border
+  const avBgStyle = ringGradient
+    ? `background:${ringGradient};border:none;padding:3px;`
+    : `background:var(--bg-3);border:2px solid var(--border);`;
 
   const linkedTxt = txt
     .replace(/(#\w+)/g, '<span class="ht">$1</span>')
@@ -1644,7 +1650,7 @@ function renderCard(id, d, rankLabel, liveUserData) {
     <div class="card-head">
       <div class="av-wrap">
         ${ringSpanHtml}
-        <div class="spark-av" style="${avBg}" onclick="event.stopPropagation();if(typeof window.openPeekCard==='function'&&'${d.uid || ""}'&&'${d.uid || ""}'!=='undefined')window.openPeekCard('${d.uid || ""}')">${avInner}</div>
+        <div class="spark-av" style="${avBgStyle}overflow:hidden;" onclick="event.stopPropagation();if(typeof window.openPeekCard==='function'&&'${d.uid || ""}'&&'${d.uid || ""}'!=='undefined')window.openPeekCard('${d.uid || ""}')">${avInner}</div>
       </div>
       <div class="card-meta">
         <div class="meta-row-1">
@@ -1997,31 +2003,44 @@ function applyComposeAvatar(photoURL, initial) {
 function applyOwnRingToCompose() {
   const ringKey = (window._sparkUserData || {}).profileRing || "none";
   const gradient = getRingGradient(ringKey);
-  // Wrap miniAv and composeAv with ring if not already wrapped
+  // For compose avatars: apply ring as a box-shadow (non-layout, won't eat text input space)
   ["miniAv", "composeAv", "promptMiniAv", "promptComposeAv"].forEach((elId) => {
     const el = document.getElementById(elId);
     if (!el) return;
-    const parent = el.parentElement;
-    if (!parent) return;
-    // Ensure parent has position:relative for ring overlay
-    if (getComputedStyle(parent).position === "static") {
-      parent.style.position = "relative";
-    }
-    // Find or create ring span inside parent
-    let ring = parent.querySelector(".compose-ring-overlay");
-    if (!ring) {
-      ring = document.createElement("span");
-      ring.className = "compose-ring-overlay";
-      ring.style.cssText =
-        "position:absolute;inset:-3px;border-radius:50%;pointer-events:none;z-index:0;transition:opacity 0.2s;";
-      parent.insertBefore(ring, el);
-    }
     if (gradient) {
-      ring.style.background = gradient;
-      ring.style.opacity = "1";
+      // Use outline + outline-offset for a clean ring that never affects layout
+      el.style.outline = "2.5px solid transparent";
+      el.style.outlineOffset = "2px";
+      // Can't apply gradient to outline directly — use box-shadow hack for solid-like ring
+      // For gradient rings, wrap with a pseudo-container approach using background
+      el.dataset.ringGradient = gradient;
+      // Apply as border via background-clip trick on wrapper
+      const parent = el.parentElement;
+      if (parent) {
+        if (getComputedStyle(parent).position === "static") parent.style.position = "relative";
+        let ring = parent.querySelector(".compose-ring-overlay");
+        if (!ring) {
+          ring = document.createElement("span");
+          ring.className = "compose-ring-overlay";
+          parent.insertBefore(ring, el);
+        }
+        const size = elId === "miniAv" || elId === "promptMiniAv" ? "36px" : "40px";
+        ring.style.cssText = `position:absolute;inset:-2.5px;border-radius:50%;background:${gradient};pointer-events:none;z-index:0;`;
+        // Add inner mask so only a thin ring shows
+        el.style.position = "relative";
+        el.style.zIndex = "1";
+      }
     } else {
-      ring.style.background = "transparent";
-      ring.style.opacity = "0";
+      // Remove ring
+      el.style.outline = "";
+      el.style.outlineOffset = "";
+      el.style.position = "";
+      el.style.zIndex = "";
+      const parent = el.parentElement;
+      if (parent) {
+        const ring = parent.querySelector(".compose-ring-overlay");
+        if (ring) ring.remove();
+      }
     }
   });
 }
