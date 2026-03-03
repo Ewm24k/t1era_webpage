@@ -446,6 +446,7 @@ function renderPromptCard(id, d, rankLabel) {
   article.innerHTML = `
     <div class="card-head">
       <div class="av-wrap">
+        <span class="spark-ring"></span>
         <div class="spark-av" style="${avBg}">${avInner}</div>
       </div>
       <div class="card-meta">
@@ -513,11 +514,6 @@ function renderPromptCard(id, d, rankLabel) {
   firstDemo
     ? panel.insertBefore(article, firstDemo)
     : panel.appendChild(article);
-
-  // ── Apply saved profile ring to own prompt spark cards ──
-  if (isOwnCard && typeof window._applyRingToOwnFeedCards === 'function') {
-    window._applyRingToOwnFeedCards(window._userRingKey || 'none');
-  }
 
   // Fetch real like count + check if current user already liked
   getDocs(collection(db, SPARKS_COL, id, "likes"))
