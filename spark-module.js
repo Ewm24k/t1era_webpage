@@ -1612,11 +1612,11 @@ function renderCard(id, d, rankLabel, liveUserData) {
     ? `<span class="spark-ring visible" style="background:${ringGradient};"></span>`
     : `<span class="spark-ring"></span>`;
 
-  // When no ring: neutral dark bg + no border so zero ring effect shows
-  // When ring set: keep gradient bg (shows through as ring behind photo) + hide border
+  // When no ring: neutral bg + subtle border
+  // When ring set: spark-ring span handles the gradient; avatar gets a 2px gap via box-shadow inset
   const avBgStyle = ringGradient
-    ? `background:${ringGradient};border:none;padding:1.5px;`
-    : `background:var(--bg-3);border:2px solid var(--border);`;
+    ? `background:var(--bg-3);border:none;box-shadow:0 0 0 2px var(--bg);`
+    : `background:var(--bg-3);border:1.5px solid var(--border);`;
 
   const linkedTxt = txt
     .replace(/(#\w+)/g, '<span class="ht">$1</span>')
@@ -2003,44 +2003,52 @@ function applyComposeAvatar(photoURL, initial) {
 function applyOwnRingToCompose() {
   const ringKey = (window._sparkUserData || {}).profileRing || "none";
   const gradient = getRingGradient(ringKey);
-  // For compose avatars: apply ring as a box-shadow (non-layout, won't eat text input space)
+
   ["miniAv", "composeAv", "promptMiniAv", "promptComposeAv"].forEach((elId) => {
     const el = document.getElementById(elId);
     if (!el) return;
+
+    // Remove any old overlay spans
+    const parent = el.parentElement;
+    if (parent) {
+      const old = parent.querySelector(".compose-ring-overlay");
+      if (old) old.remove();
+    }
+
     if (gradient) {
-      // Use outline + outline-offset for a clean ring that never affects layout
-      el.style.outline = "2.5px solid transparent";
-      el.style.outlineOffset = "2px";
-      // Can't apply gradient to outline directly — use box-shadow hack for solid-like ring
-      // For gradient rings, wrap with a pseudo-container approach using background
-      el.dataset.ringGradient = gradient;
-      // Apply as border via background-clip trick on wrapper
-      const parent = el.parentElement;
+      // Use a thin outline — perfectly circular, zero layout impact, never overflows
+      el.style.outline = "2px solid";
+      el.style.outlineColor = "transparent";
+      el.style.boxShadow = `0 0 0 1.5px var(--bg), 0 0 0 3px transparent`;
+      // Inject a tiny gradient ring canvas as background behind the element using wrapper
       if (parent) {
         if (getComputedStyle(parent).position === "static") parent.style.position = "relative";
-        let ring = parent.querySelector(".compose-ring-overlay");
-        if (!ring) {
-          ring = document.createElement("span");
-          ring.className = "compose-ring-overlay";
-          parent.insertBefore(ring, el);
-        }
-        const size = elId === "miniAv" || elId === "promptMiniAv" ? "36px" : "40px";
-        ring.style.cssText = `position:absolute;inset:-2.5px;border-radius:50%;background:${gradient};pointer-events:none;z-index:0;`;
-        // Add inner mask so only a thin ring shows
+        const ring = document.createElement("span");
+        ring.className = "compose-ring-overlay";
+        // Sized exactly to the avatar + 3px ring, perfectly circular
+        const sz = elId === "miniAv" || elId === "promptMiniAv" ? 36 : 40;
+        ring.style.cssText = [
+          "position:absolute",
+          "border-radius:50%",
+          `background:${gradient}`,
+          "pointer-events:none",
+          "z-index:0",
+          // center it exactly over the avatar
+          "top:50%",
+          "left:50%",
+          `width:${sz + 5}px`,
+          `height:${sz + 5}px`,
+          `transform:translate(-50%,-50%)`,
+        ].join(";");
         el.style.position = "relative";
         el.style.zIndex = "1";
+        parent.insertBefore(ring, el);
       }
     } else {
-      // Remove ring
       el.style.outline = "";
-      el.style.outlineOffset = "";
+      el.style.boxShadow = "";
       el.style.position = "";
       el.style.zIndex = "";
-      const parent = el.parentElement;
-      if (parent) {
-        const ring = parent.querySelector(".compose-ring-overlay");
-        if (ring) ring.remove();
-      }
     }
   });
 }
