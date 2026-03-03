@@ -1615,7 +1615,7 @@ function renderCard(id, d, rankLabel, liveUserData) {
   // When no ring: neutral dark bg + no border so zero ring effect shows
   // When ring set: keep gradient bg (shows through as ring behind photo) + hide border
   const avBgStyle = ringGradient
-    ? `background:${ringGradient};border:none;padding:3px;`
+    ? `background:${ringGradient};border:none;padding:1.5px;`
     : `background:var(--bg-3);border:2px solid var(--border);`;
 
   const linkedTxt = txt
