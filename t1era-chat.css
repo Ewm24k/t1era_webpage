@@ -345,10 +345,16 @@
 }
 
 /* ── Responsive ── */
-@media (max-width: 480px) {
+@media (max-width: 1079px) {
+  /* Reduce top gap so "New session started" sits close to tab bar */
   #t1eraChatBody.chat-active {
-    padding: 16px 10px 120px;
+    padding: 8px 10px 120px;
   }
+  .t1c-clear-notice {
+    padding: 8px 16px 8px;
+  }
+}
+@media (max-width: 480px) {
   .t1c-body {
     font-size: 13px;
   }
