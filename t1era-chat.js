@@ -64,30 +64,31 @@
 
   /* ══════════════════════════════════════════════════
      UPGRADE OMNIBAR — swap <input> to <textarea>
-     inject attachment tray, wire paste detection
+     inject attachment tray OUTSIDE omnibar box,
+     wire immediate paste-to-card on length threshold
   ══════════════════════════════════════════════════ */
   function _upgradeOmnibar(ctx) {
-    var inputId = ctx === "mob" ? "aiOmniInputMob" : "aiOmniInputPc";
+    var inputId    = ctx === "mob" ? "aiOmniInputMob"    : "aiOmniInputPc";
+    var omnibarId  = ctx === "mob" ? "aiOmnibarMobile"   : null;
+    var panelId    = ctx === "mob" ? null                : "super-panel-1";
+
     var input = document.getElementById(inputId);
     if (!input) return;
 
-    // Create textarea replacement
+    // ── Swap <input> for auto-grow <textarea> ──
     var ta = document.createElement("textarea");
-    ta.id = inputId;
-    ta.className = input.className + " t1c-omni-ta";
-    ta.placeholder = input.placeholder;
+    ta.id           = inputId;
+    ta.className    = input.className + " t1c-omni-ta";
+    ta.placeholder  = input.placeholder;
     ta.autocomplete = "off";
-    ta.rows = 1;
-    ta.setAttribute("data-ctx", ctx);
+    ta.rows         = 1;
     input.parentNode.replaceChild(ta, input);
 
-    // Auto-grow
     ta.addEventListener("input", function () {
       ta.style.height = "auto";
       ta.style.height = Math.min(ta.scrollHeight, 120) + "px";
     });
 
-    // Enter = send, Shift+Enter = newline
     ta.addEventListener("keydown", function (e) {
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
@@ -95,35 +96,46 @@
       }
     });
 
-    // Paste detection
+    // ── PASTE: intercept immediately on length — no delay ──
     ta.addEventListener("paste", function (e) {
       var pasted = (e.clipboardData || window.clipboardData).getData("text");
-      if (_shouldAttach(pasted)) {
+      // Instant threshold: >80 chars or contains newline → card. No format detection needed first.
+      if (pasted && (pasted.length > 80 || pasted.indexOf("
+") !== -1)) {
         e.preventDefault();
+        e.stopPropagation();
         _addAttachment(pasted, ctx);
       }
-      // short plain text — allow into textarea normally
+      // Under 80 chars, single line → goes into textarea normally
     });
 
-    // Inject tray OUTSIDE and ABOVE the omnibar inner row
-    // PC:  textarea is inside .ai-omnibar-inner  → parent is .ai-omnibar-pc
-    // Mob: textarea is inside .ai-omnibar-input-row → parent is .ai-omnibar-mobile
-    // We place the tray between the outer container and the inner row
+    // ── Inject tray ──
+    // PC:  inject BEFORE .ai-omnibar-pc, inside super-panel-1
+    // Mob: inject BEFORE .ai-omnibar-input-row, inside .ai-omnibar-mobile
     var tray = document.createElement("div");
-    tray.id = "t1cTray_" + ctx;
+    tray.id        = "t1cTray_" + ctx;
     tray.className = "t1c-attach-tray";
     tray.style.display = "none";
 
-    var innerRow = ta.closest
-      ? ta.closest(".ai-omnibar-inner, .ai-omnibar-input-row")
-      : null;
-    if (!innerRow) {
-      // Fallback: innerRow is ta's direct parent
-      innerRow = ta.parentNode;
-    }
-    var outerWrap = innerRow.parentNode;
-    if (outerWrap) {
-      outerWrap.insertBefore(tray, innerRow);
+    if (ctx === "pc") {
+      // Place tray inside super-panel-1, directly before .ai-omnibar-pc
+      var panel = document.getElementById("super-panel-1");
+      var omniPc = panel ? panel.querySelector(".ai-omnibar-pc") : null;
+      if (omniPc && panel) {
+        panel.insertBefore(tray, omniPc);
+      } else {
+        // fallback: before the inner row
+        ta.parentNode.parentNode.insertBefore(tray, ta.parentNode);
+      }
+    } else {
+      // Mobile: tray goes inside .ai-omnibar-mobile, before .ai-omnibar-input-row
+      var omniMob = document.getElementById("aiOmnibarMobile");
+      var inputRow = omniMob ? omniMob.querySelector(".ai-omnibar-input-row") : null;
+      if (omniMob && inputRow) {
+        omniMob.insertBefore(tray, inputRow);
+      } else {
+        ta.parentNode.parentNode.insertBefore(tray, ta.parentNode);
+      }
     }
   }
 
@@ -204,7 +216,7 @@
     }
   };
 
-  /* ── Rebalance card sizes based on count ── */
+  /* ── Rebalance card sizes and push omnibar up ── */
   function _rebalanceCards(tray) {
     var cards = tray.querySelectorAll(".t1c-att-card");
     var count = cards.length;
@@ -214,6 +226,16 @@
       if (count > 0) c.classList.add(cls);
     });
     tray.style.display = count > 0 ? "flex" : "none";
+
+    // PC: push .ai-omnibar-pc up by the tray height so tray sits above it
+    if (tray.id === "t1cTray_pc") {
+      var omniPc = document.querySelector(".ai-omnibar-pc");
+      if (omniPc) {
+        var h = count > 0 ? (tray.offsetHeight || 60) : 0;
+        omniPc.style.bottom = h + "px";
+        tray.style.bottom = omniPc.offsetHeight + "px";
+      }
+    }
   }
 
   /* ══════════════════════════════════════════════════
