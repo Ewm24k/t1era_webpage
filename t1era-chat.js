@@ -30,6 +30,8 @@
     setModel: function (m) { _activeModel = m; },
     clear: clearChat,
   };
+  // Expose attachments list for card preview popup
+  window.t1eraAttachments = function () { return _attachments; };
 
   /* ══════════════════════════════════════════════════
      INIT
@@ -126,7 +128,18 @@
     var lines   = _lineCount(content);
     var chars   = content.length;
 
-    _attachments.push({ id: id, label: info.label, content: content, type: info.format, ctx: ctx });
+    _attachments.push({
+      id:       id,
+      label:    info.label,
+      filename: info.filename,
+      content:  content,
+      type:     info.format,
+      ext:      info.ext,
+      category: info.category,
+      icon:     info.icon,
+      color:    info.color,
+      ctx:      ctx
+    });
 
     var trayId = ctx === "mob" ? "t1cCardRowMob" : "t1cCardRowPc";
     var tray = document.getElementById(trayId);
@@ -136,6 +149,12 @@
     card.className = "t1c-att-card";
     card.id = id;
     card.setAttribute("data-format", info.format);
+    card.style.cursor = "pointer";
+    card.onclick = function (e) {
+      // Don't open preview if clicking the remove button
+      if (e.target.closest && e.target.closest(".t1c-att-remove")) return;
+      window.t1cpOpen(id, ctx);
+    };
 
     // Badge(s): extension + category
     var badgesHtml =
