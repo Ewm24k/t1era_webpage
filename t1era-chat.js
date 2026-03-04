@@ -97,12 +97,26 @@
       // short plain text — allow into textarea normally
     });
 
-    // Inject tray above the textarea
+    // Inject tray OUTSIDE and ABOVE the omnibar inner row
+    // PC:  textarea is inside .ai-omnibar-inner  → parent is .ai-omnibar-pc
+    // Mob: textarea is inside .ai-omnibar-input-row → parent is .ai-omnibar-mobile
+    // We place the tray between the outer container and the inner row
     var tray = document.createElement("div");
     tray.id = "t1cTray_" + ctx;
     tray.className = "t1c-attach-tray";
     tray.style.display = "none";
-    ta.parentNode.insertBefore(tray, ta);
+
+    var innerRow = ta.closest
+      ? ta.closest(".ai-omnibar-inner, .ai-omnibar-input-row")
+      : null;
+    if (!innerRow) {
+      // Fallback: innerRow is ta's direct parent
+      innerRow = ta.parentNode;
+    }
+    var outerWrap = innerRow.parentNode;
+    if (outerWrap) {
+      outerWrap.insertBefore(tray, innerRow);
+    }
   }
 
   /* ── Should this paste become an attachment card? ── */
