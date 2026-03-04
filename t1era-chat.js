@@ -33,6 +33,52 @@
   // Expose attachments list for card preview popup
   window.t1eraAttachments = function () { return _attachments; };
 
+  // Hook for attach menu — inject a file as an attachment card
+  window._t1amInjectAttachment = function (content, ctx, filename) {
+    _addAttachment(content, ctx, filename);
+  };
+
+  // Hook for attach menu — inject an image preview card
+  window._t1amInjectImage = function (url, filename, ctx) {
+    _attachIdCounter++;
+    var id = "t1cAtt_" + _attachIdCounter;
+    _attachments.push({
+      id: id, label: filename, filename: filename,
+      content: "[IMAGE: " + filename + "]",
+      type: "image", ext: filename.split(".").pop().toLowerCase(),
+      category: "Image", icon: "ph-image", color: "#e879f9", ctx: ctx
+    });
+    var trayId = ctx === "mob" ? "t1cCardRowMob" : "t1cCardRowPc";
+    var tray = document.getElementById(trayId);
+    if (!tray) return;
+
+    var card = document.createElement("div");
+    card.className = "t1c-att-card";
+    card.id = id;
+    card.setAttribute("data-format", "image");
+    card.style.cursor = "pointer";
+    card.style.setProperty("--fmt-color", "#e879f9");
+    card.onclick = function (e) {
+      if (e.target.closest && e.target.closest(".t1c-att-remove")) return;
+      // Image preview: open in new tab
+      window.open(url, "_blank");
+    };
+    card.innerHTML =
+      '<div class="t1c-att-icon" style="--fmt-color:#e879f9"><i class="ph-bold ph-image"></i></div>' +
+      '<div class="t1c-att-info">' +
+        '<span class="t1c-att-label">' + _escHtml(filename) + "</span>" +
+        '<span class="t1c-att-meta"><i class="ph-bold ph-image"></i> image</span>' +
+        '<div class="t1c-att-badges">' +
+          '<span class="t1c-fmt-badge" style="--fmt-color:#e879f9">' + filename.split(".").pop().toUpperCase() + "</span>" +
+          '<span class="t1c-fmt-badge t1c-fmt-cat">Image</span>' +
+        "</div>" +
+      "</div>" +
+      '<button class="t1c-att-remove" title="Remove" onclick="window.t1cRemoveAttachment(\'' + id + '\',\'' + ctx + '\')">' + '<i class="ph-bold ph-x"></i></button>';
+
+    tray.appendChild(card);
+    _rebalanceCards(tray);
+  };
+
   /* ══════════════════════════════════════════════════
      INIT
   ══════════════════════════════════════════════════ */
@@ -119,12 +165,13 @@
   }
 
   /* ── Add an attachment card ── */
-  function _addAttachment(content, ctx) {
+  function _addAttachment(content, ctx, filenameOverride) {
     _attachIdCounter++;
     var id      = "t1cAtt_" + _attachIdCounter;
     var info;
-    try { info = _detectFormat(content); } catch(e) { info = _fmt("txt", null); }
+    try { info = _detectFormat(content, filenameOverride); } catch(e) { info = _fmt("txt", null); }
     if (!info) info = _fmt("txt", null);
+    if (filenameOverride && !info.filename) info.filename = filenameOverride;
     var lines   = _lineCount(content);
     var chars   = content.length;
 
@@ -218,14 +265,33 @@
      Detects language / file format from pasted content.
      Returns: { format, ext, category, icon, color, label, filename }
   ══════════════════════════════════════════════════ */
-  function _detectFormat(text) {
+  function _detectFormat(text, filenameHint) {
     var t = text.trim();
     var firstLine = t.split("\n")[0].trim();
 
-    // ── Filename extraction from first line ──
-    var filename = null;
-    var fnMatch = firstLine.match(/^[#\/\*\-]?\s*([\w\-. ]+\.([a-zA-Z0-9]{1,10}))\s*$/);
-    if (fnMatch) filename = fnMatch[1].trim();
+    // ── Filename: use hint if provided, else try extract from first line ──
+    var filename = filenameHint || null;
+    if (!filename) {
+      var fnMatch = firstLine.match(/^[#\/\*\-]?\s*([\w\-. ]+\.([a-zA-Z0-9]{1,10}))\s*$/);
+      if (fnMatch) filename = fnMatch[1].trim();
+    }
+    // If filename hint provided, also try to infer format from extension
+    if (filenameHint) {
+      var extMatch = filenameHint.match(/\.([a-zA-Z0-9]+)$/);
+      if (extMatch) {
+        var extMap = {
+          js:"js",jsx:"jsx",ts:"ts",tsx:"tsx",py:"python",
+          rb:"ruby",php:"php",go:"go",rs:"rust",java:"java",
+          kt:"kotlin",swift:"swift",dart:"dart",c:"c",cpp:"cpp",
+          cs:"cs",html:"html",css:"css",scss:"scss",less:"less",
+          json:"json",yaml:"yaml",yml:"yaml",toml:"toml",xml:"xml",
+          sql:"sql",sh:"shell",bash:"shell",md:"md",txt:"txt",
+          svg:"svg",graphql:"graphql",gql:"graphql"
+        };
+        var mapped = extMap[extMatch[1].toLowerCase()];
+        if (mapped) return _fmt(mapped, filenameHint);
+      }
+    }
 
     // ── 1. Shebang — unambiguous ──
     if (/^#!\/usr\/bin\/env\s+(python|python3)/i.test(t)) return _fmt("python", filename);
