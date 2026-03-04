@@ -3686,20 +3686,22 @@
       }
       /* Inner row 1 — card row: hidden by default, capped height */
       .t1c-card-row {
-        display: none;
+        display: flex;          /* always flex — height controls visibility */
         flex-direction: row;
         flex-wrap: wrap;
         gap: 5px;
-        padding: 6px 0 5px;
-        border-bottom: 1px solid var(--border);
-        max-height: 72px;        /* cap: ~2 rows of cards max */
-        overflow-y: auto;
-        overflow-x: hidden;
+        padding: 0;
+        border-bottom: none;
+        max-height: 0;
+        overflow: hidden;
         scrollbar-width: none;
+        transition: max-height 0.18s ease, padding 0.18s ease;
       }
       .t1c-card-row::-webkit-scrollbar { display: none; }
       .t1c-card-row.has-cards {
-        display: flex;
+        max-height: 72px;
+        padding: 6px 0 5px;
+        border-bottom: 1px solid var(--border);
       }
       /* Inner row 2 — text input */
       .t1c-input-row {
