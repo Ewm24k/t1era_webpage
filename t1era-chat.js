@@ -68,11 +68,8 @@
      wire immediate paste-to-card on length threshold
   ══════════════════════════════════════════════════ */
   function _upgradeOmnibar(ctx) {
-    var inputId    = ctx === "mob" ? "aiOmniInputMob"    : "aiOmniInputPc";
-    var omnibarId  = ctx === "mob" ? "aiOmnibarMobile"   : null;
-    var panelId    = ctx === "mob" ? null                : "super-panel-1";
-
-    var input = document.getElementById(inputId);
+    var inputId = ctx === "mob" ? "aiOmniInputMob" : "aiOmniInputPc";
+    var input   = document.getElementById(inputId);
     if (!input) return;
 
     // ── Swap <input> for auto-grow <textarea> ──
@@ -96,46 +93,15 @@
       }
     });
 
-    // ── PASTE: intercept immediately on length — no delay ──
+    // ── PASTE: instant threshold check — no regex, no delay ──
     ta.addEventListener("paste", function (e) {
       var pasted = (e.clipboardData || window.clipboardData).getData("text");
-      // Instant threshold: >80 chars or contains newline → card. No format detection needed first.
       if (pasted && (pasted.length > 80 || pasted.indexOf("\n") !== -1)) {
         e.preventDefault();
         e.stopPropagation();
         _addAttachment(pasted, ctx);
       }
-      // Under 80 chars, single line → goes into textarea normally
     });
-
-    // ── Inject tray ──
-    // PC:  inject BEFORE .ai-omnibar-pc, inside super-panel-1
-    // Mob: inject BEFORE .ai-omnibar-input-row, inside .ai-omnibar-mobile
-    var tray = document.createElement("div");
-    tray.id        = "t1cTray_" + ctx;
-    tray.className = "t1c-attach-tray";
-    tray.style.display = "none";
-
-    if (ctx === "pc") {
-      // Place tray inside super-panel-1, directly before .ai-omnibar-pc
-      var panel = document.getElementById("super-panel-1");
-      var omniPc = panel ? panel.querySelector(".ai-omnibar-pc") : null;
-      if (omniPc && panel) {
-        panel.insertBefore(tray, omniPc);
-      } else {
-        // fallback: before the inner row
-        ta.parentNode.parentNode.insertBefore(tray, ta.parentNode);
-      }
-    } else {
-      // Mobile: tray goes inside .ai-omnibar-mobile, before .ai-omnibar-input-row
-      var omniMob = document.getElementById("aiOmnibarMobile");
-      var inputRow = omniMob ? omniMob.querySelector(".ai-omnibar-input-row") : null;
-      if (omniMob && inputRow) {
-        omniMob.insertBefore(tray, inputRow);
-      } else {
-        ta.parentNode.parentNode.insertBefore(tray, ta.parentNode);
-      }
-    }
   }
 
   /* ── Should this paste become an attachment card? ── */
@@ -162,7 +128,8 @@
 
     _attachments.push({ id: id, label: info.label, content: content, type: info.format, ctx: ctx });
 
-    var tray = document.getElementById("t1cTray_" + ctx);
+    var trayId = ctx === "mob" ? "t1cCardRowMob" : "t1cCardRowPc";
+    var tray = document.getElementById(trayId);
     if (!tray) return;
 
     var card = document.createElement("div");
@@ -204,18 +171,13 @@
   window.t1cRemoveAttachment = function (id, ctx) {
     _attachments = _attachments.filter(function (a) { return a.id !== id; });
     var card = document.getElementById(id);
-    if (card) {
-      card.style.opacity = "0";
-      card.style.transform = "scale(0.88)";
-      setTimeout(function () {
-        if (card.parentNode) card.parentNode.removeChild(card);
-        var tray = document.getElementById("t1cTray_" + ctx);
-        if (tray) _rebalanceCards(tray);
-      }, 180);
-    }
+    if (card && card.parentNode) card.parentNode.removeChild(card);
+    var trayId = ctx === "mob" ? "t1cCardRowMob" : "t1cCardRowPc";
+    var tray = document.getElementById(trayId);
+    if (tray) _rebalanceCards(tray);
   };
 
-  /* ── Rebalance card sizes and push omnibar up ── */
+  /* ── Rebalance card sizes, show/hide card row ── */
   function _rebalanceCards(tray) {
     var cards = tray.querySelectorAll(".t1c-att-card");
     var count = cards.length;
@@ -224,16 +186,11 @@
       c.classList.remove("size-1", "size-2", "size-3");
       if (count > 0) c.classList.add(cls);
     });
-    tray.style.display = count > 0 ? "flex" : "none";
-
-    // PC: push .ai-omnibar-pc up by the tray height so tray sits above it
-    if (tray.id === "t1cTray_pc") {
-      var omniPc = document.querySelector(".ai-omnibar-pc");
-      if (omniPc) {
-        var h = count > 0 ? (tray.offsetHeight || 60) : 0;
-        omniPc.style.bottom = h + "px";
-        tray.style.bottom = omniPc.offsetHeight + "px";
-      }
+    // Show inner card row via class — CSS controls visibility
+    if (count > 0) {
+      tray.classList.add("has-cards");
+    } else {
+      tray.classList.remove("has-cards");
     }
   }
 
