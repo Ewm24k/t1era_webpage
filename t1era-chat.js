@@ -134,11 +134,12 @@
   /* ── Add an attachment card ── */
   function _addAttachment(content, ctx) {
     _attachIdCounter++;
-    var id = "t1cAtt_" + _attachIdCounter;
-    var type = _detectType(content);
-    var label = _makeLabel(content, type);
+    var id      = "t1cAtt_" + _attachIdCounter;
+    var info    = _detectFormat(content);  // {format, ext, icon, color, label, filename}
+    var lines   = _lineCount(content);
+    var chars   = content.length;
 
-    _attachments.push({ id: id, label: label, content: content, type: type, ctx: ctx });
+    _attachments.push({ id: id, label: info.label, content: content, type: info.format, ctx: ctx });
 
     var tray = document.getElementById("t1cTray_" + ctx);
     if (!tray) return;
@@ -146,19 +147,33 @@
     var card = document.createElement("div");
     card.className = "t1c-att-card";
     card.id = id;
+    card.setAttribute("data-format", info.format);
 
-    var iconHtml = type === "code"
-      ? '<i class="ph-bold ph-code"></i>'
-      : '<i class="ph-bold ph-file-text"></i>';
+    // Badge(s): extension + category
+    var badgesHtml =
+      '<span class="t1c-fmt-badge" style="--fmt-color:' + info.color + '">' + info.ext.toUpperCase() + '</span>' +
+      '<span class="t1c-fmt-badge t1c-fmt-cat">' + info.category + '</span>';
 
     card.innerHTML =
-      '<div class="t1c-att-icon">' + iconHtml + "</div>" +
+      '<div class="t1c-att-icon" style="--fmt-color:' + info.color + '">' +
+        '<i class="ph-bold ' + info.icon + '"></i>' +
+      '</div>' +
       '<div class="t1c-att-info">' +
-        '<span class="t1c-att-label">' + _escHtml(label) + "</span>" +
-        '<span class="t1c-att-meta">' + type + " \xb7 " + _lineCount(content) + " lines</span>" +
-      "</div>" +
-      '<button class="t1c-att-remove" title="Remove" onclick="window.t1cRemoveAttachment(\'' +
-        id + "','" + ctx + "')\"><i class=\"ph-bold ph-x\"></i></button>";
+        // Row 1: filename / label
+        '<span class="t1c-att-label">' + _escHtml(info.filename || info.label) + '</span>' +
+        // Row 2: line count + char count
+        '<span class="t1c-att-meta">' +
+          '<i class="ph-bold ph-rows"></i> ' + lines + ' lines' +
+          ' &nbsp;·&nbsp; ' +
+          '<i class="ph-bold ph-text-aa"></i> ' + _formatSize(chars) +
+        '</span>' +
+        // Row 3: format badges
+        '<div class="t1c-att-badges">' + badgesHtml + '</div>' +
+      '</div>' +
+      '<button class="t1c-att-remove" title="Remove" ' +
+        'onclick="window.t1cRemoveAttachment('' + id + '','' + ctx + '')">' +
+        '<i class="ph-bold ph-x"></i>' +
+      '</button>';
 
     tray.appendChild(card);
     _rebalanceCards(tray);
@@ -191,17 +206,197 @@
     tray.style.display = count > 0 ? "flex" : "none";
   }
 
-  /* ── Detect if content is code or text ── */
-  function _detectType(text) {
+  /* ══════════════════════════════════════════════════
+     FORMAT DETECTION ENGINE
+     Detects language / file format from pasted content.
+     Returns: { format, ext, category, icon, color, label, filename }
+  ══════════════════════════════════════════════════ */
+  function _detectFormat(text) {
     var t = text.trim();
-    if (
-      /[`{};]/.test(t) ||
-      /^\s{2,}/m.test(t) ||
-      /function |const |var |let |def |class |import |<\/?[a-z]+/i.test(t)
-    ) {
-      return "code";
+    var firstLine = t.split("\n")[0].trim();
+
+    // ── Try to extract a filename from the first line ──
+    var filename = null;
+    var fnMatch = firstLine.match(/^[#\/\*\-–]?\s*([\w\-. ]+\.([a-zA-Z0-9]{1,10}))\s*$/);
+    if (fnMatch) filename = fnMatch[1].trim();
+
+    // ── Shebang detection ──
+    if (/^#!\/usr\/bin\/env\s+(python|python3)/i.test(t)) return _fmt("python",  filename);
+    if (/^#!\/usr\/bin\/env\s+node/i.test(t))            return _fmt("js",      filename);
+    if (/^#!\/bin\/(bash|sh|zsh)/i.test(t))               return _fmt("shell",   filename);
+
+    // ── Markdown ──
+    if (/^#{1,6}\s/.test(t) && /\n#{1,6}\s/.test(t))     return _fmt("md",      filename);
+    if (/^#{1,6}\s/.test(t) && t.length < 2000)            return _fmt("md",      filename);
+
+    // ── HTML / XML / SVG ──
+    if (/^<!DOCTYPE\s+html/i.test(t))                      return _fmt("html",    filename);
+    if (/^<html/i.test(t) || /<\/html>/i.test(t))          return _fmt("html",    filename);
+    if (/^<svg/i.test(t))                                    return _fmt("svg",     filename);
+    if (/^<\?xml/i.test(t))                                 return _fmt("xml",     filename);
+    if (/<[a-z][^>]*>.*<\/[a-z]+>/is.test(t))              return _fmt("html",    filename);
+
+    // ── JSON ──
+    if (/^[\[{]/.test(t)) {
+      try { JSON.parse(t); return _fmt("json", filename); } catch(e) {}
     }
-    return "text";
+
+    // ── YAML ──
+    if (/^---\n/.test(t) || /^[a-zA-Z_]+:\s+\S/.test(t) && /\n[a-zA-Z_]+:\s+/.test(t))
+      return _fmt("yaml", filename);
+
+    // ── TOML ──
+    if (/^\[[A-Za-z]/.test(t) && /\n[a-zA-Z_]+ ?=/.test(t))
+      return _fmt("toml", filename);
+
+    // ── CSS / SCSS / LESS ──
+    if (/[a-z#.][^{]*\{[^}]*:[^}]*\}/s.test(t) && !/function|=>/.test(t)) {
+      if (t.includes("$") && /\$[a-z-]+:/.test(t))        return _fmt("scss",    filename);
+      if (t.includes("@") && /@[a-z]+\s*\(/.test(t))      return _fmt("less",    filename);
+      return _fmt("css", filename);
+    }
+
+    // ── Python ──
+    if (/^(import |from |def |class |async def |@[a-z])/m.test(t) &&
+        !/function |const |let |var /.test(t))              return _fmt("python",  filename);
+    if (/:\s*\n\s+(return|pass|raise|yield|print)/m.test(t)) return _fmt("python", filename);
+
+    // ── TypeScript (before JS — more specific) ──
+    if (/(interface |type [A-Z]|: string|: number|: boolean|<T>|as [A-Z])/.test(t))
+      return _fmt("ts", filename);
+
+    // ── JavaScript ──
+    if (/(function |const |let |var |=>|require\(|module\.exports|import .* from)/.test(t))
+      return _fmt("js", filename);
+
+    // ── JSX / TSX ──
+    if (/return \(\s*<|React\.createElement|<\/[A-Z]/.test(t))
+      return _fmt("jsx", filename);
+
+    // ── PHP ──
+    if (/^<\?php/i.test(t) || /\$[a-z_]+\s*=/.test(t) && /echo |->/.test(t))
+      return _fmt("php", filename);
+
+    // ── Ruby ──
+    if (/^(require |def |class |module |end$)/m.test(t) && !/(function|const)/.test(t))
+      return _fmt("ruby", filename);
+
+    // ── Go ──
+    if (/^package [a-z]|func [A-Za-z]|:= |var [a-z]/.test(t))
+      return _fmt("go", filename);
+
+    // ── Rust ──
+    if (/fn [a-z]|let mut |use std::|impl [A-Z]|pub fn/.test(t))
+      return _fmt("rust", filename);
+
+    // ── Java / Kotlin ──
+    if (/public (class|static|void)|System\.out\.println/.test(t))
+      return _fmt("java", filename);
+    if (/^fun [a-z]|val [a-z]|var [a-z].*=|data class/.test(t))
+      return _fmt("kotlin", filename);
+
+    // ── C / C++ ──
+    if (/#include\s*[<"]/.test(t))
+      return /class |std::|cout|cin/.test(t) ? _fmt("cpp", filename) : _fmt("c", filename);
+
+    // ── C# ──
+    if (/using System|namespace [A-Z]|public class/.test(t))
+      return _fmt("cs", filename);
+
+    // ── Swift ──
+    if (/import (Foundation|UIKit|SwiftUI)|func [a-z]|var [a-z].*: [A-Z]/.test(t))
+      return _fmt("swift", filename);
+
+    // ── Kotlin ──
+    if (/fun [a-z]|data class|companion object/.test(t))
+      return _fmt("kotlin", filename);
+
+    // ── Dart / Flutter ──
+    if (/void main\(\)|Widget build|StatelessWidget|import 'package:/.test(t))
+      return _fmt("dart", filename);
+
+    // ── SQL ──
+    if (/(SELECT|INSERT|UPDATE|DELETE|CREATE TABLE|DROP|ALTER)/i.test(t) &&
+        /(FROM|WHERE|INTO|SET|VALUES)/i.test(t))            return _fmt("sql", filename);
+
+    // ── Shell / Bash ──
+    if (/(echo |grep |awk |sed |chmod |mkdir |export |source )/.test(t))
+      return _fmt("shell", filename);
+
+    // ── Dockerfile ──
+    if (/^FROM [a-z]/im.test(t) && /(RUN |CMD |EXPOSE |ENV )/m.test(t))
+      return _fmt("docker", filename);
+
+    // ── GraphQL ──
+    if (/^(query|mutation|subscription|type [A-Z]|schema) \{/m.test(t))
+      return _fmt("graphql", filename);
+
+    // ── Regex / config-like ──
+    if (/^\[.*\]\s*$/m.test(t) && /^[a-z_]+ ?=/m.test(t))
+      return _fmt("ini", filename);
+
+    // ── Plain text / prose ──
+    return _fmt("txt", filename);
+  }
+
+  /* ── Format definition lookup ──
+     Returns full descriptor object for a given ext string
+  ── */
+  var _FMT_MAP = {
+    // Web
+    html:    { ext:"html",    category:"Web",      icon:"ph-file-html",         color:"#f97316" },
+    css:     { ext:"css",     category:"Web",      icon:"ph-file-css",          color:"#38bdf8" },
+    scss:    { ext:"scss",    category:"Web",      icon:"ph-file-css",          color:"#c084fc" },
+    less:    { ext:"less",    category:"Web",      icon:"ph-file-css",          color:"#1d4ed8" },
+    svg:     { ext:"svg",     category:"Web",      icon:"ph-file-svg",          color:"#fb923c" },
+    jsx:     { ext:"jsx",     category:"Web",      icon:"ph-file-jsx",          color:"#38bdf8" },
+    // Scripts
+    js:      { ext:"js",     category:"Script",   icon:"ph-file-js",           color:"#facc15" },
+    ts:      { ext:"ts",     category:"Script",   icon:"ph-file-ts",           color:"#60a5fa" },
+    tsx:     { ext:"tsx",    category:"Script",   icon:"ph-file-ts",           color:"#60a5fa" },
+    python:  { ext:"py",     category:"Script",   icon:"ph-file-py",           color:"#4ade80" },
+    ruby:    { ext:"rb",     category:"Script",   icon:"ph-file-code",         color:"#f87171" },
+    php:     { ext:"php",    category:"Script",   icon:"ph-file-php",          color:"#818cf8" },
+    shell:   { ext:"sh",     category:"Script",   icon:"ph-terminal-window",   color:"#a3e635" },
+    // Systems
+    c:       { ext:"c",      category:"Systems",  icon:"ph-file-c",            color:"#60a5fa" },
+    cpp:     { ext:"cpp",    category:"Systems",  icon:"ph-file-cpp",          color:"#818cf8" },
+    cs:      { ext:"cs",     category:"Systems",  icon:"ph-file-cs",           color:"#a78bfa" },
+    go:      { ext:"go",     category:"Systems",  icon:"ph-file-code",         color:"#34d399" },
+    rust:    { ext:"rs",     category:"Systems",  icon:"ph-file-code",         color:"#fb923c" },
+    java:    { ext:"java",   category:"Systems",  icon:"ph-file-code",         color:"#fb923c" },
+    kotlin:  { ext:"kt",     category:"Systems",  icon:"ph-file-code",         color:"#a78bfa" },
+    swift:   { ext:"swift",  category:"Systems",  icon:"ph-file-code",         color:"#f97316" },
+    dart:    { ext:"dart",   category:"Systems",  icon:"ph-file-code",         color:"#38bdf8" },
+    // Data
+    json:    { ext:"json",   category:"Data",     icon:"ph-file-code",         color:"#fbbf24" },
+    yaml:    { ext:"yaml",   category:"Data",     icon:"ph-file-code",         color:"#34d399" },
+    toml:    { ext:"toml",   category:"Data",     icon:"ph-file-code",         color:"#f87171" },
+    xml:     { ext:"xml",    category:"Data",     icon:"ph-file-code",         color:"#fb923c" },
+    ini:     { ext:"ini",    category:"Config",   icon:"ph-gear-six",          color:"#94a3b8" },
+    sql:     { ext:"sql",    category:"Database", icon:"ph-database",          color:"#38bdf8" },
+    graphql: { ext:"gql",    category:"API",      icon:"ph-graph",             color:"#e879f9" },
+    // Docs
+    md:      { ext:"md",     category:"Docs",     icon:"ph-file-md",           color:"#e2e8f0" },
+    txt:     { ext:"txt",    category:"Text",     icon:"ph-file-text",         color:"#94a3b8" },
+    // Other
+    docker:  { ext:"docker", category:"DevOps",   icon:"ph-cube",              color:"#38bdf8" },
+  };
+
+  function _fmt(key, filename) {
+    var def = _FMT_MAP[key] || _FMT_MAP["txt"];
+    var label = filename
+      ? filename.replace(/\.[^.]+$/, "")  // strip extension for label
+      : (def.category + " snippet");
+    return {
+      format:   key,
+      ext:      def.ext,
+      category: def.category,
+      icon:     def.icon,
+      color:    def.color,
+      label:    label,
+      filename: filename || null,
+    };
   }
 
   function _makeLabel(content, type) {
@@ -211,6 +406,11 @@
 
   function _lineCount(str) {
     return str.split("\n").length;
+  }
+
+  function _formatSize(chars) {
+    if (chars < 1000) return chars + " chars";
+    return (chars / 1000).toFixed(1) + "k chars";
   }
 
   /* ══════════════════════════════════════════════════
