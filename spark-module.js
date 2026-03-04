@@ -1932,6 +1932,9 @@ function getMidnightText() {
 }
 
 function applyComposeAvatar(photoURL, initial) {
+  // Store resolved user photo + initial for t1era-chat.js bubble avatars
+  window._t1eraUserPhoto   = photoURL || "";
+  window._t1eraUserInitial = initial  || "U";
   const miniAv = document.getElementById("miniAv");
   const composeAv = document.getElementById("composeAv");
   const promptMiniAv = document.getElementById("promptMiniAv");
