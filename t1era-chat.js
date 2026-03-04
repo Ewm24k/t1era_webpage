@@ -17,6 +17,7 @@
   /* ── Paste attachment state ── */
   var _attachments = []; // [{id, label, content, type, ctx}]
   var _attachIdCounter = 0;
+  var _pendingAvatars   = [];
 
   /* ── DOM refs (resolved lazily on first send) ── */
   var _wrap = null;  // #t1eraChatBody
@@ -590,7 +591,6 @@
     var now = _formatTime();
     var uid = "t1cMsg_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6);
 
-    var avatarContent = role === "user" ? (window._currentUserInitial || "U") : "\u26a1";
     var senderLabel = role === "user" ? "YOU" : "T1ERA AI";
     var modelTag = role === "ai"
       ? '<span class="t1c-model-tag">' + _escHtml(model) + "</span>"
@@ -601,6 +601,21 @@
       ? '<span class="t1c-attach-badge"><i class="ph-bold ph-paperclip"></i> ' + attachCount + " attachment" + (attachCount > 1 ? "s" : "") + "</span>"
       : "";
 
+    // ── Build avatar — reads from window._t1eraUserPhoto set by applyComposeAvatar ──
+    var avatarHtml;
+    if (role === "user") {
+      var photoURL = window._t1eraUserPhoto   || "";
+      var initial  = window._t1eraUserInitial || "U";
+      avatarHtml =
+        '<div class="t1c-av-wrap">' +
+          '<span class="t1c-spark-ring"></span>' +
+          '<div class="t1c-avatar t1c-av-user" id="t1cAv_' + uid + '"></div>' +
+        '</div>';
+      _pendingAvatars.push({ elId: "t1cAv_" + uid, photoURL: photoURL, initial: initial });
+    } else {
+      avatarHtml = '<div class="t1c-av-wrap"><div class="t1c-avatar">&#x26a1;</div></div>';
+    }
+
     var row = document.createElement("div");
     row.className = "t1c-row t1c-" + role;
     row.id = uid;
@@ -609,7 +624,7 @@
       '<div class="t1c-card">' +
       '<div class="t1c-header">' +
       '<div class="t1c-header-left">' +
-      '<div class="t1c-avatar">' + avatarContent + "</div>" +
+      avatarHtml +
       '<span class="t1c-sender">' + senderLabel + "</span>" +
       modelTag + attachBadge +
       "</div>" +
@@ -630,6 +645,31 @@
       "</div>";
 
     _convo.appendChild(row);
+
+    // ── Hydrate user avatars via DOM (avoids HTML-string quote issues) ──
+    while (_pendingAvatars.length) {
+      var av = _pendingAvatars.shift();
+      var el = document.getElementById(av.elId);
+      if (!el) continue;
+      if (av.photoURL) {
+        el.style.background = "none";
+        el.style.padding    = "0";
+        var img = document.createElement("img");
+        img.src             = av.photoURL;
+        img.alt             = av.initial;
+        img.referrerPolicy  = "no-referrer";
+        img.style.cssText   = "width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;";
+        img.onerror = (function(e, ini) { return function() {
+          e.textContent      = ini;
+          e.style.background = "linear-gradient(135deg,#c2185b,#8b5cf6)";
+          e.style.padding    = "";
+        }; }(el, av.initial));
+        el.appendChild(img);
+      } else {
+        el.textContent      = av.initial;
+        el.style.background = "linear-gradient(135deg,#c2185b,#8b5cf6)";
+      }
+    }
   }
 
   /* ══════════════════════════════════════════════════
