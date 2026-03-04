@@ -345,30 +345,53 @@
    ATTACHMENT TRAY — sits above the omnibar input
 ══════════════════════════════════════════════════════ */
 
+/* ── Tray shared base ── */
 .t1c-attach-tray {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
   gap: 6px;
   padding: 8px 10px 6px;
-  width: 100%;
   box-sizing: border-box;
   align-items: flex-start;
-  /* sits above the input row, outside it */
-  border-bottom: 1px solid rgba(139, 92, 246, 0.15);
   background: rgba(139, 92, 246, 0.04);
-  border-radius: var(--r-sm, 12px) var(--r-sm, 12px) 0 0;
+  border-top: 1px solid rgba(139, 92, 246, 0.12);
+  border-bottom: 1px solid rgba(139, 92, 246, 0.12);
+  width: 100%;
+}
+
+/* PC tray: lives just above .ai-omnibar-pc inside super-panel-1
+   It is fixed to bottom just like the omnibar — sits right above it */
+#t1cTray_pc {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(680px, 100%);
+  z-index: 101;
+  border-radius: 12px 12px 0 0;
+  /* push the omnibar down dynamically via JS */
+}
+
+/* Mobile tray: inside .ai-omnibar-mobile, stacks above .ai-omnibar-input-row */
+.ai-omnibar-mobile {
+  display: flex !important;
+  flex-direction: column !important;
+}
+#t1cTray_mob {
+  order: -1; /* always on top inside the mobile omnibar flex column */
+  border-radius: 12px 12px 0 0;
 }
 
 /* ── Individual attachment card ── */
 .t1c-att-card {
   display: flex;
-  align-items: center;
-  gap: 7px;
-  background: rgba(139, 92, 246, 0.08);
-  border: 1px solid rgba(139, 92, 246, 0.22);
+  align-items: flex-start;
+  gap: 8px;
+  background: color-mix(in srgb, var(--fmt-color, #8b5cf6) 7%, var(--bg-card, #111));
+  border: 1px solid color-mix(in srgb, var(--fmt-color, #8b5cf6) 20%, transparent);
   border-radius: 10px;
-  padding: 6px 8px 6px 9px;
+  padding: 7px 8px 7px 9px;
   overflow: hidden;
   transition:
     opacity 0.18s ease,
@@ -382,8 +405,8 @@
 }
 
 .t1c-att-card:hover {
-  border-color: rgba(139, 92, 246, 0.4);
-  background: rgba(139, 92, 246, 0.12);
+  border-color: color-mix(in srgb, var(--fmt-color, #8b5cf6) 40%, transparent);
+  background: color-mix(in srgb, var(--fmt-color, #8b5cf6) 12%, var(--bg-card, #111));
 }
 
 /* Size tiers — auto-compact as more cards are added */
@@ -400,55 +423,94 @@
   flex: 1 1 calc(33.33% - 4px);
 }
 
-/* ── Icon ── */
+/* ── Icon — colour driven by --fmt-color set inline ── */
 .t1c-att-icon {
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: 28px;
   border-radius: 7px;
-  background: rgba(139, 92, 246, 0.15);
-  border: 1px solid rgba(139, 92, 246, 0.2);
+  background: color-mix(in srgb, var(--fmt-color, #8b5cf6) 13%, transparent);
+  border: 1px solid color-mix(in srgb, var(--fmt-color, #8b5cf6) 28%, transparent);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
-  color: #8b5cf6;
+  font-size: 14px;
+  color: var(--fmt-color, #8b5cf6);
   flex-shrink: 0;
 }
 
-/* Code type — different accent */
-.t1c-att-card[class*="size-"] .t1c-att-icon {
-  /* inherits purple, override for code below */
-}
-
-/* ── Info block ── */
+/* ── Info block — 3 rows: filename, stats, badges ── */
 .t1c-att-info {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 3px;
   min-width: 0;
   flex: 1;
   overflow: hidden;
 }
 
+/* Row 1 — filename / label */
 .t1c-att-label {
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
   font-family: var(--f-mono);
   color: var(--text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   letter-spacing: 0.01em;
+  line-height: 1.2;
 }
 
+/* Row 2 — line count + char size */
 .t1c-att-meta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   font-size: 9px;
   font-family: var(--f-mono);
   color: var(--text-3);
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  line-height: 1.2;
+}
+.t1c-att-meta i {
+  font-size: 9px;
+  opacity: 0.6;
+}
+
+/* Row 3 — format badges */
+.t1c-att-badges {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+
+/* ── Format badge ── */
+.t1c-fmt-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 8px;
+  font-family: var(--f-mono);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  border: 1px solid;
+  /* ext badge uses --fmt-color */
+  background: color-mix(in srgb, var(--fmt-color, #8b5cf6) 12%, transparent);
+  border-color: color-mix(in srgb, var(--fmt-color, #8b5cf6) 30%, transparent);
+  color: var(--fmt-color, #8b5cf6);
+}
+/* category badge — neutral */
+.t1c-fmt-badge.t1c-fmt-cat {
+  --fmt-color: #94a3b8;
+  font-weight: 500;
+  letter-spacing: 0.03em;
 }
 
 /* ── Remove button ── */
