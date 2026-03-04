@@ -3724,6 +3724,26 @@
         flex-shrink: 0;
       }
 
+      /* + attach button — PC only */
+      .t1c-add-btn {
+        width: 26px; height: 26px;
+        border-radius: 7px;
+        border: 1px solid var(--border-2);
+        background: var(--bg-4);
+        color: var(--text-3);
+        font-size: 14px;
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer; flex-shrink: 0;
+        transition: border-color 0.15s, color 0.15s, background 0.15s;
+      }
+      .t1c-add-btn:hover {
+        border-color: var(--pink-2);
+        color: var(--pink-2);
+        background: rgba(194,24,91,0.08);
+      }
+      /* hide on mobile — mobile has its own + in bottom nav */
+      @media (max-width: 1079px) { .t1c-add-btn { display: none; } }
+
       /* T1ERA mob-nav — compact when AI bar is visible */
       @media (max-width: 1079px) {
         body.t1era-active .mob-nav {
@@ -5544,6 +5564,9 @@
               <div class="t1c-omni-col-left">
                 <div class="t1c-card-row" id="t1cCardRowPc"></div>
                 <div class="t1c-input-row">
+                  <button class="t1c-add-btn" onclick="openAttachMenu()" title="Add attachment">
+                    <i class="ph-bold ph-plus"></i>
+                  </button>
                   <input
                     class="ai-omnibar-input"
                     id="aiOmniInputPc"
@@ -6082,6 +6105,7 @@
     <script src="t1era-model-picker.js"></script>
     <script src="t1era-chat.js"></script>
     <script src="t1era-card-preview.js"></script>
+    <script src="t1era-attach-menu.js"></script>
     <script src="t1era-sidemenu.js"></script>
     <script src="spark-core.js"></script>
     <script src="spark-ring.js"></script>
