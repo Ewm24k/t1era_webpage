@@ -27,7 +27,7 @@
   align-items: center;
   gap: 16px;
   width: 100%;
-  max-width: 680px;
+  max-width: min(836px, calc(100vw - 64px));
 }
 
 /* ── Message row — wraps the full bubble card ── */
