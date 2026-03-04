@@ -350,10 +350,14 @@
   flex-direction: row;
   flex-wrap: wrap;
   gap: 6px;
-  padding: 6px 8px 4px;
+  padding: 8px 10px 6px;
   width: 100%;
   box-sizing: border-box;
   align-items: flex-start;
+  /* sits above the input row, outside it */
+  border-bottom: 1px solid rgba(139, 92, 246, 0.15);
+  background: rgba(139, 92, 246, 0.04);
+  border-radius: var(--r-sm, 12px) var(--r-sm, 12px) 0 0;
 }
 
 /* ── Individual attachment card ── */
@@ -492,4 +496,11 @@
     max-width: calc(50% - 3px);
     flex: 1 1 calc(50% - 3px);
   }
+}
+
+/* ── Make omnibar outer containers stack vertically so tray sits above input ── */
+.ai-omnibar-pc,
+.ai-omnibar-mobile {
+  display: flex !important;
+  flex-direction: column !important;
 }
