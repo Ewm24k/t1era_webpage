@@ -21,9 +21,10 @@
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
       display: flex;
-      align-items: flex-end;
+      align-items: center;
       justify-content: center;
-      padding: 0 0 20px;
+      padding: 16px;
+      box-sizing: border-box;
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.2s ease;
@@ -46,11 +47,11 @@
         0 -2px 0 rgba(255,255,255,0.04),
         0 32px 80px rgba(0,0,0,0.9),
         0 0 0 1px rgba(0,0,0,0.5);
-      transform: translateY(24px);
-      transition: transform 0.24s cubic-bezier(0.22,1,0.36,1);
+      transform: scale(0.94) translateY(8px);
+      transition: transform 0.22s cubic-bezier(0.22,1,0.36,1);
     }
     #t1amOverlay.open #t1amSheet {
-      transform: translateY(0);
+      transform: scale(1) translateY(0);
     }
 
     /* ── Header ── */
@@ -239,17 +240,17 @@
     #t1amImageInput { display: none; }
 
     /* ── Mobile: 2 col on narrow ── */
-    @media (max-width: 420px) {
+    @media (max-width: 480px) {
       #t1amGrid {
         grid-template-columns: repeat(2, 1fr);
       }
       #t1amSheet {
-        border-radius: 16px 16px 0 0;
-        max-width: 100%;
+        border-radius: 16px;
+        max-width: calc(100vw - 24px);
       }
       #t1amOverlay {
-        padding: 0;
-        align-items: flex-end;
+        padding: 12px;
+        align-items: center;
       }
     }
   `;
