@@ -322,3 +322,174 @@
     font-size: 13px;
   }
 }
+
+/* ══════════════════════════════════════════════════════
+   OMNIBAR TEXTAREA UPGRADE
+══════════════════════════════════════════════════════ */
+
+/* Swap input for auto-grow textarea */
+.t1c-omni-ta {
+  resize: none;
+  overflow-y: hidden;
+  min-height: 36px;
+  max-height: 120px;
+  line-height: 1.5;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  box-sizing: border-box;
+  transition: height 0.1s ease;
+  /* inherit all existing .ai-omnibar-input styles */
+}
+
+/* ══════════════════════════════════════════════════════
+   ATTACHMENT TRAY — sits above the omnibar input
+══════════════════════════════════════════════════════ */
+
+.t1c-attach-tray {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 6px 8px 4px;
+  width: 100%;
+  box-sizing: border-box;
+  align-items: flex-start;
+}
+
+/* ── Individual attachment card ── */
+.t1c-att-card {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(139, 92, 246, 0.08);
+  border: 1px solid rgba(139, 92, 246, 0.22);
+  border-radius: 10px;
+  padding: 6px 8px 6px 9px;
+  overflow: hidden;
+  transition:
+    opacity 0.18s ease,
+    transform 0.18s ease,
+    max-width 0.22s ease,
+    min-width 0.22s ease,
+    flex 0.22s ease;
+  flex-shrink: 1;
+  min-width: 0;
+  cursor: default;
+}
+
+.t1c-att-card:hover {
+  border-color: rgba(139, 92, 246, 0.4);
+  background: rgba(139, 92, 246, 0.12);
+}
+
+/* Size tiers — auto-compact as more cards are added */
+.t1c-att-card.size-1 {
+  max-width: 100%;
+  flex: 0 1 auto;
+}
+.t1c-att-card.size-2 {
+  max-width: calc(50% - 3px);
+  flex: 1 1 calc(50% - 3px);
+}
+.t1c-att-card.size-3 {
+  max-width: calc(33.33% - 4px);
+  flex: 1 1 calc(33.33% - 4px);
+}
+
+/* ── Icon ── */
+.t1c-att-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  background: rgba(139, 92, 246, 0.15);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  color: #8b5cf6;
+  flex-shrink: 0;
+}
+
+/* Code type — different accent */
+.t1c-att-card[class*="size-"] .t1c-att-icon {
+  /* inherits purple, override for code below */
+}
+
+/* ── Info block ── */
+.t1c-att-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+}
+
+.t1c-att-label {
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--f-mono);
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: 0.01em;
+}
+
+.t1c-att-meta {
+  font-size: 9px;
+  font-family: var(--f-mono);
+  color: var(--text-3);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Remove button ── */
+.t1c-att-remove {
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  border: none;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-3);
+  font-size: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+}
+
+.t1c-att-remove:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+/* ── Attachment badge on sent message ── */
+.t1c-attach-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 9px;
+  font-family: var(--f-mono);
+  color: #8b5cf6;
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 100px;
+  padding: 1px 7px;
+  letter-spacing: 0.04em;
+  margin-left: 4px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 480px) {
+  .t1c-att-card.size-2,
+  .t1c-att-card.size-3 {
+    max-width: calc(50% - 3px);
+    flex: 1 1 calc(50% - 3px);
+  }
+}
