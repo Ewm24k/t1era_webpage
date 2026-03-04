@@ -345,42 +345,10 @@
    ATTACHMENT TRAY — sits above the omnibar input
 ══════════════════════════════════════════════════════ */
 
-/* ── Tray shared base ── */
-.t1c-attach-tray {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: 6px;
-  padding: 8px 10px 6px;
-  box-sizing: border-box;
-  align-items: flex-start;
-  background: rgba(139, 92, 246, 0.04);
-  border-top: 1px solid rgba(139, 92, 246, 0.12);
-  border-bottom: 1px solid rgba(139, 92, 246, 0.12);
-  width: 100%;
-}
-
-/* PC tray: lives just above .ai-omnibar-pc inside super-panel-1
-   It is fixed to bottom just like the omnibar — sits right above it */
-#t1cTray_pc {
-  position: fixed;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: min(680px, 100%);
-  z-index: 101;
-  border-radius: 12px 12px 0 0;
-  /* push the omnibar down dynamically via JS */
-}
-
-/* Mobile tray: inside .ai-omnibar-mobile, stacks above .ai-omnibar-input-row */
-.ai-omnibar-mobile {
-  display: flex !important;
-  flex-direction: column !important;
-}
-#t1cTray_mob {
-  order: -1; /* always on top inside the mobile omnibar flex column */
-  border-radius: 12px 12px 0 0;
+/* ── Card row inside omnibar (inner row 1, hidden by default) ──
+   Shown via .has-cards class toggled by JS                       */
+.t1c-card-row {
+  /* base styles in spark22.html — here we just handle card sizing */
 }
 
 /* ── Individual attachment card ── */
@@ -409,18 +377,18 @@
   background: color-mix(in srgb, var(--fmt-color, #8b5cf6) 12%, var(--bg-card, #111));
 }
 
-/* Size tiers — auto-compact as more cards are added */
+/* Size tiers — compact inside the input box card row */
 .t1c-att-card.size-1 {
-  max-width: 100%;
+  max-width: 200px;
   flex: 0 1 auto;
 }
 .t1c-att-card.size-2 {
-  max-width: calc(50% - 3px);
-  flex: 1 1 calc(50% - 3px);
+  max-width: 160px;
+  flex: 1 1 140px;
 }
 .t1c-att-card.size-3 {
-  max-width: calc(33.33% - 4px);
-  flex: 1 1 calc(33.33% - 4px);
+  max-width: 130px;
+  flex: 1 1 110px;
 }
 
 /* ── Icon — colour driven by --fmt-color set inline ── */
@@ -558,11 +526,4 @@
     max-width: calc(50% - 3px);
     flex: 1 1 calc(50% - 3px);
   }
-}
-
-/* ── Make omnibar outer containers stack vertically so tray sits above input ── */
-.ai-omnibar-pc,
-.ai-omnibar-mobile {
-  display: flex !important;
-  flex-direction: column !important;
 }
