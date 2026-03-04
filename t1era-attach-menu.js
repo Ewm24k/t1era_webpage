@@ -358,6 +358,15 @@
   /* ══════════════════════════════════════════════════
      PUBLIC API
   ══════════════════════════════════════════════════ */
+  // Smart mobile + handler — attach menu if T1ERA active, else compose
+  window.t1amMobPlus = function () {
+    if (document.body.classList.contains("t1era-active")) {
+      window.openAttachMenu();
+    } else {
+      if (typeof window.openCompose === "function") window.openCompose();
+    }
+  };
+
   window.openAttachMenu = function () {
     var ov = document.getElementById("t1amOverlay");
     if (!ov) return;
