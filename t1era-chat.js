@@ -524,7 +524,7 @@
     // Reset textarea height
     var taId = ctx === "mob" ? "aiOmniInputMob" : "aiOmniInputPc";
     var ta = document.getElementById(taId);
-    if (ta) { ta.style.height = ""; ta.value = ""; }
+    if (ta) { ta.style.height = ""; ta.value = ""; ta.blur(); } // blur closes mobile keyboard
 
     // Render user bubble
     appendMessage({ role: "user", text: fullText, attachCount: ctxAttachments.length });
