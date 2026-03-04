@@ -3661,16 +3661,76 @@
       }
       .ai-omnibar-inner {
         display: flex;
-        align-items: center;
+        flex-direction: row;
+        align-items: center;   /* send btn stays vertically centred always */
         width: 100%;
         box-sizing: border-box;
         min-width: 0;
         border-radius: var(--r-sm);
-        padding: 0 6px 0 14px;
+        padding: 0 6px 0 0;
         background: var(--bg-3);
         border: 1px solid var(--border-2);
-        gap: 6px;
+        gap: 0;
         box-shadow: 0 4px 32px rgba(0,0,0,0.6);
+      }
+      /* Col 1 — left: fills remaining width, stacks card-row above input-row */
+      .t1c-omni-col-left {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        padding-left: 14px;
+        /* do NOT stretch height — let content define height */
+        align-self: stretch;
+        justify-content: center;
+      }
+      /* Inner row 1 — card row: hidden by default, capped height */
+      .t1c-card-row {
+        display: none;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 5px;
+        padding: 6px 0 5px;
+        border-bottom: 1px solid var(--border);
+        max-height: 72px;        /* cap: ~2 rows of cards max */
+        overflow-y: auto;
+        overflow-x: hidden;
+        scrollbar-width: none;
+      }
+      .t1c-card-row::-webkit-scrollbar { display: none; }
+      .t1c-card-row.has-cards {
+        display: flex;
+      }
+      /* Inner row 2 — text input */
+      .t1c-input-row {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 6px;
+        min-height: 44px;
+      }
+      .t1c-input-row .ai-omnibar-input {
+        flex: 1;
+        min-width: 0;
+      }
+      /* Col 2 — send button: always centred, never moves */
+      .ai-omnibar-inner > .ai-omnibar-send,
+      .ai-omnibar-input-row > .ai-omnibar-send {
+        align-self: center;
+        flex-shrink: 0;
+        margin: 6px 6px 6px 4px;
+      }
+      /* Mobile input-row same treatment */
+      .ai-omnibar-input-row {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        padding: 0 6px 0 0;
+      }
+      .ai-omnibar-input-row .t1c-omni-col-left {
+        padding-left: 12px;
+        align-self: stretch;
+        justify-content: center;
       }
 
       /* T1ERA mob-nav — compact when AI bar is visible */
@@ -5489,18 +5549,25 @@
           <!-- ── AI OMNIBAR — PC (outside scroll area, sticks to bottom) ── -->
           <div class="ai-omnibar-pc">
             <div class="ai-omnibar-inner">
-              <input
-                class="ai-omnibar-input"
-                id="aiOmniInputPc"
-                placeholder="Ask T1ERA AI anything…"
-                autocomplete="off"
-                onkeydown="if(event.key==='Enter')aiOmnibarSend('pc')"
-              />
-              <button class="ai-model-picker-btn" onclick="openModelPicker()" title="Choose model">
-                <i class="ph-bold ph-robot"></i>
-                <span id="pickerLabelPc">T1x.V1.1</span>
-                <i class="ph-bold ph-caret-down"></i>
-              </button>
+              <!-- Col 1: card row (hidden) + text input row -->
+              <div class="t1c-omni-col-left">
+                <div class="t1c-card-row" id="t1cCardRowPc"></div>
+                <div class="t1c-input-row">
+                  <input
+                    class="ai-omnibar-input"
+                    id="aiOmniInputPc"
+                    placeholder="Ask T1ERA AI anything…"
+                    autocomplete="off"
+                    onkeydown="if(event.key==='Enter')aiOmnibarSend('pc')"
+                  />
+                  <button class="ai-model-picker-btn" onclick="openModelPicker()" title="Choose model">
+                    <i class="ph-bold ph-robot"></i>
+                    <span id="pickerLabelPc">T1x.V1.1</span>
+                    <i class="ph-bold ph-caret-down"></i>
+                  </button>
+                </div>
+              </div>
+              <!-- Col 2: send button -->
               <button class="ai-omnibar-send" onclick="aiOmnibarSend('pc')" title="Send">
                 <i class="ph-bold ph-paper-plane-tilt"></i>
               </button>
@@ -5797,18 +5864,25 @@
 ═══════════════════════════ -->
     <div class="ai-omnibar-mobile" id="aiOmnibarMobile">
       <div class="ai-omnibar-input-row">
-        <input
-          class="ai-omnibar-input"
-          id="aiOmniInputMob"
-          placeholder="Ask T1ERA AI…"
-          autocomplete="off"
-          onkeydown="if(event.key==='Enter')aiOmnibarSend('mob')"
-        />
-        <button class="ai-model-picker-btn" onclick="openModelPicker()" title="Choose model">
-          <i class="ph-bold ph-robot"></i>
-          <span id="pickerLabelMob">T1x.V1.1</span>
-          <i class="ph-bold ph-caret-down"></i>
-        </button>
+        <!-- Col 1: card row (hidden) + text input row -->
+        <div class="t1c-omni-col-left">
+          <div class="t1c-card-row" id="t1cCardRowMob"></div>
+          <div class="t1c-input-row">
+            <input
+              class="ai-omnibar-input"
+              id="aiOmniInputMob"
+              placeholder="Ask T1ERA AI…"
+              autocomplete="off"
+              onkeydown="if(event.key==='Enter')aiOmnibarSend('mob')"
+            />
+            <button class="ai-model-picker-btn" onclick="openModelPicker()" title="Choose model">
+              <i class="ph-bold ph-robot"></i>
+              <span id="pickerLabelMob">T1x.V1.1</span>
+              <i class="ph-bold ph-caret-down"></i>
+            </button>
+          </div>
+        </div>
+        <!-- Col 2: send button -->
         <button class="ai-omnibar-send" onclick="aiOmnibarSend('mob')" title="Send">
           <i class="ph-bold ph-paper-plane-tilt"></i>
         </button>
