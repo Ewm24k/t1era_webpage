@@ -100,8 +100,7 @@
     ta.addEventListener("paste", function (e) {
       var pasted = (e.clipboardData || window.clipboardData).getData("text");
       // Instant threshold: >80 chars or contains newline → card. No format detection needed first.
-      if (pasted && (pasted.length > 80 || pasted.indexOf("
-") !== -1)) {
+      if (pasted && (pasted.length > 80 || pasted.indexOf("\n") !== -1)) {
         e.preventDefault();
         e.stopPropagation();
         _addAttachment(pasted, ctx);
@@ -193,7 +192,7 @@
         '<div class="t1c-att-badges">' + badgesHtml + '</div>' +
       '</div>' +
       '<button class="t1c-att-remove" title="Remove" ' +
-        'onclick="window.t1cRemoveAttachment('' + id + '','' + ctx + '')">' +
+        'onclick="window.t1cRemoveAttachment(\'' + id + '\',\'' + ctx + '\')">' +
         '<i class="ph-bold ph-x"></i>' +
       '</button>';
 
