@@ -3659,34 +3659,34 @@
           /* no border-top — floats above content */
         }
       }
-      .ai-omnibar-inner {
-        display: flex;
-        flex-direction: row;
-        align-items: center;   /* send btn stays vertically centred always */
+      /* ── Omnibar inner containers: relative so send btn can be absolute ── */
+      .ai-omnibar-inner,
+      .ai-omnibar-input-row {
+        position: relative;
+        display: block;         /* block — col-left fills width, send is absolute */
         width: 100%;
         box-sizing: border-box;
-        min-width: 0;
         border-radius: var(--r-sm);
-        padding: 0 6px 0 0;
         background: var(--bg-3);
         border: 1px solid var(--border-2);
-        gap: 0;
+      }
+      .ai-omnibar-inner {
         box-shadow: 0 4px 32px rgba(0,0,0,0.6);
       }
-      /* Col 1 — left: fills remaining width, stacks card-row above input-row */
+      /* Col 1 — takes full width minus room for absolute send button */
       .t1c-omni-col-left {
-        flex: 1;
-        min-width: 0;
         display: flex;
         flex-direction: column;
         padding-left: 14px;
-        /* do NOT stretch height — let content define height */
-        align-self: stretch;
-        justify-content: center;
+        padding-right: 52px;    /* reserve space for the 30px send btn + margins */
+        min-width: 0;
       }
-      /* Inner row 1 — card row: hidden by default, capped height */
+      .ai-omnibar-input-row .t1c-omni-col-left {
+        padding-left: 12px;
+      }
+      /* Inner row 1 — card row: hidden by default via max-height */
       .t1c-card-row {
-        display: flex;          /* always flex — height controls visibility */
+        display: flex;
         flex-direction: row;
         flex-wrap: wrap;
         gap: 5px;
@@ -3715,24 +3715,13 @@
         flex: 1;
         min-width: 0;
       }
-      /* Col 2 — send button: always centred, never moves */
+      /* Send button — ABSOLUTELY pinned to right-centre, NEVER moves */
       .ai-omnibar-inner > .ai-omnibar-send,
       .ai-omnibar-input-row > .ai-omnibar-send {
-        align-self: center;
+        position: absolute;
+        right: 7px;
+        bottom: 7px;            /* pinned to bottom of input row area */
         flex-shrink: 0;
-        margin: 6px 6px 6px 4px;
-      }
-      /* Mobile input-row same treatment */
-      .ai-omnibar-input-row {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        padding: 0 6px 0 0;
-      }
-      .ai-omnibar-input-row .t1c-omni-col-left {
-        padding-left: 12px;
-        align-self: stretch;
-        justify-content: center;
       }
 
       /* T1ERA mob-nav — compact when AI bar is visible */
@@ -6092,6 +6081,7 @@
 
     <script src="t1era-model-picker.js"></script>
     <script src="t1era-chat.js"></script>
+    <script src="t1era-card-preview.js"></script>
     <script src="t1era-sidemenu.js"></script>
     <script src="spark-core.js"></script>
     <script src="spark-ring.js"></script>
