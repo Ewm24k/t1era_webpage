@@ -203,127 +203,129 @@
     var t = text.trim();
     var firstLine = t.split("\n")[0].trim();
 
-    // ── Try to extract a filename from the first line ──
+    // ── Filename extraction from first line ──
     var filename = null;
-    var fnMatch = firstLine.match(/^[#\/\*\-–]?\s*([\w\-. ]+\.([a-zA-Z0-9]{1,10}))\s*$/);
+    var fnMatch = firstLine.match(/^[#\/\*\-]?\s*([\w\-. ]+\.([a-zA-Z0-9]{1,10}))\s*$/);
     if (fnMatch) filename = fnMatch[1].trim();
 
-    // ── Shebang detection ──
-    if (/^#!\/usr\/bin\/env\s+(python|python3)/i.test(t)) return _fmt("python",  filename);
-    if (/^#!\/usr\/bin\/env\s+node/i.test(t))            return _fmt("js",      filename);
-    if (/^#!\/bin\/(bash|sh|zsh)/i.test(t))               return _fmt("shell",   filename);
+    // ── 1. Shebang — unambiguous ──
+    if (/^#!\/usr\/bin\/env\s+(python|python3)/i.test(t)) return _fmt("python", filename);
+    if (/^#!\/usr\/bin\/env\s+node/i.test(t))            return _fmt("js",     filename);
+    if (/^#!\/bin\/(bash|sh|zsh)/i.test(t))               return _fmt("shell",  filename);
 
-    // ── Markdown ──
-    if (/^#{1,6}\s/.test(t) && /\n#{1,6}\s/.test(t))     return _fmt("md",      filename);
-    if (/^#{1,6}\s/.test(t) && t.length < 2000)            return _fmt("md",      filename);
+    // ── 2. Strong HTML signals — must come FIRST before generic < > check ──
+    if (/^<!DOCTYPE\s+html/i.test(t))                      return _fmt("html", filename);
+    if (/^<html[\s>]/i.test(t) || /<\/html>/i.test(t))    return _fmt("html", filename);
+    if (/^<svg[\s>]/i.test(t))                             return _fmt("svg",  filename);
+    if (/^<\?xml/i.test(t))                                return _fmt("xml",  filename);
 
-    // ── HTML / XML / SVG ──
-    if (/^<!DOCTYPE\s+html/i.test(t))                      return _fmt("html",    filename);
-    if (/^<html/i.test(t) || /<\/html>/i.test(t))          return _fmt("html",    filename);
-    if (/^<svg/i.test(t))                                    return _fmt("svg",     filename);
-    if (/^<\?xml/i.test(t))                                 return _fmt("xml",     filename);
-    if (/<[a-z][^>]*>[\s\S]*?<\/[a-z]+>/.test(t))              return _fmt("html",    filename);
+    // ── 3. JS / TS — check BEFORE anything that has {} or <> ──
+    // TypeScript specific (interface, type alias, generics, typed params)
+    if (/\binterface\s+[A-Z]|\btype\s+[A-Z]\w*\s*=|:\s*(string|number|boolean|void|any|never)\b/.test(t))
+      return _fmt("ts", filename);
+    // JSX / TSX — React return with JSX
+    if (/\breturn\s*\(\s*<[A-Z]|React\.createElement|<\/[A-Z][a-zA-Z]+>/.test(t))
+      return _fmt("jsx", filename);
+    // JavaScript — function/const/let/var/arrow/require/module
+    if (/\b(function\s+\w|const\s+\w|let\s+\w|var\s+\w)/.test(t) ||
+        /=>\s*[{(]|require\s*\(|module\.exports|import\s+[\w{]/.test(t))
+      return _fmt("js", filename);
 
-    // ── JSON ──
+    // ── 4. Python ──
+    if (/^\s*(def |class |async def |import |from \w+ import)/m.test(t) &&
+        !/\bfunction\b|\bconst\b|\blet\b/.test(t))     return _fmt("python", filename);
+    if (/:\s*\n\s+(return|pass|raise|yield|print\()/.test(t)) return _fmt("python", filename);
+
+    // ── 5. Markdown ──
+    if (/^#{1,6}\s.+/.test(t) && /\n#{1,6}\s/.test(t))   return _fmt("md", filename);
+    if (/^#{1,6}\s.+/.test(t) && t.length < 1500)          return _fmt("md", filename);
+
+    // ── 6. JSON ──
     if (/^[\[{]/.test(t)) {
       try { JSON.parse(t); return _fmt("json", filename); } catch(e) {}
     }
 
-    // ── YAML ──
-    if (/^---\n/.test(t) || /^[a-zA-Z_]+:\s+\S/.test(t) && /\n[a-zA-Z_]+:\s+/.test(t))
-      return _fmt("yaml", filename);
+    // ── 7. SQL ──
+    if (/\b(SELECT|INSERT\s+INTO|UPDATE\s+\w|DELETE\s+FROM|CREATE\s+TABLE|DROP\s+TABLE|ALTER\s+TABLE)\b/i.test(t))
+      return _fmt("sql", filename);
 
-    // ── TOML ──
-    if (/^\[[A-Za-z]/.test(t) && /\n[a-zA-Z_]+ ?=/.test(t))
-      return _fmt("toml", filename);
+    // ── 8. Shell ──
+    if (/^(echo |export |source |chmod |grep |awk |sed |curl |apt |npm |pip )/m.test(t))
+      return _fmt("shell", filename);
 
-    // ── CSS / SCSS / LESS ──
-    if (/[a-z#.][^{]*\{[\s\S]*?:[\s\S]*?\}/.test(t) && !/function|=>/.test(t)) {
-      if (t.includes("$") && /\$[a-z-]+:/.test(t))        return _fmt("scss",    filename);
-      if (t.includes("@") && /@[a-z]+\s*\(/.test(t))      return _fmt("less",    filename);
+    // ── 9. CSS / SCSS / LESS — only if no JS keywords ──
+    if (!/\b(function|const|let|var|=>|return)\b/.test(t) &&
+        /[a-zA-Z#.*[][^{\n]*\{[^}]*:[^}]*\}/.test(t)) {
+      if (/\$[a-z][a-z-]+\s*:/.test(t))                   return _fmt("scss", filename);
+      if (/@[a-z]+\s*\(/.test(t))                         return _fmt("less", filename);
       return _fmt("css", filename);
     }
 
-    // ── Python ──
-    if (/^(import |from |def |class |async def |@[a-z])/m.test(t) &&
-        !/function |const |let |var /.test(t))              return _fmt("python",  filename);
-    if (/:\s*\n\s+(return|pass|raise|yield|print)/m.test(t)) return _fmt("python", filename);
-
-    // ── TypeScript (before JS — more specific) ──
-    if (/(interface |type [A-Z]|: string|: number|: boolean|<T>|as [A-Z])/.test(t))
-      return _fmt("ts", filename);
-
-    // ── JavaScript ──
-    if (/(function |const |let |var |=>|require\(|module\.exports|import .* from)/.test(t))
-      return _fmt("js", filename);
-
-    // ── JSX / TSX ──
-    if (/return \(\s*<|React\.createElement|<\/[A-Z]/.test(t))
-      return _fmt("jsx", filename);
-
-    // ── PHP ──
-    if (/^<\?php/i.test(t) || /\$[a-z_]+\s*=/.test(t) && /echo |->/.test(t))
+    // ── 10. PHP ──
+    if (/^<\?php/i.test(t) || (/\$[a-z_]+\s*=/.test(t) && /\becho\b|->/.test(t)))
       return _fmt("php", filename);
 
-    // ── Ruby ──
-    if (/^(require |def |class |module |end$)/m.test(t) && !/(function|const)/.test(t))
-      return _fmt("ruby", filename);
+    // ── 11. Ruby ──
+    if (/^(require |def |module )\w/m.test(t) && /\bend\b/.test(t) &&
+        !/\bfunction\b|\bconst\b/.test(t))               return _fmt("ruby", filename);
 
-    // ── Go ──
-    if (/^package [a-z]|func [A-Za-z]|:= |var [a-z]/.test(t))
+    // ── 12. Go ──
+    if (/^package \w/m.test(t) || (/\bfunc \w/.test(t) && /:=/.test(t)))
       return _fmt("go", filename);
 
-    // ── Rust ──
-    if (/fn [a-z]|let mut |use std::|impl [A-Z]|pub fn/.test(t))
+    // ── 13. Rust ──
+    if (/\bfn \w+\s*\(|\blet mut\b|\buse std::/.test(t))
       return _fmt("rust", filename);
 
-    // ── Java / Kotlin ──
-    if (/public (class|static|void)|System\.out\.println/.test(t))
+    // ── 14. Java ──
+    if (/\bpublic\s+(class|static|void)\b|System\.out\.print/.test(t))
       return _fmt("java", filename);
-    if (/^fun [a-z]|val [a-z]|var [a-z].*=|data class/.test(t))
+
+    // ── 15. Kotlin ──
+    if (/\bfun \w+\s*\(|\bdata class\b|\bcompanion object\b/.test(t))
       return _fmt("kotlin", filename);
 
-    // ── C / C++ ──
+    // ── 16. C / C++ ──
     if (/#include\s*[<"]/.test(t))
-      return /class |std::|cout|cin/.test(t) ? _fmt("cpp", filename) : _fmt("c", filename);
+      return /\bclass\b|std::|cout|cin/.test(t) ? _fmt("cpp", filename) : _fmt("c", filename);
 
-    // ── C# ──
-    if (/using System|namespace [A-Z]|public class/.test(t))
+    // ── 17. C# ──
+    if (/\busing System\b|\bnamespace \w|\bpublic class\b/.test(t))
       return _fmt("cs", filename);
 
-    // ── Swift ──
-    if (/import (Foundation|UIKit|SwiftUI)|func [a-z]|var [a-z].*: [A-Z]/.test(t))
+    // ── 18. Swift ──
+    if (/\bimport (Foundation|UIKit|SwiftUI)\b|\bvar \w+:\s*[A-Z]/.test(t))
       return _fmt("swift", filename);
 
-    // ── Kotlin ──
-    if (/fun [a-z]|data class|companion object/.test(t))
-      return _fmt("kotlin", filename);
-
-    // ── Dart / Flutter ──
-    if (/void main\(\)|Widget build|StatelessWidget|import 'package:/.test(t))
+    // ── 19. Dart ──
+    if (/\bvoid main\(\)|\bWidget build\b|import 'package:/.test(t))
       return _fmt("dart", filename);
 
-    // ── SQL ──
-    if (/(SELECT|INSERT|UPDATE|DELETE|CREATE TABLE|DROP|ALTER)/i.test(t) &&
-        /(FROM|WHERE|INTO|SET|VALUES)/i.test(t))            return _fmt("sql", filename);
-
-    // ── Shell / Bash ──
-    if (/(echo |grep |awk |sed |chmod |mkdir |export |source )/.test(t))
-      return _fmt("shell", filename);
-
-    // ── Dockerfile ──
-    if (/^FROM [a-z]/im.test(t) && /(RUN |CMD |EXPOSE |ENV )/m.test(t))
+    // ── 20. Dockerfile ──
+    if (/^FROM \w/im.test(t) && /\b(RUN|CMD|EXPOSE|ENV|COPY|ADD)\b/.test(t))
       return _fmt("docker", filename);
 
-    // ── GraphQL ──
-    if (/^(query|mutation|subscription|type [A-Z]|schema) \{/m.test(t))
+    // ── 21. GraphQL ──
+    if (/^(query|mutation|type|schema)\s+\w*\s*\{/m.test(t))
       return _fmt("graphql", filename);
 
-    // ── Regex / config-like ──
-    if (/^\[.*\]\s*$/m.test(t) && /^[a-z_]+ ?=/m.test(t))
+    // ── 22. YAML ──
+    if (/^---\n/.test(t) || (/^[a-zA-Z_][\w-]*:\s*\S/m.test(t) && /\n[a-zA-Z_][\w-]*:\s*/m.test(t)))
+      return _fmt("yaml", filename);
+
+    // ── 23. TOML ──
+    if (/^\[\w/.test(t) && /^\w+ ?=/m.test(t))
+      return _fmt("toml", filename);
+
+    // ── 24. INI / Config ──
+    if (/^\[\w+\]$/m.test(t) && /^\w+ ?= ?.+/m.test(t))
       return _fmt("ini", filename);
 
-    // ── Plain text / prose ──
+    // ── 25. Weak HTML — only as last resort for code ──
+    if (/^\s*<[a-z][^>]*>/.test(t) && /<\/[a-z]+>/.test(t) &&
+        !/\b(const|let|var|function|=>)\b/.test(t))
+      return _fmt("html", filename);
+
     return _fmt("txt", filename);
   }
 
