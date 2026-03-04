@@ -143,7 +143,9 @@
   function _addAttachment(content, ctx) {
     _attachIdCounter++;
     var id      = "t1cAtt_" + _attachIdCounter;
-    var info    = _detectFormat(content);  // {format, ext, icon, color, label, filename}
+    var info;
+    try { info = _detectFormat(content); } catch(e) { info = _fmt("txt", null); }
+    if (!info) info = _fmt("txt", null);
     var lines   = _lineCount(content);
     var chars   = content.length;
 
@@ -242,7 +244,7 @@
     if (/^<html/i.test(t) || /<\/html>/i.test(t))          return _fmt("html",    filename);
     if (/^<svg/i.test(t))                                    return _fmt("svg",     filename);
     if (/^<\?xml/i.test(t))                                 return _fmt("xml",     filename);
-    if (/<[a-z][^>]*>.*<\/[a-z]+>/is.test(t))              return _fmt("html",    filename);
+    if (/<[a-z][^>]*>[\s\S]*?<\/[a-z]+>/.test(t))              return _fmt("html",    filename);
 
     // ── JSON ──
     if (/^[\[{]/.test(t)) {
@@ -258,7 +260,7 @@
       return _fmt("toml", filename);
 
     // ── CSS / SCSS / LESS ──
-    if (/[a-z#.][^{]*\{[^}]*:[^}]*\}/s.test(t) && !/function|=>/.test(t)) {
+    if (/[a-z#.][^{]*\{[\s\S]*?:[\s\S]*?\}/.test(t) && !/function|=>/.test(t)) {
       if (t.includes("$") && /\$[a-z-]+:/.test(t))        return _fmt("scss",    filename);
       if (t.includes("@") && /@[a-z]+\s*\(/.test(t))      return _fmt("less",    filename);
       return _fmt("css", filename);
