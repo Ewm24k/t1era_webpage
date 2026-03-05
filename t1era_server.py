@@ -2,9 +2,14 @@
 T1ERA AI Server
 ───────────────
 Run:  python t1era_server.py
-Then open spark22.html — the T1ERA tab will hit this server.
+Push to GitHub → Render auto-deploys.
 
-Install: pip install flask flask-cors requests
+Set these in Render dashboard → Environment:
+  RUNPOD_API_KEY      your RunPod API key
+  RUNPOD_ENDPOINT_ID  your endpoint ID
+  RUNPOD_MODEL        qwen/qwen3-14b-awq  (optional, has default)
+
+Install: pip install flask flask-cors requests gunicorn
 """
 
 from flask import Flask, request, jsonify
@@ -16,32 +21,37 @@ import os
 
 # ─── CONFIG ──────────────────────────────────────────────────────────────────
 
+# All values come from Render environment variables — nothing hardcoded
 API_KEY     = os.environ.get("RUNPOD_API_KEY")
-ENDPOINT_ID = os.environ.get("RUNPOD_ENDPOINT_ID", "xd50gpmd9jahih")
+ENDPOINT_ID = os.environ.get("RUNPOD_ENDPOINT_ID")
 MODEL       = os.environ.get("RUNPOD_MODEL", "qwen/qwen3-14b-awq")
 
-RUN_URL     = f"https://api.runpod.ai/v2/{ENDPOINT_ID}/run"
-STATUS_URL  = f"https://api.runpod.ai/v2/{ENDPOINT_ID}/status"
-HEADERS     = {
-    "Authorization": f"Bearer {API_KEY}",
-    "Content-Type":  "application/json",
-}
+RUN_URL    = f"https://api.runpod.ai/v2/{ENDPOINT_ID}/run"
+STATUS_URL = f"https://api.runpod.ai/v2/{ENDPOINT_ID}/status"
 
 # ─── APP ─────────────────────────────────────────────────────────────────────
 
-# Allow requests from Netlify (and localhost for dev)
 app = Flask(__name__)
-
-# Allow all origins — handles Netlify, local dev, previews
-CORS(app, resources={r"/*": {"origins": "*"}})
+CORS(app)  # flask-cors handles all origins by default
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s  %(message)s")
 log = app.logger
 
-if not API_KEY:
-    raise RuntimeError("RUNPOD_API_KEY environment variable is not set")
+# Force CORS headers onto EVERY response — including 4xx and 5xx
+@app.after_request
+def add_cors(response):
+    response.headers["Access-Control-Allow-Origin"]  = "*"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+    return response
 
 # ─── RUNPOD HELPERS ──────────────────────────────────────────────────────────
+
+def runpod_headers():
+    return {
+        "Authorization": f"Bearer {API_KEY}",
+        "Content-Type":  "application/json",
+    }
 
 def submit_job(messages, max_tokens=512, temperature=0.7):
     payload = {
@@ -52,7 +62,7 @@ def submit_job(messages, max_tokens=512, temperature=0.7):
             "temperature": temperature,
         }
     }
-    resp = requests.post(RUN_URL, headers=HEADERS, json=payload, timeout=30)
+    resp = requests.post(RUN_URL, headers=runpod_headers(), json=payload, timeout=30)
     resp.raise_for_status()
     return resp.json().get("id")
 
@@ -60,19 +70,18 @@ def submit_job(messages, max_tokens=512, temperature=0.7):
 def poll_job(job_id, timeout=120):
     deadline = time.time() + timeout
     while time.time() < deadline:
-        resp = requests.get(f"{STATUS_URL}/{job_id}", headers=HEADERS, timeout=15)
+        resp = requests.get(
+            f"{STATUS_URL}/{job_id}", headers=runpod_headers(), timeout=15
+        )
         resp.raise_for_status()
-        data = resp.json()
+        data   = resp.json()
         status = data.get("status")
-
         if status == "COMPLETED":
             return data
         if status in ("FAILED", "CANCELLED"):
             log.error(f"Job {job_id} {status}")
             return None
-
         time.sleep(2)
-
     log.error(f"Job {job_id} timed out")
     return None
 
@@ -80,11 +89,9 @@ def poll_job(job_id, timeout=120):
 def extract_reply(result):
     try:
         output = result["output"]
-        # Shape 1: tokens array (your pod format)
         tokens = output[0]["choices"][0].get("tokens")
         if tokens:
             return tokens[0]
-        # Shape 2: OpenAI message.content
         return output[0]["choices"][0]["message"]["content"]
     except (IndexError, KeyError, TypeError):
         return None
@@ -93,35 +100,32 @@ def extract_reply(result):
 
 @app.route("/health", methods=["GET"])
 def health():
-    return jsonify({"status": "ok"}), 200
+    return jsonify({"status": "ok", "model": MODEL, "endpoint": ENDPOINT_ID}), 200
 
 
-@app.route("/chat", methods=["OPTIONS"])
-def chat_preflight():
-    """Handle CORS preflight from browser."""
-    from flask import make_response
-    resp = make_response()
-    resp.headers["Access-Control-Allow-Origin"]  = "*"
-    resp.headers["Access-Control-Allow-Methods"] = "POST, OPTIONS"
-    resp.headers["Access-Control-Allow-Headers"] = "Content-Type"
-    return resp, 200
-
-
-@app.route("/chat", methods=["POST"])
+@app.route("/chat", methods=["POST", "OPTIONS"])
 def chat():
+    # Browser preflight
+    if request.method == "OPTIONS":
+        return jsonify({}), 200
+
+    if not API_KEY:
+        return jsonify({"error": "RUNPOD_API_KEY not set on server"}), 500
+
     body = request.get_json(silent=True)
     if not body or not body.get("messages"):
         return jsonify({"error": "messages array required"}), 400
 
     messages    = body["messages"]
-    max_tokens  = int(body.get("max_tokens", 512))
+    max_tokens  = int(body.get("max_tokens",   512))
     temperature = float(body.get("temperature", 0.7))
 
-    log.info(f"→ RunPod  turns={len(messages)}  last=\"{messages[-1]['content'][:60]}\"")
+    log.info(f'→ RunPod  turns={len(messages)}  last="{messages[-1]["content"][:60]}"')
 
     try:
         job_id = submit_job(messages, max_tokens, temperature)
     except Exception as e:
+        log.error(f"Submit error: {e}")
         return jsonify({"error": f"Submit failed: {e}"}), 502
 
     if not job_id:
@@ -133,21 +137,22 @@ def chat():
 
     reply = extract_reply(result)
     if not reply:
+        log.error(f"Unparseable output: {result.get('output')}")
         return jsonify({"error": "Could not parse RunPod response"}), 502
 
-    log.info(f"← reply   \"{reply[:80]}\"")
+    log.info(f'← reply  "{reply[:80]}"')
     return jsonify({"reply": reply}), 200
 
 # ─── START ───────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
-    print("\n" + "═" * 50)
+    port = int(os.environ.get("PORT", 5000))
+    print(f"\n{'═'*50}")
     print("  T1ERA AI Server")
-    print("═" * 50)
-    print("  Open   : http://localhost:5000")
-    print("  API    : http://localhost:5000/chat")
-    print("  RunPod : " + ENDPOINT_ID)
-    print("  Model  : " + MODEL)
-    print("  Stop   : Ctrl+C")
-    print("═" * 50 + "\n")
-    app.run(host="0.0.0.0", port=5000, debug=False)
+    print(f"{'═'*50}")
+    print(f"  Listening : http://localhost:{port}")
+    print(f"  RunPod    : {ENDPOINT_ID}")
+    print(f"  Model     : {MODEL}")
+    print(f"  API key   : {'SET ✓' if API_KEY else 'NOT SET ✗'}")
+    print(f"{'═'*50}\n")
+    app.run(host="0.0.0.0", port=port, debug=False)
