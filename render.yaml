@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: t1era-ai-server
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn t1era_server:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
