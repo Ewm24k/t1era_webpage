@@ -26,8 +26,7 @@ API_KEY     = os.environ.get("RUNPOD_API_KEY")
 ENDPOINT_ID = os.environ.get("RUNPOD_ENDPOINT_ID")
 MODEL       = os.environ.get("RUNPOD_MODEL", "qwen/qwen3-14b-awq")
 
-RUN_URL    = f"https://api.runpod.ai/v2/{ENDPOINT_ID}/run"
-STATUS_URL = f"https://api.runpod.ai/v2/{ENDPOINT_ID}/status"
+OPENAI_URL = f"https://api.runpod.ai/v2/{ENDPOINT_ID}/openai/v1/chat/completions"
 
 # ─── APP ─────────────────────────────────────────────────────────────────────
 
@@ -47,63 +46,25 @@ def add_cors(response):
 
 # ─── RUNPOD HELPERS ──────────────────────────────────────────────────────────
 
-def runpod_headers():
-    return {
+def call_runpod(messages, max_tokens=32768, temperature=0.7):
+    """Call RunPod OpenAI-compatible endpoint — synchronous, no polling needed."""
+    headers = {
         "Authorization": f"Bearer {API_KEY}",
         "Content-Type":  "application/json",
     }
-
-def submit_job(messages, max_tokens=32768, temperature=0.7):
     payload = {
-        "input": {
-            "model":    MODEL,
-            "messages": messages,
-            "sampling_params": {
-                "max_tokens":  max_tokens,
-                "temperature": temperature,
-            }
-        }
+        "model":       MODEL,
+        "messages":    messages,
+        "max_tokens":  max_tokens,
+        "temperature": temperature,
     }
-    resp = requests.post(RUN_URL, headers=runpod_headers(), json=payload, timeout=30)
+    resp = requests.post(OPENAI_URL, headers=headers, json=payload, timeout=300)
+    log.info(f"RunPod status: {resp.status_code}")
     resp.raise_for_status()
-    return resp.json().get("id")
-
-
-def poll_job(job_id, timeout=120):
-    deadline = time.time() + timeout
-    while time.time() < deadline:
-        resp = requests.get(
-            f"{STATUS_URL}/{job_id}", headers=runpod_headers(), timeout=15
-        )
-        resp.raise_for_status()
-        data   = resp.json()
-        status = data.get("status")
-        if status == "COMPLETED":
-            return data
-        if status in ("FAILED", "CANCELLED"):
-            log.error(f"Job {job_id} {status}")
-            return None
-        time.sleep(2)
-    log.error(f"Job {job_id} timed out")
-    return None
-
-
-def extract_reply(result):
-    try:
-        output = result["output"]
-        choice = output[0]["choices"][0]
-        log.info(f"finish_reason: {choice.get('finish_reason')}")
-        log.info(f"output keys: {list(choice.keys())}")
-        tokens = choice.get("tokens")
-        if tokens:
-            raw = tokens[0]
-        else:
-            raw = choice["message"]["content"]
-        log.info(f"raw reply length: {len(raw)}")
-        return raw
-    except (IndexError, KeyError, TypeError) as e:
-        log.error(f"extract_reply error: {e} — raw output: {str(result.get('output'))[:300]}")
-        return None
+    data = resp.json()
+    raw = data["choices"][0]["message"]["content"]
+    log.info(f"reply length: {len(raw)}, finish_reason: {data['choices'][0].get('finish_reason')}")
+    return raw
 
 # ─── ROUTES ──────────────────────────────────────────────────────────────────
 
@@ -132,27 +93,12 @@ def chat():
     log.info(f'→ RunPod  turns={len(messages)}  last="{messages[-1]["content"][:60]}"')
 
     try:
-        job_id = submit_job(messages, max_tokens, temperature)
+        reply = call_runpod(messages, max_tokens, temperature)
     except Exception as e:
-        log.error(f"Submit error: {e}")
-        return jsonify({"error": f"Submit failed: {e}"}), 502
+        log.error(f"RunPod error: {e}")
+        return jsonify({"error": f"RunPod request failed: {e}"}), 502
 
-    if not job_id:
-        return jsonify({"error": "No job ID from RunPod"}), 502
-
-    result = poll_job(job_id)
-    if not result:
-        return jsonify({"error": "Job failed or timed out"}), 504
-
-    reply = extract_reply(result)
-    if not reply:
-        log.error(f"Unparseable output: {result.get('output')}")
-        return jsonify({"error": "Could not parse RunPod response"}), 502
-
-    log.info(f'← reply length: {len(reply)} chars')
-    log.info(f'← has </think>: {"</think>" in reply}')
-    log.info(f'← first 200: {reply[:200]}')
-    log.info(f'← last 200: {reply[-200:]}')
+    log.info(f'← reply length: {len(reply)}, has </think>: {"</think>" in reply}')
     return jsonify({"reply": reply}), 200
 
 # ─── START ───────────────────────────────────────────────────────────────────
