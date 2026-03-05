@@ -1065,47 +1065,74 @@
      Calls the Render proxy which polls RunPod for the reply.
      Carries full _history for multi-turn context.
   ═══════════════════════════════════════════════════ */
-  // Ping Render every 10 min to prevent cold start on free tier
-  setInterval(function () {
-    fetch(T1ERA_API + "/health").catch(function () {});
-  }, 10 * 60 * 1000);
+  /* RunPod config — direct from browser, no proxy server needed */
+  var RUNPOD_API_KEY  = "rpa_DBSA1I3ZW11KF5BYTI9RXVD8W33AISG1GWQ3JL6E1uc37u";
+  var RUNPOD_ENDPOINT = "xd50gpmd9jahih";
+  var RUNPOD_MODEL    = "qwen/qwen3-14b-awq";
+  var RUNPOD_RUN_URL  = "https://api.runpod.ai/v2/" + RUNPOD_ENDPOINT + "/run";
+  var RUNPOD_STAT_URL = "https://api.runpod.ai/v2/" + RUNPOD_ENDPOINT + "/status";
 
   function _callT1ERA(userText) {
-    return new Promise(function (resolve, reject) {
-      // AbortController for timeout — mobile browsers need this explicit
-      var controller = new AbortController();
-      var timer = setTimeout(function () {
-        controller.abort();
-        reject(new Error("Request timed out — server may be waking up, please try again."));
-      }, 90000); // 90s — covers Render cold start
+    var headers = {
+      "Authorization": "Bearer " + RUNPOD_API_KEY,
+      "Content-Type":  "application/json",
+    };
 
-      fetch(T1ERA_API + "/chat", {
-        method:  "POST",
-        headers: { "Content-Type": "application/json" },
-        signal:  controller.signal,
-        body: JSON.stringify({
+    // Step 1 — submit job
+    return fetch(RUNPOD_RUN_URL, {
+      method:  "POST",
+      headers: headers,
+      body: JSON.stringify({
+        input: {
+          model:       RUNPOD_MODEL,
           messages:    _history,
-          model:       _activeModel,
           max_tokens:  512,
           temperature: 0.7,
-        }),
-      })
-        .then(function (res) {
-          clearTimeout(timer);
-          return res.json();
-        })
-        .then(function (data) {
-          if (data.error) {
-            reject(new Error(data.error));
-          } else {
-            resolve(data.reply || "[No reply]");
-          }
-        })
-        .catch(function (err) {
-          clearTimeout(timer);
-          if (err.name === "AbortError") return; // already rejected above
-          reject(new Error("Network error — " + err.message));
-        });
+        }
+      }),
+    })
+    .then(function (res) { return res.json(); })
+    .then(function (data) {
+      var jobId = data.id;
+      if (!jobId) throw new Error("No job ID from RunPod");
+
+      // Step 2 — poll status until COMPLETED
+      return new Promise(function (resolve, reject) {
+        var attempts = 0;
+        var maxAttempts = 60; // 60 × 2s = 120s max
+
+        function poll() {
+          fetch(RUNPOD_STAT_URL + "/" + jobId, { headers: headers })
+            .then(function (res) { return res.json(); })
+            .then(function (s) {
+              var status = s.status;
+
+              if (status === "COMPLETED") {
+                // Extract reply — tokens array (your pod format)
+                var out = s.output;
+                var reply = null;
+                try {
+                  reply = out[0].choices[0].tokens
+                    ? out[0].choices[0].tokens[0]
+                    : out[0].choices[0].message.content;
+                } catch (e) {}
+                resolve(reply || "[No reply]");
+
+              } else if (status === "FAILED" || status === "CANCELLED") {
+                reject(new Error("RunPod job " + status));
+
+              } else if (++attempts >= maxAttempts) {
+                reject(new Error("Timed out waiting for AI response"));
+
+              } else {
+                setTimeout(poll, 2000);
+              }
+            })
+            .catch(function (err) { reject(err); });
+        }
+
+        poll();
+      });
     });
   }
 
