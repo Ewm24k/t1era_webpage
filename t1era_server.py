@@ -56,10 +56,12 @@ def runpod_headers():
 def submit_job(messages, max_tokens=32768, temperature=0.7):
     payload = {
         "input": {
-            "model":       MODEL,
-            "messages":    messages,
-            "max_tokens":  max_tokens,
-            "temperature": temperature,
+            "model":    MODEL,
+            "messages": messages,
+            "sampling_params": {
+                "max_tokens":  max_tokens,
+                "temperature": temperature,
+            }
         }
     }
     resp = requests.post(RUN_URL, headers=runpod_headers(), json=payload, timeout=30)
