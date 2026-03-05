@@ -53,7 +53,7 @@ def runpod_headers():
         "Content-Type":  "application/json",
     }
 
-def submit_job(messages, max_tokens=8096, temperature=0.7):
+def submit_job(messages, max_tokens=32768, temperature=0.7):
     payload = {
         "input": {
             "model":       MODEL,
@@ -117,7 +117,7 @@ def chat():
         return jsonify({"error": "messages array required"}), 400
 
     messages    = body["messages"]
-    max_tokens  = int(body.get("max_tokens",   8096))
+    max_tokens  = int(body.get("max_tokens",   32768))
     temperature = float(body.get("temperature", 0.7))
 
     log.info(f'→ RunPod  turns={len(messages)}  last="{messages[-1]["content"][:60]}"')
