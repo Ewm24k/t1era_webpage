@@ -814,6 +814,10 @@
       .then(function (reply) {
         removeLoading(loadingId);
         _history.push({ role: "assistant", content: reply });
+        console.log("T1ERA reply length:", reply.length);
+        console.log("T1ERA has </think>:", reply.indexOf("</think>") > -1);
+        console.log("T1ERA first 100:", reply.slice(0, 100));
+        console.log("T1ERA last 100:", reply.slice(-100));
         appendMessage({ role: "ai", text: reply, model: _activeModel });
         _scrollToBottom();
       })
