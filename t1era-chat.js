@@ -23,8 +23,7 @@
   var _history = []; // [{role:"user"|"assistant", content:"..."}]
 
   /* ── Render proxy URL — update after deploy ── */
-  var T1ERA_API = "https://t1era-proxy.onrender.com";
-  // For local dev point to: "http://localhost:5000"
+  var T1ERA_API = "https://t1era-webpage-1.onrender.com";
 
   /* ── DOM refs (resolved lazily on first send) ── */
   var _wrap = null; // #t1eraChatBody
