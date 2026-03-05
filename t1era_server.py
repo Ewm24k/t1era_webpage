@@ -89,11 +89,18 @@ def poll_job(job_id, timeout=120):
 def extract_reply(result):
     try:
         output = result["output"]
-        tokens = output[0]["choices"][0].get("tokens")
+        choice = output[0]["choices"][0]
+        log.info(f"finish_reason: {choice.get('finish_reason')}")
+        log.info(f"output keys: {list(choice.keys())}")
+        tokens = choice.get("tokens")
         if tokens:
-            return tokens[0]
-        return output[0]["choices"][0]["message"]["content"]
-    except (IndexError, KeyError, TypeError):
+            raw = tokens[0]
+        else:
+            raw = choice["message"]["content"]
+        log.info(f"raw reply length: {len(raw)}")
+        return raw
+    except (IndexError, KeyError, TypeError) as e:
+        log.error(f"extract_reply error: {e} — raw output: {str(result.get('output'))[:300]}")
         return None
 
 # ─── ROUTES ──────────────────────────────────────────────────────────────────
@@ -140,7 +147,10 @@ def chat():
         log.error(f"Unparseable output: {result.get('output')}")
         return jsonify({"error": "Could not parse RunPod response"}), 502
 
-    log.info(f'← reply  "{reply[:80]}"')
+    log.info(f'← reply length: {len(reply)} chars')
+    log.info(f'← has </think>: {"</think>" in reply}')
+    log.info(f'← first 200: {reply[:200]}')
+    log.info(f'← last 200: {reply[-200:]}')
     return jsonify({"reply": reply}), 200
 
 # ─── START ───────────────────────────────────────────────────────────────────
