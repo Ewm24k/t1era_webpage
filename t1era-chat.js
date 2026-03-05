@@ -1176,7 +1176,7 @@
       return (
         '<div class="t1c-think-block">' +
           '<div class="t1c-think-toggle" onclick="var b=document.getElementById('' + thinkId + '');b.style.display=b.style.display==='none'?'block':'none';this.classList.toggle('open')">' +
-            '<i class="ph-bold ph-brain"></i> Thinking <i class="ph-bold ph-caret-down t1c-think-caret"></i>' +
+            '<span class="t1c-think-icon"><span></span><span></span><span></span></span> Thinking <i class="ph-bold ph-caret-down t1c-think-caret"></i>' +
           '</div>' +
           '<div class="t1c-think-body" id="' + thinkId + '" style="display:none">' +
             _formatText(_escHtml(thinkContent)) +
@@ -1194,7 +1194,7 @@
       return (
         '<div class="t1c-think-block t1c-think-open">' +
           '<div class="t1c-think-toggle">' +
-            '<i class="ph-bold ph-brain"></i> Thinking...' +
+            '<span class="t1c-think-icon"><span></span><span></span><span></span></span> Thinking...' +
           '</div>' +
           '<div class="t1c-think-body" style="display:block">' +
             _formatText(_escHtml(raw)) +
