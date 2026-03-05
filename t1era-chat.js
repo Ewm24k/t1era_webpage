@@ -1173,9 +1173,12 @@
       var answerContent = thinkMatch[2].trim();
       var thinkId = "t1cThink_" + Date.now();
 
+      var onclk = "var b=document.getElementById('" + thinkId + "');" +
+                  "b.style.display=b.style.display==='none'?'block':'none';" +
+                  "this.classList.toggle('open')";
       return (
         '<div class="t1c-think-block">' +
-          '<div class="t1c-think-toggle" onclick="var b=document.getElementById('' + thinkId + '');b.style.display=b.style.display==='none'?'block':'none';this.classList.toggle('open')">' +
+          '<div class="t1c-think-toggle" onclick="' + onclk + '">' +
             '<span class="t1c-think-icon"><span></span><span></span><span></span></span> Thinking <i class="ph-bold ph-caret-down t1c-think-caret"></i>' +
           '</div>' +
           '<div class="t1c-think-body" id="' + thinkId + '" style="display:none">' +
