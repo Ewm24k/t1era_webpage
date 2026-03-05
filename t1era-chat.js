@@ -1065,19 +1065,35 @@
      Calls the Render proxy which polls RunPod for the reply.
      Carries full _history for multi-turn context.
   ═══════════════════════════════════════════════════ */
+  // Ping Render every 10 min to prevent cold start on free tier
+  setInterval(function () {
+    fetch(T1ERA_API + "/health").catch(function () {});
+  }, 10 * 60 * 1000);
+
   function _callT1ERA(userText) {
     return new Promise(function (resolve, reject) {
+      // AbortController for timeout — mobile browsers need this explicit
+      var controller = new AbortController();
+      var timer = setTimeout(function () {
+        controller.abort();
+        reject(new Error("Request timed out — server may be waking up, please try again."));
+      }, 90000); // 90s — covers Render cold start
+
       fetch(T1ERA_API + "/chat", {
-        method: "POST",
+        method:  "POST",
         headers: { "Content-Type": "application/json" },
+        signal:  controller.signal,
         body: JSON.stringify({
-          messages:    _history,   // full conversation history
+          messages:    _history,
           model:       _activeModel,
           max_tokens:  512,
           temperature: 0.7,
         }),
       })
-        .then(function (res) { return res.json(); })
+        .then(function (res) {
+          clearTimeout(timer);
+          return res.json();
+        })
         .then(function (data) {
           if (data.error) {
             reject(new Error(data.error));
@@ -1086,6 +1102,8 @@
           }
         })
         .catch(function (err) {
+          clearTimeout(timer);
+          if (err.name === "AbortError") return; // already rejected above
           reject(new Error("Network error — " + err.message));
         });
     });
