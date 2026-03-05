@@ -3,7 +3,7 @@ services:
     name: t1era-ai-server
     runtime: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn t1era_server:app
+    startCommand: gunicorn t1era_server:app --timeout 600 --workers 2
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
