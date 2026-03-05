@@ -1092,7 +1092,7 @@
         input: {
           model:       RUNPOD_MODEL,
           messages:    _history,
-          max_tokens:  2048,
+          max_tokens:  32768,
           temperature: 0.7,
         }
       }),
@@ -1166,7 +1166,7 @@
   function _renderAiText(text, role) {
     if (role !== "ai") return _formatText(_escHtml(text));
 
-    var thinkMatch = text.match(/^<think>([\s\S]*?)<\/think>([\s\S]*)$/);
+    var thinkMatch = text.match(/^<think>([\s\S]*)<\/think>([\s\S]*)$/);
 
     if (thinkMatch) {
       var thinkContent = thinkMatch[1].trim();
