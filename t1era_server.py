@@ -30,14 +30,10 @@ HEADERS     = {
 # ─── APP ─────────────────────────────────────────────────────────────────────
 
 # Allow requests from Netlify (and localhost for dev)
-ALLOWED_ORIGINS = [
-    os.environ.get("ALLOWED_ORIGIN", "*"),
-    "http://localhost:5000",
-    "http://127.0.0.1:5000",
-]
-
 app = Flask(__name__)
-CORS(app, origins=ALLOWED_ORIGINS)
+
+# Allow all origins — handles Netlify, local dev, previews
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s  %(message)s")
 log = app.logger
@@ -98,6 +94,17 @@ def extract_reply(result):
 @app.route("/health", methods=["GET"])
 def health():
     return jsonify({"status": "ok"}), 200
+
+
+@app.route("/chat", methods=["OPTIONS"])
+def chat_preflight():
+    """Handle CORS preflight from browser."""
+    from flask import make_response
+    resp = make_response()
+    resp.headers["Access-Control-Allow-Origin"]  = "*"
+    resp.headers["Access-Control-Allow-Methods"] = "POST, OPTIONS"
+    resp.headers["Access-Control-Allow-Headers"] = "Content-Type"
+    return resp, 200
 
 
 @app.route("/chat", methods=["POST"])
