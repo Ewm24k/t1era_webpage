@@ -183,23 +183,7 @@
 
 /* AI bubble — scrollable with default max height */
 .t1c-row.t1c-ai .t1c-body {
-  max-height: 220px;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(139,92,246,0.4) transparent;
-}
-.t1c-row.t1c-ai .t1c-body::-webkit-scrollbar {
-  width: 4px;
-}
-.t1c-row.t1c-ai .t1c-body::-webkit-scrollbar-track {
-  background: transparent;
-}
-.t1c-row.t1c-ai .t1c-body::-webkit-scrollbar-thumb {
-  background: rgba(139,92,246,0.4);
-  border-radius: 4px;
-}
-.t1c-row.t1c-ai .t1c-body::-webkit-scrollbar-thumb:hover {
-  background: rgba(139,92,246,0.7);
+  overflow-y: visible;
 }
 
 .t1c-row.t1c-user .t1c-body {
