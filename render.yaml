@@ -7,3 +7,11 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
+      - key: RUNPOD_API_KEY
+        sync: false          # set manually in Render dashboard
+      - key: RUNPOD_ENDPOINT_ID
+        sync: false          # set manually in Render dashboard
+      - key: RUNPOD_MODEL
+        value: qwen/qwen3-14b-awq
+      - key: ALLOWED_ORIGIN
+        sync: false          # set to your Netlify URL in Render dashboard
