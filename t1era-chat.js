@@ -938,7 +938,7 @@
       '<div class="t1c-body" id="' +
       uid +
       '_body">' +
-      _formatText(_escHtml(text)) +
+      _renderAiText(text, role) +
       "</div>" +
       '<div class="t1c-footer">' +
       '<span class="t1c-timestamp">\u21a9 ' +
@@ -1160,6 +1160,50 @@
     var h = d.getHours().toString().padStart(2, "0");
     var m = d.getMinutes().toString().padStart(2, "0");
     return h + ":" + m;
+  }
+
+  /* ── Render AI text — shows <think> block + answer separately ── */
+  function _renderAiText(text, role) {
+    if (role !== "ai") return _formatText(_escHtml(text));
+
+    var thinkMatch = text.match(/^<think>([\s\S]*?)<\/think>([\s\S]*)$/);
+
+    if (thinkMatch) {
+      var thinkContent = thinkMatch[1].trim();
+      var answerContent = thinkMatch[2].trim();
+      var thinkId = "t1cThink_" + Date.now();
+
+      return (
+        '<div class="t1c-think-block">' +
+          '<div class="t1c-think-toggle" onclick="var b=document.getElementById('' + thinkId + '');b.style.display=b.style.display==='none'?'block':'none';this.classList.toggle('open')">' +
+            '<i class="ph-bold ph-brain"></i> Thinking <i class="ph-bold ph-caret-down t1c-think-caret"></i>' +
+          '</div>' +
+          '<div class="t1c-think-body" id="' + thinkId + '" style="display:none">' +
+            _formatText(_escHtml(thinkContent)) +
+          '</div>' +
+        '</div>' +
+        '<div class="t1c-answer">' +
+          _formatText(_escHtml(answerContent)) +
+        '</div>'
+      );
+    }
+
+    // No </think> closing yet — thinking still in progress or no thinking
+    if (text.startsWith("<think>")) {
+      var raw = text.replace(/^<think>/, "").trim();
+      return (
+        '<div class="t1c-think-block t1c-think-open">' +
+          '<div class="t1c-think-toggle">' +
+            '<i class="ph-bold ph-brain"></i> Thinking...' +
+          '</div>' +
+          '<div class="t1c-think-body" style="display:block">' +
+            _formatText(_escHtml(raw)) +
+          '</div>' +
+        '</div>'
+      );
+    }
+
+    return _formatText(_escHtml(text));
   }
 
   function _wordCount(str) {
