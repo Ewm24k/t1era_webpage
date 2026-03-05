@@ -52,7 +52,7 @@
 .t1c-card {
   width: 100%;
   border-radius: 18px;
-  overflow: hidden;
+  overflow: visible;
   border: 1px solid var(--border);
   background: var(--bg-card);
   transition: border-color 0.2s;
@@ -179,6 +179,27 @@
   color: var(--text-2);
   word-break: break-word;
   white-space: pre-wrap;
+}
+
+/* AI bubble — scrollable with default max height */
+.t1c-row.t1c-ai .t1c-body {
+  max-height: 220px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(139,92,246,0.4) transparent;
+}
+.t1c-row.t1c-ai .t1c-body::-webkit-scrollbar {
+  width: 4px;
+}
+.t1c-row.t1c-ai .t1c-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+.t1c-row.t1c-ai .t1c-body::-webkit-scrollbar-thumb {
+  background: rgba(139,92,246,0.4);
+  border-radius: 4px;
+}
+.t1c-row.t1c-ai .t1c-body::-webkit-scrollbar-thumb:hover {
+  background: rgba(139,92,246,0.7);
 }
 
 .t1c-row.t1c-user .t1c-body {
