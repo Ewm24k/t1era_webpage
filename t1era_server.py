@@ -53,7 +53,7 @@ def runpod_headers():
         "Content-Type":  "application/json",
     }
 
-def submit_job(messages, max_tokens=2048, temperature=0.7):
+def submit_job(messages, max_tokens=8096, temperature=0.7):
     payload = {
         "input": {
             "model":       MODEL,
@@ -87,21 +87,12 @@ def poll_job(job_id, timeout=120):
 
 
 def extract_reply(result):
-    import re as _re
     try:
         output = result["output"]
         tokens = output[0]["choices"][0].get("tokens")
-        raw = tokens[0] if tokens else output[0]["choices"][0]["message"]["content"]
-
-        # Qwen3 thinking mode — strip <think>...</think>, keep only final answer
-        if "<think>" in raw:
-            parts = _re.split(r"</think>", raw, maxsplit=1)
-            if len(parts) > 1:
-                raw = parts[1].strip()
-            else:
-                raw = _re.sub(r"<think>.*", "", raw, flags=_re.DOTALL).strip()
-
-        return raw if raw else None
+        if tokens:
+            return tokens[0]
+        return output[0]["choices"][0]["message"]["content"]
     except (IndexError, KeyError, TypeError):
         return None
 
@@ -126,7 +117,7 @@ def chat():
         return jsonify({"error": "messages array required"}), 400
 
     messages    = body["messages"]
-    max_tokens  = int(body.get("max_tokens",   2048))
+    max_tokens  = int(body.get("max_tokens",   8096))
     temperature = float(body.get("temperature", 0.7))
 
     log.info(f'→ RunPod  turns={len(messages)}  last="{messages[-1]["content"][:60]}"')
