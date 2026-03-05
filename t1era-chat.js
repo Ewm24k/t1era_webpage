@@ -25,6 +25,12 @@
   /* ── Render proxy URL — update after deploy ── */
   var T1ERA_API = "https://t1era-webpage-1.onrender.com";
 
+  // Wake Render immediately on page load + ping every 4 min to stay awake
+  fetch(T1ERA_API + "/health").catch(function () {});
+  setInterval(function () {
+    fetch(T1ERA_API + "/health").catch(function () {});
+  }, 4 * 60 * 1000);
+
   /* ── DOM refs (resolved lazily on first send) ── */
   var _wrap = null; // #t1eraChatBody
   var _convo = null; // #t1eraConversation
@@ -1086,7 +1092,7 @@
         input: {
           model:       RUNPOD_MODEL,
           messages:    _history,
-          max_tokens:  512,
+          max_tokens:  2048,
           temperature: 0.7,
         }
       }),
