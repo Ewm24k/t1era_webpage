@@ -57,7 +57,6 @@ def call_runpod(messages, max_tokens=8192, temperature=0.7):
         "messages":    messages,
         "max_tokens":  max_tokens,
         "temperature": temperature,
-        "stop":        ["</think>"],
     }
     resp = requests.post(OPENAI_URL, headers=headers, json=payload, timeout=600)
     resp.raise_for_status()
