@@ -23,7 +23,7 @@ import json
 API_KEY     = os.environ.get("RUNPOD_API_KEY")
 ENDPOINT_ID = os.environ.get("RUNPOD_ENDPOINT_ID")
 MODEL       = os.environ.get("RUNPOD_MODEL", "qwen/qwen3-14b-awq")
-OPENAI_URL  = f"https://api.runpod.ai/v2/{ENDPOINT_ID}/openai/v1/chat/completions"
+# OPENAI_URL built inside function so ENDPOINT_ID is read fresh from env
 
 # ─── APP ─────────────────────────────────────────────────────────────────────
 
@@ -64,7 +64,8 @@ def stream_runpod(messages, max_tokens=8192, temperature=0.7):
     buffer     = ""      # partial token buffer for tag detection
 
     try:
-        with requests.post(OPENAI_URL, headers=headers,
+        openai_url = f"https://api.runpod.ai/v2/{ENDPOINT_ID}/openai/v1/chat/completions"
+        with requests.post(openai_url, headers=headers,
                            json=payload, stream=True, timeout=600) as resp:
             resp.raise_for_status()
 
