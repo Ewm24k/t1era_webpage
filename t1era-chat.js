@@ -21,6 +21,16 @@
 
   /* ── Conversation history (sent to AI on every turn) ── */
   var _history = []; // [{role:"user"|"assistant", content:"..."}]
+  var _thinkingMode = false; // thinking mode toggle — OFF by default
+
+  /* ── Thinking mode toggle ── */
+  window.t1cToggleThinking = function () {
+    _thinkingMode = !_thinkingMode;
+    var btns = document.querySelectorAll(".t1c-think-toggle-btn");
+    var dots = document.querySelectorAll(".t1c-think-dot");
+    btns.forEach(function (b) { b.classList.toggle("t1c-think-active", _thinkingMode); });
+    dots.forEach(function (d) { d.classList.toggle("t1c-think-dot-on", _thinkingMode); });
+  };
 
   /* ── Render proxy URL — update after deploy ── */
   var T1ERA_API = "https://t1era-webpage-1.onrender.com";
@@ -1075,10 +1085,11 @@
         method:  "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          messages:    _history,
-          model:       _activeModel,
-          max_tokens:  8192,
-          temperature: 0.7,
+          messages:       _history,
+          model:          _activeModel,
+          max_tokens:     8192,
+          temperature:    0.7,
+          show_thinking:  _thinkingMode,
         }),
       })
       .then(function (resp) {
@@ -1088,18 +1099,20 @@
           });
         }
 
-        var reader     = resp.body.getReader();
-        var decoder    = new TextDecoder();
-        var fullText   = "";
-        var bubbleBody = null;  // set after first token
-        var firstToken = true;
+        var reader      = resp.body.getReader();
+        var decoder     = new TextDecoder();
+        var fullText    = "";
+        var thinkText   = "";
+        var bubbleBody  = null;
+        var thinkBody   = null;
+        var answerDiv   = null;
+        var firstToken  = true;
+        var inThink     = false;
+        var thinkDone   = false;
 
         function read() {
           reader.read().then(function (result) {
-            if (result.done) {
-              resolve(fullText);
-              return;
-            }
+            if (result.done) { resolve(fullText); return; }
 
             var lines = decoder.decode(result.value, { stream: true }).split("\n");
 
@@ -1110,15 +1123,12 @@
 
               var parsed;
               try { parsed = JSON.parse(data); } catch (e) { return; }
-
               if (parsed.error) { reject(new Error(parsed.error)); return; }
 
               var token = parsed.token || "";
               if (!token) return;
 
-              fullText += token;
-
-              // First token — remove loading bubble, create streaming bubble
+              // First token — remove loading, create bubble
               if (firstToken) {
                 firstToken = false;
                 removeLoading(loadingId);
@@ -1127,9 +1137,55 @@
                 bubbleBody = document.getElementById(uid + "_body");
               }
 
-              // Append token to bubble live
-              if (bubbleBody) {
-                bubbleBody.innerHTML = _formatText(_escHtml(fullText));
+              // Detect think block boundaries
+              if (token === "<think>") {
+                inThink = true;
+                // Create collapsible think section in bubble
+                if (bubbleBody) {
+                  var thinkId = "t1cTh_" + Date.now();
+                  var onclk = "var b=document.getElementById('" + thinkId + "');" +
+                              "b.style.display=b.style.display==='none'?'block':'none';" +
+                              "this.classList.toggle('open')";
+                  var thinkBlock = document.createElement("div");
+                  thinkBlock.className = "t1c-think-block";
+                  thinkBlock.innerHTML =
+                    '<div class="t1c-think-toggle" onclick="' + onclk + '">' +
+                      '<span class="t1c-think-icon"><span></span><span></span><span></span></span> Thinking ' +
+                      '<i class="ph-bold ph-caret-down t1c-think-caret"></i>' +
+                    '</div>' +
+                    '<div class="t1c-think-body" id="' + thinkId + '" style="display:block"></div>';
+                  bubbleBody.appendChild(thinkBlock);
+                  thinkBody = document.getElementById(thinkId);
+                  answerDiv = null;
+                }
+                return;
+              }
+
+              if (token === "</think>") {
+                inThink   = false;
+                thinkDone = true;
+                // Create answer section below think block
+                if (bubbleBody) {
+                  answerDiv = document.createElement("div");
+                  answerDiv.className = "t1c-answer";
+                  bubbleBody.appendChild(answerDiv);
+                }
+                return;
+              }
+
+              if (inThink) {
+                thinkText += token;
+                if (thinkBody) {
+                  thinkBody.innerHTML = _formatText(_escHtml(thinkText));
+                }
+                return;
+              }
+
+              // Normal answer token
+              fullText += token;
+              var target = answerDiv || bubbleBody;
+              if (target) {
+                target.innerHTML = _formatText(_escHtml(fullText));
                 _scrollToBottom();
               }
             });
