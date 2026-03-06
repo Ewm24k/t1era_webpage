@@ -1,42 +1,38 @@
 """
-T1ERA AI Server
-───────────────
-Run:  python t1era_server.py
+T1ERA AI Server — Streaming
+────────────────────────────
 Push to GitHub → Render auto-deploys.
 
-Set these in Render dashboard → Environment:
-  RUNPOD_API_KEY      your RunPod API key
-  RUNPOD_ENDPOINT_ID  your endpoint ID
-  RUNPOD_MODEL        qwen/qwen3-14b-awq  (optional, has default)
+Render Environment Variables:
+  RUNPOD_API_KEY      RunPod API key
+  RUNPOD_ENDPOINT_ID  RunPod endpoint ID
+  RUNPOD_MODEL        model name (default: qwen/qwen3-14b-awq)
 
 Install: pip install flask flask-cors requests gunicorn
 """
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Response, stream_with_context
 from flask_cors import CORS
 import requests
-import time
 import logging
 import os
+import json
 
 # ─── CONFIG ──────────────────────────────────────────────────────────────────
 
-# All values come from Render environment variables — nothing hardcoded
 API_KEY     = os.environ.get("RUNPOD_API_KEY")
 ENDPOINT_ID = os.environ.get("RUNPOD_ENDPOINT_ID")
 MODEL       = os.environ.get("RUNPOD_MODEL", "qwen/qwen3-14b-awq")
-
-OPENAI_URL = f"https://api.runpod.ai/v2/{ENDPOINT_ID}/openai/v1/chat/completions"
+OPENAI_URL  = f"https://api.runpod.ai/v2/{ENDPOINT_ID}/openai/v1/chat/completions"
 
 # ─── APP ─────────────────────────────────────────────────────────────────────
 
 app = Flask(__name__)
-CORS(app)  # flask-cors handles all origins by default
+CORS(app)
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s  %(message)s")
 log = app.logger
 
-# Force CORS headers onto EVERY response — including 4xx and 5xx
 @app.after_request
 def add_cors(response):
     response.headers["Access-Control-Allow-Origin"]  = "*"
@@ -44,10 +40,13 @@ def add_cors(response):
     response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
     return response
 
-# ─── RUNPOD HELPERS ──────────────────────────────────────────────────────────
+# ─── STREAM GENERATOR ────────────────────────────────────────────────────────
 
-def call_runpod(messages, max_tokens=8192, temperature=0.7):
-    """Call RunPod OpenAI-compatible endpoint — handles all response formats."""
+def stream_runpod(messages, max_tokens=8192, temperature=0.7):
+    """
+    Stream tokens from RunPod directly to the browser as SSE.
+    Filters out <think>...</think> block — only streams the final answer.
+    """
     headers = {
         "Authorization": f"Bearer {API_KEY}",
         "Content-Type":  "application/json",
@@ -57,37 +56,79 @@ def call_runpod(messages, max_tokens=8192, temperature=0.7):
         "messages":    messages,
         "max_tokens":  max_tokens,
         "temperature": temperature,
+        "stream":      True,
     }
-    resp = requests.post(OPENAI_URL, headers=headers, json=payload, timeout=600)
-    resp.raise_for_status()
-    data = resp.json()
 
-    # Parse all possible response formats
-    if "choices" in data:
-        choice = data["choices"][0]
-        if "message" in choice:
-            raw = choice["message"]["content"]
-        elif "text" in choice:
-            raw = choice["text"]
-        elif "tokens" in choice:
-            raw = "".join(choice["tokens"])
-        else:
-            raw = str(choice)
-    elif "output" in data:
-        raw = "".join(data["output"][0]["choices"][0]["tokens"])
-    else:
-        raw = str(data)
+    in_think   = False   # currently inside <think> block
+    think_done = False   # </think> already seen
+    buffer     = ""      # partial token buffer for tag detection
 
-    log.info(f"reply length: {len(raw)}")
+    try:
+        with requests.post(OPENAI_URL, headers=headers,
+                           json=payload, stream=True, timeout=600) as resp:
+            resp.raise_for_status()
 
-    # Strip reasoning block — return only final answer
-    if "</think>" in raw:
-        raw = raw.split("</think>", 1)[1].strip()
-    elif "<think>" in raw:
-        raw = raw.replace("<think>", "").strip()
+            for line in resp.iter_lines():
+                if not line:
+                    continue
 
-    log.info(f"final reply length: {len(raw)}")
-    return raw
+                line = line.decode("utf-8")
+
+                # SSE format: "data: {...}" or "data: [DONE]"
+                if not line.startswith("data:"):
+                    continue
+
+                data_str = line[5:].strip()
+
+                if data_str == "[DONE]":
+                    yield "data: [DONE]\n\n"
+                    break
+
+                try:
+                    chunk = json.loads(data_str)
+                except json.JSONDecodeError:
+                    continue
+
+                # Extract token from chunk
+                delta = chunk.get("choices", [{}])[0].get("delta", {})
+                token = delta.get("content", "")
+
+                if not token:
+                    continue
+
+                buffer += token
+
+                # ── Think block filtering ─────────────────────────────────
+                if not think_done:
+                    # Check if we just entered think block
+                    if "<think>" in buffer and not in_think:
+                        in_think = True
+                        # Emit anything before <think>
+                        before = buffer.split("<think>")[0]
+                        buffer = buffer[buffer.index("<think>"):]
+                        if before:
+                            yield f"data: {json.dumps({'token': before})}\n\n"
+                        continue
+
+                    if in_think:
+                        if "</think>" in buffer:
+                            # Think block closed — emit everything after
+                            in_think   = False
+                            think_done = True
+                            after = buffer.split("</think>", 1)[1]
+                            buffer = ""
+                            if after:
+                                yield f"data: {json.dumps({'token': after})}\n\n"
+                        # Still inside think — discard
+                        continue
+
+                # ── Normal token — emit to browser ───────────────────────
+                yield f"data: {json.dumps({'token': buffer})}\n\n"
+                buffer = ""
+
+    except Exception as e:
+        log.error(f"Stream error: {e}")
+        yield f"data: {json.dumps({'error': str(e)})}\n\n"
 
 # ─── ROUTES ──────────────────────────────────────────────────────────────────
 
@@ -98,7 +139,6 @@ def health():
 
 @app.route("/chat", methods=["POST", "OPTIONS"])
 def chat():
-    # Browser preflight
     if request.method == "OPTIONS":
         return jsonify({}), 200
 
@@ -113,23 +153,25 @@ def chat():
     max_tokens  = int(body.get("max_tokens",   8192))
     temperature = float(body.get("temperature", 0.7))
 
-    log.info(f'→ RunPod  turns={len(messages)}  last="{messages[-1]["content"][:60]}"')
+    log.info(f'→ stream  turns={len(messages)}  last="{messages[-1]["content"][:60]}"'  )
 
-    try:
-        reply = call_runpod(messages, max_tokens, temperature)
-    except Exception as e:
-        log.error(f"RunPod error: {e}")
-        return jsonify({"error": f"RunPod request failed: {e}"}), 502
+    return Response(
+        stream_with_context(stream_runpod(messages, max_tokens, temperature)),
+        mimetype="text/event-stream",
+        headers={
+            "Cache-Control":           "no-cache",
+            "X-Accel-Buffering":       "no",
+            "Access-Control-Allow-Origin": "*",
+        }
+    )
 
-    log.info(f'← reply length: {len(reply)}, has </think>: {"</think>" in reply}')
-    return jsonify({"reply": reply}), 200
 
 # ─── START ───────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     print(f"\n{'═'*50}")
-    print("  T1ERA AI Server")
+    print("  T1ERA AI Server — Streaming")
     print(f"{'═'*50}")
     print(f"  Listening : http://localhost:{port}")
     print(f"  RunPod    : {ENDPOINT_ID}")
