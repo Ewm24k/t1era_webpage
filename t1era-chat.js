@@ -1323,10 +1323,10 @@
 
   function _escHtml(str) {
     return (str || "")
-      .replace(/&/g, "&amp;")
+      .replace(/&(?!quot;|amp;|lt;|gt;|#)/g, "&amp;")  // don't double-escape &quot;
       .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;");
+      .replace(/>/g, "&gt;");
+      // leave " as-is so inlineFormat can style it
   }
 
   function _formatText(str) {
@@ -1348,8 +1348,9 @@
       s = s.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
       // Italic *text*
       s = s.replace(/\*([^*]+)\*/g, "<em>$1</em>");
-      // &quot; — always replace with styled quote span (covers *&quot;text&quot;* too)
-      s = s.replace(/&quot;([\s\S]*?)&quot;/g, "<span class=\"t1c-md-quote\">\u201c$1\u201d</span>");
+      // Style quoted text — handles both literal " and &quot; entity
+      s = s.replace(/&quot;([^&\n]*?)&quot;/g, "<span class=\"t1c-md-quote\">\u201c$1\u201d</span>");
+      s = s.replace(/"([^"\n]{1,120})"/g, "<span class=\"t1c-md-quote\">\u201c$1\u201d</span>");
       return s;
     }
 
