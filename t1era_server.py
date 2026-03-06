@@ -46,9 +46,8 @@ def add_cors(response):
 
 # ─── RUNPOD HELPERS ──────────────────────────────────────────────────────────
 
-def call_runpod(messages, max_tokens=1024, temperature=0.7):
-    """Call RunPod OpenAI-compatible endpoint — handles both response formats."""
-    import re as _re
+def call_runpod(messages, max_tokens=4096, temperature=0.7):
+    """Call RunPod OpenAI-compatible endpoint — handles all response formats."""
     headers = {
         "Authorization": f"Bearer {API_KEY}",
         "Content-Type":  "application/json",
@@ -58,30 +57,32 @@ def call_runpod(messages, max_tokens=1024, temperature=0.7):
         "messages":    messages,
         "max_tokens":  max_tokens,
         "temperature": temperature,
-        "stop":        ["</think>"],
     }
     resp = requests.post(OPENAI_URL, headers=headers, json=payload, timeout=600)
-    log.info(f"RunPod status: {resp.status_code}")
     resp.raise_for_status()
     data = resp.json()
 
-    # Support both OpenAI message format and vLLM tokens format
-    choice = data["choices"][0]
-    if "message" in choice:
-        raw = choice["message"]["content"]
-    elif "tokens" in choice:
-        raw = "".join(choice["tokens"])
+    # Parse all possible response formats
+    if "choices" in data:
+        choice = data["choices"][0]
+        if "message" in choice:
+            raw = choice["message"]["content"]
+        elif "text" in choice:
+            raw = choice["text"]
+        elif "tokens" in choice:
+            raw = "".join(choice["tokens"])
+        else:
+            raw = str(choice)
+    elif "output" in data:
+        raw = "".join(data["output"][0]["choices"][0]["tokens"])
     else:
-        raw = str(choice)
+        raw = str(data)
 
-    log.info(f"raw length: {len(raw)}, finish_reason: {choice.get('finish_reason')}")
+    log.info(f"reply length: {len(raw)}")
 
-    # Strip <think>...</think> block — send only final answer to frontend
-    if "<think>" in raw and "</think>" in raw:
-        raw = _re.sub(r"<think>.*?</think>", "", raw, flags=_re.S).strip()
-    elif "<think>" in raw and "</think>" not in raw:
-        # Incomplete thinking block — strip it entirely
-        raw = raw.split("<think>")[-1].strip()
+    # Strip reasoning block — return only final answer
+    if "</think>" in raw:
+        raw = raw.split("</think>", 1)[1].strip()
 
     log.info(f"final reply length: {len(raw)}")
     return raw
@@ -107,7 +108,7 @@ def chat():
         return jsonify({"error": "messages array required"}), 400
 
     messages    = body["messages"]
-    max_tokens  = int(body.get("max_tokens",   32768))
+    max_tokens  = int(body.get("max_tokens",   4096))
     temperature = float(body.get("temperature", 0.7))
 
     log.info(f'→ RunPod  turns={len(messages)}  last="{messages[-1]["content"][:60]}"')
