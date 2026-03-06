@@ -161,17 +161,17 @@ def chat():
     temperature   = float(body.get("temperature", 0.7))
     show_thinking = bool(body.get("show_thinking", False))
 
-    log.info(f'→ stream  turns={len(messages)}  thinking={show_thinking}  last="{messages[-1]["content"][:60]}"'  )
+    log.info(f"→ stream turns={len(messages)} thinking={show_thinking}")
 
-    return Response(
+    r = Response(
         stream_with_context(stream_runpod(messages, max_tokens, temperature, show_thinking)),
         mimetype="text/event-stream",
-        headers={
-            "Cache-Control":           "no-cache",
-            "X-Accel-Buffering":       "no",
-            "Access-Control-Allow-Origin": "*",
-        }
     )
+    r.headers["Cache-Control"]               = "no-cache"
+    r.headers["X-Accel-Buffering"]           = "no"
+    r.headers["Access-Control-Allow-Origin"] = "*"
+    r.headers["Access-Control-Allow-Headers"]= "Content-Type, Authorization"
+    return r
 
 
 # ─── START ───────────────────────────────────────────────────────────────────
