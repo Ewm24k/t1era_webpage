@@ -659,3 +659,69 @@
   0%, 100% { opacity: 1; }
   50%       { opacity: 0; }
 }
+
+/* ── Markdown rendering inside AI bubbles ──────────────────── */
+.t1c-body .t1c-md-h {
+  color: var(--text);
+  font-weight: 700;
+  margin: 10px 0 4px;
+  line-height: 1.3;
+}
+.t1c-body h3.t1c-md-h { font-size: 14px; }
+.t1c-body h4.t1c-md-h { font-size: 13px; }
+.t1c-body h5.t1c-md-h { font-size: 12.5px; }
+
+.t1c-body .t1c-md-p {
+  margin: 2px 0;
+}
+
+.t1c-body .t1c-md-ul,
+.t1c-body .t1c-md-ol {
+  margin: 4px 0 4px 18px;
+  padding: 0;
+}
+.t1c-body .t1c-md-ul li,
+.t1c-body .t1c-md-ol li {
+  margin: 2px 0;
+  line-height: 1.6;
+}
+
+.t1c-body .t1c-md-hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 8px 0;
+}
+
+.t1c-body code {
+  background: rgba(139,92,246,0.12);
+  color: rgba(200,180,255,0.95);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-family: var(--f-mono);
+  font-size: 12px;
+}
+
+.t1c-body pre.t1c-code {
+  background: rgba(0,0,0,0.35);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin: 8px 0;
+  overflow-x: auto;
+  font-family: var(--f-mono);
+  font-size: 12px;
+  line-height: 1.6;
+  color: rgba(220,210,255,0.9);
+  white-space: pre;
+}
+
+.t1c-body pre.t1c-code code {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+  font-size: inherit;
+  color: inherit;
+}
+
+.t1c-body strong { color: var(--text); font-weight: 700; }
+.t1c-body em     { font-style: italic; color: rgba(255,255,255,0.75); }
