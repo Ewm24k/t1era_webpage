@@ -791,6 +791,12 @@
   align-items: center;
   justify-content: center;
   overflow: visible !important;
+  border: none !important;
+}
+
+/* Parent av-wrap must also allow overflow for orbiting dots */
+.t1c-row.t1c-ai .t1c-av-wrap {
+  overflow: visible;
 }
 
 .t1c-ai-orb {
