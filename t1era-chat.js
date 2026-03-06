@@ -1112,14 +1112,28 @@
 
         function read() {
           reader.read().then(function (result) {
-            if (result.done) { resolve(fullText); return; }
+            if (result.done) {
+              // Final render — ensures &quot; and all patterns fully resolved
+              if (answerDiv) answerDiv.innerHTML = _formatText(_escHtml(fullText));
+              else if (bubbleBody) bubbleBody.innerHTML = _formatText(_escHtml(fullText));
+              // Remove streaming cursor
+              if (bubbleBody) bubbleBody.classList.remove("t1c-streaming");
+              resolve(fullText);
+              return;
+            }
 
             var lines = decoder.decode(result.value, { stream: true }).split("\n");
 
             lines.forEach(function (line) {
               if (!line.startsWith("data:")) return;
               var data = line.slice(5).trim();
-              if (data === "[DONE]") { resolve(fullText); return; }
+              if (data === "[DONE]") {
+                if (answerDiv) answerDiv.innerHTML = _formatText(_escHtml(fullText));
+                else if (bubbleBody) bubbleBody.innerHTML = _formatText(_escHtml(fullText));
+                if (bubbleBody) bubbleBody.classList.remove("t1c-streaming");
+                resolve(fullText);
+                return;
+              }
 
               var parsed;
               try { parsed = JSON.parse(data); } catch (e) { return; }
