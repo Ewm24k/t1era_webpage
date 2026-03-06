@@ -1332,11 +1332,10 @@
       s = s.replace(/`([^`]+)`/g, "<code>$1</code>");
       // Bold **text**
       s = s.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
-      // Italic *text* (but not inside already-replaced tags)
+      // Italic *text*
       s = s.replace(/\*([^*]+)\*/g, "<em>$1</em>");
-      // Quoted text — handles both real " and HTML-escaped &quot;
-      s = s.replace(/&quot;([^&]+)&quot;/g, "<span class=\"t1c-md-quote\">&#8220;$1&#8221;</span>");
-      s = s.replace(/"([^"\n]{2,80})"/g, "<span class=\"t1c-md-quote\">&#8220;$1&#8221;</span>");
+      // &quot; — always replace with styled quote span (covers *&quot;text&quot;* too)
+      s = s.replace(/&quot;([\s\S]*?)&quot;/g, "<span class=\"t1c-md-quote\">\u201c$1\u201d</span>");
       return s;
     }
 
