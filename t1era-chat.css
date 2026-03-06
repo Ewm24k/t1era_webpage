@@ -783,3 +783,72 @@
 @media (max-width: 1079px) {
   .t1c-add-btn { display: none !important; }
 }
+
+/* ── AI Avatar — animated orb ──────────────────────────────── */
+.t1c-av-ai {
+  background: transparent !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible !important;
+}
+
+.t1c-ai-orb {
+  position: relative;
+  width: 18px;
+  height: 18px;
+}
+
+/* Pulsing core */
+.t1c-ai-orb::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(139,92,246,1);
+  box-shadow: 0 0 8px rgba(139,92,246,0.9), 0 0 16px rgba(139,92,246,0.4);
+  animation: t1cCorePulse 1.6s ease-in-out infinite;
+}
+
+@keyframes t1cCorePulse {
+  0%, 100% { transform: translate(-50%,-50%) scale(1);   opacity: 1; }
+  50%       { transform: translate(-50%,-50%) scale(1.35); opacity: 0.7; }
+}
+
+/* 3 orbiting dots */
+.t1c-ai-orb span {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(196,155,255,0.9);
+  top: 50%;
+  left: 50%;
+  transform-origin: 0 0;
+  animation: t1cOrbit 2s linear infinite;
+}
+
+.t1c-ai-orb span:nth-child(1) {
+  animation-delay: 0s;
+  margin-top: -2px;
+  margin-left: -2px;
+}
+.t1c-ai-orb span:nth-child(2) {
+  animation-delay: -0.66s;
+  margin-top: -2px;
+  margin-left: -2px;
+}
+.t1c-ai-orb span:nth-child(3) {
+  animation-delay: -1.33s;
+  margin-top: -2px;
+  margin-left: -2px;
+}
+
+@keyframes t1cOrbit {
+  0%   { transform: rotate(0deg)   translateX(9px) rotate(0deg); }
+  100% { transform: rotate(360deg) translateX(9px) rotate(-360deg); }
+}
