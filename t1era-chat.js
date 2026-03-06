@@ -1260,6 +1260,102 @@
   }
 
   function _formatText(str) {
-    return str.replace(/\n/g, "<br>");
+    var lines = str.split("\n");
+    var html  = "";
+    var inCode   = false;
+    var inUl     = false;
+    var inOl     = false;
+    var codeLines = [];
+
+    function closeUl() { if (inUl) { html += "</ul>"; inUl = false; } }
+    function closeOl() { if (inOl) { html += "</ol>"; inOl = false; } }
+    function closeLists() { closeUl(); closeOl(); }
+
+    function inlineFormat(s) {
+      // Code inline `code`
+      s = s.replace(/`([^`]+)`/g, "<code>$1</code>");
+      // Bold **text**
+      s = s.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+      // Italic *text*
+      s = s.replace(/\*([^*]+)\*/g, "<em>$1</em>");
+      return s;
+    }
+
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i];
+
+      // Code block fence ```
+      if (line.trimStart().startsWith("```")) {
+        if (!inCode) {
+          closeLists();
+          inCode = true;
+          codeLines = [];
+          var lang = line.trim().slice(3).trim();
+          html += '<pre class="t1c-code"><code' + (lang ? ' class="lang-' + lang + '"' : "") + '>';
+        } else {
+          inCode = false;
+          html += _escHtml(codeLines.join("\n")) + "</code></pre>";
+          codeLines = [];
+        }
+        continue;
+      }
+
+      if (inCode) {
+        codeLines.push(line);
+        continue;
+      }
+
+      // Heading ### ## #
+      var hMatch = line.match(/^(#{1,3})\s+(.+)/);
+      if (hMatch) {
+        closeLists();
+        var level = Math.min(hMatch[1].length + 2, 5); // h3-h5
+        html += "<h" + level + " class=\"t1c-md-h\">" + inlineFormat(_escHtml(hMatch[2])) + "</h" + level + ">";
+        continue;
+      }
+
+      // Horizontal rule ---
+      if (/^[-*_]{3,}$/.test(line.trim())) {
+        closeLists();
+        html += "<hr class=\"t1c-md-hr\">";
+        continue;
+      }
+
+      // Unordered list - item or * item
+      var ulMatch = line.match(/^[\s]*[-*+]\s+(.+)/);
+      if (ulMatch) {
+        closeOl();
+        if (!inUl) { html += "<ul class=\"t1c-md-ul\">"; inUl = true; }
+        html += "<li>" + inlineFormat(_escHtml(ulMatch[1])) + "</li>";
+        continue;
+      }
+
+      // Ordered list 1. item
+      var olMatch = line.match(/^[\s]*\d+\.\s+(.+)/);
+      if (olMatch) {
+        closeUl();
+        if (!inOl) { html += "<ol class=\"t1c-md-ol\">"; inOl = true; }
+        html += "<li>" + inlineFormat(_escHtml(olMatch[1])) + "</li>";
+        continue;
+      }
+
+      // Blank line
+      if (line.trim() === "") {
+        closeLists();
+        html += "<br>";
+        continue;
+      }
+
+      // Normal paragraph line
+      closeLists();
+      html += "<p class=\"t1c-md-p\">" + inlineFormat(_escHtml(line)) + "</p>";
+    }
+
+    closeLists();
+    if (inCode) {
+      html += _escHtml(codeLines.join("\n")) + "</code></pre>";
+    }
+
+    return html;
   }
 })();
