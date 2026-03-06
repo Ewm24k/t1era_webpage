@@ -827,9 +827,9 @@
       })
       .catch(function (err) {
         removeLoading(loadingId);
-        var errMsg =
-          "⚠️ Connection error — " +
-          (err.message || "could not reach T1ERA AI. Please try again.");
+        var errMsg = err && err.message && err.message.indexOf("fetch") > -1
+          ? "⚠️ T1ERA Cloud is currently offline or busy. Our AI server needs a moment to wake up. Please wait 1–2 minutes and try again."
+          : "⚠️ Something went wrong — " + (err.message || "unexpected error. Please try again.");
         appendMessage({ role: "ai", text: errMsg, model: _activeModel });
         _scrollToBottom();
         _history.pop();
@@ -1078,7 +1078,11 @@
      Reads SSE stream from Render → tokens arrive live → appended
      to the bubble as they come. <think> block filtered server-side.
   ──────────────────────────────────────────────────────────────── */
-  function _callT1ERA(userText, loadingId) {
+  function _callT1ERA(userText, loadingId, _retryCount) {
+    _retryCount = _retryCount || 0;
+    var MAX_RETRIES = 5;
+    var RETRY_DELAY = 12000; // 12s — enough for RunPod cold start
+
     return new Promise(function (resolve, reject) {
 
       fetch(T1ERA_API + "/chat", {
@@ -1210,7 +1214,20 @@
 
         read();
       })
-      .catch(function (err) { reject(err); });
+      .catch(function (err) {
+        if (_retryCount < MAX_RETRIES) {
+          // Cold start — update loading text and retry
+          var loadingBody = document.getElementById(loadingId + "_body");
+          if (loadingBody) {
+            loadingBody.innerHTML = "Waking up AI... retrying in " + (RETRY_DELAY / 1000) + "s (" + (_retryCount + 1) + "/" + MAX_RETRIES + ")";
+          }
+          setTimeout(function () {
+            _callT1ERA(userText, loadingId, _retryCount + 1).then(resolve).catch(reject);
+          }, RETRY_DELAY);
+        } else {
+          reject(err);
+        }
+      });
     });
   }
 
