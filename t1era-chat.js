@@ -1323,10 +1323,10 @@
 
   function _escHtml(str) {
     return (str || "")
-      .replace(/&(?!quot;|amp;|lt;|gt;|#)/g, "&amp;")  // don't double-escape &quot;
+      .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;");
-      // leave " as-is so inlineFormat can style it
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
   }
 
   function _formatText(str) {
