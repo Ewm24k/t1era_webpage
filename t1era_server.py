@@ -46,7 +46,7 @@ def add_cors(response):
 
 # ─── RUNPOD HELPERS ──────────────────────────────────────────────────────────
 
-def call_runpod(messages, max_tokens=4096, temperature=0.7):
+def call_runpod(messages, max_tokens=8192, temperature=0.7):
     """Call RunPod OpenAI-compatible endpoint — handles all response formats."""
     headers = {
         "Authorization": f"Bearer {API_KEY}",
@@ -57,6 +57,7 @@ def call_runpod(messages, max_tokens=4096, temperature=0.7):
         "messages":    messages,
         "max_tokens":  max_tokens,
         "temperature": temperature,
+        "stop":        ["</think>"],
     }
     resp = requests.post(OPENAI_URL, headers=headers, json=payload, timeout=600)
     resp.raise_for_status()
@@ -83,6 +84,8 @@ def call_runpod(messages, max_tokens=4096, temperature=0.7):
     # Strip reasoning block — return only final answer
     if "</think>" in raw:
         raw = raw.split("</think>", 1)[1].strip()
+    elif "<think>" in raw:
+        raw = raw.replace("<think>", "").strip()
 
     log.info(f"final reply length: {len(raw)}")
     return raw
@@ -108,7 +111,7 @@ def chat():
         return jsonify({"error": "messages array required"}), 400
 
     messages    = body["messages"]
-    max_tokens  = int(body.get("max_tokens",   4096))
+    max_tokens  = int(body.get("max_tokens",   8192))
     temperature = float(body.get("temperature", 0.7))
 
     log.info(f'→ RunPod  turns={len(messages)}  last="{messages[-1]["content"][:60]}"')
