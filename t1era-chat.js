@@ -1064,14 +1064,6 @@
     }, 1800);
   }
 
-  var T1ERA_API = "https://t1era-webpage-1.onrender.com";
-
-  // Keep Render awake — ping on load + every 4 min
-  fetch(T1ERA_API + "/health").catch(function () {});
-  setInterval(function () {
-    fetch(T1ERA_API + "/health").catch(function () {});
-  }, 4 * 60 * 1000);
-
   /* ─── Streaming AI call ─────────────────────────────────────────
      Reads SSE stream from Render → tokens arrive live → appended
      to the bubble as they come. <think> block filtered server-side.
@@ -1109,8 +1101,7 @@
               return;
             }
 
-            var lines = decoder.decode(result.value, { stream: true }).split("
-");
+            var lines = decoder.decode(result.value, { stream: true }).split("\n");
 
             lines.forEach(function (line) {
               if (!line.startsWith("data:")) return;
@@ -1173,7 +1164,7 @@
         '<div class="t1c-footer">' +
           '<span class="t1c-timestamp"></span>' +
           '<div class="t1c-actions">' +
-            '<button class="t1c-action-btn" title="Copy" onclick="window.t1cCopy(this,'' + uid + '_body')">' +
+            '<button class="t1c-action-btn" title="Copy" onclick="window.t1cCopy(this,\'' + uid + '_body\')">' +
               '<i class="ph-bold ph-copy"></i>' +
             '</button>' +
           '</div>' +
