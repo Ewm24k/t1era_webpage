@@ -42,7 +42,7 @@ def add_cors(response):
 
 # ─── STREAM GENERATOR ────────────────────────────────────────────────────────
 
-def stream_runpod(messages, max_tokens=8192, temperature=0.7):
+def stream_runpod(messages, max_tokens=8192, temperature=0.7, show_thinking=False):
     """
     Stream tokens from RunPod directly to the browser as SSE.
     Filters out <think>...</think> block — only streams the final answer.
@@ -113,14 +113,20 @@ def stream_runpod(messages, max_tokens=8192, temperature=0.7):
 
                     if in_think:
                         if "</think>" in buffer:
-                            # Think block closed — emit everything after
                             in_think   = False
                             think_done = True
                             after = buffer.split("</think>", 1)[1]
+                            if show_thinking:
+                                # Emit closing tag so frontend knows think block ended
+                                yield f"data: {json.dumps({'token': '</think>'})}\n\n"
                             buffer = ""
                             if after:
                                 yield f"data: {json.dumps({'token': after})}\n\n"
-                        # Still inside think — discard
+                        else:
+                            if show_thinking:
+                                # Stream thinking tokens to frontend
+                                yield f"data: {json.dumps({'token': buffer})}\n\n"
+                            buffer = ""
                         continue
 
                 # ── Normal token — emit to browser ───────────────────────
@@ -150,14 +156,15 @@ def chat():
     if not body or not body.get("messages"):
         return jsonify({"error": "messages array required"}), 400
 
-    messages    = body["messages"]
-    max_tokens  = int(body.get("max_tokens",   8192))
-    temperature = float(body.get("temperature", 0.7))
+    messages      = body["messages"]
+    max_tokens    = int(body.get("max_tokens",   8192))
+    temperature   = float(body.get("temperature", 0.7))
+    show_thinking = bool(body.get("show_thinking", False))
 
-    log.info(f'→ stream  turns={len(messages)}  last="{messages[-1]["content"][:60]}"'  )
+    log.info(f'→ stream  turns={len(messages)}  thinking={show_thinking}  last="{messages[-1]["content"][:60]}"'  )
 
     return Response(
-        stream_with_context(stream_runpod(messages, max_tokens, temperature)),
+        stream_with_context(stream_runpod(messages, max_tokens, temperature, show_thinking)),
         mimetype="text/event-stream",
         headers={
             "Cache-Control":           "no-cache",
