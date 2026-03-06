@@ -46,8 +46,9 @@ def add_cors(response):
 
 # ─── RUNPOD HELPERS ──────────────────────────────────────────────────────────
 
-def call_runpod(messages, max_tokens=32768, temperature=0.7):
-    """Call RunPod OpenAI-compatible endpoint — synchronous, no polling needed."""
+def call_runpod(messages, max_tokens=1024, temperature=0.7):
+    """Call RunPod OpenAI-compatible endpoint — handles both response formats."""
+    import re as _re
     headers = {
         "Authorization": f"Bearer {API_KEY}",
         "Content-Type":  "application/json",
@@ -57,13 +58,32 @@ def call_runpod(messages, max_tokens=32768, temperature=0.7):
         "messages":    messages,
         "max_tokens":  max_tokens,
         "temperature": temperature,
+        "stop":        ["</think>"],
     }
-    resp = requests.post(OPENAI_URL, headers=headers, json=payload, timeout=300)
+    resp = requests.post(OPENAI_URL, headers=headers, json=payload, timeout=600)
     log.info(f"RunPod status: {resp.status_code}")
     resp.raise_for_status()
     data = resp.json()
-    raw = data["choices"][0]["message"]["content"]
-    log.info(f"reply length: {len(raw)}, finish_reason: {data['choices'][0].get('finish_reason')}")
+
+    # Support both OpenAI message format and vLLM tokens format
+    choice = data["choices"][0]
+    if "message" in choice:
+        raw = choice["message"]["content"]
+    elif "tokens" in choice:
+        raw = "".join(choice["tokens"])
+    else:
+        raw = str(choice)
+
+    log.info(f"raw length: {len(raw)}, finish_reason: {choice.get('finish_reason')}")
+
+    # Strip <think>...</think> block — send only final answer to frontend
+    if "<think>" in raw and "</think>" in raw:
+        raw = _re.sub(r"<think>.*?</think>", "", raw, flags=_re.S).strip()
+    elif "<think>" in raw and "</think>" not in raw:
+        # Incomplete thinking block — strip it entirely
+        raw = raw.split("<think>")[-1].strip()
+
+    log.info(f"final reply length: {len(raw)}")
     return raw
 
 # ─── ROUTES ──────────────────────────────────────────────────────────────────
