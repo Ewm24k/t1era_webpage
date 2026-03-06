@@ -643,3 +643,19 @@
 .t1c-answer {
   margin-top: 4px;
 }
+
+/* ── Streaming cursor ────────────────────────────────── */
+.t1c-body.t1c-streaming::after {
+  content: "";
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background: rgba(139,92,246,0.8);
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  animation: t1cBlink 0.7s step-end infinite;
+}
+@keyframes t1cBlink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
