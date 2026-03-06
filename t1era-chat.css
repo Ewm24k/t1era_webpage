@@ -30,6 +30,16 @@
   max-width: min(836px, calc(100vw - 64px));
 }
 
+@media (max-width: 1079px) {
+  #t1eraConversation {
+    max-width: calc(100vw - 24px);
+  }
+  #t1eraChatBody.chat-active {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}
+
 /* ── Message row — wraps the full bubble card ── */
 .t1c-row {
   width: 100%;
@@ -767,4 +777,9 @@
 .t1c-think-dot.t1c-think-dot-on {
   background: rgba(139,92,246,1);
   box-shadow: 0 0 4px rgba(139,92,246,0.8);
+}
+
+/* ── Hide PC-only attachment button on mobile ─────────── */
+@media (max-width: 1079px) {
+  .t1c-add-btn { display: none !important; }
 }
