@@ -1096,7 +1096,7 @@
         input: {
           model:       RUNPOD_MODEL,
           messages:    _history,
-          max_tokens:  32768,
+          max_tokens:  8192,
           temperature: 0.7,
         }
       }),
@@ -1170,13 +1170,14 @@
   function _renderAiText(text, role) {
     if (role !== "ai") return _formatText(_escHtml(text));
 
-    var thinkMatch = text.match(/^<think>([\s\S]*)<\/think>([\s\S]*)$/);
-
-    if (thinkMatch) {
-      var thinkContent = thinkMatch[1].trim();
-      var answerContent = thinkMatch[2].trim();
-      var thinkId = "t1cThink_" + Date.now();
-
+    // Server already strips <think> block — just render clean answer
+    // But handle edge case where truncated <think> leaks through
+    if (text.indexOf("</think>") > -1) {
+      // Has closing tag — split and show both
+      var parts     = text.split("</think>");
+      var thinkText = parts[0].replace(/^<think>/, "").trim();
+      var answer    = parts.slice(1).join("").trim();
+      var thinkId   = "t1cThink_" + Date.now();
       var onclk = "var b=document.getElementById('" + thinkId + "');" +
                   "b.style.display=b.style.display==='none'?'block':'none';" +
                   "this.classList.toggle('open')";
@@ -1186,30 +1187,34 @@
             '<span class="t1c-think-icon"><span></span><span></span><span></span></span> Thinking <i class="ph-bold ph-caret-down t1c-think-caret"></i>' +
           '</div>' +
           '<div class="t1c-think-body" id="' + thinkId + '" style="display:none">' +
-            _formatText(_escHtml(thinkContent)) +
+            _formatText(_escHtml(thinkText)) +
           '</div>' +
         '</div>' +
-        '<div class="t1c-answer">' +
-          _formatText(_escHtml(answerContent)) +
-        '</div>'
+        '<div class="t1c-answer">' + _formatText(_escHtml(answer)) + '</div>'
       );
     }
 
-    // No </think> closing yet — thinking still in progress or no thinking
-    if (text.startsWith("<think>")) {
+    if (text.indexOf("<think>") === 0) {
+      // Truncated — show as thinking in progress
       var raw = text.replace(/^<think>/, "").trim();
+      var thinkId2 = "t1cThink_" + Date.now();
+      var onclk2 = "var b=document.getElementById('" + thinkId2 + "');" +
+                   "b.style.display=b.style.display==='none'?'block':'none';" +
+                   "this.classList.toggle('open')";
       return (
-        '<div class="t1c-think-block t1c-think-open">' +
-          '<div class="t1c-think-toggle">' +
-            '<span class="t1c-think-icon"><span></span><span></span><span></span></span> Thinking...' +
+        '<div class="t1c-think-block">' +
+          '<div class="t1c-think-toggle" onclick="' + onclk2 + '">' +
+            '<span class="t1c-think-icon"><span></span><span></span><span></span></span> Thinking <i class="ph-bold ph-caret-down t1c-think-caret"></i>' +
           '</div>' +
-          '<div class="t1c-think-body" style="display:block">' +
+          '<div class="t1c-think-body" id="' + thinkId2 + '" style="display:block">' +
             _formatText(_escHtml(raw)) +
           '</div>' +
-        '</div>'
+        '</div>' +
+        '<div class="t1c-answer" style="color:rgba(255,255,255,0.35);font-size:12px;padding:8px 0 0">⚠️ Response was cut off — try again.</div>'
       );
     }
 
+    // Clean answer — render directly
     return _formatText(_escHtml(text));
   }
 
