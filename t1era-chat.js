@@ -810,15 +810,9 @@
     // Add user turn to history then call real AI
     _history.push({ role: "user", content: fullText });
 
-    _callT1ERA(fullText)
+    _callT1ERA(fullText, loadingId)
       .then(function (reply) {
-        removeLoading(loadingId);
         _history.push({ role: "assistant", content: reply });
-        console.log("T1ERA reply length:", reply.length);
-        console.log("T1ERA has </think>:", reply.indexOf("</think>") > -1);
-        console.log("T1ERA first 100:", reply.slice(0, 100));
-        console.log("T1ERA last 100:", reply.slice(-100));
-        appendMessage({ role: "ai", text: reply, model: _activeModel });
         _scrollToBottom();
       })
       .catch(function (err) {
@@ -828,7 +822,7 @@
           (err.message || "could not reach T1ERA AI. Please try again.");
         appendMessage({ role: "ai", text: errMsg, model: _activeModel });
         _scrollToBottom();
-        _history.pop(); // remove failed user turn so retry is clean
+        _history.pop();
       });
   }
 
@@ -1070,81 +1064,125 @@
     }, 1800);
   }
 
-  /* ═══════════════════════════════════════════════════
-     REAL AI — RunPod Serverless
-     Calls the Render proxy which polls RunPod for the reply.
-     Carries full _history for multi-turn context.
-  ═══════════════════════════════════════════════════ */
-  /* RunPod config — direct from browser, no proxy server needed */
-  var RUNPOD_API_KEY  = "rpa_DBSA1I3ZW11KF5BYTI9RXVD8W33AISG1GWQ3JL6E1uc37u";
-  var RUNPOD_ENDPOINT = "xd50gpmd9jahih";
-  var RUNPOD_MODEL    = "qwen/qwen3-14b-awq";
-  var RUNPOD_RUN_URL  = "https://api.runpod.ai/v2/" + RUNPOD_ENDPOINT + "/run";
-  var RUNPOD_STAT_URL = "https://api.runpod.ai/v2/" + RUNPOD_ENDPOINT + "/status";
+  var T1ERA_API = "https://t1era-webpage-1.onrender.com";
 
-  function _callT1ERA(userText) {
-    var headers = {
-      "Authorization": "Bearer " + RUNPOD_API_KEY,
-      "Content-Type":  "application/json",
-    };
+  // Keep Render awake — ping on load + every 4 min
+  fetch(T1ERA_API + "/health").catch(function () {});
+  setInterval(function () {
+    fetch(T1ERA_API + "/health").catch(function () {});
+  }, 4 * 60 * 1000);
 
-    // Step 1 — submit job
-    return fetch(RUNPOD_RUN_URL, {
-      method:  "POST",
-      headers: headers,
-      body: JSON.stringify({
-        input: {
-          model:       RUNPOD_MODEL,
+  /* ─── Streaming AI call ─────────────────────────────────────────
+     Reads SSE stream from Render → tokens arrive live → appended
+     to the bubble as they come. <think> block filtered server-side.
+  ──────────────────────────────────────────────────────────────── */
+  function _callT1ERA(userText, loadingId) {
+    return new Promise(function (resolve, reject) {
+
+      fetch(T1ERA_API + "/chat", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
           messages:    _history,
+          model:       _activeModel,
           max_tokens:  8192,
           temperature: 0.7,
+        }),
+      })
+      .then(function (resp) {
+        if (!resp.ok) {
+          return resp.json().then(function (e) {
+            throw new Error(e.error || "Server error " + resp.status);
+          });
         }
-      }),
-    })
-    .then(function (res) { return res.json(); })
-    .then(function (data) {
-      var jobId = data.id;
-      if (!jobId) throw new Error("No job ID from RunPod");
 
-      // Step 2 — poll status until COMPLETED
-      return new Promise(function (resolve, reject) {
-        var attempts = 0;
-        var maxAttempts = 60; // 60 × 2s = 120s max
+        var reader     = resp.body.getReader();
+        var decoder    = new TextDecoder();
+        var fullText   = "";
+        var bubbleBody = null;  // set after first token
+        var firstToken = true;
 
-        function poll() {
-          fetch(RUNPOD_STAT_URL + "/" + jobId, { headers: headers })
-            .then(function (res) { return res.json(); })
-            .then(function (s) {
-              var status = s.status;
+        function read() {
+          reader.read().then(function (result) {
+            if (result.done) {
+              resolve(fullText);
+              return;
+            }
 
-              if (status === "COMPLETED") {
-                // Extract reply — tokens array (your pod format)
-                var out = s.output;
-                var reply = null;
-                try {
-                  reply = out[0].choices[0].tokens
-                    ? out[0].choices[0].tokens[0]
-                    : out[0].choices[0].message.content;
-                } catch (e) {}
-                resolve(reply || "[No reply]");
+            var lines = decoder.decode(result.value, { stream: true }).split("
+");
 
-              } else if (status === "FAILED" || status === "CANCELLED") {
-                reject(new Error("RunPod job " + status));
+            lines.forEach(function (line) {
+              if (!line.startsWith("data:")) return;
+              var data = line.slice(5).trim();
+              if (data === "[DONE]") { resolve(fullText); return; }
 
-              } else if (++attempts >= maxAttempts) {
-                reject(new Error("Timed out waiting for AI response"));
+              var parsed;
+              try { parsed = JSON.parse(data); } catch (e) { return; }
 
-              } else {
-                setTimeout(poll, 2000);
+              if (parsed.error) { reject(new Error(parsed.error)); return; }
+
+              var token = parsed.token || "";
+              if (!token) return;
+
+              fullText += token;
+
+              // First token — remove loading bubble, create streaming bubble
+              if (firstToken) {
+                firstToken = false;
+                removeLoading(loadingId);
+                var uid = "t1cStream_" + Date.now();
+                _appendStreamBubble(uid);
+                bubbleBody = document.getElementById(uid + "_body");
               }
-            })
-            .catch(function (err) { reject(err); });
+
+              // Append token to bubble live
+              if (bubbleBody) {
+                bubbleBody.innerHTML = _formatText(_escHtml(fullText));
+                _scrollToBottom();
+              }
+            });
+
+            read();
+          }).catch(function (err) { reject(err); });
         }
 
-        poll();
-      });
+        read();
+      })
+      .catch(function (err) { reject(err); });
     });
   }
+
+  function _appendStreamBubble(uid) {
+    if (!_convo) return;
+    var now = _formatTime();
+    var row = document.createElement("div");
+    row.className = "t1c-row t1c-ai";
+    row.id = uid;
+    row.innerHTML =
+      '<div class="t1c-card">' +
+        '<div class="t1c-header">' +
+          '<div class="t1c-header-left">' +
+            '<div class="t1c-av-wrap"><div class="t1c-avatar">&#x26a1;</div></div>' +
+            '<span class="t1c-sender">T1ERA AI</span>' +
+            '<span class="t1c-model-tag">' + _escHtml(_activeModel) + '</span>' +
+          '</div>' +
+          '<span class="t1c-timestamp">' + now + '</span>' +
+        '</div>' +
+        '<div class="t1c-body t1c-streaming" id="' + uid + '_body"></div>' +
+        '<div class="t1c-footer">' +
+          '<span class="t1c-timestamp"></span>' +
+          '<div class="t1c-actions">' +
+            '<button class="t1c-action-btn" title="Copy" onclick="window.t1cCopy(this,'' + uid + '_body')">' +
+              '<i class="ph-bold ph-copy"></i>' +
+            '</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    _convo.appendChild(row);
+    _scrollToBottom();
+  }
+
 
   /* ══════════════════════════════════════════════════
      HELPERS
