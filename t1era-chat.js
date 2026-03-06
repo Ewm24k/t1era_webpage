@@ -1098,9 +1098,7 @@
       })
       .then(function (resp) {
         if (!resp.ok) {
-          return resp.json().then(function (e) {
-            throw new Error(e.error || "Server error " + resp.status);
-          });
+          throw new Error("_NORETRY_Server error " + resp.status);
         }
 
         var reader      = resp.body.getReader();
@@ -1215,17 +1213,18 @@
         read();
       })
       .catch(function (err) {
-        if (_retryCount < MAX_RETRIES) {
-          // Cold start — update loading text and retry
+        var msg = err ? (err.message || "") : "";
+        var noRetry = msg.indexOf("_NORETRY_") === 0;
+        if (!noRetry && _retryCount < MAX_RETRIES) {
           var loadingBody = document.getElementById(loadingId + "_body");
           if (loadingBody) {
-            loadingBody.innerHTML = "Waking up AI... retrying in " + (RETRY_DELAY / 1000) + "s (" + (_retryCount + 1) + "/" + MAX_RETRIES + ")";
+            loadingBody.innerHTML = "Waking up AI... retrying (" + (_retryCount + 1) + "/" + MAX_RETRIES + ")";
           }
           setTimeout(function () {
             _callT1ERA(userText, loadingId, _retryCount + 1).then(resolve).catch(reject);
           }, RETRY_DELAY);
         } else {
-          reject(err);
+          reject(new Error(noRetry ? msg.replace("_NORETRY_", "") : msg));
         }
       });
     });
