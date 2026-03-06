@@ -921,7 +921,7 @@
       });
     } else {
       avatarHtml =
-        '<div class="t1c-av-wrap"><div class="t1c-avatar">&#x26a1;</div></div>';
+        '<div class="t1c-av-wrap"><div class="t1c-avatar t1c-av-ai"><div class="t1c-ai-orb"><span></span><span></span><span></span></div></div></div>';
     }
 
     var row = document.createElement("div");
@@ -1007,7 +1007,7 @@
       '<div class="t1c-card">' +
       '<div class="t1c-header">' +
       '<div class="t1c-header-left">' +
-      '<div class="t1c-avatar">\u26a1</div>' +
+      '<div class="t1c-avatar t1c-av-ai"><div class="t1c-ai-orb"><span></span><span></span><span></span></div></div>' +
       '<span class="t1c-sender" style="color:var(--purple)">T1ERA AI</span>' +
       '<span class="t1c-model-tag">' +
       _escHtml(_activeModel) +
@@ -1210,7 +1210,7 @@
       '<div class="t1c-card">' +
         '<div class="t1c-header">' +
           '<div class="t1c-header-left">' +
-            '<div class="t1c-av-wrap"><div class="t1c-avatar">&#x26a1;</div></div>' +
+            '<div class="t1c-av-wrap"><div class="t1c-avatar t1c-av-ai"><div class="t1c-ai-orb"><span></span><span></span><span></span></div></div></div>' +
             '<span class="t1c-sender">T1ERA AI</span>' +
             '<span class="t1c-model-tag">' + _escHtml(_activeModel) + '</span>' +
           '</div>' +
