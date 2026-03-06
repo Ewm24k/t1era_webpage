@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
     <title>T1ERA — Sparks</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -1862,7 +1862,8 @@
         bottom: 0;
         left: 0;
         right: 0;
-        height: 60px;
+        height: calc(60px + env(safe-area-inset-bottom));
+        padding-bottom: env(safe-area-inset-bottom);
         z-index: 250;
         background: rgba(0, 0, 0, 0.92);
         backdrop-filter: blur(20px);
@@ -3550,7 +3551,7 @@
       .ai-omnibar-mobile {
         display: none;
         position: fixed;
-        bottom: 60px;
+        bottom: calc(60px + env(safe-area-inset-bottom));
         left: 0;
         right: 0;
         z-index: 240;
@@ -3649,7 +3650,7 @@
           display: block;
           /* fixed in viewport — cannot be pushed by scroll or flex */
           position: fixed;
-          bottom: 48px;
+          bottom: 16px;
           left: 50%;
           transform: translateX(-50%);
           width: min(836px, calc(100vw - 64px));
@@ -3761,10 +3762,10 @@
           font-size: 18px;
         }
         body.t1era-active .ai-omnibar-mobile {
-          bottom: 44px;
+          bottom: calc(44px + env(safe-area-inset-bottom));
         }
         /* body padding: compact mob-nav(44) + omnibar input(~50) */
-        body.t1era-active { padding-bottom: 100px; }
+        body.t1era-active { padding-bottom: calc(100px + env(safe-area-inset-bottom)); }
       }
     </style>
   
@@ -5579,10 +5580,6 @@
                     <span id="pickerLabelPc">T1x.V1.1</span>
                     <i class="ph-bold ph-caret-down"></i>
                   </button>
-                  <button class="t1c-think-toggle-btn" id="thinkToggleBtn" onclick="window.t1cToggleThinking()" title="Thinking mode">
-                    <i class="ph-bold ph-brain"></i>
-                    <span class="t1c-think-dot" id="thinkDot"></span>
-                  </button>
                 </div>
               </div>
               <!-- Col 2: send button -->
@@ -5897,10 +5894,6 @@
               <i class="ph-bold ph-robot"></i>
               <span id="pickerLabelMob">T1x.V1.1</span>
               <i class="ph-bold ph-caret-down"></i>
-            </button>
-            <button class="t1c-think-toggle-btn" onclick="window.t1cToggleThinking()" title="Thinking mode">
-              <i class="ph-bold ph-brain"></i>
-              <span class="t1c-think-dot" id="thinkDotMob"></span>
             </button>
           </div>
         </div>
