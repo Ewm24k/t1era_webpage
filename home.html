@@ -3099,7 +3099,7 @@
                   <p>Intelligent conversations powered by advanced AI · Multi-mode support · 24/7 Available</p>
                 </div>
               </div>
-              <a class="btn btn-chat" href="ChatT1era.html" style="flex-shrink:0;">
+              <a class="btn btn-chat" href="https://t1era.netlify.app/spark" style="flex-shrink:0;">
                 ⚡ Try Now — Free
               </a>
             </div>
@@ -3118,7 +3118,7 @@
                   <p>Text-to-video powered by LTX-2 on Azure A10 GPU · Up to 1080p · 24fps</p>
                 </div>
               </div>
-              <a class="btn btn-video" href="https://ba524658328f4e9a45.gradio.live" style="flex-shrink:0;" target="_blank">
+              <a class="btn btn-video" href="https://t1era.netlify.app/spark" style="flex-shrink:0;">
                 ⚡ Try Now — Free
               </a>
             </div>
@@ -4051,6 +4051,8 @@
       saveAuthCache(user);
       applySignedInUI(user.displayName, user.email, user.photoURL);
       injectSignOutBtn();
+      // Authenticated users should be on Spark, not the landing page
+      window.location.replace('https://t1era.netlify.app/spark');
     } else {
       saveAuthCache(null);
       // Only switch to signed-out UI if we're not mid-signout animation
