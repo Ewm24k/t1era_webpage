@@ -509,7 +509,7 @@
         <div class="hov-lsub">Too many failed verification attempts detected.<br>HOV Security has flagged this session as suspicious.</div>
         <div class="hov-timer" id="hLockTimer">60</div>
         <div class="hov-lsub" style="font-size:11px;opacity:.6;">seconds remaining before you can try again</div>
-        <button class="hov-lbtn" onclick="location.href='home.html'">🏠 Go to Home Page</button>
+        <button class="hov-lbtn" onclick="location.href='https://t1era.netlify.app/spark'">🏠 Go to Home Page</button>
         <button class="hov-lbtn" onclick="location.href='https://t.me/T1ERA_SecBot'" style="margin-top:4px;">🚀 Open Telegram Instead</button>
       </div>
     </div>
@@ -706,6 +706,18 @@
 
     onAuthStateChanged(auth, async user => {
       if (user) {
+        // ── Early redirect: already authenticated, not a fresh login ──
+        if (!window._isNewSignup && !window._isLoggingIn) {
+          try {
+            const snap = await getDoc(doc(db, 'users', user.uid));
+            if (snap.exists() && snap.data().setupCompletedAt) {
+              window.location.replace('https://t1era.netlify.app/spark');
+              return;
+            }
+            // Setup incomplete — fall through to normal flow
+          } catch (e) { /* fall through */ }
+        }
+
         document.getElementById('authF').style.display = 'none';
         const p = document.getElementById('lgdin');
         p.classList.add('on');
@@ -738,9 +750,9 @@
           try {
             const snap = await getDoc(doc(db, 'users', user.uid));
             if (snap.exists() && snap.data().setupCompletedAt) {
-              // Setup is done — go home
-              txt.textContent = 'Redirecting to Home...';
-              setTimeout(() => { window.location.href = 'home.html'; }, 800);
+              // Setup is done — go to Spark
+              txt.textContent = 'Redirecting to Spark...';
+              setTimeout(() => { window.location.href = 'https://t1era.netlify.app/spark'; }, 800);
             } else {
               // Setup not done — send to account-setup
               txt.textContent = 'Completing your profile...';
@@ -840,7 +852,7 @@
     document.getElementById('fgLink').addEventListener('click',e=>{e.preventDefault();const v=document.getElementById('lE').value.trim();if(v)document.getElementById('rE').value=v;sw('reset');});
 
     /* LOGIN */
-    async function doLogin(){clrA('lErr');clrA('lOk');if(locked())return;const email=sanitize(document.getElementById('lE').value);const pass=document.getElementById('lP').value;if(!chkEmail('lE','lESt',true)){showA('lErr','Valid email required.','err');return;}if(!pass){showA('lErr','Password required.','err');return;}setLd('lBtn',true);try{
+    async function doLogin(){clrA('lErr');clrA('lOk');if(locked())return;const email=sanitize(document.getElementById('lE').value);const pass=document.getElementById('lP').value;if(!chkEmail('lE','lESt',true)){showA('lErr','Valid email required.','err');return;}if(!pass){showA('lErr','Password required.','err');return;}setLd('lBtn',true);window._isLoggingIn=true;try{
         // NO VERIFICATION CHECK — just sign in
         await window._fb.signInWithEmailAndPassword(window._auth,email,pass);markOk();showA('lOk','Welcome back!','ok');}catch(err){markFail();showA('lErr',fbMsg(err.code),'err');setLd('lBtn',false);}}
     window.doLogin=doLogin;
@@ -852,7 +864,7 @@
     async function doSignupFirebase(name,email,pass){try{const methods=await window._fb.fetchSignInMethodsForEmail(window._auth,email);if(methods.length>0){showA('sErr','Email already registered. <a href="#" onclick="sw(\'login\');return false;" style="color:var(--blue)">Sign in →</a>','err');setLd('sBtn',false);return;}}catch(e){}try{const cred=await window._fb.createUserWithEmailAndPassword(window._auth,email,pass);await window._fb.updateProfile(cred.user,{displayName:name});window._isNewSignup=true;}catch(err){showA('sErr',fbMsg(err.code),'err');setLd('sBtn',false);}}
 
     /* GOOGLE AUTH */
-    async function doGoogle(mode){clrA('lErr');if(locked())return;const btnId=mode==='login'?'lGBtn':'gSignupBtn';const btn=document.getElementById(btnId);if(btn){btn.style.opacity='0.6';btn.style.pointerEvents='none';}try{const result=await window._fb.signInWithPopup(window._auth,window._gp);const info=window._fb.getAdditionalUserInfo(result);if(mode==='login'&&info.isNewUser){await window._fb.signOut(window._auth);markFail();showA('lErr','No account found. <a href="#" onclick="sw(\'signup\');" style="color:var(--blue)">Sign up first →</a>','err');return;}if(mode==='signup'&&info.isNewUser){window._isNewSignup=true;}markOk();}catch(err){console.error("Google Auth Crash Handler:",err);if(err.message&&(err.message.includes('closed')||err.message.includes('blocked')||err.message.includes('Assertion'))){showA(mode==='login'?'lErr':'sErr','Browser blocked the popup. Please try again.','warn');}else{showA(mode==='login'?'lErr':'sErr',fbMsg(err.code),'err');}}finally{if(btn){btn.style.opacity='';btn.style.pointerEvents='';}}}
+    async function doGoogle(mode){clrA('lErr');if(locked())return;const btnId=mode==='login'?'lGBtn':'gSignupBtn';const btn=document.getElementById(btnId);if(btn){btn.style.opacity='0.6';btn.style.pointerEvents='none';}window._isLoggingIn=true;try{const result=await window._fb.signInWithPopup(window._auth,window._gp);const info=window._fb.getAdditionalUserInfo(result);if(mode==='login'&&info.isNewUser){await window._fb.signOut(window._auth);markFail();showA('lErr','No account found. <a href="#" onclick="sw(\'signup\');" style="color:var(--blue)">Sign up first →</a>','err');return;}if(mode==='signup'&&info.isNewUser){window._isNewSignup=true;}markOk();}catch(err){console.error("Google Auth Crash Handler:",err);if(err.message&&(err.message.includes('closed')||err.message.includes('blocked')||err.message.includes('Assertion'))){showA(mode==='login'?'lErr':'sErr','Browser blocked the popup. Please try again.','warn');}else{showA(mode==='login'?'lErr':'sErr',fbMsg(err.code),'err');}}finally{if(btn){btn.style.opacity='';btn.style.pointerEvents='';}}}
     window.doGoogle=doGoogle;
 
     /* RESET */
