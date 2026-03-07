@@ -89,10 +89,12 @@
    SEARCH BAR
 ══════════════════════════════════════════ */
       .search-bar-wrap {
-        position: sticky;
+        position: fixed;
         top: 52px;
-        z-index: 299;
-        background: rgba(0, 0, 0, 0.88);
+        left: 0;
+        right: 0;
+        z-index: 298;
+        background: rgba(0, 0, 0, 0.92);
         backdrop-filter: blur(20px);
         border-bottom: 1px solid var(--border);
         max-height: 0;
@@ -251,6 +253,10 @@
         max-width: 680px;
         margin: 0 auto;
         padding-top: 98px;
+        transition: padding-top 0.28s var(--ease);
+      }
+      body.search-open .page-wrap {
+        padding-top: 158px;
       }
 
       /* PC 3-column */
@@ -262,6 +268,9 @@
           gap: 0;
           align-items: start;
           padding: 147px 24px 0;
+        }
+        body.search-open .page-wrap {
+          padding-top: 207px;
         }
       }
 
@@ -573,6 +582,10 @@
         backdrop-filter: blur(16px);
         border-bottom: 1px solid var(--border);
         display: flex;
+        transition: top 0.28s var(--ease);
+      }
+      body.search-open .tabs-bar {
+        top: 158px;
       }
       @media (min-width: 1080px) {
         .tabs-bar {
