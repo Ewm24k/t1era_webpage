@@ -45,7 +45,8 @@ const RING_GRADIENTS = {
   none: null,
   white: "#ffffff",
   "white-grey": "linear-gradient(135deg,#ffffff,#888888)",
-  "pink-purple": "conic-gradient(var(--pink) 0deg,var(--purple) 90deg,var(--pink-2) 180deg,var(--pink) 360deg)",
+  "pink-purple":
+    "conic-gradient(var(--pink) 0deg,var(--purple) 90deg,var(--pink-2) 180deg,var(--pink) 360deg)",
   gold: "linear-gradient(135deg,#f59e0b,#fbbf24)",
   green: "linear-gradient(135deg,#10b981,#34d399)",
   blue: "linear-gradient(135deg,#3b82f6,#60a5fa)",
@@ -90,7 +91,7 @@ window._resolveDisplayName = resolveDisplayName;
 // ── AUTH STATE ──
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
-    window.location.replace("home.html");
+    window.location.replace("https://t1era.netlify.app/auth");
     return;
   }
 
@@ -1933,8 +1934,8 @@ function getMidnightText() {
 
 function applyComposeAvatar(photoURL, initial) {
   // Store resolved user photo + initial for t1era-chat.js bubble avatars
-  window._t1eraUserPhoto   = photoURL || "";
-  window._t1eraUserInitial = initial  || "U";
+  window._t1eraUserPhoto = photoURL || "";
+  window._t1eraUserInitial = initial || "U";
   const miniAv = document.getElementById("miniAv");
   const composeAv = document.getElementById("composeAv");
   const promptMiniAv = document.getElementById("promptMiniAv");
