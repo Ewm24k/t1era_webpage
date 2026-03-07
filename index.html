@@ -57,7 +57,8 @@
       inset: 0;
       z-index: 1;
       perspective: 1000px;
-      transform-style: preserve-3d;
+      -webkit-transform: translateZ(0);
+      transform: translateZ(0);
     }
 
     .grid-layer {
@@ -171,7 +172,11 @@
       background: inherit;
       -webkit-background-clip: text;
       background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
       opacity: 0.8;
+      -webkit-transform: translateZ(0);
+      transform: translateZ(0);
     }
 
     .logo-main::before {
@@ -538,6 +543,14 @@
       50% { opacity: 0.8; }
     }
 
+    /* ========== iOS FIX — all browsers on iPhone/iPad (Safari, Chrome, Firefox etc) ========== */
+    .ios-device .logo-main {
+      filter: drop-shadow(0 0 30px rgba(59, 130, 246, 0.6))
+              drop-shadow(0 0 50px rgba(139, 92, 246, 0.4));
+      animation: logoGradientShift 4s ease-in-out infinite,
+                 logoFloat 3s ease-in-out infinite;
+    }
+
     /* ========== MOBILE RESPONSIVE ========== */
     @media (max-width: 768px) {
       .logo-main {
@@ -665,6 +678,10 @@
   </div>
 
   <script>
+    // ── iOS detection: covers Safari, Chrome, Firefox, Edge — all use WebKit on iOS ──
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+                  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    if (isIOS) document.documentElement.classList.add('ios-device');
     // Generate Animated Particles
     const particleContainer = document.getElementById('particleContainer');
     const particleCount = 50;
