@@ -148,6 +148,10 @@ onAuthStateChanged(auth, async (user) => {
   await loadFollowingSet(user.uid);
   await loadWhoToFollow(user.uid);
   renderAppearanceSettings();
+  // Mobile "Who to Follow" popup — only fires on mobile, max 2x/day
+  if (typeof window._initWtfPopup === "function") {
+    window._initWtfPopup();
+  }
 });
 
 // ══════════════════════════════════════════════════════════════════════
