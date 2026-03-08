@@ -98,7 +98,7 @@
         border-bottom: 1px solid var(--border);
       }
       .search-bar-wrap.open {
-        max-height: 60px;
+        max-height: 420px;
         opacity: 1;
       }
       .search-bar-inner {
@@ -148,6 +148,101 @@
       .search-bar-close:hover {
         background: rgba(255, 255, 255, 0.06);
         color: var(--text);
+      }
+      /* ── User Search Results Dropdown ── */
+      .search-user-results {
+        border-top: 1px solid var(--border);
+        max-height: 340px;
+        overflow-y: auto;
+      }
+      .search-user-results::-webkit-scrollbar { width: 4px; }
+      .search-user-results::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+      .search-user-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 16px;
+        cursor: pointer;
+        transition: background 0.15s;
+        border-bottom: 1px solid rgba(255,255,255,0.04);
+      }
+      .search-user-item:hover {
+        background: rgba(255,255,255,0.04);
+      }
+      .search-user-av {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        background: linear-gradient(135deg, var(--pink), var(--purple));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 14px;
+        color: #fff;
+        overflow: hidden;
+      }
+      .search-user-av img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+      }
+      .search-user-info {
+        flex: 1;
+        min-width: 0;
+      }
+      .search-user-name {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .search-user-handle {
+        font-size: 11px;
+        color: var(--text-3);
+        font-family: var(--f-mono);
+      }
+      .search-user-follow-btn {
+        flex-shrink: 0;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.15s;
+        border: 1px solid rgba(194,24,91,0.4);
+        background: rgba(194,24,91,0.1);
+        color: var(--pink);
+      }
+      .search-user-follow-btn:hover {
+        background: var(--pink);
+        color: #fff;
+      }
+      .search-user-follow-btn.following {
+        border-color: var(--border);
+        background: none;
+        color: var(--text-3);
+      }
+      .search-user-follow-btn.following:hover {
+        border-color: rgba(239,68,68,0.4);
+        background: rgba(239,68,68,0.08);
+        color: rgba(239,68,68,0.8);
+      }
+      .search-user-empty {
+        padding: 20px 16px;
+        text-align: center;
+        font-size: 12px;
+        color: var(--text-3);
+      }
+      .search-user-loading {
+        padding: 16px;
+        text-align: center;
+        font-size: 12px;
+        color: var(--text-3);
       }
       .search-no-results {
         text-align: center;
@@ -4029,7 +4124,7 @@
               class="search-bar-input"
               id="searchInput"
               type="text"
-              placeholder="Search sparks, #hashtags…"
+              placeholder="Search sparks, #hashtags, or @users…"
               autocomplete="off"
               oninput="onSearchInput(this)"
             />
@@ -4037,6 +4132,7 @@
               <i class="ph-bold ph-x"></i>
             </button>
           </div>
+          <div class="search-user-results" id="searchUserResults" style="display:none;"></div>
         </div>
 
         <!-- ══ SUPER PANEL 0 — SPARKS (all existing content) ══ -->
