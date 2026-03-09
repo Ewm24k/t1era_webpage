@@ -741,24 +741,8 @@
 
       <!-- TAB CONTENT: SERVERLESS -->
       <div id="tab-serverless" class="tab-content">
-        <div class="filters" style="justify-content: flex-end;">
-          <button class="btn-primary" id="btnServerlessDeploy" onclick="serverlessGoToGPUs('deploy')">
-            <i class="ph-bold ph-rocket-launch"></i> Deploy
-          </button>
-          <button class="btn-outline" style="margin-left: 10px;" onclick="serverlessGoToGPUs('create')">
-            <i class="ph-bold ph-plus"></i> Create
-          </button>
-        </div>
-
-        <div class="empty-state" id="serverlessEmptyState">
-          <i class="ph-fill ph-lightning"></i>
-          <h3>No Serverless Endpoints</h3>
-          <p>Deploy a serverless endpoint to get started. Choose a GPU and configure your inference settings — no server management needed.</p>
-        </div>
-
-        <!-- Active serverless endpoints list (shown after deploy) -->
-        <div id="serverlessEndpointList" style="display:none;">
-          <!-- Populated dynamically -->
+        <div id="serverlessContent">
+          <!-- Rendered by pod-serverless.js -->
         </div>
       </div>
 
@@ -1258,6 +1242,11 @@
       });
     });
 
-  </script>
+  <!-- Firebase compat SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <!-- Serverless instance manager -->
+  <script src="pod-serverless.js"></script>
 </body>
 </html>
