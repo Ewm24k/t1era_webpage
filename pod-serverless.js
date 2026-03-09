@@ -7,6 +7,8 @@
  *   1. Auth gate  – redirects to auth.html if Firebase user not logged in
  *   2. Uptime persists across refresh using lastStartedAt timestamp
  *   3. New pods saved to Firebase Firestore: users/{uid}/pods/{id}
+ *   4. syncBalanceDOMs syncs balanceAmount, sidebarBalance, slHeaderBalance, runwayBalance
+ *   5. renderAll hides skeleton (#serverlessSkeleton) and shows #serverlessContent
  *
  * Firebase SDK scripts required in Pod-workflow.html (before this file):
  *   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -248,6 +250,11 @@
     var wrap = document.getElementById('serverlessContent');
     if (!wrap) return;
 
+    // 5. Hide skeleton, show content
+    var skel = document.getElementById('serverlessSkeleton');
+    if (skel) skel.style.display = 'none';
+    wrap.style.display = 'block';
+
     if (_instances.length === 0) {
       wrap.innerHTML = emptyStateHTML();
       syncBalanceDOMs();
@@ -281,9 +288,10 @@
     }
   }
 
+  /* 4. syncBalanceDOMs — syncs all 4 balance targets including runwayBalance */
   function syncBalanceDOMs() {
     var fmt = '$' + _balance.toFixed(2);
-    ['balanceAmount', 'sidebarBalance', 'slHeaderBalance'].forEach(function (id) {
+    ['balanceAmount', 'sidebarBalance', 'slHeaderBalance', 'runwayBalance'].forEach(function (id) {
       var el = document.getElementById(id);
       if (el) el.textContent = fmt;
     });
@@ -311,7 +319,7 @@
       '<div class="sl-empty">',
         '<div class="sl-empty-icon"><i class="ph-fill ph-lightning"></i></div>',
         '<h3>No Active Instances</h3>',
-        '<p>Go to <strong>Secure Cloud</strong>, choose a GPU,<br>',
+        '<p>Go to <strong>GPU Instances</strong>, choose a GPU,<br>',
         'and hit <strong>Deploy Now</strong> — it appears here automatically.</p>',
       '</div>'
     ].join('');
