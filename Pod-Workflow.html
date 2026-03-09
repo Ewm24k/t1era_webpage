@@ -57,7 +57,10 @@
       height: 100vh;
       overflow: hidden;
       -webkit-font-smoothing: antialiased;
+      opacity: 0;
+      transition: opacity 0.4s ease;
     }
+    body.loaded { opacity: 1; }
 
     /* --- AUTH LOADING GATE --- */
     #authGate {
@@ -83,8 +86,6 @@
     @keyframes gateSpin { to { transform: rotate(360deg); } }
 
     /* --- SKELETON LOADING --- */
-    .page-content { opacity: 0; transition: opacity 0.4s ease; }
-    .page-content.loaded { opacity: 1; }
 
     .skel {
       background: linear-gradient(90deg, var(--bg-surface) 25%, var(--bg-elevated) 50%, var(--bg-surface) 75%);
@@ -703,9 +704,6 @@
     <div class="gate-text">Checking authentication…</div>
   </div>
 
-  <!-- PAGE CONTENT (hidden until auth confirmed) -->
-  <div class="page-content" id="pageContent">
-
   <!-- SIDEBAR OVERLAY (Mobile) -->
   <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
 
@@ -806,7 +804,7 @@
           <div class="skel skel-card"></div>
           <div class="skel skel-card"></div>
         </div>
-        <div id="serverlessContent" style="display:none;">
+        <div id="serverlessContent">
           <!-- Rendered by pod-serverless.js -->
         </div>
       </div>
@@ -920,8 +918,6 @@
 
     </div>
   </main>
-
-  </div><!-- /page-content -->
 
   <!-- CREATE SERVER MODAL (Centered) -->
   <div class="modal-overlay-center" id="createServerModal">
@@ -1359,7 +1355,7 @@
         }
 
         // Show page with skeletons visible
-        var page = document.getElementById('pageContent');
+        var page = document.body;
         if (page) {
           setTimeout(function() { page.classList.add('loaded'); }, 50);
         }
