@@ -712,10 +712,10 @@
         <a href="#" class="nav-item"><i class="ph ph-gear"></i> Settings</a>
       </div>
       <div class="user-profile">
-        <div class="avatar">JD</div>
+        <div class="avatar" id="sidebarAvatar" style="overflow:hidden;">U</div>
         <div class="user-info">
-          <span class="user-name">John Doe</span>
-          <span class="user-balance">$142.50</span>
+          <span class="user-name" id="sidebarUserName">Loading…</span>
+          <span class="user-balance" id="sidebarBalance">$142.50</span>
         </div>
       </div>
     </div>
@@ -740,8 +740,8 @@
       <!-- TABS -->
       <div class="tabs-wrapper">
         <div class="tabs">
-          <div class="tab active" data-target="tab-compute">Secure Cloud</div>
-          <div class="tab" data-target="tab-serverless">Serverless</div>
+          <div class="tab active" data-target="tab-serverless">Serverless</div>
+          <div class="tab" data-target="tab-compute">GPU Instances</div>
           <div class="tab" data-target="tab-payg">
             Pay as you go <span class="badge-new">New</span>
           </div>
@@ -749,7 +749,7 @@
       </div>
 
       <!-- TAB CONTENT: COMPUTE (GPUs) -->
-      <div id="tab-compute" class="tab-content active">
+      <div id="tab-compute" class="tab-content">
         
         <!-- Filters & Create Server Button -->
         <div class="filters" style="justify-content: flex-end;">
@@ -776,7 +776,7 @@
       </div>
 
       <!-- TAB CONTENT: SERVERLESS -->
-      <div id="tab-serverless" class="tab-content">
+      <div id="tab-serverless" class="tab-content active">
         <div id="serverlessContent">
           <!-- Rendered by pod-serverless.js -->
         </div>
@@ -1311,17 +1311,57 @@
             appId:             "1:279266491659:web:28a03c7b7300fcb152b60e"
           });
 
+      var db = firebase.firestore();
+
       firebase.auth().onAuthStateChanged(function(user) {
         if (!user) {
           window.location.href = 'auth.html';
-        } else {
-          var gate = document.getElementById('authGate');
-          if (gate) {
-            gate.style.opacity = '0';
-            gate.style.transition = 'opacity 0.3s ease';
-            setTimeout(function() { gate.style.display = 'none'; }, 300);
-          }
+          return;
         }
+
+        // Hide auth gate
+        var gate = document.getElementById('authGate');
+        if (gate) {
+          gate.style.opacity = '0';
+          gate.style.transition = 'opacity 0.3s ease';
+          setTimeout(function() { gate.style.display = 'none'; }, 300);
+        }
+
+        // Fetch user profile from Firestore — same pattern as spark
+        db.collection('users').doc(user.uid).get().then(function(snap) {
+          var d = snap.exists ? snap.data() : {};
+          var photoURL   = (d.profilePicture && d.profilePicture.url) || user.photoURL || '';
+          var fullName   = d.firstName && d.lastName
+                           ? (d.firstName + ' ' + d.lastName)
+                           : (d.displayName || user.displayName || user.email || 'User');
+          var initial    = fullName[0].toUpperCase();
+
+          // Update sidebar name
+          var nameEl = document.getElementById('sidebarUserName');
+          if (nameEl) nameEl.textContent = fullName;
+
+          // Update sidebar avatar — photo or initial
+          var avatarEl = document.getElementById('sidebarAvatar');
+          if (avatarEl) {
+            if (photoURL) {
+              avatarEl.innerHTML = '<img src="' + photoURL + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />';
+            } else {
+              avatarEl.textContent = initial;
+            }
+          }
+        }).catch(function() {
+          // Fallback to auth user data only
+          var nameEl = document.getElementById('sidebarUserName');
+          if (nameEl) nameEl.textContent = user.displayName || user.email || 'User';
+          var avatarEl = document.getElementById('sidebarAvatar');
+          if (avatarEl) {
+            if (user.photoURL) {
+              avatarEl.innerHTML = '<img src="' + user.photoURL + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />';
+            } else {
+              avatarEl.textContent = (user.displayName || user.email || 'U')[0].toUpperCase();
+            }
+          }
+        });
       });
     })();
   </script>
