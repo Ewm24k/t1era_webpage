@@ -3,34 +3,43 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>T1ERA - Serverless Endpoints</title>
+  <title>T1ERA - GPU Compute</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
   <style>
     :root {
+      /* Google AI Studio / Modern Cloud Vibe */
       --bg-base: #0a0a0c;
       --bg-surface: #131316;
       --bg-surface-hover: #1c1c21;
       --bg-elevated: #1e1e24;
+      
       --border-subtle: rgba(255, 255, 255, 0.08);
       --border-focus: rgba(138, 180, 248, 0.5);
+      
       --text-primary: #f8f9fa;
       --text-secondary: #9aa0a6;
       --text-tertiary: #5f6368;
+      
+      /* Accents (Gemini/AI Studio inspired) */
       --accent-blue: #8ab4f8;
       --accent-purple: #c58af9;
       --accent-gradient: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+      
       --success: #81c995;
       --warning: #fdd663;
       --danger: #f28b82;
+
       --radius-sm: 8px;
       --radius-md: 12px;
       --radius-lg: 20px;
       --radius-full: 9999px;
+
       --shadow-glow: 0 0 20px rgba(138, 180, 248, 0.15);
       --shadow-modal: 0 24px 40px rgba(0, 0, 0, 0.5);
+      
       --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
@@ -46,6 +55,7 @@
       -webkit-font-smoothing: antialiased;
     }
 
+    /* --- SIDEBAR & OVERLAY --- */
     .sidebar-overlay {
       display: none;
       position: fixed;
@@ -82,9 +92,14 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
-    .logo i { font-size: 24px; -webkit-text-fill-color: var(--accent-blue); }
+
+    .logo i {
+      font-size: 24px;
+      -webkit-text-fill-color: var(--accent-blue);
+    }
 
     .nav-group { margin-bottom: 24px; }
+
     .nav-label {
       font-size: 11px;
       text-transform: uppercase;
@@ -94,6 +109,7 @@
       margin-bottom: 8px;
       padding: 0 8px;
     }
+
     .nav-item {
       display: flex;
       align-items: center;
@@ -107,15 +123,20 @@
       transition: all var(--transition);
       cursor: pointer;
     }
+
     .nav-item i { font-size: 18px; }
     .nav-item:hover { background-color: var(--bg-surface-hover); color: var(--text-primary); }
-    .nav-item.active { background-color: rgba(138, 180, 248, 0.1); color: var(--accent-blue); }
+    .nav-item.active {
+      background-color: rgba(138, 180, 248, 0.1);
+      color: var(--accent-blue);
+    }
 
     .sidebar-footer {
       margin-top: auto;
       padding-top: 20px;
       border-top: 1px solid var(--border-subtle);
     }
+
     .user-profile {
       display: flex;
       align-items: center;
@@ -130,6 +151,7 @@
     .user-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .user-balance { font-size: 12px; color: var(--success); font-family: 'JetBrains Mono', monospace; }
 
+    /* --- MAIN CONTENT --- */
     .main-content {
       flex: 1;
       display: flex;
@@ -139,6 +161,7 @@
       width: 100%;
     }
 
+    /* Header */
     .header {
       height: 72px;
       display: flex;
@@ -151,9 +174,19 @@
       z-index: 5;
       flex-shrink: 0;
     }
-    .header-left { display: flex; align-items: center; gap: 16px; }
-    .mobile-menu-btn { display: none; }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .mobile-menu-btn {
+      display: none;
+    }
+
     .header-title { font-size: 20px; font-weight: 600; }
+
     .header-actions { display: flex; align-items: center; gap: 12px; }
 
     .btn-icon {
@@ -171,6 +204,7 @@
     }
     .btn-icon:hover { background: var(--bg-surface-hover); color: var(--text-primary); }
 
+    /* Content Area */
     .content-scroll {
       flex: 1;
       overflow-y: auto;
@@ -178,51 +212,15 @@
       -webkit-overflow-scrolling: touch;
     }
 
-    /* ---- LOADING SCREEN ---- */
-    #loadingScreen {
-      position: fixed; inset: 0;
-      background: var(--bg-base);
-      z-index: 999;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 16px;
-      transition: opacity 0.4s ease;
-    }
-    #loadingScreen.fade-out { opacity: 0; pointer-events: none; }
-    .loading-logo {
-      font-size: 28px;
-      font-weight: 700;
-      background: var(--accent-gradient);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    .loading-bar {
-      width: 200px;
-      height: 3px;
-      background: var(--bg-elevated);
-      border-radius: 2px;
-      overflow: hidden;
-    }
-    .loading-bar-inner {
-      height: 100%;
-      width: 0%;
-      background: var(--accent-gradient);
-      border-radius: 2px;
-      animation: loadBar 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-    }
-    @keyframes loadBar { to { width: 100%; } }
-    .loading-text { font-size: 13px; color: var(--text-secondary); }
-
-    /* ---- TABS ---- */
+    /* Tabs */
     .tabs-wrapper {
       width: 100%;
       overflow-x: auto;
-      scrollbar-width: none;
-      margin-bottom: 28px;
+      scrollbar-width: none; /* Firefox */
+      margin-bottom: 24px;
     }
-    .tabs-wrapper::-webkit-scrollbar { display: none; }
+    .tabs-wrapper::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+
     .tabs {
       display: inline-flex;
       gap: 8px;
@@ -231,6 +229,7 @@
       border-radius: var(--radius-md);
       border: 1px solid var(--border-subtle);
     }
+
     .tab {
       padding: 8px 16px;
       border-radius: var(--radius-sm);
@@ -244,8 +243,14 @@
       gap: 8px;
       white-space: nowrap;
     }
+
     .tab:hover { color: var(--text-primary); }
-    .tab.active { background: var(--bg-elevated); color: var(--text-primary); box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+    .tab.active {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
     .badge-new {
       background: var(--accent-gradient);
       color: #000;
@@ -256,391 +261,13 @@
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
+
+    /* Tab Content Containers */
     .tab-content { display: none; animation: fadeIn 0.3s ease; }
     .tab-content.active { display: block; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* ---- SERVERLESS SECTION HEADER ---- */
-    .section-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 24px;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-    .section-header-left h2 { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
-    .section-header-left p { font-size: 13px; color: var(--text-secondary); }
-
-    .btn-primary {
-      background: var(--accent-gradient);
-      color: #000;
-      border: none;
-      padding: 10px 18px;
-      border-radius: var(--radius-sm);
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: var(--transition);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-    }
-    .btn-primary:hover { box-shadow: 0 0 20px rgba(197, 138, 249, 0.4); transform: scale(1.02); }
-    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-
-    .btn-outline {
-      background: transparent;
-      color: var(--text-primary);
-      border: 1px solid var(--border-subtle);
-      padding: 8px 14px;
-      border-radius: var(--radius-sm);
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: var(--transition);
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .btn-outline:hover { background: var(--bg-surface-hover); border-color: var(--text-secondary); }
-    .btn-danger {
-      background: rgba(242, 139, 130, 0.1);
-      color: var(--danger);
-      border: 1px solid rgba(242, 139, 130, 0.2);
-      padding: 6px 12px;
-      border-radius: var(--radius-sm);
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: var(--transition);
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-    }
-    .btn-danger:hover { background: rgba(242, 139, 130, 0.2); }
-
-    /* ---- EMPTY STATE ---- */
-    .empty-state {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 80px 20px;
-      text-align: center;
-      background: var(--bg-surface);
-      border: 1px dashed var(--border-subtle);
-      border-radius: var(--radius-lg);
-    }
-    .empty-state i { font-size: 48px; color: var(--text-tertiary); margin-bottom: 16px; }
-    .empty-state h3 { font-size: 18px; color: var(--text-primary); margin-bottom: 8px; font-weight: 600; }
-    .empty-state p { font-size: 13px; color: var(--text-secondary); max-width: 340px; line-height: 1.6; margin-bottom: 24px; }
-
-    /* ---- SERVER CARDS ---- */
-    .servers-list {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .server-card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-lg);
-      padding: 20px 24px;
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
-      animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-
-    @keyframes slideIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .server-card::before {
-      content: '';
-      position: absolute;
-      left: 0; top: 0; bottom: 0;
-      width: 3px;
-      border-radius: 3px 0 0 3px;
-    }
-    .server-card.running::before { background: var(--success); }
-    .server-card.stopped::before { background: var(--text-tertiary); }
-    .server-card.starting::before { background: var(--warning); }
-
-    .server-card:hover {
-      border-color: rgba(138, 180, 248, 0.25);
-      box-shadow: var(--shadow-glow);
-    }
-
-    .server-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: var(--radius-md);
-      background: var(--bg-elevated);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 22px;
-      color: var(--accent-purple);
-      border: 1px solid var(--border-subtle);
-      flex-shrink: 0;
-    }
-
-    .server-info { flex: 1; min-width: 0; }
-    .server-name {
-      font-size: 15px;
-      font-weight: 600;
-      margin-bottom: 4px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .server-meta {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-    .server-meta-item {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      font-size: 12px;
-      color: var(--text-secondary);
-      font-family: 'JetBrains Mono', monospace;
-    }
-    .server-meta-item i { font-size: 14px; color: var(--text-tertiary); }
-
-    .server-status {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 10px;
-      border-radius: var(--radius-full);
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      flex-shrink: 0;
-    }
-    .server-status.running { background: rgba(129, 201, 149, 0.1); color: var(--success); border: 1px solid rgba(129, 201, 149, 0.2); }
-    .server-status.stopped { background: rgba(95, 99, 104, 0.2); color: var(--text-tertiary); border: 1px solid var(--border-subtle); }
-    .server-status.starting { background: rgba(253, 214, 99, 0.1); color: var(--warning); border: 1px solid rgba(253, 214, 99, 0.2); }
-
-    .status-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-    .status-dot.running { background: var(--success); animation: pulse 2s infinite; }
-    .status-dot.stopped { background: var(--text-tertiary); }
-    .status-dot.starting { background: var(--warning); animation: pulse 1s infinite; }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.5; transform: scale(0.8); }
-    }
-
-    .server-stats {
-      display: flex;
-      gap: 24px;
-      flex-shrink: 0;
-    }
-    .stat-item { text-align: right; }
-    .stat-label { font-size: 10px; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 3px; }
-    .stat-value { font-size: 14px; font-weight: 600; font-family: 'JetBrains Mono', monospace; }
-    .stat-value.green { color: var(--success); }
-    .stat-value.yellow { color: var(--warning); }
-
-    .server-actions {
-      display: flex;
-      gap: 8px;
-      flex-shrink: 0;
-    }
-
-    /* ---- UPTIME BADGE ---- */
-    .uptime-chip {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      color: var(--success);
-      background: rgba(129, 201, 149, 0.08);
-      padding: 2px 8px;
-      border-radius: var(--radius-full);
-      border: 1px solid rgba(129, 201, 149, 0.15);
-    }
-
-    /* ---- STATS OVERVIEW ---- */
-    .stats-row {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 16px;
-      margin-bottom: 28px;
-    }
-    .stat-card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-md);
-      padding: 16px 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .stat-card-label { font-size: 11px; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
-    .stat-card-value { font-size: 26px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
-    .stat-card-sub { font-size: 11px; color: var(--text-secondary); }
-
-    /* ---- MODALS ---- */
-    .modal-overlay-center {
-      position: fixed; inset: 0;
-      background: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(4px);
-      z-index: 200;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s ease;
-      padding: 16px;
-    }
-    .modal-overlay-center.active { opacity: 1; pointer-events: auto; }
-    .modal-panel-center {
-      width: 100%;
-      max-width: 460px;
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-lg);
-      transform: scale(0.95) translateY(10px);
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-      display: flex;
-      flex-direction: column;
-      box-shadow: var(--shadow-modal);
-    }
-    .modal-overlay-center.active .modal-panel-center { transform: scale(1) translateY(0); }
-
-    .modal-header {
-      padding: 20px 24px;
-      border-bottom: 1px solid var(--border-subtle);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .modal-title { font-size: 18px; font-weight: 600; }
-    .btn-close { background: transparent; border: none; color: var(--text-secondary); font-size: 20px; cursor: pointer; padding: 4px; border-radius: 6px; transition: var(--transition); }
-    .btn-close:hover { color: var(--text-primary); background: var(--bg-elevated); }
-    .modal-body { padding: 24px; }
-    .modal-footer {
-      padding: 16px 24px;
-      border-top: 1px solid var(--border-subtle);
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-      background: var(--bg-base);
-      border-radius: 0 0 var(--radius-lg) var(--radius-lg);
-    }
-
-    .form-group { margin-bottom: 18px; }
-    .form-label {
-      display: block;
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--text-secondary);
-      margin-bottom: 8px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .form-input, .form-select {
-      width: 100%;
-      background: var(--bg-base);
-      border: 1px solid var(--border-subtle);
-      color: var(--text-primary);
-      padding: 11px 14px;
-      border-radius: var(--radius-sm);
-      font-family: 'Inter', sans-serif;
-      font-size: 14px;
-      outline: none;
-      transition: var(--transition);
-      appearance: none;
-    }
-    .form-input:focus, .form-select:focus { border-color: var(--accent-blue); }
-    .form-input::placeholder { color: var(--text-tertiary); }
-
-    .form-hint { font-size: 11px; color: var(--text-tertiary); margin-top: 6px; line-height: 1.5; }
-
-    /* GPU option cards inside modal */
-    .gpu-options {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-    }
-    .gpu-option {
-      background: var(--bg-base);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-sm);
-      padding: 12px;
-      cursor: pointer;
-      transition: var(--transition);
-    }
-    .gpu-option:hover { border-color: rgba(138, 180, 248, 0.3); }
-    .gpu-option.selected { border-color: var(--accent-blue); background: rgba(138, 180, 248, 0.06); }
-    .gpu-option-name { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
-    .gpu-option-price { font-size: 11px; color: var(--accent-blue); font-family: 'JetBrains Mono', monospace; }
-    .gpu-option-spec { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; }
-
-    /* Deploy button */
-    .btn-deploy {
-      background: var(--accent-gradient);
-      color: #000;
-      border: none;
-      padding: 11px 22px;
-      border-radius: var(--radius-sm);
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: var(--transition);
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .btn-deploy:hover { box-shadow: 0 0 20px rgba(197, 138, 249, 0.4); }
-    .btn-deploy:disabled { opacity: 0.5; cursor: not-allowed; }
-
-    /* ---- TOAST NOTIFICATION ---- */
-    #toast {
-      position: fixed;
-      bottom: 28px;
-      left: 50%;
-      transform: translateX(-50%) translateY(20px);
-      background: var(--bg-elevated);
-      border: 1px solid var(--border-subtle);
-      color: var(--text-primary);
-      padding: 12px 20px;
-      border-radius: var(--radius-sm);
-      font-size: 13px;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      z-index: 9999;
-      opacity: 0;
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-      pointer-events: none;
-      white-space: nowrap;
-    }
-    #toast.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-
-    /* ---- GPU INSTANCES TAB (from original) ---- */
+    /* Filters & Actions */
     .filters {
       display: flex;
       justify-content: space-between;
@@ -648,6 +275,7 @@
       margin-bottom: 24px;
       gap: 16px;
     }
+
     .search-box { position: relative; width: 300px; }
     .search-box i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-tertiary); }
     .search-box input {
@@ -664,11 +292,31 @@
     }
     .search-box input:focus { border-color: var(--accent-blue); }
 
+    /* Empty State */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 20px;
+      text-align: center;
+      background: var(--bg-surface);
+      border: 1px dashed var(--border-subtle);
+      border-radius: var(--radius-lg);
+      margin-top: 20px;
+    }
+    .empty-state i { font-size: 48px; color: var(--text-tertiary); margin-bottom: 16px; }
+    .empty-state h3 { font-size: 18px; color: var(--text-primary); margin-bottom: 8px; font-weight: 600; }
+    .empty-state p { font-size: 13px; color: var(--text-secondary); max-width: 320px; line-height: 1.5; }
+
+    /* GPU Grid */
     .gpu-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
       gap: 20px;
     }
+
+    /* GPU Card */
     .gpu-card {
       background: var(--bg-surface);
       border: 1px solid var(--border-subtle);
@@ -679,7 +327,14 @@
       transition: all 0.3s ease;
       position: relative;
       overflow: hidden;
+      opacity: 0; /* Hidden initially for animation */
+      transform: translateY(20px);
     }
+
+    @keyframes fadeUpIn {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
     .gpu-card::before {
       content: '';
       position: absolute;
@@ -688,846 +343,921 @@
       opacity: 0;
       transition: opacity 0.3s ease;
     }
-    .gpu-card:hover { transform: translateY(-4px); border-color: rgba(138, 180, 248, 0.3); box-shadow: var(--shadow-glow); }
+
+    .gpu-card:hover {
+      transform: translateY(-4px) !important; /* Override animation transform */
+      border-color: rgba(138, 180, 248, 0.3);
+      box-shadow: var(--shadow-glow);
+    }
     .gpu-card:hover::before { opacity: 1; }
+
     .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
     .gpu-title-wrap { display: flex; align-items: center; gap: 12px; }
-    .gpu-icon { width: 40px; height: 40px; background: var(--bg-elevated); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--accent-purple); border: 1px solid var(--border-subtle); flex-shrink: 0; }
+    .gpu-icon {
+      width: 40px; height: 40px;
+      background: var(--bg-elevated);
+      border-radius: var(--radius-md);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; color: var(--accent-purple);
+      border: 1px solid var(--border-subtle);
+      flex-shrink: 0;
+    }
     .gpu-name { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
     .gpu-provider { font-size: 12px; color: var(--text-tertiary); }
-    .badge { padding: 4px 8px; border-radius: var(--radius-full); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+
+    .badge {
+      padding: 4px 8px;
+      border-radius: var(--radius-full);
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
     .badge.available { background: rgba(129, 201, 149, 0.1); color: var(--success); border: 1px solid rgba(129, 201, 149, 0.2); }
     .badge.high-demand { background: rgba(253, 214, 99, 0.1); color: var(--warning); border: 1px solid rgba(253, 214, 99, 0.2); }
-    .specs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; background: var(--bg-base); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); }
+
+    .specs-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+      background: var(--bg-base);
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+    }
+
     .spec-item { display: flex; flex-direction: column; gap: 4px; }
     .spec-label { font-size: 11px; color: var(--text-tertiary); text-transform: uppercase; font-weight: 600; }
     .spec-value { font-size: 13px; font-weight: 500; font-family: 'JetBrains Mono', monospace; }
-    .card-footer { margin-top: auto; display: flex; justify-content: space-between; align-items: center; padding-top: 16px; border-top: 1px solid var(--border-subtle); }
+
+    .card-footer {
+      margin-top: auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 16px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
     .price-wrap { display: flex; flex-direction: column; }
     .price { font-size: 18px; font-weight: 700; font-family: 'JetBrains Mono', monospace; color: var(--text-primary); }
     .price-unit { font-size: 11px; color: var(--text-tertiary); }
 
-    /* ---- PAYG TAB ---- */
-    .payg-layout { display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px; max-width: 1100px; }
-    .payg-card { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 28px; position: relative; overflow: hidden; }
-    .payg-card.glow-border::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--accent-gradient); }
-    .payg-header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+    .btn-primary {
+      background: var(--accent-gradient);
+      color: #000;
+      border: none;
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .btn-primary:hover { box-shadow: 0 0 15px rgba(197, 138, 249, 0.4); transform: scale(1.02); }
+    
+    .btn-outline {
+      background: transparent;
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .btn-outline:hover { background: var(--bg-surface-hover); border-color: var(--text-secondary); }
+
+    /* --- PAY AS YOU GO TAB STYLES --- */
+    .payg-layout {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 24px;
+      max-width: 1100px;
+    }
+
+    .payg-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .payg-card.glow-border::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 3px;
+      background: var(--accent-gradient);
+    }
+
+    .payg-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
     .payg-header i { font-size: 24px; color: var(--accent-blue); }
     .payg-header h2 { font-size: 18px; font-weight: 600; }
+
     .balance-display { margin-bottom: 32px; }
     .balance-label { font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
     .balance-amount { font-size: 48px; font-weight: 700; font-family: 'JetBrains Mono', monospace; color: var(--text-primary); line-height: 1; margin-bottom: 8px; }
     .balance-subtext { font-size: 13px; color: var(--success); display: flex; align-items: center; gap: 6px; }
+
     .amount-selector { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 24px; }
-    .amount-btn { flex: 1; min-width: 80px; background: var(--bg-base); border: 1px solid var(--border-subtle); color: var(--text-primary); padding: 12px; border-radius: var(--radius-sm); font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 600; cursor: pointer; transition: var(--transition); text-align: center; }
+    .amount-btn {
+      flex: 1; min-width: 80px; background: var(--bg-base); border: 1px solid var(--border-subtle);
+      color: var(--text-primary); padding: 12px; border-radius: var(--radius-sm);
+      font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 600;
+      cursor: pointer; transition: var(--transition); text-align: center;
+    }
     .amount-btn:hover { border-color: var(--accent-purple); background: rgba(197, 138, 249, 0.05); }
     .amount-btn.selected { border-color: var(--accent-blue); background: rgba(138, 180, 248, 0.1); color: var(--accent-blue); box-shadow: inset 0 0 0 1px var(--accent-blue); }
-    .payment-method { display: flex; align-items: center; justify-content: space-between; background: var(--bg-base); padding: 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); margin-bottom: 24px; }
+
+    .payment-method {
+      display: flex; align-items: center; justify-content: space-between; background: var(--bg-base);
+      padding: 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); margin-bottom: 24px;
+    }
     .card-info { display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 500; }
     .card-info i { font-size: 24px; color: var(--text-secondary); }
     .btn-text { background: none; border: none; color: var(--accent-blue); font-size: 13px; font-weight: 600; cursor: pointer; }
-    .btn-checkout { width: 100%; background: var(--text-primary); color: var(--bg-base); border: none; padding: 16px; border-radius: var(--radius-sm); font-size: 15px; font-weight: 700; cursor: pointer; transition: var(--transition); display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .btn-text:hover { text-decoration: underline; }
+
+    .btn-checkout {
+      width: 100%; background: var(--text-primary); color: var(--bg-base); border: none;
+      padding: 16px; border-radius: var(--radius-sm); font-size: 15px; font-weight: 700;
+      cursor: pointer; transition: var(--transition); display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
     .btn-checkout:hover { background: #fff; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255,255,255,0.1); }
+
+    /* Toggle Switch */
     .setting-row { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--border-subtle); }
     .setting-row:last-child { border-bottom: none; padding-bottom: 0; }
     .setting-info h3 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
     .setting-info p { font-size: 12px; color: var(--text-secondary); line-height: 1.5; max-width: 280px; }
+
     .switch { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
     .switch input { opacity: 0; width: 0; height: 0; }
-    .slider-toggle { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--bg-elevated); transition: .4s; border-radius: 24px; border: 1px solid var(--border-subtle); }
-    .slider-toggle:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: var(--text-secondary); transition: .4s; border-radius: 50%; }
+    .slider-toggle {
+      position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+      background-color: var(--bg-elevated); transition: .4s; border-radius: 24px; border: 1px solid var(--border-subtle);
+    }
+    .slider-toggle:before {
+      position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px;
+      background-color: var(--text-secondary); transition: .4s; border-radius: 50%;
+    }
     input:checked + .slider-toggle { background: var(--accent-gradient); border-color: transparent; }
     input:checked + .slider-toggle:before { transform: translateX(20px); background-color: #fff; }
+
+    /* Cost Estimator */
     .estimator-list { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
-    .estimator-item { display: flex; justify-content: space-between; align-items: center; background: var(--bg-base); padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); }
+    .estimator-item {
+      display: flex; justify-content: space-between; align-items: center;
+      background: var(--bg-base); padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);
+    }
     .est-gpu { font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
     .est-gpu i { color: var(--accent-purple); }
     .est-time { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text-secondary); }
     .est-time span { color: var(--text-primary); font-weight: 600; }
 
-    /* ---- RESPONSIVE ---- */
-    @media (max-width: 1024px) { .payg-layout { grid-template-columns: 1fr; } }
+    /* --- MODALS --- */
+    /* Slide-over Modal (Deploy) */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px);
+      z-index: 100; display: flex; justify-content: flex-end; opacity: 0; pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .modal-overlay.active { opacity: 1; pointer-events: auto; }
+
+    .modal-panel {
+      width: 100%; max-width: 500px; background: var(--bg-surface); height: 100%;
+      border-left: 1px solid var(--border-subtle); transform: translateX(100%);
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column;
+      box-shadow: var(--shadow-modal);
+    }
+    .modal-overlay.active .modal-panel { transform: translateX(0); }
+
+    /* Centered Modal (Create Server) */
+    .modal-overlay-center {
+      position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px);
+      z-index: 200; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none;
+      transition: opacity 0.3s ease; padding: 16px;
+    }
+    .modal-overlay-center.active { opacity: 1; pointer-events: auto; }
+    
+    .modal-panel-center {
+      width: 100%; max-width: 420px; background: var(--bg-surface);
+      border: 1px solid var(--border-subtle); border-radius: var(--radius-lg);
+      transform: scale(0.95) translateY(10px); transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex; flex-direction: column; box-shadow: var(--shadow-modal);
+    }
+    .modal-overlay-center.active .modal-panel-center { transform: scale(1) translateY(0); }
+
+    /* Shared Modal Elements */
+    .modal-header { padding: 20px 24px; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; }
+    .modal-title { font-size: 18px; font-weight: 600; }
+    .btn-close { background: transparent; border: none; color: var(--text-secondary); font-size: 20px; cursor: pointer; }
+    .btn-close:hover { color: var(--text-primary); }
+    .modal-body { padding: 24px; overflow-y: auto; flex: 1; }
+    .modal-footer {
+      padding: 20px 24px; border-top: 1px solid var(--border-subtle); background: var(--bg-base);
+      display: flex; justify-content: space-between; align-items: center; border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    }
+
+    .form-group { margin-bottom: 20px; }
+    .form-label { display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+    
+    .select-box {
+      width: 100%; background: var(--bg-base); border: 1px solid var(--border-subtle);
+      color: var(--text-primary); padding: 12px; border-radius: var(--radius-sm);
+      font-family: 'Inter', sans-serif; font-size: 14px; outline: none; appearance: none; cursor: pointer;
+    }
+    .select-box:focus { border-color: var(--accent-blue); }
+    input.select-box { cursor: text; }
+
+    .slider-wrap { display: flex; align-items: center; gap: 16px; }
+    .slider { flex: 1; -webkit-appearance: none; height: 4px; background: var(--bg-elevated); border-radius: 2px; outline: none; }
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
+      background: var(--accent-blue); cursor: pointer; box-shadow: 0 0 10px rgba(138, 180, 248, 0.5);
+    }
+    .slider-val {
+      font-family: 'JetBrains Mono', monospace; font-size: 13px; background: var(--bg-base);
+      padding: 6px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);
+      min-width: 80px; text-align: center;
+    }
+
+    /* --- RESPONSIVE DESIGN --- */
+    @media (max-width: 1024px) {
+      .payg-layout { grid-template-columns: 1fr; }
+    }
+    
     @media (max-width: 768px) {
-      .sidebar { position: fixed; top: 0; bottom: 0; left: 0; transform: translateX(-100%); }
+      .sidebar {
+        position: fixed;
+        top: 0; bottom: 0; left: 0;
+        transform: translateX(-100%);
+      }
       .sidebar.open { transform: translateX(0); }
       .sidebar-overlay.active { display: block; opacity: 1; }
+      
       .header { padding: 0 16px; height: 64px; }
       .header-title { font-size: 18px; }
       .mobile-menu-btn { display: flex; }
+      
       .content-scroll { padding: 16px; }
-      .server-card { flex-wrap: wrap; }
-      .server-stats { display: none; }
+      
+      .filters { flex-direction: column; align-items: stretch; gap: 12px; }
+      .search-box { width: 100%; margin-right: 0 !important; }
+      #btnCreateServer { width: 100%; justify-content: center; }
+      
       .gpu-grid { grid-template-columns: 1fr; }
-      .gpu-options { grid-template-columns: 1fr; }
-      .stats-row { grid-template-columns: 1fr 1fr; }
-      .filters { flex-direction: column; align-items: stretch; }
-      .search-box { width: 100%; }
+      
+      .payg-card { padding: 20px; }
+      .balance-amount { font-size: 36px; }
+      .amount-btn { min-width: calc(33.33% - 8px); }
+      
+      .modal-panel { max-width: 100%; }
+      .modal-footer { flex-direction: column; gap: 16px; align-items: stretch; }
+      .modal-footer > div { text-align: center; }
+      .btn-deploy { justify-content: center; }
     }
+    
     @media (max-width: 480px) {
-      .stats-row { grid-template-columns: 1fr; }
-      .server-actions { width: 100%; justify-content: flex-end; }
+      .amount-btn { min-width: calc(50% - 6px); }
+      .specs-grid { grid-template-columns: 1fr; gap: 8px; }
+      .setting-row { flex-direction: column; align-items: flex-start; gap: 12px; }
+      .setting-info p { max-width: 100%; }
+      .switch { align-self: flex-end; }
     }
-
-    /* Confirm dialog */
-    .confirm-box {
-      background: var(--bg-elevated);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-md);
-      padding: 16px;
-      margin-top: 16px;
-    }
-    .confirm-box p { font-size: 13px; color: var(--text-secondary); margin-bottom: 12px; line-height: 1.5; }
-    .confirm-box-actions { display: flex; gap: 8px; justify-content: flex-end; }
   </style>
 </head>
 <body>
 
-<!-- LOADING SCREEN -->
-<div id="loadingScreen">
-  <div class="loading-logo">⬡ T1ERA</div>
-  <div class="loading-bar"><div class="loading-bar-inner"></div></div>
-  <div class="loading-text" id="loadingText">Connecting to database...</div>
-</div>
+  <!-- SIDEBAR OVERLAY (Mobile) -->
+  <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
 
-<!-- TOAST -->
-<div id="toast"></div>
-
-<!-- SIDEBAR OVERLAY -->
-<div class="sidebar-overlay" onclick="toggleSidebar()"></div>
-
-<!-- SIDEBAR -->
-<nav class="sidebar">
-  <div class="logo">
-    <i class="ph-fill ph-hexagon"></i>
-    T1ERA
-  </div>
-  <div class="nav-group">
-    <div class="nav-label">Compute</div>
-    <a href="#" class="nav-item" onclick="switchMainTab('gpu')"><i class="ph ph-cpu"></i> GPU Instances</a>
-    <a href="#" class="nav-item active" onclick="switchMainTab('serverless')"><i class="ph ph-lightning"></i> Serverless</a>
-    <a href="#" class="nav-item"><i class="ph ph-hard-drives"></i> Storage Volumes</a>
-  </div>
-  <div class="nav-group">
-    <div class="nav-label">Resources</div>
-    <a href="#" class="nav-item"><i class="ph ph-copy"></i> Templates</a>
-    <a href="#" class="nav-item"><i class="ph ph-key"></i> Secrets & API Keys</a>
-  </div>
-  <div class="sidebar-footer">
-    <div class="nav-group" style="margin-bottom: 12px;">
-      <a href="#" class="nav-item" onclick="switchMainTab('payg')"><i class="ph ph-credit-card"></i> Billing</a>
-      <a href="#" class="nav-item"><i class="ph ph-gear"></i> Settings</a>
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="logo">
+      <i class="ph-fill ph-hexagon"></i>
+      T1ERA
     </div>
-    <div class="user-profile">
-      <div class="avatar">JD</div>
-      <div class="user-info">
-        <span class="user-name">John Doe</span>
-        <span class="user-balance">$142.50</span>
+
+    <div class="nav-group">
+      <div class="nav-label">Compute</div>
+      <a href="#" class="nav-item active"><i class="ph ph-cpu"></i> GPU Instances</a>
+      <a href="#" class="nav-item"><i class="ph ph-lightning"></i> Serverless Endpoints</a>
+      <a href="#" class="nav-item"><i class="ph ph-hard-drives"></i> Storage Volumes</a>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-label">Resources</div>
+      <a href="#" class="nav-item"><i class="ph ph-copy"></i> Templates</a>
+      <a href="#" class="nav-item"><i class="ph ph-key"></i> Secrets & API Keys</a>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="nav-group" style="margin-bottom: 12px;">
+        <a href="#" class="nav-item"><i class="ph ph-credit-card"></i> Billing</a>
+        <a href="#" class="nav-item"><i class="ph ph-gear"></i> Settings</a>
+      </div>
+      <div class="user-profile">
+        <div class="avatar">JD</div>
+        <div class="user-info">
+          <span class="user-name">John Doe</span>
+          <span class="user-balance">$142.50</span>
+        </div>
       </div>
     </div>
-  </div>
-</nav>
+  </nav>
 
-<!-- MAIN CONTENT -->
-<main class="main-content">
-  <header class="header">
-    <div class="header-left">
-      <button class="btn-icon mobile-menu-btn" onclick="toggleSidebar()">
-        <i class="ph ph-list"></i>
-      </button>
-      <div class="header-title" id="headerTitle">Serverless Endpoints</div>
-    </div>
-    <div class="header-actions">
-      <button class="btn-icon"><i class="ph ph-bell"></i></button>
-      <button class="btn-icon"><i class="ph ph-question"></i></button>
-    </div>
-  </header>
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    <header class="header">
+      <div class="header-left">
+        <button class="btn-icon mobile-menu-btn" onclick="toggleSidebar()">
+          <i class="ph ph-list"></i>
+        </button>
+        <div class="header-title">Deploy Instance</div>
+      </div>
+      <div class="header-actions">
+        <button class="btn-icon"><i class="ph ph-bell"></i></button>
+        <button class="btn-icon"><i class="ph ph-question"></i></button>
+      </div>
+    </header>
 
-  <div class="content-scroll">
-
-    <!-- TAB: SERVERLESS -->
-    <div id="tab-serverless" class="tab-content active">
-
-      <!-- Stats Overview -->
-      <div class="stats-row" id="statsRow" style="display:none;">
-        <div class="stat-card">
-          <div class="stat-card-label">Running Servers</div>
-          <div class="stat-card-value" id="statRunning">0</div>
-          <div class="stat-card-sub">Active right now</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-card-label">Total Projects</div>
-          <div class="stat-card-value" id="statTotal">0</div>
-          <div class="stat-card-sub">In your database</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-card-label">Cost This Hour</div>
-          <div class="stat-card-value" id="statCost">$0.00</div>
-          <div class="stat-card-sub">Billing rate</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-card-label">Total Uptime</div>
-          <div class="stat-card-value" id="statUptime">0h</div>
-          <div class="stat-card-sub">Across all servers</div>
+    <div class="content-scroll">
+      <!-- TABS -->
+      <div class="tabs-wrapper">
+        <div class="tabs">
+          <div class="tab active" data-target="tab-compute">Secure Cloud</div>
+          <div class="tab" data-target="tab-serverless">Serverless</div>
+          <div class="tab" data-target="tab-payg">
+            Pay as you go <span class="badge-new">New</span>
+          </div>
         </div>
       </div>
 
-      <!-- Section Header -->
-      <div class="section-header">
-        <div class="section-header-left">
-          <h2>Serverless Endpoints</h2>
-          <p>Deploy and manage persistent serverless GPU workers. State is preserved across page refreshes.</p>
+      <!-- TAB CONTENT: COMPUTE (GPUs) -->
+      <div id="tab-compute" class="tab-content active">
+        
+        <!-- Filters & Create Server Button -->
+        <div class="filters" style="justify-content: flex-end;">
+          <div class="search-box" id="gpuSearchBox" style="display: none; margin-right: auto;">
+            <i class="ph ph-magnifying-glass"></i>
+            <input type="text" id="searchInput" placeholder="Search GPUs (e.g. RTX 4090, A100)...">
+          </div>
+          <button class="btn-primary" id="btnCreateServer" onclick="openCreateServerModal()">
+            <i class="ph-bold ph-plus"></i> Create Server
+          </button>
         </div>
-        <button class="btn-primary" onclick="openCreateModal()">
-          <i class="ph-bold ph-plus"></i> Deploy New Server
+
+        <!-- Empty State (Shown initially) -->
+        <div class="empty-state" id="gpuEmptyState">
+          <i class="ph-fill ph-server"></i>
+          <h3>No Server Configured</h3>
+          <p>Start by creating a new server project and selecting your preferred location to view available GPU instances.</p>
+        </div>
+
+        <!-- GPU Grid (Hidden initially) -->
+        <div class="gpu-grid" id="gpuGrid" style="display: none;">
+          <!-- Cards injected via JS -->
+        </div>
+      </div>
+
+      <!-- TAB CONTENT: SERVERLESS -->
+      <div id="tab-serverless" class="tab-content">
+        <div class="filters" style="justify-content: flex-end;">
+          <button class="btn-primary" id="btnServerlessDeploy" onclick="serverlessGoToGPUs('deploy')">
+            <i class="ph-bold ph-rocket-launch"></i> Deploy
+          </button>
+          <button class="btn-outline" style="margin-left: 10px;" onclick="serverlessGoToGPUs('create')">
+            <i class="ph-bold ph-plus"></i> Create
+          </button>
+        </div>
+
+        <div class="empty-state" id="serverlessEmptyState">
+          <i class="ph-fill ph-lightning"></i>
+          <h3>No Serverless Endpoints</h3>
+          <p>Deploy a serverless endpoint to get started. Choose a GPU and configure your inference settings — no server management needed.</p>
+        </div>
+
+        <!-- Active serverless endpoints list (shown after deploy) -->
+        <div id="serverlessEndpointList" style="display:none;">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+
+      <!-- TAB CONTENT: PAY AS YOU GO -->
+      <div id="tab-payg" class="tab-content">
+        <div class="payg-layout">
+          
+          <!-- Left Column: Add Funds -->
+          <div class="payg-card glow-border">
+            <div class="payg-header">
+              <i class="ph-fill ph-wallet"></i>
+              <h2>Add Compute Credits</h2>
+            </div>
+            
+            <div class="balance-display">
+              <div class="balance-label">Current Balance</div>
+              <div class="balance-amount">$142.50</div>
+              <div class="balance-subtext">
+                <i class="ph-fill ph-check-circle"></i> Sufficient for active deployments
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Select Amount</label>
+              <div class="amount-selector" id="amountSelector">
+                <button class="amount-btn">$10</button>
+                <button class="amount-btn selected">$25</button>
+                <button class="amount-btn">$50</button>
+                <button class="amount-btn">$100</button>
+                <button class="amount-btn">Custom</button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Payment Method</label>
+              <div class="payment-method">
+                <div class="card-info">
+                  <i class="ph ph-credit-card"></i>
+                  Visa ending in 4242
+                </div>
+                <button class="btn-text">Change</button>
+              </div>
+            </div>
+
+            <button class="btn-checkout">
+              <i class="ph-bold ph-lock-key"></i> Pay $25.00
+            </button>
+            <p style="text-align: center; font-size: 11px; color: var(--text-tertiary); margin-top: 12px;">
+              Payments are securely processed by Stripe.
+            </p>
+          </div>
+
+          <!-- Right Column: Settings & Estimates -->
+          <div style="display: flex; flex-direction: column; gap: 24px;">
+            
+            <!-- Auto-Recharge Card -->
+            <div class="payg-card">
+              <div class="payg-header" style="margin-bottom: 16px;">
+                <i class="ph-fill ph-arrows-clockwise"></i>
+                <h2>Auto-Recharge</h2>
+              </div>
+              
+              <div class="setting-row">
+                <div class="setting-info">
+                  <h3>Enable Auto-Recharge</h3>
+                  <p>Automatically add funds when your balance falls below a specific threshold to prevent instance termination.</p>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" checked>
+                  <span class="slider-toggle"></span>
+                </label>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-info">
+                  <h3>Recharge Settings</h3>
+                  <p>Add <strong>$50.00</strong> when balance falls below <strong>$10.00</strong>.</p>
+                </div>
+                <button class="btn-text">Edit</button>
+              </div>
+            </div>
+
+            <!-- Cost Estimator Card -->
+            <div class="payg-card">
+              <div class="payg-header" style="margin-bottom: 8px;">
+                <i class="ph-fill ph-chart-line-up"></i>
+                <h2>Runway Estimator</h2>
+              </div>
+              <p style="font-size: 12px; color: var(--text-secondary);">How long your current balance ($142.50) will last on a single instance:</p>
+              
+              <div class="estimator-list">
+                <div class="estimator-item">
+                  <div class="est-gpu"><i class="ph-fill ph-graphics-card"></i> RTX 3090</div>
+                  <div class="est-time"><span>~419</span> hours</div>
+                </div>
+                <div class="estimator-item">
+                  <div class="est-gpu"><i class="ph-fill ph-graphics-card"></i> RTX 4090</div>
+                  <div class="est-time"><span>~192</span> hours</div>
+                </div>
+                <div class="estimator-item">
+                  <div class="est-gpu"><i class="ph-fill ph-graphics-card"></i> A100 80GB</div>
+                  <div class="est-time"><span>~75</span> hours</div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- CREATE SERVER MODAL (Centered) -->
+  <div class="modal-overlay-center" id="createServerModal">
+    <div class="modal-panel-center">
+      <div class="modal-header">
+        <div class="modal-title">Create New Server</div>
+        <button class="btn-close" onclick="closeCreateServerModal()"><i class="ph ph-x"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Project Name</label>
+          <input type="text" class="select-box" id="projectName" placeholder="e.g. AI-Training-01">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Server Location</label>
+          <select class="select-box" id="serverLocation">
+            <option value="us-east">US East (Virginia)</option>
+            <option value="us-west">US West (Oregon)</option>
+            <option value="eu-central">EU Central (Frankfurt)</option>
+            <option value="ap-southeast">Asia Pacific (Singapore)</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer" style="justify-content: flex-end;">
+        <button class="btn-deploy" onclick="proceedToGPUs()">
+          Continue <i class="ph-bold ph-arrow-right"></i>
         </button>
       </div>
+    </div>
+  </div>
 
-      <!-- Empty State -->
-      <div class="empty-state" id="emptyState">
-        <i class="ph-fill ph-lightning"></i>
-        <h3>No Serverless Servers Yet</h3>
-        <p>Deploy your first serverless GPU endpoint. Servers keep running even when you close or refresh this page — their state is stored in your database.</p>
-        <button class="btn-primary" onclick="openCreateModal()">
-          <i class="ph-bold ph-rocket-launch"></i> Deploy First Server
+  <!-- DEPLOY MODAL (Slide-over) -->
+  <div class="modal-overlay" id="deployModal">
+    <div class="modal-panel">
+      <div class="modal-header">
+        <div>
+          <div class="modal-title">Configure Deployment</div>
+          <div style="font-size: 12px; color: var(--text-tertiary); margin-top: 2px;" id="modalSourceLabel"></div>
+        </div>
+        <button class="btn-close" onclick="closeDeployModal()"><i class="ph ph-x"></i></button>
+      </div>
+      
+      <div class="modal-body">
+        <!-- Full GPU Details Card -->
+        <div style="background: var(--bg-base); border: 1px solid rgba(138,180,248,0.3); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 24px; position: relative; overflow: hidden;">
+          <div style="position: absolute; top:0; left:0; right:0; height: 3px; background: var(--accent-gradient);"></div>
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div class="gpu-icon" style="background: rgba(138,180,248,0.1); border-color: rgba(138,180,248,0.3);">
+                <i class="ph-fill ph-graphics-card" style="color: var(--accent-blue);"></i>
+              </div>
+              <div>
+                <div style="font-size: 17px; font-weight: 700;" id="modalGpuName">RTX 4090</div>
+                <div style="font-size: 12px; color: var(--text-tertiary); margin-top: 2px;">Secure Cloud · NVIDIA</div>
+              </div>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-size: 22px; font-weight: 700; font-family: 'JetBrains Mono', monospace;" id="modalGpuPrice">$0.74</div>
+              <div style="font-size: 11px; color: var(--text-tertiary);">/ hour</div>
+            </div>
+          </div>
+          <!-- Specs Grid -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 10px 12px;">
+              <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-tertiary); font-weight: 600; margin-bottom: 4px;">VRAM</div>
+              <div style="font-size: 14px; font-weight: 600; font-family: 'JetBrains Mono', monospace;" id="modalGpuVram">24 GB</div>
+            </div>
+            <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 10px 12px;">
+              <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-tertiary); font-weight: 600; margin-bottom: 4px;">RAM</div>
+              <div style="font-size: 14px; font-weight: 600; font-family: 'JetBrains Mono', monospace;" id="modalGpuRam">64 GB</div>
+            </div>
+            <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 10px 12px;">
+              <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-tertiary); font-weight: 600; margin-bottom: 4px;">vCPUs</div>
+              <div style="font-size: 14px; font-weight: 600; font-family: 'JetBrains Mono', monospace;" id="modalGpuCpu">12 Cores</div>
+            </div>
+            <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 10px 12px;">
+              <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-tertiary); font-weight: 600; margin-bottom: 4px;">Network</div>
+              <div style="font-size: 14px; font-weight: 600; font-family: 'JetBrains Mono', monospace;">10 Gbps</div>
+            </div>
+          </div>
+          <!-- Status badge -->
+          <div style="margin-top: 12px; display: flex; gap: 8px; align-items: center;">
+            <span class="badge available" id="modalGpuStatus">Available</span>
+            <span style="font-size: 11px; color: var(--text-tertiary);" id="modalGpuLocation">Secure Cloud</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Select Template</label>
+          <select class="select-box">
+            <option>RunPod PyTorch 2.1.0 (CUDA 11.8)</option>
+            <option>Stable Diffusion WebUI (Automatic1111)</option>
+            <option>Ollama / vLLM Inference Server</option>
+            <option>Ubuntu 22.04 LTS (Base)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Container Disk (GB)</label>
+          <div class="slider-wrap">
+            <input type="range" class="slider" min="10" max="200" value="40" oninput="document.getElementById('diskVal').innerText = this.value + ' GB'">
+            <div class="slider-val" id="diskVal">40 GB</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Volume Disk (GB)</label>
+          <div class="slider-wrap">
+            <input type="range" class="slider" min="50" max="1000" value="100" step="50" oninput="document.getElementById('volVal').innerText = this.value + ' GB'">
+            <div class="slider-val" id="volVal">100 GB</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <div>
+          <div class="total-price" id="modalTotalPrice">$0.74 <span>/ hr</span></div>
+          <div style="font-size: 11px; color: var(--text-tertiary); margin-top: 4px;">+ network & storage fees</div>
+        </div>
+        <button class="btn-deploy" onclick="deployInstance()">
+          <i class="ph-bold ph-rocket-launch"></i> Deploy Now
         </button>
       </div>
-
-      <!-- Servers List -->
-      <div class="servers-list" id="serversList" style="display:none;"></div>
-
-    </div>
-
-    <!-- TAB: GPU INSTANCES -->
-    <div id="tab-gpu" class="tab-content">
-      <div class="filters">
-        <div class="search-box" style="margin-right: auto;">
-          <i class="ph ph-magnifying-glass"></i>
-          <input type="text" id="searchInput" placeholder="Search GPUs (e.g. RTX 4090, A100)..." oninput="renderGPUs(this.value)">
-        </div>
-      </div>
-      <div class="gpu-grid" id="gpuGrid"></div>
-    </div>
-
-    <!-- TAB: PAYG -->
-    <div id="tab-payg" class="tab-content">
-      <div class="payg-layout">
-        <div class="payg-card glow-border">
-          <div class="payg-header">
-            <i class="ph-fill ph-wallet"></i>
-            <h2>Add Compute Credits</h2>
-          </div>
-          <div class="balance-display">
-            <div class="balance-label">Current Balance</div>
-            <div class="balance-amount">$142.50</div>
-            <div class="balance-subtext"><i class="ph-fill ph-check-circle"></i> Sufficient for active deployments</div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Select Amount</label>
-            <div class="amount-selector">
-              <button class="amount-btn">$10</button>
-              <button class="amount-btn selected">$25</button>
-              <button class="amount-btn">$50</button>
-              <button class="amount-btn">$100</button>
-              <button class="amount-btn">Custom</button>
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Payment Method</label>
-            <div class="payment-method">
-              <div class="card-info"><i class="ph ph-credit-card"></i> Visa ending in 4242</div>
-              <button class="btn-text">Change</button>
-            </div>
-          </div>
-          <button class="btn-checkout"><i class="ph-bold ph-lock-key"></i> Pay $25.00</button>
-          <p style="text-align: center; font-size: 11px; color: var(--text-tertiary); margin-top: 12px;">Payments are securely processed by Stripe.</p>
-        </div>
-        <div style="display: flex; flex-direction: column; gap: 24px;">
-          <div class="payg-card">
-            <div class="payg-header" style="margin-bottom: 16px;"><i class="ph-fill ph-arrows-clockwise"></i><h2>Auto-Recharge</h2></div>
-            <div class="setting-row">
-              <div class="setting-info"><h3>Enable Auto-Recharge</h3><p>Automatically add funds when your balance falls below a threshold.</p></div>
-              <label class="switch"><input type="checkbox" checked><span class="slider-toggle"></span></label>
-            </div>
-            <div class="setting-row">
-              <div class="setting-info"><h3>Recharge Settings</h3><p>Add <strong>$50.00</strong> when balance falls below <strong>$10.00</strong>.</p></div>
-              <button class="btn-text">Edit</button>
-            </div>
-          </div>
-          <div class="payg-card">
-            <div class="payg-header" style="margin-bottom: 8px;"><i class="ph-fill ph-chart-line-up"></i><h2>Runway Estimator</h2></div>
-            <p style="font-size: 12px; color: var(--text-secondary);">How long your current balance ($142.50) will last:</p>
-            <div class="estimator-list">
-              <div class="estimator-item"><div class="est-gpu"><i class="ph-fill ph-graphics-card"></i> RTX 3090</div><div class="est-time"><span>~419</span> hrs</div></div>
-              <div class="estimator-item"><div class="est-gpu"><i class="ph-fill ph-graphics-card"></i> RTX 4090</div><div class="est-time"><span>~192</span> hrs</div></div>
-              <div class="estimator-item"><div class="est-gpu"><i class="ph-fill ph-graphics-card"></i> A100 80GB</div><div class="est-time"><span>~75</span> hrs</div></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </div>
-</main>
-
-<!-- CREATE SERVER MODAL -->
-<div class="modal-overlay-center" id="createModal">
-  <div class="modal-panel-center">
-    <div class="modal-header">
-      <div class="modal-title">Deploy Serverless Server</div>
-      <button class="btn-close" onclick="closeCreateModal()"><i class="ph ph-x"></i></button>
-    </div>
-    <div class="modal-body">
-
-      <div class="form-group">
-        <label class="form-label">Project Name *</label>
-        <input type="text" class="form-input" id="newProjectName" placeholder="e.g. llm-inference-v2">
-        <div class="form-hint">This name will be stored in your database and displayed on the dashboard.</div>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Server Location</label>
-        <select class="form-select" id="newLocation">
-          <option value="US East (Virginia)">US East (Virginia)</option>
-          <option value="US West (Oregon)">US West (Oregon)</option>
-          <option value="EU Central (Frankfurt)">EU Central (Frankfurt)</option>
-          <option value="Asia Pacific (Singapore)">Asia Pacific (Singapore)</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Select GPU</label>
-        <div class="gpu-options" id="gpuOptions">
-          <div class="gpu-option selected" data-gpu="RTX 4090" data-price="0.74" data-vram="24GB">
-            <div class="gpu-option-name">RTX 4090</div>
-            <div class="gpu-option-price">$0.74/hr</div>
-            <div class="gpu-option-spec">24 GB VRAM</div>
-          </div>
-          <div class="gpu-option" data-gpu="RTX 3090" data-price="0.34" data-vram="24GB">
-            <div class="gpu-option-name">RTX 3090</div>
-            <div class="gpu-option-price">$0.34/hr</div>
-            <div class="gpu-option-spec">24 GB VRAM</div>
-          </div>
-          <div class="gpu-option" data-gpu="A100 80GB" data-price="1.89" data-vram="80GB">
-            <div class="gpu-option-name">A100 80GB</div>
-            <div class="gpu-option-price">$1.89/hr</div>
-            <div class="gpu-option-spec">80 GB VRAM</div>
-          </div>
-          <div class="gpu-option" data-gpu="H100 PCIe" data-price="4.69" data-vram="80GB">
-            <div class="gpu-option-name">H100 PCIe</div>
-            <div class="gpu-option-price">$4.69/hr</div>
-            <div class="gpu-option-spec">80 GB VRAM</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Container Template</label>
-        <select class="form-select" id="newTemplate">
-          <option>PyTorch 2.1 + CUDA 11.8</option>
-          <option>vLLM Inference Server</option>
-          <option>Stable Diffusion WebUI</option>
-          <option>Ubuntu 22.04 LTS (Base)</option>
-          <option>Ollama LLM Server</option>
-        </select>
-      </div>
-
-    </div>
-    <div class="modal-footer">
-      <button class="btn-outline" onclick="closeCreateModal()">Cancel</button>
-      <button class="btn-deploy" id="deployBtn" onclick="deployServer()">
-        <i class="ph-bold ph-rocket-launch"></i> Deploy Server
-      </button>
     </div>
   </div>
-</div>
 
-<script>
-// =====================================================================
-// DATABASE LAYER — uses window.storage (persistent across refreshes)
-// =====================================================================
-
-const DB_KEY = 'serverless-projects';
-
-async function dbLoad() {
-  try {
-    const result = await window.storage.get(DB_KEY);
-    if (!result) return [];
-    return JSON.parse(result.value);
-  } catch (e) {
-    return [];
-  }
-}
-
-async function dbSave(servers) {
-  try {
-    await window.storage.set(DB_KEY, JSON.stringify(servers));
-  } catch (e) {
-    console.error('DB save error:', e);
-  }
-}
-
-async function dbAddServer(server) {
-  const servers = await dbLoad();
-  servers.push(server);
-  await dbSave(servers);
-}
-
-async function dbUpdateServer(id, updates) {
-  const servers = await dbLoad();
-  const idx = servers.findIndex(s => s.id === id);
-  if (idx !== -1) {
-    servers[idx] = { ...servers[idx], ...updates };
-    await dbSave(servers);
-  }
-}
-
-async function dbDeleteServer(id) {
-  const servers = await dbLoad();
-  const updated = servers.filter(s => s.id !== id);
-  await dbSave(updated);
-}
-
-// =====================================================================
-// STATE
-// =====================================================================
-let servers = [];
-let uptimeIntervals = {};
-let selectedGpu = { gpu: 'RTX 4090', price: 0.74, vram: '24GB' };
-
-// GPU data for the GPU Instances tab
-const gpus = [
-  { id: 1, name: "NVIDIA H100 PCIe", vram: "80 GB", ram: "200 GB", vcpu: 24, price: 4.69, status: "available" },
-  { id: 2, name: "NVIDIA A100 80GB", vram: "80 GB", ram: "115 GB", vcpu: 14, price: 1.89, status: "high-demand" },
-  { id: 3, name: "NVIDIA RTX 4090", vram: "24 GB", ram: "64 GB", vcpu: 12, price: 0.74, status: "available" },
-  { id: 4, name: "NVIDIA RTX 6000 Ada", vram: "48 GB", ram: "100 GB", vcpu: 16, price: 1.25, status: "available" },
-  { id: 5, name: "NVIDIA RTX 3090", vram: "24 GB", ram: "48 GB", vcpu: 8, price: 0.34, status: "available" },
-  { id: 6, name: "NVIDIA A40", vram: "48 GB", ram: "90 GB", vcpu: 10, price: 0.85, status: "high-demand" },
-  { id: 7, name: "NVIDIA L40S", vram: "48 GB", ram: "120 GB", vcpu: 16, price: 1.45, status: "available" },
-  { id: 8, name: "NVIDIA RTX A5000", vram: "24 GB", ram: "45 GB", vcpu: 8, price: 0.45, status: "available" }
-];
-
-// =====================================================================
-// BOOT — check DB on page load
-// =====================================================================
-async function boot() {
-  document.getElementById('loadingText').textContent = 'Checking your database...';
-
-  await new Promise(r => setTimeout(r, 400));
-  document.getElementById('loadingText').textContent = 'Loading serverless projects...';
-
-  servers = await dbLoad();
-
-  await new Promise(r => setTimeout(r, 500));
-  document.getElementById('loadingText').textContent = servers.length
-    ? `Found ${servers.length} project${servers.length > 1 ? 's' : ''} — restoring state...`
-    : 'No existing projects. Ready to deploy.';
-
-  await new Promise(r => setTimeout(r, 500));
-
-  // Fade out loading screen
-  const ls = document.getElementById('loadingScreen');
-  ls.classList.add('fade-out');
-  setTimeout(() => ls.remove(), 400);
-
-  // Render everything
-  renderServers();
-  renderGPUs('');
-  startAllTimers();
-  updateStats();
-  setupGpuOptionClicks();
-  setupAmountBtns();
-  setupTabClicks();
-}
-
-// =====================================================================
-// UPTIME — calculated from startedAt timestamp, so refresh-safe
-// =====================================================================
-
-function getUptimeMs(server) {
-  if (server.status !== 'running' || !server.startedAt) return server.accumulatedMs || 0;
-  const now = Date.now();
-  return (server.accumulatedMs || 0) + (now - server.startedAt);
-}
-
-function formatUptime(ms) {
-  if (!ms) return '0s';
-  const totalSec = Math.floor(ms / 1000);
-  const h = Math.floor(totalSec / 3600);
-  const m = Math.floor((totalSec % 3600) / 60);
-  const s = totalSec % 60;
-  if (h > 0) return `${h}h ${m}m`;
-  if (m > 0) return `${m}m ${s}s`;
-  return `${s}s`;
-}
-
-function startAllTimers() {
-  servers.forEach(server => {
-    if (server.status === 'running') {
-      startTimer(server.id);
+  <script>
+    // --- MOBILE SIDEBAR TOGGLE ---
+    function toggleSidebar() {
+      document.querySelector('.sidebar').classList.toggle('open');
+      document.querySelector('.sidebar-overlay').classList.toggle('active');
     }
-  });
-}
 
-function startTimer(id) {
-  if (uptimeIntervals[id]) return; // already running
-  uptimeIntervals[id] = setInterval(() => {
-    const el = document.getElementById(`uptime-${id}`);
-    const server = servers.find(s => s.id === id);
-    if (el && server) {
-      el.textContent = formatUptime(getUptimeMs(server));
-    }
-    updateStats();
-  }, 1000);
-}
+    // --- GPU DATA & RENDERING ---
+    const gpus = [
+      { id: 1, name: "NVIDIA H100 PCIe", vram: "80 GB", ram: "200 GB", vcpu: 24, price: 4.69, status: "available" },
+      { id: 2, name: "NVIDIA A100 80GB", vram: "80 GB", ram: "115 GB", vcpu: 14, price: 1.89, status: "high-demand" },
+      { id: 3, name: "NVIDIA RTX 4090", vram: "24 GB", ram: "64 GB", vcpu: 12, price: 0.74, status: "available" },
+      { id: 4, name: "NVIDIA RTX 6000 Ada", vram: "48 GB", ram: "100 GB", vcpu: 16, price: 1.25, status: "available" },
+      { id: 5, name: "NVIDIA RTX 3090", vram: "24 GB", ram: "48 GB", vcpu: 8, price: 0.34, status: "available" },
+      { id: 6, name: "NVIDIA A40", vram: "48 GB", ram: "90 GB", vcpu: 10, price: 0.85, status: "high-demand" },
+      { id: 7, name: "NVIDIA L40S", vram: "48 GB", ram: "120 GB", vcpu: 16, price: 1.45, status: "available" },
+      { id: 8, name: "NVIDIA RTX A5000", vram: "24 GB", ram: "45 GB", vcpu: 8, price: 0.45, status: "available" }
+    ];
 
-function stopTimer(id) {
-  if (uptimeIntervals[id]) {
-    clearInterval(uptimeIntervals[id]);
-    delete uptimeIntervals[id];
-  }
-}
+    const grid = document.getElementById('gpuGrid');
+    const searchInput = document.getElementById('searchInput');
+    const deployModal = document.getElementById('deployModal');
+    const createServerModal = document.getElementById('createServerModal');
 
-// =====================================================================
-// RENDER SERVERS
-// =====================================================================
-
-function renderServers() {
-  const list = document.getElementById('serversList');
-  const empty = document.getElementById('emptyState');
-  const statsRow = document.getElementById('statsRow');
-
-  if (servers.length === 0) {
-    list.style.display = 'none';
-    empty.style.display = 'flex';
-    statsRow.style.display = 'none';
-    return;
-  }
-
-  empty.style.display = 'none';
-  list.style.display = 'flex';
-  statsRow.style.display = 'grid';
-  list.innerHTML = '';
-
-  servers.forEach((server, i) => {
-    const card = document.createElement('div');
-    card.className = `server-card ${server.status}`;
-    card.id = `card-${server.id}`;
-    card.style.animationDelay = `${i * 0.06}s`;
-
-    const uptimeMs = getUptimeMs(server);
-
-    card.innerHTML = `
-      <div class="server-icon"><i class="ph-fill ph-lightning"></i></div>
-
-      <div class="server-info">
-        <div class="server-name">${escHtml(server.name)}</div>
-        <div class="server-meta">
-          <div class="server-meta-item"><i class="ph ph-graphics-card"></i>${escHtml(server.gpu)}</div>
-          <div class="server-meta-item"><i class="ph ph-map-pin"></i>${escHtml(server.location)}</div>
-          <div class="server-meta-item"><i class="ph ph-stack"></i>${escHtml(server.template)}</div>
-          ${server.status === 'running' ? `<div class="server-meta-item"><i class="ph ph-timer"></i><span class="uptime-chip" id="uptime-${server.id}">${formatUptime(uptimeMs)}</span></div>` : ''}
-        </div>
-      </div>
-
-      <div class="server-stats">
-        <div class="stat-item">
-          <div class="stat-label">GPU</div>
-          <div class="stat-value">${escHtml(server.gpu)}</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-label">Rate</div>
-          <div class="stat-value green">$${server.price}/hr</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-label">Created</div>
-          <div class="stat-value" style="font-size:12px;">${formatDate(server.createdAt)}</div>
-        </div>
-      </div>
-
-      <div class="server-status ${server.status}">
-        <div class="status-dot ${server.status}"></div>
-        ${server.status === 'running' ? 'Running' : server.status === 'starting' ? 'Starting' : 'Stopped'}
-      </div>
-
-      <div class="server-actions">
-        ${server.status === 'running'
-          ? `<button class="btn-outline" onclick="stopServer('${server.id}')"><i class="ph ph-stop"></i> Stop</button>`
-          : `<button class="btn-outline" onclick="startServer('${server.id}')"><i class="ph ph-play"></i> Start</button>`
+    // Render GPUs with optional staggered animation
+    function renderGPUs(filterText = "", animate = false) {
+      grid.innerHTML = "";
+      const filtered = gpus.filter(g => g.name.toLowerCase().includes(filterText.toLowerCase()));
+      
+      filtered.forEach((gpu, index) => {
+        const badgeClass = gpu.status === 'available' ? 'available' : 'high-demand';
+        const badgeText = gpu.status === 'available' ? 'Available' : 'High Demand';
+        
+        const card = document.createElement('div');
+        card.className = 'gpu-card';
+        
+        // Apply staggered animation if requested
+        if (animate) {
+          card.style.animation = `fadeUpIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards ${index * 0.08}s`;
+        } else {
+          card.style.opacity = '1';
+          card.style.transform = 'translateY(0)';
         }
-        <button class="btn-danger" onclick="deleteServer('${server.id}')"><i class="ph ph-trash"></i></button>
-      </div>
-    `;
 
-    list.appendChild(card);
-  });
-}
-
-function updateStats() {
-  const running = servers.filter(s => s.status === 'running').length;
-  const totalCost = servers
-    .filter(s => s.status === 'running')
-    .reduce((sum, s) => sum + s.price, 0);
-  const totalUptimeMs = servers.reduce((sum, s) => sum + getUptimeMs(s), 0);
-  const totalHours = Math.floor(totalUptimeMs / 3600000);
-
-  document.getElementById('statRunning').textContent = running;
-  document.getElementById('statTotal').textContent = servers.length;
-  document.getElementById('statCost').textContent = `$${totalCost.toFixed(2)}`;
-  document.getElementById('statUptime').textContent = `${totalHours}h`;
-}
-
-// =====================================================================
-// SERVER ACTIONS
-// =====================================================================
-
-async function startServer(id) {
-  const server = servers.find(s => s.id === id);
-  if (!server) return;
-
-  // Update UI to "starting"
-  server.status = 'starting';
-  renderServers();
-  await dbUpdateServer(id, { status: 'starting' });
-
-  // Simulate startup delay (2s)
-  setTimeout(async () => {
-    server.status = 'running';
-    server.startedAt = Date.now();
-    renderServers();
-    await dbUpdateServer(id, { status: 'running', startedAt: server.startedAt });
-    startTimer(id);
-    updateStats();
-    showToast(`<i class="ph-fill ph-check-circle" style="color:var(--success)"></i> ${server.name} is now running`);
-  }, 2000);
-}
-
-async function stopServer(id) {
-  const server = servers.find(s => s.id === id);
-  if (!server) return;
-
-  stopTimer(id);
-  const accumulated = getUptimeMs(server);
-  server.status = 'stopped';
-  server.startedAt = null;
-  server.accumulatedMs = accumulated;
-
-  await dbUpdateServer(id, {
-    status: 'stopped',
-    startedAt: null,
-    accumulatedMs: accumulated
-  });
-
-  renderServers();
-  updateStats();
-  showToast(`<i class="ph ph-stop-circle" style="color:var(--text-secondary)"></i> ${server.name} stopped`);
-}
-
-async function deleteServer(id) {
-  const server = servers.find(s => s.id === id);
-  if (!server) return;
-  if (!confirm(`Delete "${server.name}"? This cannot be undone.`)) return;
-
-  stopTimer(id);
-  servers = servers.filter(s => s.id !== id);
-  await dbDeleteServer(id);
-  renderServers();
-  updateStats();
-  showToast(`<i class="ph ph-trash" style="color:var(--danger)"></i> ${server.name} deleted`);
-}
-
-// =====================================================================
-// CREATE SERVER
-// =====================================================================
-
-function openCreateModal() {
-  document.getElementById('createModal').classList.add('active');
-  document.getElementById('newProjectName').value = '';
-  setTimeout(() => document.getElementById('newProjectName').focus(), 150);
-}
-
-function closeCreateModal() {
-  document.getElementById('createModal').classList.remove('active');
-}
-
-async function deployServer() {
-  const name = document.getElementById('newProjectName').value.trim();
-  if (!name) {
-    document.getElementById('newProjectName').focus();
-    document.getElementById('newProjectName').style.borderColor = 'var(--danger)';
-    setTimeout(() => document.getElementById('newProjectName').style.borderColor = '', 1500);
-    return;
-  }
-
-  const location = document.getElementById('newLocation').value;
-  const template = document.getElementById('newTemplate').value;
-
-  const btn = document.getElementById('deployBtn');
-  btn.disabled = true;
-  btn.innerHTML = '<i class="ph-bold ph-spinner"></i> Deploying...';
-
-  // Simulate deploy delay
-  await new Promise(r => setTimeout(r, 1500));
-
-  const server = {
-    id: 'srv-' + Date.now(),
-    name,
-    gpu: selectedGpu.gpu,
-    vram: selectedGpu.vram,
-    price: selectedGpu.price,
-    location,
-    template,
-    status: 'starting',
-    createdAt: Date.now(),
-    startedAt: null,
-    accumulatedMs: 0
-  };
-
-  servers.push(server);
-  await dbAddServer(server);
-
-  closeCreateModal();
-  btn.disabled = false;
-  btn.innerHTML = '<i class="ph-bold ph-rocket-launch"></i> Deploy Server';
-
-  renderServers();
-  updateStats();
-  showToast(`<i class="ph-fill ph-rocket-launch" style="color:var(--accent-blue)"></i> Deploying "${name}"...`);
-
-  // Auto-start after 2s
-  setTimeout(async () => {
-    server.status = 'running';
-    server.startedAt = Date.now();
-    await dbUpdateServer(server.id, { status: 'running', startedAt: server.startedAt });
-    renderServers();
-    startTimer(server.id);
-    updateStats();
-    showToast(`<i class="ph-fill ph-check-circle" style="color:var(--success)"></i> "${name}" is live!`);
-  }, 2000);
-}
-
-// =====================================================================
-// GPU INSTANCES TAB
-// =====================================================================
-
-function renderGPUs(filter = '') {
-  const grid = document.getElementById('gpuGrid');
-  grid.innerHTML = '';
-  const filtered = gpus.filter(g => g.name.toLowerCase().includes(filter.toLowerCase()));
-
-  filtered.forEach(gpu => {
-    const card = document.createElement('div');
-    card.className = 'gpu-card';
-    const badgeClass = gpu.status === 'available' ? 'available' : 'high-demand';
-    const badgeText = gpu.status === 'available' ? 'Available' : 'High Demand';
-    card.innerHTML = `
-      <div class="card-header">
-        <div class="gpu-title-wrap">
-          <div class="gpu-icon"><i class="ph-fill ph-graphics-card"></i></div>
-          <div>
-            <div class="gpu-name">${gpu.name}</div>
-            <div class="gpu-provider">Secure Cloud</div>
+        card.innerHTML = `
+          <div class="card-header">
+            <div class="gpu-title-wrap">
+              <div class="gpu-icon"><i class="ph-fill ph-graphics-card"></i></div>
+              <div>
+                <div class="gpu-name">${gpu.name}</div>
+                <div class="gpu-provider">Secure Cloud</div>
+              </div>
+            </div>
+            <span class="badge ${badgeClass}">${badgeText}</span>
           </div>
-        </div>
-        <span class="badge ${badgeClass}">${badgeText}</span>
-      </div>
-      <div class="specs-grid">
-        <div class="spec-item"><span class="spec-label">VRAM</span><span class="spec-value">${gpu.vram}</span></div>
-        <div class="spec-item"><span class="spec-label">RAM</span><span class="spec-value">${gpu.ram}</span></div>
-        <div class="spec-item"><span class="spec-label">vCPUs</span><span class="spec-value">${gpu.vcpu} Cores</span></div>
-        <div class="spec-item"><span class="spec-label">Network</span><span class="spec-value">10 Gbps</span></div>
-      </div>
-      <div class="card-footer">
-        <div class="price-wrap">
-          <div class="price">$${gpu.price.toFixed(2)}</div>
-          <div class="price-unit">/ hr</div>
-        </div>
-        <button class="btn-primary" onclick="switchMainTab('serverless'); openCreateModal();">
-          Deploy <i class="ph-bold ph-arrow-right"></i>
-        </button>
-      </div>
-    `;
-    grid.appendChild(card);
-  });
-}
+          
+          <div class="specs-grid">
+            <div class="spec-item">
+              <span class="spec-label">VRAM</span>
+              <span class="spec-value">${gpu.vram}</span>
+            </div>
+            <div class="spec-item">
+              <span class="spec-label">RAM</span>
+              <span class="spec-value">${gpu.ram}</span>
+            </div>
+            <div class="spec-item">
+              <span class="spec-label">vCPUs</span>
+              <span class="spec-value">${gpu.vcpu} Cores</span>
+            </div>
+            <div class="spec-item">
+              <span class="spec-label">Network</span>
+              <span class="spec-value">10 Gbps</span>
+            </div>
+          </div>
 
-// =====================================================================
-// UI HELPERS
-// =====================================================================
+          <div class="card-footer">
+            <div class="price-wrap">
+              <div class="price">$${gpu.price.toFixed(2)}</div>
+              <div class="price-unit">/ hr</div>
+            </div>
+            <button class="btn-primary" onclick="openDeployModal('${gpu.name}', '${gpu.vram}', ${gpu.price}, '${gpu.ram}', ${gpu.vcpu}, '${gpu.status}')">
+              Deploy <i class="ph-bold ph-arrow-right"></i>
+            </button>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
 
-function setupGpuOptionClicks() {
-  document.querySelectorAll('.gpu-option').forEach(opt => {
-    opt.addEventListener('click', () => {
-      document.querySelectorAll('.gpu-option').forEach(o => o.classList.remove('selected'));
-      opt.classList.add('selected');
-      selectedGpu = {
-        gpu: opt.dataset.gpu,
-        price: parseFloat(opt.dataset.price),
-        vram: opt.dataset.vram
-      };
+    // --- CREATE SERVER FLOW ---
+    function openCreateServerModal() {
+      createServerModal.classList.add('active');
+      setTimeout(() => document.getElementById('projectName').focus(), 100);
+    }
+
+    function closeCreateServerModal() {
+      createServerModal.classList.remove('active');
+    }
+
+    function proceedToGPUs() {
+      const projName = document.getElementById('projectName').value.trim() || 'New Project';
+      
+      // Close modal
+      closeCreateServerModal();
+      
+      // Hide empty state, show grid and search
+      document.getElementById('gpuEmptyState').style.display = 'none';
+      document.getElementById('gpuSearchBox').style.display = 'block';
+      grid.style.display = 'grid';
+      
+      // Update Create Server button to show project name
+      const btnCreate = document.getElementById('btnCreateServer');
+      btnCreate.className = 'btn-outline';
+      btnCreate.innerHTML = `<i class="ph-fill ph-check-circle" style="color: var(--success)"></i> Project: ${projName}`;
+      
+      // Render GPUs with animation
+      renderGPUs("", true);
+    }
+
+    // --- DEPLOY MODAL FLOW ---
+    let _deploySource = 'gpu'; // 'gpu' or 'serverless'
+
+    function openDeployModal(name, vram, price, ram, vcpu, status) {
+      // Populate full GPU details
+      document.getElementById('modalGpuName').innerText = name;
+      document.getElementById('modalGpuVram').innerText = vram;
+      document.getElementById('modalGpuRam').innerText = ram || '64 GB';
+      document.getElementById('modalGpuCpu').innerText = (vcpu || 12) + ' Cores';
+      document.getElementById('modalGpuPrice').innerText = '$' + parseFloat(price).toFixed(2);
+      document.getElementById('modalTotalPrice').innerHTML = '$' + parseFloat(price).toFixed(2) + ' <span>/ hr</span>';
+
+      // Status badge
+      const statusBadge = document.getElementById('modalGpuStatus');
+      if (status === 'high-demand') {
+        statusBadge.className = 'badge high-demand';
+        statusBadge.innerText = 'High Demand';
+      } else {
+        statusBadge.className = 'badge available';
+        statusBadge.innerText = 'Available';
+      }
+
+      // Source label
+      const sourceLabel = document.getElementById('modalSourceLabel');
+      sourceLabel.innerText = _deploySource === 'serverless' ? 'Serverless Endpoint' : 'GPU Instance · Secure Cloud';
+
+      deployModal.classList.add('active');
+    }
+
+    // --- SERVERLESS: Navigate to GPU Instances tab to pick GPU ---
+    function serverlessGoToGPUs(action) {
+      _deploySource = 'serverless';
+
+      // Switch to GPU Instances tab
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelector('.tab[data-target="tab-compute"]').classList.add('active');
+      document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+      document.getElementById('tab-compute').classList.add('active');
+
+      // Update header
+      document.querySelector('.header-title').innerText = 'Pick a GPU — ' + (action === 'deploy' ? 'Serverless Deploy' : 'Create Serverless Endpoint');
+
+      // Show GPU grid (trigger same flow as create server)
+      document.getElementById('gpuEmptyState').style.display = 'none';
+      document.getElementById('gpuSearchBox').style.display = 'block';
+      grid.style.display = 'grid';
+
+      // Update button label
+      const btnCreate = document.getElementById('btnCreateServer');
+      btnCreate.className = 'btn-outline';
+      btnCreate.innerHTML = `<i class="ph-fill ph-lightning" style="color: var(--accent-purple)"></i> Serverless`;
+
+      renderGPUs("", true);
+
+      // Add a banner hint
+      let hint = document.getElementById('serverlessHint');
+      if (!hint) {
+        hint = document.createElement('div');
+        hint.id = 'serverlessHint';
+        hint.style.cssText = 'background: rgba(197,138,249,0.08); border: 1px solid rgba(197,138,249,0.2); border-radius: var(--radius-sm); padding: 10px 14px; margin-bottom: 16px; font-size: 13px; color: var(--accent-purple); display: flex; align-items: center; gap: 8px;';
+        hint.innerHTML = '<i class="ph-fill ph-lightning"></i> Select a GPU below to configure your serverless endpoint.';
+        document.getElementById('tab-compute').insertBefore(hint, document.querySelector('#tab-compute .filters').nextSibling);
+      } else {
+        hint.style.display = 'flex';
+      }
+    }
+
+
+      deployModal.classList.remove('active');
+    }
+
+    function deployInstance() {
+      const btn = document.querySelector('#deployModal .btn-deploy');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '<i class="ph-bold ph-spinner ph-spin"></i> Deploying...';
+      btn.style.pointerEvents = 'none';
+      
+      setTimeout(() => {
+        btn.innerHTML = '<i class="ph-bold ph-check"></i> Deployed';
+        btn.style.background = 'var(--success)';
+        setTimeout(() => {
+          closeDeployModal();
+          setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.style.background = 'var(--accent-gradient)';
+            btn.style.pointerEvents = 'auto';
+          }, 300);
+        }, 1000);
+      }, 1500);
+    }
+
+    // Search functionality
+    searchInput.addEventListener('input', (e) => {
+      // If searching, we don't need the staggered animation every time
+      renderGPUs(e.target.value, false);
     });
-  });
-}
 
-function setupAmountBtns() {
-  document.querySelectorAll('.amount-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('selected'));
-      btn.classList.add('selected');
+    // --- TAB SWITCHING LOGIC ---
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', (e) => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        e.currentTarget.classList.add('active');
+
+        const headerTitle = document.querySelector('.header-title');
+        const target = e.currentTarget.getAttribute('data-target');
+
+        if (target === 'tab-payg') {
+          headerTitle.innerText = 'Billing & Credits';
+        } else if (target === 'tab-serverless') {
+          headerTitle.innerText = 'Serverless Endpoints';
+        } else {
+          headerTitle.innerText = 'Deploy Instance';
+          // Reset serverless source when manually clicking GPU Instances
+          _deploySource = 'gpu';
+          // Hide serverless hint if visible
+          const hint = document.getElementById('serverlessHint');
+          if (hint) hint.style.display = 'none';
+        }
+
+        document.querySelectorAll('.tab-content').forEach(tc => {
+          tc.classList.remove('active');
+          if (tc.id === target) tc.classList.add('active');
+        });
+      });
     });
-  });
-}
 
-function setupTabClicks() {
-  // Sidebar nav items
-}
+    // --- PAYG AMOUNT SELECTOR LOGIC ---
+    document.querySelectorAll('.amount-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('selected'));
+        e.currentTarget.classList.add('selected');
+        
+        const val = e.currentTarget.innerText;
+        const checkoutBtn = document.querySelector('.btn-checkout');
+        if(val !== 'Custom') {
+          checkoutBtn.innerHTML = `<i class="ph-bold ph-lock-key"></i> Pay ${val}.00`;
+        } else {
+          checkoutBtn.innerHTML = `<i class="ph-bold ph-lock-key"></i> Enter Amount`;
+        }
+      });
+    });
 
-function switchMainTab(tab) {
-  // Update nav
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-
-  const tabMap = { serverless: 'tab-serverless', gpu: 'tab-gpu', payg: 'tab-payg' };
-  const titleMap = { serverless: 'Serverless Endpoints', gpu: 'GPU Instances', payg: 'Billing & Credits' };
-
-  document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
-  const targetTab = document.getElementById(tabMap[tab]);
-  if (targetTab) targetTab.classList.add('active');
-  document.getElementById('headerTitle').textContent = titleMap[tab] || 'T1ERA';
-
-  event?.currentTarget?.classList?.add('active');
-}
-
-function toggleSidebar() {
-  document.querySelector('.sidebar').classList.toggle('open');
-  document.querySelector('.sidebar-overlay').classList.toggle('active');
-}
-
-function formatDate(ts) {
-  if (!ts) return '—';
-  const d = new Date(ts);
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-}
-
-function escHtml(str) {
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
-
-let toastTimer;
-function showToast(html) {
-  const toast = document.getElementById('toast');
-  toast.innerHTML = html;
-  toast.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => toast.classList.remove('show'), 3000);
-}
-
-// =====================================================================
-// INIT
-// =====================================================================
-window.addEventListener('DOMContentLoaded', boot);
-</script>
+  </script>
 </body>
 </html>
