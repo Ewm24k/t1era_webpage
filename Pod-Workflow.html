@@ -679,7 +679,7 @@
         <div class="avatar">JD</div>
         <div class="user-info">
           <span class="user-name">John Doe</span>
-          <span class="user-balance">$142.50</span>
+          <span class="user-balance" id="sidebarBalance">$142.50</span>
         </div>
       </div>
     </div>
@@ -705,7 +705,7 @@
       <div class="tabs-wrapper">
         <div class="tabs">
           <div class="tab active" data-target="tab-compute">Secure Cloud</div>
-          <div class="tab" data-target="tab-compute">Serverless</div>
+          <div class="tab" data-target="tab-serverless">Serverless</div>
           <div class="tab" data-target="tab-payg">
             Pay as you go <span class="badge-new">New</span>
           </div>
@@ -739,6 +739,12 @@
         </div>
       </div>
 
+      <!-- TAB CONTENT: SERVERLESS -->
+      <div id="tab-serverless" class="tab-content">
+        <!-- Instance cards injected by pod-serverless.js -->
+        <div id="serverlessContent"></div>
+      </div>
+
       <!-- TAB CONTENT: PAY AS YOU GO -->
       <div id="tab-payg" class="tab-content">
         <div class="payg-layout">
@@ -752,7 +758,7 @@
             
             <div class="balance-display">
               <div class="balance-label">Current Balance</div>
-              <div class="balance-amount">$142.50</div>
+              <div class="balance-amount" id="balanceAmount">$142.50</div>
               <div class="balance-subtext">
                 <i class="ph-fill ph-check-circle"></i> Sufficient for active deployments
               </div>
@@ -1080,12 +1086,25 @@
       const originalText = btn.innerHTML;
       btn.innerHTML = '<i class="ph-bold ph-spinner ph-spin"></i> Deploying...';
       btn.style.pointerEvents = 'none';
-      
+
+      // Capture current modal values
+      const name      = document.getElementById('modalGpuName').innerText;
+      const vram      = document.getElementById('modalGpuVram').innerText.replace(' VRAM','');
+      const priceText = document.getElementById('modalGpuPrice').innerText.replace('$','');
+      const price     = parseFloat(priceText) || 0;
+      const template  = document.querySelector('#deployModal .select-box')?.value || 'Ubuntu 22.04';
+      const disk      = parseInt(document.getElementById('diskVal')?.innerText) || 40;
+      const volume    = parseInt(document.getElementById('volVal')?.innerText) || 100;
+
       setTimeout(() => {
         btn.innerHTML = '<i class="ph-bold ph-check"></i> Deployed';
         btn.style.background = 'var(--success)';
         setTimeout(() => {
           closeDeployModal();
+          // Hand off to serverless manager
+          if (window.SL && window.SL.deploy) {
+            window.SL.deploy({ name, vram, pricePerHr: price, template, disk, volume });
+          }
           setTimeout(() => {
             btn.innerHTML = originalText;
             btn.style.background = 'var(--accent-gradient)';
@@ -1112,6 +1131,8 @@
         const headerTitle = document.querySelector('.header-title');
         if(e.currentTarget.innerText.includes('Pay as you go')) {
           headerTitle.innerText = 'Billing & Credits';
+        } else if(e.currentTarget.innerText.includes('Serverless')) {
+          headerTitle.innerText = 'Serverless Endpoints';
         } else {
           headerTitle.innerText = 'Deploy Instance';
         }
@@ -1144,6 +1165,11 @@
     });
 
   </script>
+
+  <!-- ═══════════════════════════
+   SERVERLESS INSTANCE MANAGER
+  ═══════════════════════════ -->
+  <script src="pod-serverless.js"></script>
 
   <!-- ═══════════════════════════
    AUTH GATEWAY — redirect unauthenticated users
