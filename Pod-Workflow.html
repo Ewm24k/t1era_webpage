@@ -82,6 +82,26 @@
     #authGate .gate-text { font-size: 13px; color: var(--text-tertiary); }
     @keyframes gateSpin { to { transform: rotate(360deg); } }
 
+    /* --- SKELETON LOADING --- */
+    .page-content { opacity: 0; transition: opacity 0.4s ease; }
+    .page-content.loaded { opacity: 1; }
+
+    .skel {
+      background: linear-gradient(90deg, var(--bg-surface) 25%, var(--bg-elevated) 50%, var(--bg-surface) 75%);
+      background-size: 200% 100%;
+      animation: skelShimmer 1.4s infinite;
+      border-radius: 6px;
+    }
+    @keyframes skelShimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+    .skel-line { height: 13px; margin-bottom: 8px; }
+    .skel-line.short { width: 40%; }
+    .skel-line.med   { width: 65%; }
+    .skel-line.full  { width: 100%; }
+    .skel-avatar { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; }
+    .skel-card { height: 180px; border-radius: 20px; margin-bottom: 16px; }
+    .skel-tab  { height: 36px; width: 90px; border-radius: 8px; display: inline-block; margin-right: 8px; }
+
     /* --- SIDEBAR & OVERLAY --- */
     .sidebar-overlay {
       display: none;
@@ -683,6 +703,9 @@
     <div class="gate-text">Checking authentication…</div>
   </div>
 
+  <!-- PAGE CONTENT (hidden until auth confirmed) -->
+  <div class="page-content" id="pageContent">
+
   <!-- SIDEBAR OVERLAY (Mobile) -->
   <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
 
@@ -712,9 +735,9 @@
         <a href="#" class="nav-item"><i class="ph ph-gear"></i> Settings</a>
       </div>
       <div class="user-profile">
-        <div class="avatar" id="sidebarAvatar" style="overflow:hidden;">U</div>
+        <div class="avatar skel skel-avatar" id="sidebarAvatar" style="overflow:hidden;"></div>
         <div class="user-info">
-          <span class="user-name" id="sidebarUserName">Loading…</span>
+          <span class="user-name skel skel-line med" id="sidebarUserName" style="display:block;"></span>
           <span class="user-balance" id="sidebarBalance">$142.50</span>
         </div>
       </div>
@@ -777,7 +800,13 @@
 
       <!-- TAB CONTENT: SERVERLESS -->
       <div id="tab-serverless" class="tab-content active">
-        <div id="serverlessContent">
+        <!-- Skeleton shown before SL.js renders -->
+        <div id="serverlessSkeleton">
+          <div class="skel skel-card"></div>
+          <div class="skel skel-card"></div>
+          <div class="skel skel-card"></div>
+        </div>
+        <div id="serverlessContent" style="display:none;">
           <!-- Rendered by pod-serverless.js -->
         </div>
       </div>
@@ -795,7 +824,7 @@
             
             <div class="balance-display">
               <div class="balance-label">Current Balance</div>
-              <div class="balance-amount">$142.50</div>
+              <div class="balance-amount" id="balanceAmount">$142.50</div>
               <div class="balance-subtext">
                 <i class="ph-fill ph-check-circle"></i> Sufficient for active deployments
               </div>
@@ -867,7 +896,7 @@
                 <i class="ph-fill ph-chart-line-up"></i>
                 <h2>Runway Estimator</h2>
               </div>
-              <p style="font-size: 12px; color: var(--text-secondary);">How long your current balance ($142.50) will last on a single instance:</p>
+              <p style="font-size: 12px; color: var(--text-secondary);">How long your current balance (<span id="runwayBalance">$142.50</span>) will last on a single instance:</p>
               
               <div class="estimator-list">
                 <div class="estimator-item">
@@ -891,6 +920,8 @@
 
     </div>
   </main>
+
+  </div><!-- /page-content -->
 
   <!-- CREATE SERVER MODAL (Centered) -->
   <div class="modal-overlay-center" id="createServerModal">
@@ -1319,7 +1350,7 @@
           return;
         }
 
-        // Hide auth gate
+        // Hide auth gate, show skeleton page
         var gate = document.getElementById('authGate');
         if (gate) {
           gate.style.opacity = '0';
@@ -1327,34 +1358,50 @@
           setTimeout(function() { gate.style.display = 'none'; }, 300);
         }
 
-        // Fetch user profile from Firestore — same pattern as spark
+        // Show page with skeletons visible
+        var page = document.getElementById('pageContent');
+        if (page) {
+          setTimeout(function() { page.classList.add('loaded'); }, 50);
+        }
+
+        // Fetch user profile from Firestore
         db.collection('users').doc(user.uid).get().then(function(snap) {
           var d = snap.exists ? snap.data() : {};
-          var photoURL   = (d.profilePicture && d.profilePicture.url) || user.photoURL || '';
-          var fullName   = d.firstName && d.lastName
-                           ? (d.firstName + ' ' + d.lastName)
-                           : (d.displayName || user.displayName || user.email || 'User');
-          var initial    = fullName[0].toUpperCase();
+          var photoURL  = (d.profilePicture && d.profilePicture.url) || user.photoURL || '';
+          var fullName  = (d.firstName && d.lastName)
+                          ? (d.firstName + ' ' + d.lastName)
+                          : (d.displayName || user.displayName || user.email || 'User');
+          var initial   = fullName[0].toUpperCase();
 
-          // Update sidebar name
+          // Remove skeleton from name
           var nameEl = document.getElementById('sidebarUserName');
-          if (nameEl) nameEl.textContent = fullName;
+          if (nameEl) {
+            nameEl.classList.remove('skel', 'skel-line', 'med');
+            nameEl.style.display = '';
+            nameEl.textContent = fullName;
+          }
 
-          // Update sidebar avatar — photo or initial
+          // Remove skeleton from avatar, set photo or initial
           var avatarEl = document.getElementById('sidebarAvatar');
           if (avatarEl) {
+            avatarEl.classList.remove('skel', 'skel-avatar');
             if (photoURL) {
               avatarEl.innerHTML = '<img src="' + photoURL + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />';
             } else {
               avatarEl.textContent = initial;
             }
           }
+
         }).catch(function() {
-          // Fallback to auth user data only
           var nameEl = document.getElementById('sidebarUserName');
-          if (nameEl) nameEl.textContent = user.displayName || user.email || 'User';
+          if (nameEl) {
+            nameEl.classList.remove('skel', 'skel-line', 'med');
+            nameEl.style.display = '';
+            nameEl.textContent = user.displayName || user.email || 'User';
+          }
           var avatarEl = document.getElementById('sidebarAvatar');
           if (avatarEl) {
+            avatarEl.classList.remove('skel', 'skel-avatar');
             if (user.photoURL) {
               avatarEl.innerHTML = '<img src="' + user.photoURL + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />';
             } else {
