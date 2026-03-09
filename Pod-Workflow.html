@@ -1176,15 +1176,36 @@
       const originalText = btn.innerHTML;
       btn.innerHTML = '<i class="ph-bold ph-spinner ph-spin"></i> Deploying...';
       btn.style.pointerEvents = 'none';
-      
+
+      // Collect current modal values
+      const gpuName     = document.getElementById('modalGpuName').innerText;
+      const gpuVram     = document.getElementById('modalGpuVram').innerText;
+      const gpuPrice    = parseFloat(document.getElementById('modalGpuPrice').innerText.replace('$',''));
+      const template    = document.querySelector('#deployModal select').value;
+      const disk        = parseInt(document.getElementById('diskVal').innerText);
+      const volume      = parseInt(document.getElementById('volVal').innerText);
+
       setTimeout(() => {
         btn.innerHTML = '<i class="ph-bold ph-check"></i> Deployed';
         btn.style.background = 'var(--success)';
+
+        // Call SL.deploy so the instance appears in Serverless tab
+        if (window.SL) {
+          window.SL.deploy({
+            name:       gpuName,
+            vram:       gpuVram,
+            pricePerHr: gpuPrice,
+            template:   template,
+            disk:       disk,
+            volume:     volume
+          });
+        }
+
         setTimeout(() => {
           closeDeployModal();
           setTimeout(() => {
             btn.innerHTML = originalText;
-            btn.style.background = 'var(--accent-gradient)';
+            btn.style.background = '';
             btn.style.pointerEvents = 'auto';
           }, 300);
         }, 1000);
@@ -1193,7 +1214,6 @@
 
     // Search functionality
     searchInput.addEventListener('input', (e) => {
-      // If searching, we don't need the staggered animation every time
       renderGPUs(e.target.value, false);
     });
 
@@ -1212,9 +1232,7 @@
           headerTitle.innerText = 'Serverless Endpoints';
         } else {
           headerTitle.innerText = 'Deploy Instance';
-          // Reset serverless source when manually clicking GPU Instances
           _deploySource = 'gpu';
-          // Hide serverless hint if visible
           const hint = document.getElementById('serverlessHint');
           if (hint) hint.style.display = 'none';
         }
@@ -1231,16 +1249,17 @@
       btn.addEventListener('click', (e) => {
         document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('selected'));
         e.currentTarget.classList.add('selected');
-        
         const val = e.currentTarget.innerText;
         const checkoutBtn = document.querySelector('.btn-checkout');
-        if(val !== 'Custom') {
+        if (val !== 'Custom') {
           checkoutBtn.innerHTML = `<i class="ph-bold ph-lock-key"></i> Pay ${val}.00`;
         } else {
           checkoutBtn.innerHTML = `<i class="ph-bold ph-lock-key"></i> Enter Amount`;
         }
       });
     });
+
+  </script>
 
   <!-- Firebase compat SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
