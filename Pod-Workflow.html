@@ -1144,5 +1144,31 @@
     });
 
   </script>
+
+  <!-- ═══════════════════════════
+   AUTH GATEWAY — redirect unauthenticated users
+  ═══════════════════════════ -->
+  <script type="module">
+    import { initializeApp }                        from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+    import { getAuth, onAuthStateChanged }          from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+
+    const firebaseConfig = {
+      apiKey:            "AIzaSyBnt9mbb8LdMVeguSHUmS20L6uBHIfxwAs",
+      authDomain:        "t1era-v2.firebaseapp.com",
+      projectId:         "t1era-v2",
+      storageBucket:     "t1era-v2.firebasestorage.app",
+      messagingSenderId: "279266491659",
+      appId:             "1:279266491659:web:28a03c7b7300fcb152b60e",
+    };
+
+    const app  = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.replace('https://t1era.netlify.app/auth');
+      }
+    });
+  </script>
 </body>
 </html>
