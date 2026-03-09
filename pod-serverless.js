@@ -250,10 +250,10 @@
     var wrap = document.getElementById('serverlessContent');
     if (!wrap) return;
 
-    // 5. Hide skeleton, show content
+    // Hide skeleton, show content
     var skel = document.getElementById('serverlessSkeleton');
     if (skel) skel.style.display = 'none';
-    wrap.style.display = 'block';
+    wrap.style.display = '';
 
     if (_instances.length === 0) {
       wrap.innerHTML = emptyStateHTML();
@@ -554,18 +554,16 @@
     injectCSS();
     initFirebase();
 
-    checkAuthGate(function () {
-      loadState();
-      renderAll();
+    loadState();
+    renderAll();
 
-      document.querySelectorAll('.tab[data-target="tab-serverless"]').forEach(function (t) {
-        t.addEventListener('click', function () { setTimeout(renderAll, 20); });
-      });
-
-      if (_instances.some(function (i) { return i.state === 'running'; })) {
-        startTicker();
-      }
+    document.querySelectorAll('.tab[data-target="tab-serverless"]').forEach(function (t) {
+      t.addEventListener('click', function () { setTimeout(renderAll, 20); });
     });
+
+    if (_instances.some(function (i) { return i.state === 'running'; })) {
+      startTicker();
+    }
   }
 
   if (document.readyState === 'loading') {
