@@ -8,6 +8,10 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <!-- Firebase compat SDK — must load before auth gate -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <style>
     :root {
       /* Google AI Studio / Modern Cloud Vibe */
@@ -54,6 +58,29 @@
       overflow: hidden;
       -webkit-font-smoothing: antialiased;
     }
+
+    /* --- AUTH LOADING GATE --- */
+    #authGate {
+      position: fixed; inset: 0; z-index: 9999;
+      background: var(--bg-base);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 20px;
+    }
+    #authGate .gate-logo {
+      font-size: 28px; font-weight: 700; letter-spacing: -0.5px;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      display: flex; align-items: center; gap: 10px;
+    }
+    #authGate .gate-logo i { -webkit-text-fill-color: var(--accent-blue); font-size: 32px; }
+    #authGate .gate-spinner {
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 3px solid rgba(138,180,248,0.15);
+      border-top-color: var(--accent-blue);
+      animation: gateSpin 0.8s linear infinite;
+    }
+    #authGate .gate-text { font-size: 13px; color: var(--text-tertiary); }
+    @keyframes gateSpin { to { transform: rotate(360deg); } }
 
     /* --- SIDEBAR & OVERLAY --- */
     .sidebar-overlay {
@@ -646,6 +673,15 @@
   </style>
 </head>
 <body>
+
+  <!-- AUTH LOADING GATE -->
+  <div id="authGate">
+    <div class="gate-logo">
+      <i class="ph-fill ph-hexagon"></i> T1ERA
+    </div>
+    <div class="gate-spinner"></div>
+    <div class="gate-text">Checking authentication…</div>
+  </div>
 
   <!-- SIDEBAR OVERLAY (Mobile) -->
   <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
@@ -1261,10 +1297,35 @@
 
   </script>
 
-  <!-- Firebase compat SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <!-- Auth gate check -->
+  <script>
+    (function() {
+      var app = firebase.apps.length
+        ? firebase.apps[0]
+        : firebase.initializeApp({
+            apiKey:            "AIzaSyBnt9mbb8LdMVeguSHUmS20L6uBHIfxwAs",
+            authDomain:        "t1era-v2.firebaseapp.com",
+            projectId:         "t1era-v2",
+            storageBucket:     "t1era-v2.firebasestorage.app",
+            messagingSenderId: "279266491659",
+            appId:             "1:279266491659:web:28a03c7b7300fcb152b60e"
+          });
+
+      firebase.auth().onAuthStateChanged(function(user) {
+        if (!user) {
+          window.location.href = 'auth.html';
+        } else {
+          var gate = document.getElementById('authGate');
+          if (gate) {
+            gate.style.opacity = '0';
+            gate.style.transition = 'opacity 0.3s ease';
+            setTimeout(function() { gate.style.display = 'none'; }, 300);
+          }
+        }
+      });
+    })();
+  </script>
+
   <!-- Serverless instance manager -->
   <script src="pod-serverless.js"></script>
 </body>
