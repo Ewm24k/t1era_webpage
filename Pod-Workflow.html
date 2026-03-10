@@ -57,15 +57,11 @@
       height: 100vh;
       overflow: hidden;
       -webkit-font-smoothing: antialiased;
-      opacity: 0;
-      transition: opacity 0.4s ease;
     }
-    body.loaded { opacity: 1; }
 
     /* --- AUTH LOADING GATE --- */
     #authGate {
       position: fixed; inset: 0; z-index: 9999;
-      opacity: 1;
       display: flex; flex-direction: column;
       align-items: center; justify-content: center; gap: 20px;
       background:
@@ -175,10 +171,12 @@
       display: flex;
       flex-direction: column;
       padding: 20px 16px;
-      transition: transform var(--transition);
+      transition: transform var(--transition), opacity 0.4s ease;
       z-index: 10;
       flex-shrink: 0;
+      opacity: 0;
     }
+    .sidebar.page-ready { opacity: 1; }
 
     .logo {
       display: flex;
@@ -260,7 +258,10 @@
       overflow: hidden;
       position: relative;
       width: 100%;
+      opacity: 0;
+      transition: opacity 0.4s ease;
     }
+    .main-content.page-ready { opacity: 1; }
 
     /* Header */
     .header {
@@ -1414,11 +1415,13 @@
           setTimeout(function() { gate.classList.add('hidden'); }, 420);
         }
 
-        // Show page with skeletons visible
-        var page = document.body;
-        if (page) {
-          setTimeout(function() { page.classList.add('loaded'); }, 50);
-        }
+        // Show page content (sidebar + main) after gate fades
+        setTimeout(function() {
+          var sidebar = document.querySelector('.sidebar');
+          var main    = document.querySelector('.main-content');
+          if (sidebar) sidebar.classList.add('page-ready');
+          if (main)    main.classList.add('page-ready');
+        }, 50);
 
         // Fetch user profile from Firestore
         db.collection('users').doc(user.uid).get().then(function(snap) {
