@@ -147,6 +147,20 @@
       });
   }
 
+
+  function fbDeleteProject(projectId) {
+    if (!_fbDb || !_currentUid) return;
+    _fbDb.collection('users').doc(_currentUid).collection('projects').doc(projectId).delete()
+      .catch(function(e){ console.warn('[SL] project delete failed:', e); });
+    _fbDb.collection('users').doc(_currentUid).collection('pods')
+      .where('projectId','==',projectId).get()
+      .then(function(snap){
+        var batch = _fbDb.batch();
+        snap.forEach(function(doc){ batch.delete(doc.ref); });
+        return batch.commit();
+      }).catch(function(e){ console.warn('[SL] pod batch delete failed:', e); });
+  }
+
   /* ══════════════════════════════════════════════════════════════════
      PERSISTENCE  –  localStorage + uptime recovery on refresh
   ══════════════════════════════════════════════════════════════════ */
@@ -359,6 +373,30 @@
       renderAll();
     },
 
+    deleteProject: function (projectId) {
+      /* Stop ticker on any running instances first */
+      var toDelete = _instances.filter(function(i){ return i.projectId === projectId; });
+      toDelete.forEach(function(i){ fbDeletePod(i.id); });
+      _instances = _instances.filter(function(i){ return i.projectId !== projectId; });
+      _projects  = _projects.filter(function(p){ return p.id !== projectId; });
+      if (_activeProjectId === projectId) {
+        _activeProjectId = _projects.length > 0 ? _projects[0].id : null;
+      }
+      saveState();
+      fbDeleteProject(projectId);
+      stopTickerIfIdle();
+      renderAll();
+      /* Re-render compute tab project panel */
+      var panel = document.getElementById('gpuComputeProjectPanel');
+      var emptyState = document.getElementById('gpuEmptyState');
+      if (_projects.length === 0) {
+        if (panel) panel.style.display = 'none';
+        if (emptyState) emptyState.style.display = '';
+      } else {
+        if (global.SL && global.SL.renderComputeTab) global.SL.renderComputeTab();
+      }
+    },
+
     setActiveProject: function (projectId) {
       _activeProjectId = projectId;
       renderAll();
@@ -471,6 +509,7 @@
             : '<button class="cp-btn-switch" onclick="computeTabSwitchProject(\'' + proj.id + '\')">'
               + '<i class="ph-fill ph-arrow-square-right"></i> Switch to This'
               + '</button>')
+          + '<button class="cp-btn-delete" onclick="slDeleteProject(\'' + proj.id + '\')" title="Delete project"><i class="ph-bold ph-trash"></i></button>'
           + '</div>'
           + '</div>';
       });
@@ -1020,6 +1059,8 @@
       ".cp-btn-switch:hover{border-color:rgba(255,255,255,0.15);color:#e8eaed;}",
       ".cp-active-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:#81c995;}",
       ".cp-active-badge i{font-size:14px;}",
+      ".cp-btn-delete{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;font-size:13px;border:1px solid rgba(235,87,87,0.2);background:rgba(235,87,87,0.06);color:#f28b82;cursor:pointer;transition:all 0.15s;margin-left:auto;font-family:inherit;flex-shrink:0;}",
+      ".cp-btn-delete:hover{background:rgba(235,87,87,0.2);border-color:rgba(235,87,87,0.5);}",
     ].join("");
     document.head.appendChild(s);
   }
