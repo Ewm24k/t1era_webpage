@@ -556,6 +556,7 @@
       "sidebarBalance",
       "slHeaderBalance",
       "runwayBalance",
+      "headerBalanceStat",
     ].forEach(function (id) {
       var el = document.getElementById(id);
       if (el) el.textContent = fmt;
