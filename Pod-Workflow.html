@@ -1218,22 +1218,19 @@
       renderComputeTab();
     }
 
-    function slDeleteProject(projectId) {
+    function slDeleteProject(projectId, btnEl) {
       if (!window.SL) return;
       var projects = window.SL.getProjects();
       var proj = projects.filter(function(p){ return p.id === projectId; })[0];
       var name = proj ? proj.name : 'this project';
-      var instanceCount = window.SL.getProjects ? 0 : 0;
-      /* Count instances for confirmation message */
       var confirmed = window.confirm(
         'Delete "' + name + '"?\n\nThis will permanently delete the project and all its GPU instances from your account and database.\n\nThis cannot be undone.'
       );
       if (!confirmed) return;
-      window.SL.deleteProject(projectId);
-      /* Reset current project id if it was the deleted one */
       if (window._currentProjectId === projectId) {
         window._currentProjectId = null;
       }
+      window.SL.deleteProject(projectId, btnEl);
     }
 
     // Renders the project panel in tab-compute (called on tab switch & after deploy)
