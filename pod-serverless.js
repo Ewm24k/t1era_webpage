@@ -178,54 +178,19 @@
       _activeProjectId = _projects[0].id;
     }
 
-    /* RECOVERY: instances may have projectIds that were never saved to _projects
-       (e.g. data from before project tracking, or localStorage cleared partially).
-       Auto-create placeholder project entries for any orphaned projectId. */
-    _instances.forEach(function (inst) {
-      if (!inst.projectId) return;
-      var exists = _projects.some(function (p) { return p.id === inst.projectId; });
-      if (!exists) {
-        /* Try to derive a readable name from the projectId timestamp */
-        var projTs = inst.projectId.replace('proj_', '');
-        var projDate = projTs && !isNaN(Number(projTs))
-          ? new Date(Number(projTs)).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-          : '';
-        _projects.push({
-          id:        inst.projectId,
-          name:      projDate ? "Project " + projDate : inst.projectId,
-          location:  "",
-          createdAt: inst.deployedAt || new Date().toISOString()
-        });
-      }
-    });
-
-    /* Also handle instances with no projectId at all.
-       If real projects already exist, link unlinked instances to the first real
-       project (the user's own project) so the correct name shows up.
-       Only create a fallback project if there are truly no projects at all. */
+    /* If instances have no projectId, assign them to the first real project.
+       We do NOT create fake placeholder projects here — that was corrupting
+       t1era_sl_projects with generic names and overwriting the user's real names.
+       Display-time fallback handles the label if still unresolved. */
     var unlinked = _instances.filter(function (i) { return !i.projectId; });
-    if (unlinked.length > 0) {
-      if (_projects.length > 0) {
-        /* Attach to the earliest real project */
-        var sorted = _projects.slice().sort(function (a, b) {
-          return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
-        });
-        var targetId = sorted[0].id;
-        unlinked.forEach(function (i) { i.projectId = targetId; });
-      } else {
-        /* No real projects at all — create one fallback */
-        var fallbackId = "proj_" + Date.now();
-        _projects.push({
-          id:        fallbackId,
-          name:      "My Project",
-          location:  "",
-          createdAt: new Date().toISOString()
-        });
-        unlinked.forEach(function (i) { i.projectId = fallbackId; });
-      }
+    if (unlinked.length > 0 && _projects.length > 0) {
+      var earliest = _projects.slice().sort(function (a, b) {
+        return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
+      })[0];
+      unlinked.forEach(function (i) { i.projectId = earliest.id; });
     }
 
-    /* re-set active project after recovery */
+    /* Set active project */
     if (!_activeProjectId && _projects.length > 0) {
       _activeProjectId = _projects[0].id;
     }
