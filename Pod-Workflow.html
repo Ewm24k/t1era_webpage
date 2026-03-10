@@ -61,9 +61,29 @@
 
     /* --- AUTH LOADING GATE --- */
     #authGate {
-      position: fixed; inset: 0; z-index: 9999;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center; gap: 20px;
+      position: fixed;
+      top: 0; right: 0; bottom: 0; left: 0; /* inset fallback for all browsers */
+      z-index: 9999;
+      display: -webkit-box;
+      display: -webkit-flex;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-box-orient: vertical;
+      -webkit-box-direction: normal;
+      -webkit-flex-direction: column;
+      -ms-flex-direction: column;
+      flex-direction: column;
+      -webkit-box-align: center;
+      -webkit-align-items: center;
+      -ms-flex-align: center;
+      align-items: center;
+      -webkit-box-pack: center;
+      -webkit-justify-content: center;
+      -ms-flex-pack: center;
+      justify-content: center;
+      gap: 20px;
+      -webkit-box-sizing: border-box;
+      box-sizing: border-box;
       background:
         radial-gradient(ellipse at 25% 20%, rgba(168,42,120,.55) 0%, transparent 50%),
         radial-gradient(ellipse at 75% 80%, rgba(109,40,217,.60) 0%, transparent 50%),
@@ -71,29 +91,59 @@
         radial-gradient(ellipse at 10% 90%, rgba(88,28,135,.70) 0%, transparent 45%),
         linear-gradient(135deg,#12041e 0%,#1e0533 40%,#2d0a1e 70%,#180330 100%);
       overflow: hidden;
+      /* Ensure gate is always on top regardless of body state */
+      -webkit-transform: translateZ(0);
+      transform: translateZ(0);
     }
     #authGate::before {
-      content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+      content: '';
+      position: absolute;
+      top: 0; right: 0; bottom: 0; left: 0;
+      z-index: 0;
+      pointer-events: none;
       background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.07'/%3E%3C/svg%3E");
       background-size: 180px;
     }
     #authGate::after {
-      content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+      content: '';
+      position: absolute;
+      top: 0; right: 0; bottom: 0; left: 0;
+      z-index: 0;
+      pointer-events: none;
       background: radial-gradient(circle at 50% 50%, rgba(236,72,153,.08) 0%, transparent 60%);
+      -webkit-animation: gateOrbPulse 3s ease-in-out infinite;
       animation: gateOrbPulse 3s ease-in-out infinite;
     }
+    @-webkit-keyframes gateOrbPulse { 0%,100%{-webkit-transform:scale(1);transform:scale(1);opacity:1} 50%{-webkit-transform:scale(1.15);transform:scale(1.15);opacity:.6} }
     @keyframes gateOrbPulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.15);opacity:.6} }
-    #authGate.hidden { display: none; }
+    /* Use visibility+pointer-events instead of display:none to avoid layout flash */
+    #authGate.hidden {
+      opacity: 0 !important;
+      pointer-events: none;
+      visibility: hidden;
+    }
     #authGate > * { position: relative; z-index: 1; }
 
-    .ag-logo { display: flex; align-items: center; gap: 11px; margin-bottom: 4px; }
+    .ag-logo {
+      display: -webkit-box; display: -webkit-flex; display: -ms-flexbox; display: flex;
+      -webkit-box-align: center; -webkit-align-items: center; align-items: center;
+      gap: 11px; margin-bottom: 4px;
+    }
     .ag-logomark {
       width: 40px; height: 40px; border-radius: 11px;
       background: linear-gradient(135deg,#8ab4f8 0%,#c58af9 50%,#7c3aed 100%);
-      display: flex; align-items: center; justify-content: center;
+      display: -webkit-box; display: -webkit-flex; display: -ms-flexbox; display: flex;
+      -webkit-box-align: center; -webkit-align-items: center; align-items: center;
+      -webkit-box-pack: center; -webkit-justify-content: center; justify-content: center;
       font-family: 'Inter', sans-serif; font-weight: 900; font-size: 13px; color: #fff;
+      -webkit-box-shadow: 0 0 28px rgba(138,180,248,.5), 0 0 56px rgba(197,138,249,.25);
       box-shadow: 0 0 28px rgba(138,180,248,.5), 0 0 56px rgba(197,138,249,.25);
+      -webkit-animation: agMarkGlow 2.5s ease-in-out infinite;
       animation: agMarkGlow 2.5s ease-in-out infinite;
+    }
+    @-webkit-keyframes agMarkGlow {
+      0%,100% { -webkit-box-shadow: 0 0 28px rgba(138,180,248,.5), 0 0 56px rgba(197,138,249,.25); box-shadow: 0 0 28px rgba(138,180,248,.5), 0 0 56px rgba(197,138,249,.25); }
+      50%      { -webkit-box-shadow: 0 0 40px rgba(138,180,248,.8), 0 0 80px rgba(197,138,249,.45); box-shadow: 0 0 40px rgba(138,180,248,.8), 0 0 80px rgba(197,138,249,.45); }
     }
     @keyframes agMarkGlow {
       0%,100% { box-shadow: 0 0 28px rgba(138,180,248,.5), 0 0 56px rgba(197,138,249,.25); }
@@ -101,37 +151,78 @@
     }
     .ag-logotxt {
       font-family: 'Inter', sans-serif; font-weight: 900; font-size: 20px; letter-spacing: .1em;
+      color: #c58af9; /* solid fallback for browsers that don't support bg-clip:text */
       background: linear-gradient(135deg,#8ab4f8 0%,#c58af9 60%,#ffffff 100%);
       background-size: 200% 100%;
-      -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+      -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent;
+      -webkit-animation: agLogoShimmer 3s ease-in-out infinite;
       animation: agLogoShimmer 3s ease-in-out infinite;
     }
+    @-webkit-keyframes agLogoShimmer { 0%,100%{background-position:0% 0} 50%{background-position:100% 0} }
     @keyframes agLogoShimmer { 0%,100%{background-position:0% 0} 50%{background-position:100% 0} }
 
     .ag-spinner { position: relative; width: 56px; height: 56px; }
-    .ag-spinner::before, .ag-spinner::after { content: ''; position: absolute; border-radius: 50%; border-style: solid; border-color: transparent; }
-    .ag-spinner::before { inset: 0; border-width: 3px; border-top-color: #8ab4f8; border-right-color: rgba(138,180,248,.3); animation: agSpin 1.1s linear infinite; }
-    .ag-spinner::after  { inset: 9px; border-width: 3px; border-top-color: #c58af9; border-left-color: rgba(197,138,249,.25); animation: agSpin .8s linear infinite reverse; }
+    .ag-spinner::before,
+    .ag-spinner::after {
+      content: '';
+      position: absolute;
+      border-radius: 50%;
+      border-style: solid;
+      border-color: transparent;
+    }
+    .ag-spinner::before {
+      top: 0; right: 0; bottom: 0; left: 0;
+      border-width: 3px;
+      border-top-color: #8ab4f8;
+      border-right-color: rgba(138,180,248,.3);
+      -webkit-animation: agSpin 1.1s linear infinite;
+      animation: agSpin 1.1s linear infinite;
+    }
+    .ag-spinner::after {
+      top: 9px; right: 9px; bottom: 9px; left: 9px;
+      border-width: 3px;
+      border-top-color: #c58af9;
+      border-left-color: rgba(197,138,249,.25);
+      -webkit-animation: agSpin .8s linear infinite reverse;
+      animation: agSpin .8s linear infinite reverse;
+    }
+    @-webkit-keyframes agSpin { to { -webkit-transform: rotate(360deg); transform: rotate(360deg); } }
     @keyframes agSpin { to { transform: rotate(360deg); } }
 
     .ag-txt {
       font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 700;
       letter-spacing: .18em; text-transform: uppercase;
+      color: rgba(255,255,255,.8); /* solid fallback */
       background: linear-gradient(90deg,rgba(255,255,255,.9),rgba(138,180,248,.7),rgba(255,255,255,.9));
       background-size: 200% 100%;
-      -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+      -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent;
+      -webkit-animation: agTxtShimmer 2.2s ease-in-out infinite, agTxtPulse 1.6s ease-in-out infinite;
       animation: agTxtShimmer 2.2s ease-in-out infinite, agTxtPulse 1.6s ease-in-out infinite;
     }
+    @-webkit-keyframes agTxtShimmer { 0%{background-position:100% 0} 100%{background-position:-100% 0} }
     @keyframes agTxtShimmer { 0%{background-position:100% 0} 100%{background-position:-100% 0} }
-    @keyframes agTxtPulse   { 0%,100%{opacity:.55} 50%{opacity:1} }
+    @-webkit-keyframes agTxtPulse { 0%,100%{opacity:.55} 50%{opacity:1} }
+    @keyframes agTxtPulse { 0%,100%{opacity:.55} 50%{opacity:1} }
 
-    .ag-pills { display: flex; gap: 8px; align-items: center; margin-top: 2px; }
-    .ag-pill { width: 6px; height: 6px; border-radius: 50%; animation: agPillPop 1.4s ease-in-out infinite; }
-    .ag-pill:nth-child(1){background:#8ab4f8;animation-delay:0s;}
-    .ag-pill:nth-child(2){background:#c58af9;animation-delay:.18s;}
-    .ag-pill:nth-child(3){background:#ffffff;animation-delay:.36s;}
-    .ag-pill:nth-child(4){background:#c58af9;animation-delay:.54s;}
-    .ag-pill:nth-child(5){background:#8ab4f8;animation-delay:.72s;}
+    .ag-pills {
+      display: -webkit-box; display: -webkit-flex; display: -ms-flexbox; display: flex;
+      gap: 8px;
+      -webkit-box-align: center; -webkit-align-items: center; align-items: center;
+      margin-top: 2px;
+    }
+    .ag-pill {
+      width: 6px; height: 6px; border-radius: 50%;
+      -webkit-animation: agPillPop 1.4s ease-in-out infinite;
+      animation: agPillPop 1.4s ease-in-out infinite;
+    }
+    .ag-pill:nth-child(1){background:#8ab4f8;-webkit-animation-delay:0s;animation-delay:0s;}
+    .ag-pill:nth-child(2){background:#c58af9;-webkit-animation-delay:.18s;animation-delay:.18s;}
+    .ag-pill:nth-child(3){background:#ffffff;-webkit-animation-delay:.36s;animation-delay:.36s;}
+    .ag-pill:nth-child(4){background:#c58af9;-webkit-animation-delay:.54s;animation-delay:.54s;}
+    .ag-pill:nth-child(5){background:#8ab4f8;-webkit-animation-delay:.72s;animation-delay:.72s;}
+    @-webkit-keyframes agPillPop { 0%,100%{-webkit-transform:scaleY(1);transform:scaleY(1);opacity:.5} 50%{-webkit-transform:scaleY(1.9);transform:scaleY(1.9);opacity:1} }
     @keyframes agPillPop { 0%,100%{transform:scaleY(1);opacity:.5} 50%{transform:scaleY(1.9);opacity:1} }
 
     /* --- SKELETON LOADING --- */
@@ -1383,7 +1474,7 @@
 
   </script>
 
-  <!-- Auth gate check -->
+  <!-- Auth gate check — real server token verification -->
   <script>
     (function() {
       var app = firebase.apps.length
@@ -1397,77 +1488,117 @@
             appId:             "1:279266491659:web:28a03c7b7300fcb152b60e"
           });
 
-      var db = firebase.firestore();
+      var db      = firebase.firestore();
+      var gate    = document.getElementById('authGate');
+      var gateTxt = document.getElementById('authGateTxt');
 
+      function setGateTxt(msg) {
+        if (gateTxt) gateTxt.textContent = msg;
+      }
+
+      function dismissGate() {
+        if (!gate) return;
+        gate.style.transition = 'opacity 0.45s ease';
+        gate.style.opacity    = '0';
+        // After fade completes, hide with visibility so it takes no space/events
+        setTimeout(function() {
+          gate.classList.add('hidden');
+        }, 460);
+      }
+
+      function revealPage() {
+        var sidebar = document.querySelector('.sidebar');
+        var main    = document.querySelector('.main-content');
+        if (sidebar) sidebar.classList.add('page-ready');
+        if (main)    main.classList.add('page-ready');
+      }
+
+      function redirectToAuth() {
+        setGateTxt('REDIRECTING TO SIGN IN...');
+        setTimeout(function() {
+          window.location.replace('https://t1era.netlify.app/auth.html');
+        }, 900);
+      }
+
+      function loadUserProfile(user) {
+        db.collection('users').doc(user.uid).get()
+          .then(function(snap) {
+            var d        = snap.exists ? snap.data() : {};
+            var photoURL = (d.profilePicture && d.profilePicture.url) || user.photoURL || '';
+            var fullName = (d.firstName && d.lastName)
+                           ? (d.firstName + ' ' + d.lastName)
+                           : (d.displayName || user.displayName || user.email || 'User');
+            var initial  = fullName.charAt(0).toUpperCase();
+
+            var nameEl = document.getElementById('sidebarUserName');
+            if (nameEl) {
+              nameEl.classList.remove('skel', 'skel-line', 'med');
+              nameEl.style.display = '';
+              nameEl.textContent   = fullName;
+            }
+            var avatarEl = document.getElementById('sidebarAvatar');
+            if (avatarEl) {
+              avatarEl.classList.remove('skel', 'skel-avatar');
+              if (photoURL) {
+                avatarEl.innerHTML = '<img src="' + photoURL + '" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />';
+              } else {
+                avatarEl.textContent = initial;
+              }
+            }
+          })
+          .catch(function() {
+            var nameEl = document.getElementById('sidebarUserName');
+            if (nameEl) {
+              nameEl.classList.remove('skel', 'skel-line', 'med');
+              nameEl.style.display = '';
+              nameEl.textContent   = user.displayName || user.email || 'User';
+            }
+            var avatarEl = document.getElementById('sidebarAvatar');
+            if (avatarEl) {
+              avatarEl.classList.remove('skel', 'skel-avatar');
+              if (user.photoURL) {
+                avatarEl.innerHTML = '<img src="' + user.photoURL + '" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />';
+              } else {
+                avatarEl.textContent = (user.displayName || user.email || 'U').charAt(0).toUpperCase();
+              }
+            }
+          });
+      }
+
+      // onAuthStateChanged fires from local cache (fast).
+      // We then call user.reload() which contacts Firebase servers
+      // to re-fetch the account state and verify the session is still valid.
+      // Then getIdToken(true) forces a server-signed token refresh.
+      // Only after BOTH succeed do we dismiss the gate — this is a real check.
       firebase.auth().onAuthStateChanged(function(user) {
         if (!user) {
-          var gateTxt = document.getElementById('authGateTxt');
-          if (gateTxt) gateTxt.textContent = 'REDIRECTING TO SIGN IN...';
-          setTimeout(function() { window.location.href = 'https://t1era.netlify.app/auth.html'; }, 800);
+          // No cached session at all — redirect immediately
+          redirectToAuth();
           return;
         }
 
-        // Hide auth gate with fade, show skeleton page
-        var gate = document.getElementById('authGate');
-        if (gate) {
-          gate.style.transition = 'opacity 0.4s ease';
-          gate.style.opacity = '0';
-          setTimeout(function() { gate.classList.add('hidden'); }, 420);
-        }
+        // Cached session exists — now verify against server
+        setGateTxt('VERIFYING WITH SERVER...');
 
-        // Show page content (sidebar + main) after gate fades
-        setTimeout(function() {
-          var sidebar = document.querySelector('.sidebar');
-          var main    = document.querySelector('.main-content');
-          if (sidebar) sidebar.classList.add('page-ready');
-          if (main)    main.classList.add('page-ready');
-        }, 50);
-
-        // Fetch user profile from Firestore
-        db.collection('users').doc(user.uid).get().then(function(snap) {
-          var d = snap.exists ? snap.data() : {};
-          var photoURL  = (d.profilePicture && d.profilePicture.url) || user.photoURL || '';
-          var fullName  = (d.firstName && d.lastName)
-                          ? (d.firstName + ' ' + d.lastName)
-                          : (d.displayName || user.displayName || user.email || 'User');
-          var initial   = fullName[0].toUpperCase();
-
-          // Remove skeleton from name
-          var nameEl = document.getElementById('sidebarUserName');
-          if (nameEl) {
-            nameEl.classList.remove('skel', 'skel-line', 'med');
-            nameEl.style.display = '';
-            nameEl.textContent = fullName;
-          }
-
-          // Remove skeleton from avatar, set photo or initial
-          var avatarEl = document.getElementById('sidebarAvatar');
-          if (avatarEl) {
-            avatarEl.classList.remove('skel', 'skel-avatar');
-            if (photoURL) {
-              avatarEl.innerHTML = '<img src="' + photoURL + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />';
-            } else {
-              avatarEl.textContent = initial;
-            }
-          }
-
-        }).catch(function() {
-          var nameEl = document.getElementById('sidebarUserName');
-          if (nameEl) {
-            nameEl.classList.remove('skel', 'skel-line', 'med');
-            nameEl.style.display = '';
-            nameEl.textContent = user.displayName || user.email || 'User';
-          }
-          var avatarEl = document.getElementById('sidebarAvatar');
-          if (avatarEl) {
-            avatarEl.classList.remove('skel', 'skel-avatar');
-            if (user.photoURL) {
-              avatarEl.innerHTML = '<img src="' + user.photoURL + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />';
-            } else {
-              avatarEl.textContent = (user.displayName || user.email || 'U')[0].toUpperCase();
-            }
-          }
-        });
+        user.reload()
+          .then(function() {
+            // reload() succeeded — account exists and is not disabled
+            // Now force a fresh token from the server (forceRefresh = true)
+            setGateTxt('CHECKING CREDENTIALS...');
+            return firebase.auth().currentUser.getIdToken(true);
+          })
+          .then(function(/* idToken */) {
+            // Real server-verified token obtained — session is fully authenticated
+            setGateTxt('ACCESS GRANTED');
+            dismissGate();
+            revealPage();
+            loadUserProfile(firebase.auth().currentUser);
+          })
+          .catch(function(err) {
+            // reload() or getIdToken() failed — session is invalid/expired/account deleted
+            console.warn('[AuthGate] Server verification failed:', err.code, err.message);
+            redirectToAuth();
+          });
       });
     })();
   </script>
