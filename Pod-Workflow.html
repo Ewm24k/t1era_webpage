@@ -65,25 +65,77 @@
     /* --- AUTH LOADING GATE --- */
     #authGate {
       position: fixed; inset: 0; z-index: 9999;
-      background: var(--bg-base);
       display: flex; flex-direction: column;
       align-items: center; justify-content: center; gap: 20px;
+      background:
+        radial-gradient(ellipse at 25% 20%, rgba(168,42,120,.55) 0%, transparent 50%),
+        radial-gradient(ellipse at 75% 80%, rgba(109,40,217,.60) 0%, transparent 50%),
+        radial-gradient(ellipse at 60% 10%, rgba(219,39,119,.30) 0%, transparent 40%),
+        radial-gradient(ellipse at 10% 90%, rgba(88,28,135,.70) 0%, transparent 45%),
+        linear-gradient(135deg,#12041e 0%,#1e0533 40%,#2d0a1e 70%,#180330 100%);
+      overflow: hidden;
     }
-    #authGate .gate-logo {
-      font-size: 28px; font-weight: 700; letter-spacing: -0.5px;
-      background: var(--accent-gradient);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      display: flex; align-items: center; gap: 10px;
+    #authGate::before {
+      content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.07'/%3E%3C/svg%3E");
+      background-size: 180px;
     }
-    #authGate .gate-logo i { -webkit-text-fill-color: var(--accent-blue); font-size: 32px; }
-    #authGate .gate-spinner {
-      width: 36px; height: 36px; border-radius: 50%;
-      border: 3px solid rgba(138,180,248,0.15);
-      border-top-color: var(--accent-blue);
-      animation: gateSpin 0.8s linear infinite;
+    #authGate::after {
+      content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+      background: radial-gradient(circle at 50% 50%, rgba(236,72,153,.08) 0%, transparent 60%);
+      animation: gateOrbPulse 3s ease-in-out infinite;
     }
-    #authGate .gate-text { font-size: 13px; color: var(--text-tertiary); }
-    @keyframes gateSpin { to { transform: rotate(360deg); } }
+    @keyframes gateOrbPulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.15);opacity:.6} }
+    #authGate.hidden { display: none; }
+    #authGate > * { position: relative; z-index: 1; }
+
+    .ag-logo { display: flex; align-items: center; gap: 11px; margin-bottom: 4px; }
+    .ag-logomark {
+      width: 40px; height: 40px; border-radius: 11px;
+      background: linear-gradient(135deg,#8ab4f8 0%,#c58af9 50%,#7c3aed 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Inter', sans-serif; font-weight: 900; font-size: 13px; color: #fff;
+      box-shadow: 0 0 28px rgba(138,180,248,.5), 0 0 56px rgba(197,138,249,.25);
+      animation: agMarkGlow 2.5s ease-in-out infinite;
+    }
+    @keyframes agMarkGlow {
+      0%,100% { box-shadow: 0 0 28px rgba(138,180,248,.5), 0 0 56px rgba(197,138,249,.25); }
+      50%      { box-shadow: 0 0 40px rgba(138,180,248,.8), 0 0 80px rgba(197,138,249,.45); }
+    }
+    .ag-logotxt {
+      font-family: 'Inter', sans-serif; font-weight: 900; font-size: 20px; letter-spacing: .1em;
+      background: linear-gradient(135deg,#8ab4f8 0%,#c58af9 60%,#ffffff 100%);
+      background-size: 200% 100%;
+      -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+      animation: agLogoShimmer 3s ease-in-out infinite;
+    }
+    @keyframes agLogoShimmer { 0%,100%{background-position:0% 0} 50%{background-position:100% 0} }
+
+    .ag-spinner { position: relative; width: 56px; height: 56px; }
+    .ag-spinner::before, .ag-spinner::after { content: ''; position: absolute; border-radius: 50%; border-style: solid; border-color: transparent; }
+    .ag-spinner::before { inset: 0; border-width: 3px; border-top-color: #8ab4f8; border-right-color: rgba(138,180,248,.3); animation: agSpin 1.1s linear infinite; }
+    .ag-spinner::after  { inset: 9px; border-width: 3px; border-top-color: #c58af9; border-left-color: rgba(197,138,249,.25); animation: agSpin .8s linear infinite reverse; }
+    @keyframes agSpin { to { transform: rotate(360deg); } }
+
+    .ag-txt {
+      font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 700;
+      letter-spacing: .18em; text-transform: uppercase;
+      background: linear-gradient(90deg,rgba(255,255,255,.9),rgba(138,180,248,.7),rgba(255,255,255,.9));
+      background-size: 200% 100%;
+      -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+      animation: agTxtShimmer 2.2s ease-in-out infinite, agTxtPulse 1.6s ease-in-out infinite;
+    }
+    @keyframes agTxtShimmer { 0%{background-position:100% 0} 100%{background-position:-100% 0} }
+    @keyframes agTxtPulse   { 0%,100%{opacity:.55} 50%{opacity:1} }
+
+    .ag-pills { display: flex; gap: 8px; align-items: center; margin-top: 2px; }
+    .ag-pill { width: 6px; height: 6px; border-radius: 50%; animation: agPillPop 1.4s ease-in-out infinite; }
+    .ag-pill:nth-child(1){background:#8ab4f8;animation-delay:0s;}
+    .ag-pill:nth-child(2){background:#c58af9;animation-delay:.18s;}
+    .ag-pill:nth-child(3){background:#ffffff;animation-delay:.36s;}
+    .ag-pill:nth-child(4){background:#c58af9;animation-delay:.54s;}
+    .ag-pill:nth-child(5){background:#8ab4f8;animation-delay:.72s;}
+    @keyframes agPillPop { 0%,100%{transform:scaleY(1);opacity:.5} 50%{transform:scaleY(1.9);opacity:1} }
 
     /* --- SKELETON LOADING --- */
 
@@ -697,11 +749,16 @@
 
   <!-- AUTH LOADING GATE -->
   <div id="authGate">
-    <div class="gate-logo">
-      <i class="ph-fill ph-hexagon"></i> T1ERA
+    <div class="ag-logo">
+      <div class="ag-logomark">T1</div>
+      <span class="ag-logotxt">T1ERA</span>
     </div>
-    <div class="gate-spinner"></div>
-    <div class="gate-text">Checking authentication…</div>
+    <div class="ag-spinner"></div>
+    <div class="ag-txt" id="authGateTxt">VERIFYING SESSION...</div>
+    <div class="ag-pills">
+      <div class="ag-pill"></div><div class="ag-pill"></div><div class="ag-pill"></div>
+      <div class="ag-pill"></div><div class="ag-pill"></div>
+    </div>
   </div>
 
   <!-- SIDEBAR OVERLAY (Mobile) -->
@@ -1342,16 +1399,18 @@
 
       firebase.auth().onAuthStateChanged(function(user) {
         if (!user) {
-          window.location.href = 'auth.html';
+          var gateTxt = document.getElementById('authGateTxt');
+          if (gateTxt) gateTxt.textContent = 'REDIRECTING TO SIGN IN...';
+          setTimeout(function() { window.location.href = 'https://t1era.netlify.app/auth.html'; }, 800);
           return;
         }
 
-        // Hide auth gate, show skeleton page
+        // Hide auth gate with fade, show skeleton page
         var gate = document.getElementById('authGate');
         if (gate) {
+          gate.style.transition = 'opacity 0.4s ease';
           gate.style.opacity = '0';
-          gate.style.transition = 'opacity 0.3s ease';
-          setTimeout(function() { gate.style.display = 'none'; }, 300);
+          setTimeout(function() { gate.classList.add('hidden'); }, 420);
         }
 
         // Show page with skeletons visible
