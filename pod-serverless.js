@@ -149,16 +149,60 @@
 
 
   function fbDeleteProject(projectId) {
-    if (!_fbDb || !_currentUid) return;
-    _fbDb.collection('users').doc(_currentUid).collection('projects').doc(projectId).delete()
-      .catch(function(e){ console.warn('[SL] project delete failed:', e); });
-    _fbDb.collection('users').doc(_currentUid).collection('pods')
-      .where('projectId','==',projectId).get()
-      .then(function(snap){
+    /* Returns a Promise that resolves when BOTH the project doc AND all its
+       pod docs have been confirmed deleted by Firestore. */
+    if (!_fbDb || !_currentUid) {
+      /* No DB connection — resolve immediately (offline mode) */
+      return Promise.resolve();
+    }
+    var projectRef = _fbDb.collection('users').doc(_currentUid)
+                          .collection('projects').doc(projectId);
+    var podsRef    = _fbDb.collection('users').doc(_currentUid)
+                          .collection('pods').where('projectId','==',projectId);
+
+    /* Delete project doc + all pods in parallel, wait for both */
+    return Promise.all([
+      projectRef.delete(),
+      podsRef.get().then(function(snap) {
+        if (snap.empty) return Promise.resolve();
         var batch = _fbDb.batch();
-        snap.forEach(function(doc){ batch.delete(doc.ref); });
+        snap.forEach(function(doc) { batch.delete(doc.ref); });
         return batch.commit();
-      }).catch(function(e){ console.warn('[SL] pod batch delete failed:', e); });
+      })
+    ]);
+  }
+
+  function showToast(msg, type) {
+    /* type: 'success' | 'error' */
+    var existing = document.getElementById('slToast');
+    if (existing) existing.remove();
+    var t = document.createElement('div');
+    t.id = 'slToast';
+    var bg   = type === 'error' ? 'rgba(235,87,87,0.15)' : 'rgba(52,211,153,0.12)';
+    var bdr  = type === 'error' ? 'rgba(235,87,87,0.4)'  : 'rgba(52,211,153,0.35)';
+    var col  = type === 'error' ? '#f28b82'               : '#34d399';
+    var icon = type === 'error' ? 'ph-warning-circle'     : 'ph-check-circle';
+    t.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:9998;'
+      + 'display:flex;align-items:center;gap:10px;'
+      + 'background:' + bg + ';border:1px solid ' + bdr + ';color:' + col + ';'
+      + 'padding:12px 18px;border-radius:10px;font-size:13px;font-weight:600;'
+      + "font-family:'DM Sans',sans-serif;"
+      + 'box-shadow:0 8px 24px rgba(0,0,0,0.4);'
+      + 'animation:toastIn .25s cubic-bezier(.16,1,.3,1) both;';
+    t.innerHTML = '<i class="ph-fill ' + icon + '" style="font-size:16px;"></i>' + msg;
+    /* inject keyframe once */
+    if (!document.getElementById('slToastStyle')) {
+      var s = document.createElement('style');
+      s.id = 'slToastStyle';
+      s.textContent = '@keyframes toastIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}';
+      document.head.appendChild(s);
+    }
+    document.body.appendChild(t);
+    setTimeout(function() {
+      t.style.transition = 'opacity .3s';
+      t.style.opacity = '0';
+      setTimeout(function(){ t.remove(); }, 320);
+    }, 3500);
   }
 
   /* ══════════════════════════════════════════════════════════════════
@@ -373,8 +417,14 @@
       renderAll();
     },
 
-    deleteProject: function (projectId) {
-      /* Stop ticker on any running instances first */
+    deleteProject: function (projectId, btnEl) {
+      /* btnEl — the trash button DOM element, used to show loading state */
+      if (btnEl) {
+        btnEl.disabled = true;
+        btnEl.innerHTML = '<i class="ph ph-spinner" style="animation:spin 1s linear infinite;display:inline-block;"></i>';
+      }
+
+      /* 1. Remove from memory + localStorage immediately so UI feels instant */
       var toDelete = _instances.filter(function(i){ return i.projectId === projectId; });
       toDelete.forEach(function(i){ fbDeletePod(i.id); });
       _instances = _instances.filter(function(i){ return i.projectId !== projectId; });
@@ -383,10 +433,10 @@
         _activeProjectId = _projects.length > 0 ? _projects[0].id : null;
       }
       saveState();
-      fbDeleteProject(projectId);
       stopTickerIfIdle();
       renderAll();
-      /* Re-render compute tab project panel */
+
+      /* Re-render compute tab */
       var panel = document.getElementById('gpuComputeProjectPanel');
       var emptyState = document.getElementById('gpuEmptyState');
       if (_projects.length === 0) {
@@ -395,6 +445,16 @@
       } else {
         if (global.SL && global.SL.renderComputeTab) global.SL.renderComputeTab();
       }
+
+      /* 2. Delete from Firestore — wait for confirmation then show toast */
+      fbDeleteProject(projectId)
+        .then(function() {
+          showToast('Project deleted from database', 'success');
+        })
+        .catch(function(err) {
+          console.error('[SL] DB delete failed:', err);
+          showToast('Deleted locally — database sync failed', 'error');
+        });
     },
 
     setActiveProject: function (projectId) {
@@ -509,7 +569,7 @@
             : '<button class="cp-btn-switch" onclick="computeTabSwitchProject(\'' + proj.id + '\')">'
               + '<i class="ph-fill ph-arrow-square-right"></i> Switch to This'
               + '</button>')
-          + '<button class="cp-btn-delete" onclick="slDeleteProject(\'' + proj.id + '\')" title="Delete project"><i class="ph-bold ph-trash"></i></button>'
+          + '<button class="cp-btn-delete" onclick="slDeleteProject(\'' + proj.id + '\',this)" title="Delete project"><i class="ph-bold ph-trash"></i></button>'
           + '</div>'
           + '</div>';
       });
