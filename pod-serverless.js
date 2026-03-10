@@ -185,29 +185,44 @@
       if (!inst.projectId) return;
       var exists = _projects.some(function (p) { return p.id === inst.projectId; });
       if (!exists) {
+        /* Try to derive a readable name from the projectId timestamp */
+        var projTs = inst.projectId.replace('proj_', '');
+        var projDate = projTs && !isNaN(Number(projTs))
+          ? new Date(Number(projTs)).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+          : '';
         _projects.push({
           id:        inst.projectId,
-          name:      "Recovered Project",
+          name:      projDate ? "Project " + projDate : inst.projectId,
           location:  "",
           createdAt: inst.deployedAt || new Date().toISOString()
         });
       }
     });
 
-    /* Also handle instances with no projectId at all — group them under a default project */
+    /* Also handle instances with no projectId at all.
+       If real projects already exist, link unlinked instances to the first real
+       project (the user's own project) so the correct name shows up.
+       Only create a fallback project if there are truly no projects at all. */
     var unlinked = _instances.filter(function (i) { return !i.projectId; });
     if (unlinked.length > 0) {
-      var defaultProjId = "proj_default";
-      var defaultExists = _projects.some(function (p) { return p.id === defaultProjId; });
-      if (!defaultExists) {
+      if (_projects.length > 0) {
+        /* Attach to the earliest real project */
+        var sorted = _projects.slice().sort(function (a, b) {
+          return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
+        });
+        var targetId = sorted[0].id;
+        unlinked.forEach(function (i) { i.projectId = targetId; });
+      } else {
+        /* No real projects at all — create one fallback */
+        var fallbackId = "proj_" + Date.now();
         _projects.push({
-          id:        defaultProjId,
-          name:      "Default Project",
+          id:        fallbackId,
+          name:      "My Project",
           location:  "",
           createdAt: new Date().toISOString()
         });
+        unlinked.forEach(function (i) { i.projectId = fallbackId; });
       }
-      unlinked.forEach(function (i) { i.projectId = defaultProjId; });
     }
 
     /* re-set active project after recovery */
