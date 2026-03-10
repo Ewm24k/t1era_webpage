@@ -940,7 +940,10 @@
           <p>Start by creating a new server project and selecting your preferred location to view available GPU instances.</p>
         </div>
 
-        <!-- GPU Grid (Hidden initially) -->
+        <!-- Project panel — rendered by SL.renderComputeTab() when projects exist -->
+        <div id="gpuComputeProjectPanel" style="display: none;"></div>
+
+        <!-- GPU Grid (Shown when user picks a project to add GPU to) -->
         <div class="gpu-grid" id="gpuGrid" style="display: none;">
           <!-- Cards injected via JS -->
         </div>
@@ -1293,24 +1296,115 @@
       createServerModal.classList.remove('active');
     }
 
+    // Tracks which project the currently-shown GPU grid belongs to
+    window._currentProjectId = null;
+
     function proceedToGPUs() {
-      const projName = document.getElementById('projectName').value.trim() || 'New Project';
-      
+      const projName  = document.getElementById('projectName').value.trim() || 'New Project';
+      const projLoc   = document.getElementById('serverLocation').value || 'us-east';
+      const projectId = 'proj_' + Date.now();
+
       // Close modal
       closeCreateServerModal();
-      
-      // Hide empty state, show grid and search
+
+      // Save project to SL (localStorage + Firestore + sets _activeProjectId)
+      if (window.SL) {
+        window.SL.addProject({
+          id:        projectId,
+          name:      projName,
+          location:  projLoc,
+          createdAt: new Date().toISOString()
+        });
+      }
+      window._currentProjectId = projectId;
+
+      // Hide empty state and project panel, show GPU grid + search for this project
       document.getElementById('gpuEmptyState').style.display = 'none';
+      document.getElementById('gpuComputeProjectPanel').style.display = 'none';
       document.getElementById('gpuSearchBox').style.display = 'block';
       grid.style.display = 'grid';
-      
-      // Update Create Server button to show project name
+
+      // Update Create Server button to show project context
       const btnCreate = document.getElementById('btnCreateServer');
       btnCreate.className = 'btn-outline';
       btnCreate.innerHTML = `<i class="ph-fill ph-check-circle" style="color: var(--success)"></i> Project: ${projName}`;
-      
+
+      // Show a back-to-projects link above the grid
+      let backLink = document.getElementById('gpuBackToProjects');
+      if (!backLink) {
+        backLink = document.createElement('div');
+        backLink.id = 'gpuBackToProjects';
+        backLink.style.cssText = 'font-size:12px;color:var(--text-tertiary);margin-bottom:12px;display:flex;align-items:center;gap:6px;cursor:pointer;';
+        backLink.innerHTML = '<i class="ph ph-arrow-left"></i> Back to projects &nbsp;·&nbsp; <strong style="color:var(--accent-blue)">' + projName + '</strong>';
+        backLink.onclick = function() { renderComputeTab(); };
+        document.getElementById('tab-compute').insertBefore(
+          backLink,
+          document.querySelector('#tab-compute .filters').nextSibling
+        );
+      } else {
+        backLink.style.display = 'flex';
+        backLink.querySelector('strong').textContent = projName;
+      }
+
       // Render GPUs with animation
       renderGPUs("", true);
+    }
+
+    // Called when user clicks "Add GPU" on a project card
+    function computeTabAddGPU(projectId, projectName) {
+      window._currentProjectId = projectId;
+      if (window.SL) window.SL.setActiveProject(projectId);
+
+      document.getElementById('gpuComputeProjectPanel').style.display = 'none';
+      document.getElementById('gpuSearchBox').style.display = 'block';
+      grid.style.display = 'grid';
+      _deploySource = 'gpu';
+
+      let backLink = document.getElementById('gpuBackToProjects');
+      if (!backLink) {
+        backLink = document.createElement('div');
+        backLink.id = 'gpuBackToProjects';
+        backLink.style.cssText = 'font-size:12px;color:var(--text-tertiary);margin-bottom:12px;display:flex;align-items:center;gap:6px;cursor:pointer;';
+        backLink.onclick = function() { renderComputeTab(); };
+        document.getElementById('tab-compute').insertBefore(
+          backLink,
+          document.querySelector('#tab-compute .filters').nextSibling
+        );
+      } else {
+        backLink.style.display = 'flex';
+      }
+      backLink.innerHTML = '<i class="ph ph-arrow-left"></i> Back to projects &nbsp;·&nbsp; <strong style="color:var(--accent-blue)">' + projectName + '</strong>';
+      backLink.onclick = function() { renderComputeTab(); };
+
+      renderGPUs("", true);
+    }
+
+    // Called when user clicks "Switch to This" on a project card
+    function computeTabSwitchProject(projectId) {
+      if (window.SL) window.SL.setActiveProject(projectId);
+      window._currentProjectId = projectId;
+      renderComputeTab();
+    }
+
+    // Renders the project panel in tab-compute (called on tab switch & after deploy)
+    function renderComputeTab() {
+      // Hide GPU grid and search, hide back link
+      document.getElementById('gpuSearchBox').style.display = 'none';
+      grid.style.display = 'none';
+      const backLink = document.getElementById('gpuBackToProjects');
+      if (backLink) backLink.style.display = 'none';
+      const hint = document.getElementById('serverlessHint');
+      if (hint) hint.style.display = 'none';
+
+      // Reset Create Server button
+      const btnCreate = document.getElementById('btnCreateServer');
+      btnCreate.className = 'btn-primary';
+      btnCreate.innerHTML = '<i class="ph-bold ph-plus"></i> Create Server';
+      btnCreate.onclick = openCreateServerModal;
+
+      if (window.SL) {
+        window.SL.renderComputeTab();
+      }
     }
 
     // --- DEPLOY MODAL FLOW ---
@@ -1410,7 +1504,8 @@
             pricePerHr: gpuPrice,
             template:   template,
             disk:       disk,
-            volume:     volume
+            volume:     volume,
+            projectId:  window._currentProjectId || null
           });
         }
 
@@ -1444,10 +1539,10 @@
         } else if (target === 'tab-serverless') {
           headerTitle.innerText = 'Serverless Endpoints';
         } else {
-          headerTitle.innerText = 'Deploy Instance';
+          headerTitle.innerText = 'GPU Instances';
           _deploySource = 'gpu';
-          const hint = document.getElementById('serverlessHint');
-          if (hint) hint.style.display = 'none';
+          // Render project panel (or empty state) when switching to GPU Instances tab
+          renderComputeTab();
         }
 
         document.querySelectorAll('.tab-content').forEach(tc => {
