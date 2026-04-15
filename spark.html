@@ -4109,8 +4109,8 @@
          SUPER TABS — SPARKS / T1ERA
         ═══════════════════════════ -->
         <div class="super-tabs-bar">
-          <button class="super-tab-btn active" onclick="switchSuperTab(0, this)">SPARKS</button>
-          <button class="super-tab-btn" onclick="switchSuperTab(1, this)">T1ERA</button>
+          <button class="super-tab-btn" onclick="switchSuperTab(0, this)">SPARKS</button>
+          <button class="super-tab-btn active" onclick="switchSuperTab(1, this)">T1ERA</button>
         </div>
 
 
@@ -4136,7 +4136,7 @@
         </div>
 
         <!-- ══ SUPER PANEL 0 — SPARKS (all existing content) ══ -->
-        <div class="super-tab-panel active" id="super-panel-0">
+        <div class="super-tab-panel" id="super-panel-0">
 
           <!-- TABS -->
           <div class="tabs-bar">
@@ -5443,7 +5443,7 @@
         <!-- end super-panel-0 -->
 
         <!-- ══ SUPER PANEL 1 — T1ERA (future) ══ -->
-        <div class="super-tab-panel" id="super-panel-1">
+        <div class="super-tab-panel active" id="super-panel-1">
           <div class="t1era-page-wrap" id="t1eraChatBody">
 
             <!-- HERO -->
@@ -6362,6 +6362,9 @@
 ═══════════════════════════ -->
     <script>
       /* ── Super Tab Switch ── */
+      /* default: T1ERA tab active on load */
+      document.body.classList.add('t1era-active');
+
       function switchSuperTab(idx, btn) {
         document.querySelectorAll('.super-tab-btn').forEach(function(b) {
           b.classList.remove('active');
