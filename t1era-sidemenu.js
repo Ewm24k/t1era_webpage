@@ -631,6 +631,11 @@
     panel.classList.remove('open');
     overlay.classList.remove('open');
     document.body.style.overflow = '';
+    /* Collapse footer drawer so only the profile icon shows when panel minimises */
+    var drawer  = document.getElementById('t1smFooterDrawer');
+    var chevron = document.getElementById('t1smFooterChevron');
+    if (drawer)  drawer.classList.remove('open');
+    if (chevron) chevron.textContent = '▲';
   }
 
   /* ── Pane switcher — controls what shows in super-panel-1 ── */
