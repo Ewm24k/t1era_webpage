@@ -37,7 +37,7 @@
       opacity: 0; pointer-events: none;
       transition: opacity 0.28s ease;
     }
-    .t1sm-overlay.open { opacity: 1; pointer-events: all; }
+    .t1sm-overlay.open { opacity: 1; pointer-events: auto; }
 
     /* ── Side panel ── */
     .t1sm-panel {
@@ -45,7 +45,10 @@
       top: 0; left: 0;
       width: 72px;           /* icon-only width */
       max-width: 280px;
-      height: 100dvh;
+      height: 100vh;         /* fallback for older browsers */
+      height: 100dvh;        /* dynamic viewport — modern browsers */
+      /* iOS Safari full-height fix */
+      min-height: -webkit-fill-available;
       background: linear-gradient(160deg,#0d0d14 0%,#121220 100%);
       border-right: 1px solid rgba(255,255,255,0.07);
       box-shadow: 4px 0 40px rgba(0,0,0,0.6);
@@ -54,6 +57,9 @@
       transition: transform 0.3s cubic-bezier(0.4,0,0.2,1), width 0.28s ease;
       display: flex; flex-direction: column;
       overflow: hidden;
+      /* Prevent iOS scroll bounce leaking through panel */
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
     }
     .t1sm-panel.open { transform: translateX(0); }
 
@@ -95,12 +101,15 @@
       flex: 1; padding: 12px 0;
       overflow-y: auto; overflow-x: hidden;
       scrollbar-width: none;
+      -webkit-overflow-scrolling: touch; /* iOS momentum scroll */
+      overscroll-behavior-y: contain;
     }
     .t1sm-nav::-webkit-scrollbar { display: none; }
 
     .t1sm-item {
       display: flex; align-items: center; gap: 14px;
       padding: 11px 20px;
+      min-height: 44px; /* Apple HIG & Android minimum touch target */
       cursor: pointer; border: none; background: transparent;
       width: 100%; text-align: left;
       color: var(--text-2, #888);
@@ -109,6 +118,8 @@
       position: relative;
       text-decoration: none;
       white-space: nowrap;
+      -webkit-tap-highlight-color: transparent; /* remove grey flash on tap (Android/iOS) */
+      touch-action: manipulation; /* prevent 300ms tap delay */
     }
     .t1sm-item:hover { background: rgba(255,255,255,0.05); color: #fff; }
     .t1sm-item.active { color: #fff; }
@@ -206,17 +217,22 @@
       flex-shrink: 0;
       border-top: 1px solid rgba(255,255,255,0.07);
       padding: 10px 0 12px;
+      /* iPhone home bar / notch safe area */
+      padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
     }
 
     /* Profile row — always visible, click to expand */
     .t1sm-profile-row {
       display: flex; align-items: center; gap: 12px;
       padding: 8px 16px;
+      min-height: 44px; /* minimum touch target */
       cursor: pointer;
       border-radius: 10px;
       margin: 0 6px;
       transition: background 0.18s;
       position: relative;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
     }
     .t1sm-profile-row:hover { background: rgba(255,255,255,0.05); }
 
@@ -318,6 +334,7 @@
       display: flex; align-items: center; justify-content: center; gap: 6px;
       width: 100%;
       padding: 6px 10px;
+      min-height: 36px; /* comfortable tap target */
       border-radius: 7px;
       background: rgba(194,24,91,0.08);
       border: 1px solid rgba(194,24,91,0.2);
@@ -327,6 +344,8 @@
       cursor: pointer;
       transition: background 0.18s, border-color 0.18s;
       white-space: nowrap;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
     }
     .t1sm-server-btn:hover {
       background: rgba(194,24,91,0.16);
@@ -476,6 +495,36 @@
       </div>
     `;
     document.body.appendChild(panel);
+
+    /* 4a. Touch swipe-to-close — swipe left anywhere on panel to close (mobile) */
+    (function wireSwipe() {
+      var _tx = 0, _dragging = false;
+      panel.addEventListener('touchstart', function (e) {
+        _tx = e.touches[0].clientX;
+        _dragging = true;
+      }, { passive: true });
+      panel.addEventListener('touchmove', function (e) {
+        if (!_dragging) return;
+        var dx = e.touches[0].clientX - _tx;
+        /* Only respond to leftward swipe (dx < 0) */
+        if (dx < -8) {
+          /* Live-drag the panel for tactile feel */
+          panel.style.transition = 'none';
+          panel.style.transform = 'translateX(' + Math.min(0, dx) + 'px)';
+        }
+      }, { passive: true });
+      panel.addEventListener('touchend', function (e) {
+        if (!_dragging) return;
+        _dragging = false;
+        var dx = e.changedTouches[0].clientX - _tx;
+        panel.style.transition = '';
+        panel.style.transform = '';
+        /* Swipe > 60px left = close */
+        if (dx < -60) {
+          closeMenu();
+        }
+      }, { passive: true });
+    })();
 
     /* 4. Wire nav items → panes */
     panel.querySelectorAll('.t1sm-item[data-pane]').forEach(function (item) {
