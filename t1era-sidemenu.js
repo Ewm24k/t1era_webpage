@@ -523,18 +523,95 @@
         if (svgNode) srvBtn.insertBefore(svgNode, srvBtn.firstChild);
       }
 
-      /* Avatar — same pattern as composeAv in spark22:
-         if photoURL provided inject <img>, else show initials */
+      /* Avatar — exact same pattern as applyComposeAvatar() in spark-module.js:
+         inject <img> with referrerPolicy if photoURL present, else show initials */
       if (avEl) {
         if (opts.photoURL) {
-          avEl.innerHTML = '<img src="' + opts.photoURL + '" alt="avatar" />';
-        } else if (opts.name) {
-          /* derive initials from name, remove any existing img */
-          avEl.innerHTML = '';
-          avEl.textContent = opts.name.trim().split(/\s+/).map(function(w){ return w[0]; }).join('').substring(0,2).toUpperCase();
+          avEl.textContent = '';
+          avEl.style.background = 'none';
+          avEl.style.padding = '0';
+          var img = document.createElement('img');
+          img.src = opts.photoURL;
+          img.alt = 'avatar';
+          img.referrerPolicy = 'no-referrer';
+          img.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;';
+          img.onerror = function () {
+            avEl.style.background = 'linear-gradient(135deg,#c2185b,#8b5cf6)';
+            avEl.style.padding = '';
+            avEl.textContent = opts._initial || 'U';
+          };
+          avEl.appendChild(img);
+        } else {
+          avEl.style.background = '';
+          avEl.style.padding = '';
+          if (opts.name) {
+            avEl.innerHTML = '';
+            avEl.textContent = opts.name.trim().split(/\s+/).map(function(w){ return w[0]; }).join('').substring(0,2).toUpperCase();
+          }
         }
       }
     };
+
+    /* 9. Patch into spark-module.js applyComposeAvatar so the footer avatar
+          stays in sync automatically — same timing, same data, zero duplication.
+          Strategy: wrap window._t1eraUserPhoto/_t1eraUserInitial with a setter
+          so whenever spark-module.js writes those globals we update the footer. */
+    (function patchApplyComposeAvatar() {
+      /* spark-module.js sets window._t1eraUserPhoto THEN calls applyComposeAvatar.
+         We wrap applyComposeAvatar on window so we intercept every call. */
+      var _origApply = window.applyComposeAvatar; /* may be undefined at this point */
+
+      function _syncFooter() {
+        var photo   = window._t1eraUserPhoto   || '';
+        var initial = window._t1eraUserInitial || 'U';
+        var ud      = window._sparkUserData    || {};
+        var pref    = window._displayNamePref  || 'fullName';
+
+        /* Resolve display name the same way spark-module.js does */
+        var name = '';
+        if (pref === 'nickname') {
+          name = ud.nickname || ud.fullName || 'My Account';
+        } else {
+          name = ud.fullName || 'My Account';
+        }
+        var handle = ud.nickname || (ud.emailPrimary || '').split('@')[0] || 'user';
+
+        if (typeof window.t1smUpdateProfile === 'function') {
+          window.t1smUpdateProfile({
+            photoURL: photo,
+            name: name,
+            handle: handle,
+            _initial: initial,
+          });
+        }
+      }
+
+      /* Try to patch applyComposeAvatar if already defined */
+      function _tryPatch() {
+        if (typeof window.applyComposeAvatar === 'function' && !window.applyComposeAvatar._t1smPatched) {
+          var orig = window.applyComposeAvatar;
+          window.applyComposeAvatar = function (photoURL, initial) {
+            orig(photoURL, initial);
+            _syncFooter();
+          };
+          window.applyComposeAvatar._t1smPatched = true;
+        }
+      }
+
+      /* Poll until spark-module.js has loaded and defined applyComposeAvatar.
+         Stops after 10 seconds. Also handles the case where _t1eraUserPhoto
+         is already set (spark-module loaded first). */
+      var _pollCount = 0;
+      var _poll = setInterval(function () {
+        _tryPatch();
+        _pollCount++;
+        /* If photo globals already populated (module ran first), sync immediately */
+        if (window._t1eraUserPhoto !== undefined || _pollCount > 100) {
+          clearInterval(_poll);
+          if (window._t1eraUserPhoto !== undefined) _syncFooter();
+        }
+      }, 100);
+    })();
   }
 
   /* ── Open / close ── */
