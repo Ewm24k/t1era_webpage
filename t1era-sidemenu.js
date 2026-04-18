@@ -200,6 +200,133 @@
     }
     .t1sm-coming p { font-size: 13px; font-weight: 500; margin: 0; }
     .t1sm-coming small { font-size: 11px; opacity: 0.6; }
+
+    /* ── Footer ── */
+    .t1sm-footer {
+      flex-shrink: 0;
+      border-top: 1px solid rgba(255,255,255,0.07);
+      padding: 10px 0 12px;
+    }
+
+    /* Profile row — always visible, click to expand */
+    .t1sm-profile-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 8px 16px;
+      cursor: pointer;
+      border-radius: 10px;
+      margin: 0 6px;
+      transition: background 0.18s;
+      position: relative;
+    }
+    .t1sm-profile-row:hover { background: rgba(255,255,255,0.05); }
+
+    /* Avatar circle — mirrors compose-av pattern from spark22 */
+    .t1sm-footer-av {
+      width: 32px; height: 32px; border-radius: 50%;
+      flex-shrink: 0;
+      background: linear-gradient(135deg, #c2185b, #8b5cf6);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 800;
+      font-family: var(--f-display, "Orbitron", sans-serif);
+      color: #fff;
+      overflow: hidden;
+      border: 2px solid rgba(194,24,91,0.3);
+      transition: border-color 0.18s;
+    }
+    .t1sm-footer-av img {
+      width: 100%; height: 100%;
+      object-fit: cover; border-radius: 50%; display: block;
+    }
+    .t1sm-profile-row:hover .t1sm-footer-av { border-color: rgba(194,24,91,0.6); }
+
+    /* Name + handle — hidden when panel is narrow */
+    .t1sm-footer-info {
+      flex: 1; min-width: 0;
+      opacity: 0; transition: opacity 0.15s 0.04s;
+      pointer-events: none;
+    }
+    .t1sm-panel:hover .t1sm-footer-info { opacity: 1; }
+    @media (max-width: 639px) { .t1sm-footer-info { opacity: 1; } }
+
+    .t1sm-footer-name {
+      font-size: 12px; font-weight: 700; color: #fff;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .t1sm-footer-handle {
+      font-size: 10px; color: rgba(255,255,255,0.35);
+      font-family: var(--f-mono, "Fira Code", monospace);
+      white-space: nowrap;
+    }
+
+    /* Chevron indicator */
+    .t1sm-footer-chevron {
+      font-size: 11px; color: rgba(255,255,255,0.25);
+      opacity: 0; transition: opacity 0.15s;
+      flex-shrink: 0;
+    }
+    .t1sm-panel:hover .t1sm-footer-chevron { opacity: 1; }
+
+    /* ── Expanded drawer ── */
+    .t1sm-footer-drawer {
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height 0.28s cubic-bezier(0.4,0,0.2,1),
+                  opacity 0.22s ease;
+      opacity: 0;
+      margin: 0 6px;
+    }
+    .t1sm-footer-drawer.open {
+      max-height: 200px;
+      opacity: 1;
+    }
+    .t1sm-footer-drawer-inner {
+      padding: 10px 12px 4px;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+
+    /* Balance row */
+    .t1sm-balance-row {
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 8px;
+      padding: 8px 10px;
+    }
+    .t1sm-balance-label {
+      font-size: 9px; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.35);
+      font-family: var(--f-mono, "Fira Code", monospace);
+    }
+    .t1sm-balance-value {
+      font-size: 13px; font-weight: 800;
+      font-family: var(--f-display, "Orbitron", sans-serif);
+      background: linear-gradient(135deg, #c2185b, #8b5cf6);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Server / tier button */
+    .t1sm-server-btn {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      width: 100%;
+      padding: 6px 10px;
+      border-radius: 7px;
+      background: rgba(194,24,91,0.08);
+      border: 1px solid rgba(194,24,91,0.2);
+      color: rgba(194,24,91,0.85);
+      font-size: 10px; font-weight: 700; letter-spacing: 0.05em;
+      font-family: var(--f-body, "DM Sans", sans-serif);
+      cursor: pointer;
+      transition: background 0.18s, border-color 0.18s;
+      white-space: nowrap;
+    }
+    .t1sm-server-btn:hover {
+      background: rgba(194,24,91,0.16);
+      border-color: rgba(194,24,91,0.4);
+      color: #e91e8c;
+    }
+    .t1sm-server-btn svg { width: 12px; height: 12px; flex-shrink: 0; }
   `;
   document.head.appendChild(style);
 
@@ -306,7 +433,41 @@
         </button>
 
       </nav>
-    `;
+
+      <div class="t1sm-footer" id="t1smFooter">
+        <!-- Profile row — always visible, click to expand -->
+        <div class="t1sm-profile-row" id="t1smProfileRow" onclick="window.t1smToggleDrawer()">
+          <!-- Avatar — mirrors composeAv/miniAv pattern from spark22: div with initials,
+               img injected by window.t1smUpdateProfile() when photoURL is available -->
+          <div class="t1sm-footer-av" id="t1smFooterAv">M</div>
+          <div class="t1sm-footer-info">
+            <div class="t1sm-footer-name" id="t1smFooterName">My Account</div>
+            <div class="t1sm-footer-handle" id="t1smFooterHandle">@user</div>
+          </div>
+          <span class="t1sm-footer-chevron" id="t1smFooterChevron">▲</span>
+        </div>
+
+        <!-- Expandable drawer -->
+        <div class="t1sm-footer-drawer" id="t1smFooterDrawer">
+          <div class="t1sm-footer-drawer-inner">
+            <!-- Balance / quota row — placeholder until backend wired -->
+            <div class="t1sm-balance-row">
+              <span class="t1sm-balance-label">Balance</span>
+              <span class="t1sm-balance-value" id="t1smBalanceVal">—</span>
+            </div>
+            <!-- Server / tier button -->
+            <button class="t1sm-server-btn" id="t1smServerBtn" onclick="window.t1smServerClick()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="3" width="20" height="5" rx="1"/>
+                <rect x="2" y="10" width="20" height="5" rx="1"/>
+                <circle cx="18" cy="5.5" r="1"/><circle cx="18" cy="12.5" r="1"/>
+              </svg>
+              Free Server
+            </button>
+          </div>
+        </div>
+      </div>
+    \`;
     document.body.appendChild(panel);
 
     /* 4. Wire nav items → panes */
@@ -325,6 +486,55 @@
 
     /* 5. Expose helpers to global scope */
     window.t1smClose = closeMenu;
+
+    /* 6. Footer drawer toggle */
+    window.t1smToggleDrawer = function () {
+      var drawer  = document.getElementById('t1smFooterDrawer');
+      var chevron = document.getElementById('t1smFooterChevron');
+      if (!drawer) return;
+      var isOpen = drawer.classList.toggle('open');
+      if (chevron) chevron.textContent = isOpen ? '▼' : '▲';
+    };
+
+    /* 7. Server button click — placeholder; backend wires this later */
+    window.t1smServerClick = function () {
+      if (typeof showToast === 'function') showToast('Server settings coming soon ⚡');
+    };
+
+    /* 8. Profile update hook — called by backend/auth module with user data.
+          Mirrors the spark22 pattern: inject <img> if photoURL exists,
+          otherwise fall back to initials. */
+    window.t1smUpdateProfile = function (opts) {
+      /* opts: { name, handle, photoURL, balance, serverLabel } — all optional */
+      opts = opts || {};
+      var avEl      = document.getElementById('t1smFooterAv');
+      var nameEl    = document.getElementById('t1smFooterName');
+      var handleEl  = document.getElementById('t1smFooterHandle');
+      var balEl     = document.getElementById('t1smBalanceVal');
+      var srvBtn    = document.getElementById('t1smServerBtn');
+
+      if (nameEl   && opts.name)        nameEl.textContent   = opts.name;
+      if (handleEl && opts.handle)      handleEl.textContent = '@' + opts.handle.replace(/^@/, '');
+      if (balEl    && opts.balance != null) balEl.textContent = opts.balance;
+      if (srvBtn   && opts.serverLabel) {
+        /* preserve the SVG icon, update text node only */
+        var svgNode = srvBtn.querySelector('svg');
+        srvBtn.textContent = opts.serverLabel;
+        if (svgNode) srvBtn.insertBefore(svgNode, srvBtn.firstChild);
+      }
+
+      /* Avatar — same pattern as composeAv in spark22:
+         if photoURL provided inject <img>, else show initials */
+      if (avEl) {
+        if (opts.photoURL) {
+          avEl.innerHTML = '<img src="' + opts.photoURL + '" alt="avatar" />';
+        } else if (opts.name) {
+          /* derive initials from name, remove any existing img */
+          avEl.innerHTML = '';
+          avEl.textContent = opts.name.trim().split(/\s+/).map(function(w){ return w[0]; }).join('').substring(0,2).toUpperCase();
+        }
+      }
+    };
   }
 
   /* ── Open / close ── */
