@@ -279,6 +279,13 @@
       max-height: 200px;
       opacity: 1;
     }
+    /* When panel shrinks back to icon-only on PC (not hovered), force drawer closed */
+    @media (min-width: 640px) {
+      .t1sm-panel:not(:hover) .t1sm-footer-drawer.open {
+        max-height: 0;
+        opacity: 0;
+      }
+    }
     .t1sm-footer-drawer-inner {
       padding: 10px 12px 4px;
       display: flex; flex-direction: column; gap: 8px;
