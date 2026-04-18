@@ -467,7 +467,7 @@
           </div>
         </div>
       </div>
-    \`;
+    `;
     document.body.appendChild(panel);
 
     /* 4. Wire nav items → panes */
