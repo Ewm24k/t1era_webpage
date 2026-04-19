@@ -554,7 +554,7 @@
 
     /* 7. Server button click — placeholder; backend wires this later */
     window.t1smServerClick = function () {
-      if (typeof showToast === 'function') showToast('Server settings coming soon ⚡');
+      window.location.href = 'https://t1era.netlify.app/pod-workflow';
     };
 
     /* 8. Profile update hook — called by backend/auth module with user data.
