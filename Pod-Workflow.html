@@ -680,6 +680,144 @@
       .amt-grid { grid-template-columns:repeat(3,1fr); }
       .spec-grid { grid-template-columns:1fr; }
     }
+
+    /* ════════════════════════════════════
+       USAGE TAB
+    ════════════════════════════════════ */
+    .usage-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .usage-stat-card {
+      background: var(--surface-1);
+      border: 1px solid var(--line);
+      border-radius: var(--r3);
+      padding: 18px 16px;
+      position: relative;
+      overflow: hidden;
+    }
+    .usage-stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+    }
+    .usage-stat-card.c-blue::before  { background: var(--grd); }
+    .usage-stat-card.c-green::before { background: linear-gradient(135deg, var(--b3), var(--b1)); }
+    .usage-stat-card.c-amber::before { background: linear-gradient(135deg, var(--b4), #f87171); }
+    .usage-stat-card.c-violet::before{ background: linear-gradient(135deg, var(--b2), var(--b1)); }
+    .usc-icon {
+      width: 32px; height: 32px; border-radius: var(--r1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; margin-bottom: 12px;
+    }
+    .usc-icon.c-blue   { background: rgba(110,168,254,.1);  color: var(--b1); }
+    .usc-icon.c-green  { background: rgba(52,211,153,.1);   color: var(--b3); }
+    .usc-icon.c-amber  { background: rgba(245,158,11,.1);   color: var(--b4); }
+    .usc-icon.c-violet { background: rgba(167,139,250,.1);  color: var(--b2); }
+    .usc-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: var(--t3); margin-bottom: 6px; }
+    .usc-value { font-size: 22px; font-weight: 700; font-family: 'DM Mono', monospace; line-height: 1; margin-bottom: 3px; }
+    .usc-sub   { font-size: 11px; color: var(--t3); }
+
+    /* Section title */
+    .usage-section-title {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .8px; color: var(--t3);
+      margin-bottom: 12px; margin-top: 24px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .usage-section-title::after {
+      content: ''; flex: 1; height: 1px; background: var(--line);
+    }
+
+    /* Per-instance breakdown table */
+    .usage-table {
+      width: 100%; border-collapse: collapse;
+      font-size: 13px;
+    }
+    .usage-table th {
+      text-align: left; padding: 8px 12px;
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .6px; color: var(--t3);
+      border-bottom: 1px solid var(--line);
+      white-space: nowrap;
+    }
+    .usage-table td {
+      padding: 11px 12px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: middle;
+    }
+    .usage-table tr:last-child td { border-bottom: none; }
+    .usage-table tr:hover td { background: var(--surface-2); }
+    .usage-table-wrap {
+      background: var(--surface-1);
+      border: 1px solid var(--line);
+      border-radius: var(--r3);
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+    .usage-gpu-name { font-weight: 600; color: var(--t1); margin-bottom: 2px; }
+    .usage-gpu-sub  { font-size: 11px; color: var(--t3); font-family: 'DM Mono', monospace; }
+    .usage-state-dot {
+      display: inline-block; width: 7px; height: 7px;
+      border-radius: 50%; margin-right: 5px; flex-shrink: 0;
+    }
+    .dot-running { background: var(--b3); box-shadow: 0 0 5px var(--b3); }
+    .dot-paused  { background: var(--b4); }
+    .dot-stopped { background: var(--t3); }
+    .usage-mono  { font-family: 'DM Mono', monospace; font-size: 12px; }
+
+    /* Cost bar */
+    .usage-bar-wrap { background: var(--surface-3); border-radius: 3px; height: 5px; margin-top: 5px; min-width: 60px; }
+    .usage-bar-fill { height: 100%; border-radius: 3px; background: var(--grd); }
+
+    /* Project breakdown */
+    .usage-proj-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--line);
+    }
+    .usage-proj-row:last-child { border-bottom: none; }
+    .usage-proj-left { display: flex; align-items: center; gap: 10px; }
+    .usage-proj-icon {
+      width: 30px; height: 30px; border-radius: var(--r1);
+      background: rgba(110,168,254,.08); border: 1px solid rgba(110,168,254,.15);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; color: var(--b1); flex-shrink: 0;
+    }
+    .usage-proj-name { font-size: 13px; font-weight: 600; color: var(--t1); }
+    .usage-proj-sub  { font-size: 11px; color: var(--t3); margin-top: 1px; }
+    .usage-proj-cost { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 700; color: var(--b1); }
+
+    /* Empty usage state */
+    .usage-empty {
+      text-align: center; padding: 60px 20px;
+      color: var(--t3); font-size: 13px;
+    }
+    .usage-empty i { font-size: 40px; margin-bottom: 14px; display: block; opacity: .35; }
+
+    /* Refresh button */
+    .usage-refresh-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 12px; font-weight: 600; color: var(--t2);
+      background: var(--surface-2); border: 1px solid var(--line);
+      border-radius: var(--r1); padding: 6px 12px; cursor: pointer;
+      transition: all .15s; font-family: 'DM Sans', sans-serif;
+    }
+    .usage-refresh-btn:hover { background: var(--surface-3); color: var(--t1); border-color: var(--line-mid); }
+
+    @media (max-width: 768px) {
+      .usage-summary-grid { grid-template-columns: repeat(2, 1fr); }
+      .usage-table th:nth-child(4),
+      .usage-table td:nth-child(4) { display: none; }
+    }
+    @media (max-width: 480px) {
+      .usage-summary-grid { grid-template-columns: 1fr 1fr; }
+      .usage-table th:nth-child(3),
+      .usage-table td:nth-child(3) { display: none; }
+    }
   </style>
 </head>
 <body>
@@ -726,7 +864,7 @@
       <div class="sb-group">
         <div class="sb-group-label">Account</div>
         <a href="#" class="nav-item" id="navBilling" onclick="event.preventDefault();document.querySelector('.tab[data-target=tab-payg]').click();"><i class="ph-fill ph-credit-card"></i> Billing <span class="nav-badge">NEW</span></a>
-        <a href="#" class="nav-item"><i class="ph-fill ph-chart-pie"></i> Usage</a>
+        <a href="#" class="nav-item" id="navUsage" onclick="event.preventDefault();document.querySelector('.tab[data-target=tab-usage]').click();"><i class="ph-fill ph-chart-pie"></i> Usage</a>
         <a href="#" class="nav-item"><i class="ph-fill ph-gear"></i> Settings</a>
       </div>
     </div>
@@ -782,6 +920,9 @@
           <div class="tab" data-target="tab-payg">
             <i class="ph-fill ph-wallet"></i> Billing
             <span class="tab-badge">New</span>
+          </div>
+          <div class="tab" data-target="tab-usage">
+            <i class="ph-fill ph-chart-pie"></i> Usage
           </div>
         </div>
       </div>
@@ -921,6 +1062,28 @@
           </div>
         </div>
       </div><!-- /tab-payg -->
+
+      <!-- ── TAB: USAGE ── -->
+      <div id="tab-usage" class="tab-content">
+        <div class="page-head">
+          <div class="page-head-left">
+            <div class="page-head-icon"><i class="ph-fill ph-chart-pie"></i></div>
+            <div>
+              <div class="page-head-title">Usage</div>
+              <div class="page-head-sub">GPU compute hours, spend and instance activity</div>
+            </div>
+          </div>
+          <div class="page-head-right">
+            <button class="usage-refresh-btn" onclick="renderUsageTab()">
+              <i class="ph-bold ph-arrows-clockwise"></i> Refresh
+            </button>
+          </div>
+        </div>
+
+        <div id="usageContent">
+          <!-- injected by renderUsageTab() -->
+        </div>
+      </div>
 
     </div><!-- /content-area -->
   </main>
@@ -1372,6 +1535,158 @@
       renderGPUs(e.target.value, false);
     });
 
+    // ─── USAGE TAB RENDERER ───────────────────────────────────────
+    function renderUsageTab() {
+      var wrap = document.getElementById('usageContent');
+      if (!wrap) return;
+
+      // Pull live data from SL module
+      var instances = (window.SL && typeof window.SL.getProjects === 'function')
+        ? (function() {
+            // read from localStorage directly — SL doesn't expose getInstances publicly
+            try { return JSON.parse(localStorage.getItem('t1era_sl_instances') || '[]'); } catch(e) { return []; }
+          })()
+        : [];
+      var projects = (window.SL && typeof window.SL.getProjects === 'function')
+        ? window.SL.getProjects()
+        : [];
+      var balance = (function() {
+        try { var b = parseFloat(localStorage.getItem('t1era_sl_balance')); return isNaN(b) ? 142.50 : b; } catch(e) { return 142.50; }
+      })();
+
+      // Aggregate stats
+      var totalInstances = instances.length;
+      var running = instances.filter(function(i){ return i.state === 'running'; }).length;
+      var totalUptimeSec = instances.reduce(function(s,i){ return s + (i.uptimeSec || 0); }, 0);
+      var totalCost = instances.reduce(function(s,i){ return s + (i.totalCost || 0); }, 0);
+      var totalProjects = projects.length;
+
+      function fmtUptime(s) {
+        var h = Math.floor(s/3600), m = Math.floor((s%3600)/60), sec = s%60;
+        if (h) return h + 'h ' + m + 'm';
+        if (m) return m + 'm ' + ('0'+sec).slice(-2) + 's';
+        return ('0'+sec).slice(-2) + 's';
+      }
+      function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+      // ── Summary cards ──
+      var html = '<div class="usage-summary-grid">';
+      html += '<div class="usage-stat-card c-blue">'
+            + '<div class="usc-icon c-blue"><i class="ph-fill ph-clock"></i></div>'
+            + '<div class="usc-label">Total Compute</div>'
+            + '<div class="usc-value">' + fmtUptime(totalUptimeSec) + '</div>'
+            + '<div class="usc-sub">across all instances</div>'
+            + '</div>';
+      html += '<div class="usage-stat-card c-amber">'
+            + '<div class="usc-icon c-amber"><i class="ph-fill ph-currency-dollar"></i></div>'
+            + '<div class="usc-label">Total Spend</div>'
+            + '<div class="usc-value">$' + totalCost.toFixed(4) + '</div>'
+            + '<div class="usc-sub">session charges</div>'
+            + '</div>';
+      html += '<div class="usage-stat-card c-green">'
+            + '<div class="usc-icon c-green"><i class="ph-fill ph-cpu"></i></div>'
+            + '<div class="usc-label">Instances</div>'
+            + '<div class="usc-value">' + totalInstances + '</div>'
+            + '<div class="usc-sub">' + running + ' running now</div>'
+            + '</div>';
+      html += '<div class="usage-stat-card c-violet">'
+            + '<div class="usc-icon c-violet"><i class="ph-fill ph-stack"></i></div>'
+            + '<div class="usc-label">Projects</div>'
+            + '<div class="usc-value">' + totalProjects + '</div>'
+            + '<div class="usc-sub">GPU projects created</div>'
+            + '</div>';
+      html += '</div>';
+
+      if (totalInstances === 0) {
+        html += '<div class="usage-empty"><i class="ph-bold ph-chart-bar"></i>No usage data yet.<br>Deploy a GPU instance to start tracking usage.</div>';
+        wrap.innerHTML = html;
+        return;
+      }
+
+      // ── Per-instance breakdown ──
+      html += '<div class="usage-section-title">Instance Breakdown</div>';
+      html += '<div class="usage-table-wrap"><table class="usage-table">';
+      html += '<thead><tr>'
+            + '<th>Instance</th>'
+            + '<th>State</th>'
+            + '<th>Uptime</th>'
+            + '<th>Rate</th>'
+            + '<th>Session Cost</th>'
+            + '</tr></thead><tbody>';
+
+      var maxCost = Math.max.apply(null, instances.map(function(i){ return i.totalCost || 0; })) || 1;
+      instances.forEach(function(inst) {
+        var dotCls = inst.state === 'running' ? 'dot-running' : inst.state === 'paused' ? 'dot-paused' : 'dot-stopped';
+        var stateLabel = inst.state === 'running' ? 'Running' : inst.state === 'paused' ? 'Paused' : 'Stopped';
+        var pct = Math.round(((inst.totalCost || 0) / maxCost) * 100);
+        html += '<tr>'
+              + '<td><div class="usage-gpu-name">' + esc(inst.name) + '</div>'
+              + '<div class="usage-gpu-sub">' + esc(inst.vram) + ' VRAM</div></td>'
+              + '<td><span class="usage-state-dot ' + dotCls + '"></span>' + stateLabel + '</td>'
+              + '<td class="usage-mono">' + fmtUptime(inst.uptimeSec || 0) + '</td>'
+              + '<td class="usage-mono">$' + (inst.pricePerHr || 0).toFixed(2) + '/hr</td>'
+              + '<td>'
+              + '<div class="usage-mono">$' + (inst.totalCost || 0).toFixed(5) + '</div>'
+              + '<div class="usage-bar-wrap"><div class="usage-bar-fill" style="width:' + pct + '%"></div></div>'
+              + '</td>'
+              + '</tr>';
+      });
+      html += '</tbody></table></div>';
+
+      // ── Per-project breakdown ──
+      if (projects.length > 0) {
+        html += '<div class="usage-section-title">Project Breakdown</div>';
+        html += '<div class="usage-table-wrap">';
+        projects.forEach(function(proj) {
+          var projInsts = instances.filter(function(i){ return i.projectId === proj.id; });
+          var projCost = projInsts.reduce(function(s,i){ return s + (i.totalCost || 0); }, 0);
+          var projUptime = projInsts.reduce(function(s,i){ return s + (i.uptimeSec || 0); }, 0);
+          var projRunning = projInsts.filter(function(i){ return i.state === 'running'; }).length;
+          html += '<div class="usage-proj-row">'
+                + '<div class="usage-proj-left">'
+                + '<div class="usage-proj-icon"><i class="ph-fill ph-folder' + (projInsts.length > 0 ? '-open' : '') + '"></i></div>'
+                + '<div>'
+                + '<div class="usage-proj-name">' + esc(proj.name) + '</div>'
+                + '<div class="usage-proj-sub">'
+                + projInsts.length + ' GPU' + (projInsts.length !== 1 ? 's' : '')
+                + (projRunning > 0 ? ' · <span style="color:var(--b3)">' + projRunning + ' running</span>' : '')
+                + ' · ' + fmtUptime(projUptime) + ' total'
+                + '</div>'
+                + '</div>'
+                + '</div>'
+                + '<div class="usage-proj-cost">$' + projCost.toFixed(4) + '</div>'
+                + '</div>';
+        });
+        html += '</div>';
+      }
+
+      // ── Balance health ──
+      html += '<div class="usage-section-title">Balance Health</div>';
+      var healthColor = balance < 5 ? 'var(--b5)' : balance < 20 ? 'var(--b4)' : 'var(--b3)';
+      var healthLabel = balance < 5 ? 'Critical — top up now' : balance < 20 ? 'Low — consider topping up' : 'Healthy';
+      var runningCostPerHr = instances
+        .filter(function(i){ return i.state === 'running'; })
+        .reduce(function(s,i){ return s + (i.pricePerHr || 0); }, 0);
+      var runwayHrs = runningCostPerHr > 0 ? (balance / runningCostPerHr).toFixed(1) : '∞';
+      html += '<div class="b-card" style="max-width:600px;">'
+            + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">'
+            + '<div><div style="font-size:22px;font-weight:700;font-family:DM Mono,monospace;color:' + healthColor + '">$' + balance.toFixed(2) + '</div>'
+            + '<div style="font-size:12px;color:' + healthColor + ';margin-top:3px;">' + healthLabel + '</div></div>'
+            + '<div style="text-align:right;">'
+            + '<div style="font-size:11px;color:var(--t3);margin-bottom:3px;">Runway at current rate</div>'
+            + '<div style="font-size:18px;font-weight:700;font-family:DM Mono,monospace;">' + runwayHrs + '<span style="font-size:12px;color:var(--t3);font-weight:400"> hrs</span></div>'
+            + '</div>'
+            + '</div>'
+            + '<div style="background:var(--surface-3);border-radius:4px;height:6px;overflow:hidden;">'
+            + '<div style="height:100%;border-radius:4px;background:' + healthColor + ';width:' + Math.min(100, (balance/200)*100).toFixed(0) + '%;transition:width .4s"></div>'
+            + '</div>'
+            + '<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--t3);margin-top:5px;"><span>$0</span><span>$200</span></div>'
+            + '</div>';
+
+      wrap.innerHTML = html;
+    }
+    window.renderUsageTab = renderUsageTab;
+
     // Sync header balance stat
     const origSyncBalance = window._syncBalanceHeaderHooked;
     if (!origSyncBalance) {
@@ -1396,6 +1711,9 @@
           headerTitle.innerText = 'Billing & Credits'; document.getElementById('topbarTitle').innerText = 'Billing & Credits';
         } else if (target === 'tab-serverless') {
           headerTitle.innerText = 'Serverless Endpoints'; document.getElementById('topbarTitle').innerText = 'Serverless Endpoints';
+        } else if (target === 'tab-usage') {
+          headerTitle.innerText = 'Usage'; document.getElementById('topbarTitle').innerText = 'Usage';
+          setTimeout(renderUsageTab, 20);
         } else {
           headerTitle.innerText = 'GPU Instances'; document.getElementById('topbarTitle').innerText = 'GPU Instances';
           _deploySource = 'gpu';
