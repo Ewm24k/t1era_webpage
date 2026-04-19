@@ -818,6 +818,164 @@
       .usage-table th:nth-child(3),
       .usage-table td:nth-child(3) { display: none; }
     }
+
+    /* ════════════════════════════════════
+       SETTINGS TAB
+    ════════════════════════════════════ */
+    .settings-layout {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 24px;
+      max-width: 900px;
+    }
+    @media (max-width: 768px) {
+      .settings-layout { grid-template-columns: 1fr; }
+      .settings-sidenav { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 4px; }
+    }
+
+    /* Settings side nav */
+    .settings-sidenav {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .sn-item {
+      display: flex; align-items: center; gap: 9px;
+      padding: 9px 12px; border-radius: var(--r1);
+      font-size: 13px; font-weight: 500; color: var(--t2);
+      cursor: pointer; border: none; background: transparent;
+      width: 100%; text-align: left; font-family: 'DM Sans', sans-serif;
+      transition: all .15s var(--ease);
+    }
+    .sn-item i { font-size: 15px; flex-shrink: 0; }
+    .sn-item:hover { background: var(--surface-2); color: var(--t1); }
+    .sn-item.active {
+      background: var(--surface-3);
+      color: var(--t1);
+      border-left: 2px solid var(--b1);
+      padding-left: 10px;
+    }
+    @media (max-width: 768px) {
+      .sn-item { padding: 7px 10px; font-size: 12px; border-radius: var(--r2); }
+      .sn-item.active { border-left: none; border-bottom: 2px solid var(--b1); padding-left: 10px; }
+    }
+
+    /* Settings section panels */
+    .settings-panel-section { display: none; }
+    .settings-panel-section.active { display: block; }
+
+    /* Section card */
+    .s-card {
+      background: var(--surface-1);
+      border: 1px solid var(--line);
+      border-radius: var(--r3);
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+    .s-card-head {
+      display: flex; align-items: center; gap: 10px;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--line);
+      background: var(--surface-2);
+    }
+    .s-card-icon {
+      width: 30px; height: 30px; border-radius: var(--r1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; flex-shrink: 0;
+    }
+    .s-card-icon.blue   { background: rgba(110,168,254,.1); color: var(--b1); }
+    .s-card-icon.violet { background: rgba(167,139,250,.1); color: var(--b2); }
+    .s-card-icon.green  { background: rgba(52,211,153,.1);  color: var(--b3); }
+    .s-card-icon.amber  { background: rgba(245,158,11,.1);  color: var(--b4); }
+    .s-card-icon.red    { background: rgba(248,113,113,.1); color: var(--b5); }
+    .s-card-title { font-size: 13px; font-weight: 700; color: var(--t1); }
+    .s-card-sub   { font-size: 11px; color: var(--t3); margin-top: 1px; }
+    .s-card-body  { padding: 0 20px; }
+
+    /* Setting row — reuse existing .setting-row but extend */
+    .s-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 0; border-bottom: 1px solid var(--line);
+      gap: 16px;
+    }
+    .s-row:last-child { border-bottom: none; }
+    .s-row-left { flex: 1; min-width: 0; }
+    .s-row-title { font-size: 13px; font-weight: 600; color: var(--t1); margin-bottom: 3px; }
+    .s-row-desc  { font-size: 11px; color: var(--t3); line-height: 1.55; max-width: 320px; }
+    .s-row-right { flex-shrink: 0; }
+
+    /* Input inside settings */
+    .s-input {
+      background: var(--bg); border: 1px solid var(--line);
+      color: var(--t1); padding: 7px 11px; border-radius: var(--r1);
+      font-family: 'DM Mono', monospace; font-size: 12px;
+      outline: none; transition: border-color .15s; width: 110px; text-align: right;
+    }
+    .s-input:focus { border-color: var(--b1); }
+    .s-input-prefix {
+      display: inline-flex; align-items: center;
+      background: var(--bg); border: 1px solid var(--line);
+      border-radius: var(--r1); overflow: hidden;
+    }
+    .s-input-prefix span {
+      padding: 7px 10px; font-size: 12px; color: var(--t3);
+      border-right: 1px solid var(--line); background: var(--surface-2);
+      font-family: 'DM Mono', monospace;
+    }
+    .s-input-prefix input {
+      background: transparent; border: none; color: var(--t1);
+      padding: 7px 10px; font-family: 'DM Mono', monospace;
+      font-size: 12px; outline: none; width: 80px;
+    }
+
+    /* Select inside settings */
+    .s-select {
+      background: var(--bg); border: 1px solid var(--line);
+      color: var(--t1); padding: 7px 28px 7px 11px; border-radius: var(--r1);
+      font-family: 'DM Sans', sans-serif; font-size: 12px;
+      outline: none; cursor: pointer; appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%23666'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 8px center;
+    }
+    .s-select:focus { border-color: var(--b1); }
+
+    /* Badge/pill inside settings */
+    .s-badge {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .5px; padding: 3px 9px; border-radius: var(--r5);
+    }
+    .s-badge-soon { background: var(--surface-3); color: var(--t3); border: 1px solid var(--line); }
+    .s-badge-on   { background: rgba(52,211,153,.1); color: var(--b3); border: 1px solid rgba(52,211,153,.2); }
+
+    /* Danger zone */
+    .danger-zone-card {
+      background: rgba(248,113,113,.04);
+      border: 1px solid rgba(248,113,113,.18);
+      border-radius: var(--r3); overflow: hidden; margin-bottom: 16px;
+    }
+    .danger-zone-card .s-card-head {
+      background: rgba(248,113,113,.06);
+      border-bottom-color: rgba(248,113,113,.15);
+    }
+    .btn-danger {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 7px 14px; border-radius: var(--r1);
+      background: rgba(248,113,113,.08);
+      border: 1px solid rgba(248,113,113,.3);
+      color: var(--b5); font-size: 12px; font-weight: 600;
+      cursor: pointer; font-family: 'DM Sans', sans-serif;
+      transition: all .15s;
+    }
+    .btn-danger:hover { background: rgba(248,113,113,.18); border-color: var(--b5); }
+
+    /* Save bar */
+    .s-save-bar {
+      display: flex; align-items: center; justify-content: flex-end;
+      gap: 10px; padding: 14px 20px;
+      border-top: 1px solid var(--line);
+      background: var(--surface-2);
+    }
+    .s-save-note { font-size: 11px; color: var(--t3); flex: 1; }
   </style>
 </head>
 <body>
@@ -865,7 +1023,7 @@
         <div class="sb-group-label">Account</div>
         <a href="#" class="nav-item" id="navBilling" onclick="event.preventDefault();document.querySelector('.tab[data-target=tab-payg]').click();"><i class="ph-fill ph-credit-card"></i> Billing <span class="nav-badge">NEW</span></a>
         <a href="#" class="nav-item" id="navUsage" onclick="event.preventDefault();document.querySelector('.tab[data-target=tab-usage]').click();"><i class="ph-fill ph-chart-pie"></i> Usage</a>
-        <a href="#" class="nav-item"><i class="ph-fill ph-gear"></i> Settings</a>
+        <a href="#" class="nav-item" id="navSettings" onclick="event.preventDefault();document.querySelector('.tab[data-target=tab-settings]').click();"><i class="ph-fill ph-gear"></i> Settings</a>
       </div>
     </div>
 
@@ -923,6 +1081,9 @@
           </div>
           <div class="tab" data-target="tab-usage">
             <i class="ph-fill ph-chart-pie"></i> Usage
+          </div>
+          <div class="tab" data-target="tab-settings">
+            <i class="ph-fill ph-gear"></i> Settings
           </div>
         </div>
       </div>
@@ -1084,6 +1245,427 @@
           <!-- injected by renderUsageTab() -->
         </div>
       </div>
+
+      <!-- ── TAB: SETTINGS ── -->
+      <div id="tab-settings" class="tab-content">
+        <div class="page-head">
+          <div class="page-head-left">
+            <div class="page-head-icon"><i class="ph-fill ph-gear"></i></div>
+            <div>
+              <div class="page-head-title">Settings</div>
+              <div class="page-head-sub">Manage notifications, billing limits and account preferences</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-layout">
+
+          <!-- ── Settings Side Nav ── -->
+          <div class="settings-sidenav">
+            <button class="sn-item active" onclick="switchSettingsSection('notif', this)">
+              <i class="ph-fill ph-bell"></i> Notifications
+            </button>
+            <button class="sn-item" onclick="switchSettingsSection('billing-limits', this)">
+              <i class="ph-fill ph-shield-warning"></i> Billing Limits
+            </button>
+            <button class="sn-item" onclick="switchSettingsSection('compute', this)">
+              <i class="ph-fill ph-cpu"></i> Compute
+            </button>
+            <button class="sn-item" onclick="switchSettingsSection('danger', this)">
+              <i class="ph-fill ph-warning"></i> Danger Zone
+            </button>
+          </div>
+
+          <!-- ── Settings Panels ── -->
+          <div>
+
+            <!-- NOTIFICATIONS -->
+            <div class="settings-panel-section active" id="sp-notif">
+
+              <div class="s-card">
+                <div class="s-card-head">
+                  <div class="s-card-icon blue"><i class="ph-fill ph-bell"></i></div>
+                  <div>
+                    <div class="s-card-title">Balance Alerts</div>
+                    <div class="s-card-sub">Get notified when your compute balance runs low</div>
+                  </div>
+                </div>
+                <div class="s-card-body">
+                  <div class="s-row">
+                    <div class="s-row-left">
+                      <div class="s-row-title">Low Balance Warning</div>
+                      <div class="s-row-desc">Show an in-app alert when balance drops below the threshold you set</div>
+                    </div>
+                    <div class="s-row-right">
+                      <label class="toggle"><input type="checkbox" checked id="notifLowBalance"><span class="toggle-track"></span></label>
+                    </div>
+                  </div>
+                  <div class="s-row">
+                    <div class="s-row-left">
+                      <div class="s-row-title">Warning Threshold</div>
+                      <div class="s-row-desc">Trigger the low balance alert when balance falls below this amount</div>
+                    </div>
+                    <div class="s-row-right">
+                      <div class="s-input-prefix">
+                        <span>$</span>
+                        <input type="number" id="notifThreshold" value="20" min="1" max="999" placeholder="20">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="s-row">
+                    <div class="s-row-left">
+                      <div class="s-row-title">Critical Balance Alert</div>
+                      <div class="s-row-desc">Show a critical warning when balance drops below $5 — instances at risk of stopping</div>
+                    </div>
+                    <div class="s-row-right">
+                      <label class="toggle"><input type="checkbox" checked id="notifCritical"><span class="toggle-track"></span></label>
+                    </div>
+                  </div>
+                  <div class="s-row">
+                    <div class="s-row-left">
+                      <div class="s-row-title">Balance Depleted</div>
+                      <div class="s-row-desc">Alert when balance reaches $0 and instances are force-stopped</div>
+                    </div>
+                    <div class="s-row-right">
+                      <label class="toggle"><input type="checkbox" checked id="notifDepleted"><span class="toggle-track"></span></label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="s-card">
+                <div class="s-card-head">
+                  <div class="s-card-icon violet"><i class="ph-fill ph-cpu"></i></div>
+                  <div>
+                    <div class="s-card-title">Instance State Alerts</div>
+                    <div class="s-card-sub">Get notified when GPU instance states change</div>
+                  </div>
+                </div>
+                <div class="s-card-body">
+                  <div class="s-row">
+                    <div class="s-row-left">
+                      <div class="s-row-title">Instance Stopped</div>
+                      <div class="s-row-desc">Notify when an instance is stopped — manually or due to depleted balance</div>
+                    </div>
+                    <div class="s-row-right">
+                      <label class="toggle"><input type="checkbox" checked id="notifStopped"><span class="toggle-track"></span></label>
+                    </div>
+                  </div>
+                  <div class="s-row">
+                    <div class="s-row-left">
+                      <div class="s-row-title">Instance Paused</div>
+                      <div class="s-row-desc">Notify when a running instance is paused</div>
+                    </div>
+                    <div class="s-row-right">
+                      <label class="toggle"><input type="checkbox" id="notifPaused"><span class="toggle-track"></span></label>
+                    </div>
+                  </div>
+                  <div class="s-row">
+                    <div class="s-row-left">
+                      <div class="s-row-title">Instance Deployed</div>
+                      <div class="s-row-desc">Confirm when a new GPU instance goes live</div>
+                    </div>
+                    <div class="s-row-right">
+                      <label class="toggle"><input type="checkbox" checked id="notifDeployed"><span class="toggle-track"></span></label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="s-card">
+                <div class="s-card-head">
+                  <div class="s-card-icon amber"><i class="ph-fill ph-envelope"></i></div>
+                  <div>
+                    <div class="s-card-title">Email Notifications</div>
+                    <div class="s-card-sub">Send alerts to your account email</div>
+                  </div>
+                  <span class="s-badge s-badge-soon" style="margin-left:auto">Coming Soon</span>
+                </div>
+                <div class="s-card-body">
+                  <div class="s-row">
+                    <div class="s-row-left">
+                      <div class="s-row-title">Email Alerts</div>
+                      <div class="s-row-desc">Receive critical balance and instance alerts via email — available soon</div>
+                    </div>
+                    <div class="s-row-right">
+                      <label class="toggle"><input type="checkbox" disabled><span class="toggle-track" style="opacity:.4;cursor:not-allowed"></span></label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="s-save-bar">
+                <span class="s-save-note">Changes apply immediately in-app. Email alerts require backend.</span>
+                <button class="btn btn-secondary" onclick="showSettingsToast('Notification preferences saved')">Save Preferences</button>
+              </div>
+
+            </div><!-- /sp-notif -->
+
+            <!-- BILLING LIMITS -->
+            <div class="settings-panel-section" id="sp-billing-limits">
+
+              <div class="s-card">
+                <div class="s-card-head">
+                  <div class="s-card-icon amber"><i class="ph-fill ph-shield-warning"></i></div>
+                  <div>
+                    <div class="s-card-title">Spending Limits</div>
+                    <div class="s-card-sub">Cap your GPU compute spend to prevent overruns</div>
+                  </div>
+                </div>
+                <div class="s-card-body">
+                  <div class="s-row">
+                    <div class="s-row-left">
+                      <div class="s-row-title">Enable Spending Cap</div>
+                      <div class="s-row-desc">Automatically pause all running instances when the daily or monthly limit is reached</div>
+                    </div>
+                    <div class="s-row-right">
+                      <label class="toggle"><input type="checkbox" id="limitEnable" onchange="toggleLimitInputs(this)"><span class="toggle-track"></span></label>
+                    </div>
+                  </div>
+                  <div class="s-row" id="limitDailyRow" style="opacity:.4;pointer-events:none;">
+                    <div class="s-row-left">
+                      <div class="s-row-title">Daily Limit</div>
+                      <div class="s-row-desc">Max spend per calendar day — instances pause when hit</div>
+                    </div>
+                    <div class="s-row-right">
+                      <div class="s-input-prefix">
+                        <span>$</span>
+                        <input type="number" id="limitDaily" value="50" min="1" max="9999" placeholder="50">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="s-row" id="limitMonthlyRow" style="opacity:.4;pointer-events:none;">
+                    <div class="s-row-left">
+                      <div class="s-row-title">Monthly Limit</div>
+                      <div class="s-row-desc">Max spend per calendar month — instances pause when hit</div>
+                    </div>
+                    <div class="s-row-right">
+                      <div class="s-input-prefix">
+                        <span>$</span>
+                        <input type="number" id="limitMonthly" value="500" min="1" max="99999" placeholder="500">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="s-row" id="limitActionRow" style="opacity:.4;pointer-events:none;">
+                    <div class="s-row-left">
+                      <div class="s-row-title">Action When Limit Reached</div>
+                      <div class="s-row-desc">What happens to running instances when the cap is hit</div>
+                    </div>
+                    <div class="s-row-right">
+                      <select class="s-select" id="limitAction">
+                        <option value="pause">Pause all instances</option>
+                        <option value="stop">Stop all instances</option>
+                        <option value="alert">Alert only — keep running</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="s-card">
+                <div class="s-card-head">
+                  <div class="s-card-icon blue"><i class="ph-fill ph-clock-countdown"></i></div>
+                  <div>
+                    <div class="s-card-title">Auto-Stop Rules</div>
+                    <div class="s-card-sub">Automatically stop idle or long-running instances</div>
+                  </div>
+                </div>
+                <div class="s-card-body">
+                  <div class="s-row">
+                    <div class="s-row-left">
+                      <div class="s-row-title">Max Instance Runtime</div>
+                      <div class="s-row-desc">Auto-stop any instance that has been running longer than this duration</div>
+                    </div>
+                    <div class="s-row-right">
+                      <select class="s-select" id="maxRuntime">
+                        <option value="0">No limit</option>
+                        <option value="4">4 hours</option>
+                        <option value="8">8 hours</option>
+                        <option value="24" selected>24 hours</option>
+                        <option value="48">48 hours</option>
+                        <option value="72">72 hours</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="s-row">
+                    <div class="s-row-left">
+                      <div class="s-row-title">Warn Before Auto-Stop</div>
+                      <div class="s-row-desc">Show an in-app warning 30 minutes before an instance is auto-stopped</div>
+                    </div>
+                    <div class="s-row-right">
+                      <label class="toggle"><input type="checkbox" checked id="warnBeforeStop"><span class="toggle-track"></span></label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="s-card">
+                <div class="s-card-head">
+                  <div class="s-card-icon green"><i class="ph-fill ph-arrows-clockwise"></i></div>
+                  <div>
+                    <div class="s-card-title">Auto-Recharge</div>
+                    <div class="s-card-sub">Automatically top up your balance — manages alongside Billing tab</div>
+                  </div>
+                </div>
+                <div class="s-card-body">
+                  <div class="s-row">
+                    <div class="s-row-left">
+                      <div class="s-row-title">Enable Auto-Recharge</div>
+                      <div class="s-row-desc">Automatically add credits when balance drops below your threshold</div>
+                    </div>
+                    <div class="s-row-right">
+                      <label class="toggle"><input type="checkbox" checked id="autoRechargeEnable"><span class="toggle-track"></span></label>
+                    </div>
+                  </div>
+                  <div class="s-row">
+                    <div class="s-row-left">
+                      <div class="s-row-title">Recharge Below</div>
+                      <div class="s-row-desc">Trigger auto top-up when balance falls below this amount</div>
+                    </div>
+                    <div class="s-row-right">
+                      <div class="s-input-prefix">
+                        <span>$</span>
+                        <input type="number" id="rechargeBelow" value="10" min="1" max="999">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="s-row">
+                    <div class="s-row-left">
+                      <div class="s-row-title">Recharge Amount</div>
+                      <div class="s-row-desc">Credits to add each time auto-recharge triggers</div>
+                    </div>
+                    <div class="s-row-right">
+                      <div class="s-input-prefix">
+                        <span>$</span>
+                        <input type="number" id="rechargeAmount" value="50" min="10" max="9999">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="s-save-bar">
+                <span class="s-save-note">Spending caps and auto-stop rules require backend to enforce — design only for now.</span>
+                <button class="btn btn-secondary" onclick="showSettingsToast('Billing limits saved')">Save Limits</button>
+              </div>
+
+            </div><!-- /sp-billing-limits -->
+
+            <!-- COMPUTE DEFAULTS -->
+            <div class="settings-panel-section" id="sp-compute">
+
+              <div class="s-card">
+                <div class="s-card-head">
+                  <div class="s-card-icon violet"><i class="ph-fill ph-map-pin"></i></div>
+                  <div>
+                    <div class="s-card-title">Compute Defaults</div>
+                    <div class="s-card-sub">Pre-fill deploy settings to save time</div>
+                  </div>
+                </div>
+                <div class="s-card-body">
+                  <div class="s-row">
+                    <div class="s-row-left">
+                      <div class="s-row-title">Default Region</div>
+                      <div class="s-row-desc">Pre-select this region when creating new GPU projects</div>
+                    </div>
+                    <div class="s-row-right">
+                      <select class="s-select" id="defaultRegion">
+                        <option value="us-east">US East — Virginia</option>
+                        <option value="us-west">US West — Oregon</option>
+                        <option value="eu-central">EU Central — Frankfurt</option>
+                        <option value="ap-southeast">Asia Pacific — Singapore</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="s-row">
+                    <div class="s-row-left">
+                      <div class="s-row-title">Default Container Image</div>
+                      <div class="s-row-desc">Pre-select this template in the deploy modal</div>
+                    </div>
+                    <div class="s-row-right">
+                      <select class="s-select" id="defaultTemplate">
+                        <option>PyTorch 2.1 · CUDA 11.8</option>
+                        <option>Stable Diffusion WebUI</option>
+                        <option>Ollama / vLLM Server</option>
+                        <option>Ubuntu 22.04 LTS</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="s-row">
+                    <div class="s-row-left">
+                      <div class="s-row-title">Default Container Disk</div>
+                      <div class="s-row-desc">GB pre-set on the disk slider when deploy modal opens</div>
+                    </div>
+                    <div class="s-row-right">
+                      <div class="s-input-prefix">
+                        <span>GB</span>
+                        <input type="number" id="defaultDisk" value="40" min="10" max="200">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="s-save-bar">
+                <span class="s-save-note">Defaults are saved locally and applied when the deploy modal opens.</span>
+                <button class="btn btn-secondary" onclick="showSettingsToast('Compute defaults saved')">Save Defaults</button>
+              </div>
+
+            </div><!-- /sp-compute -->
+
+            <!-- DANGER ZONE -->
+            <div class="settings-panel-section" id="sp-danger">
+
+              <div class="danger-zone-card">
+                <div class="s-card-head">
+                  <div class="s-card-icon red"><i class="ph-fill ph-warning-diamond"></i></div>
+                  <div>
+                    <div class="s-card-title">Danger Zone</div>
+                    <div class="s-card-sub">Irreversible actions — proceed with caution</div>
+                  </div>
+                </div>
+                <div class="s-card-body">
+                  <div class="s-row">
+                    <div class="s-row-left">
+                      <div class="s-row-title">Clear All Instances</div>
+                      <div class="s-row-desc">Remove all serverless GPU instances from your account. This cannot be undone.</div>
+                    </div>
+                    <div class="s-row-right">
+                      <button class="btn-danger" onclick="if(confirm('Remove ALL instances permanently? This cannot be undone.')){ if(window.SL){ var insts=JSON.parse(localStorage.getItem('t1era_sl_instances')||'[]'); insts.forEach(function(i){ window.SL.remove && window.SL.remove(i.id); }); } showSettingsToast('All instances cleared'); }">
+                        <i class="ph-bold ph-trash"></i> Clear Instances
+                      </button>
+                    </div>
+                  </div>
+                  <div class="s-row">
+                    <div class="s-row-left">
+                      <div class="s-row-title">Delete All Projects</div>
+                      <div class="s-row-desc">Permanently delete all GPU projects and their associated instances from Firestore.</div>
+                    </div>
+                    <div class="s-row-right">
+                      <button class="btn-danger" onclick="if(confirm('Delete ALL projects and their instances? This cannot be undone.')){ if(window.SL){ var projs=window.SL.getProjects(); projs.forEach(function(p){ window.SL.deleteProject && window.SL.deleteProject(p.id, null); }); } showSettingsToast('All projects deleted'); }">
+                        <i class="ph-bold ph-folder-minus"></i> Delete Projects
+                      </button>
+                    </div>
+                  </div>
+                  <div class="s-row">
+                    <div class="s-row-left">
+                      <div class="s-row-title">Reset Balance to Default</div>
+                      <div class="s-row-desc">Reset your local balance back to $142.50 — for testing and demo purposes only.</div>
+                    </div>
+                    <div class="s-row-right">
+                      <button class="btn-danger" onclick="if(confirm('Reset balance to $142.50?')){ localStorage.setItem('t1era_sl_balance','142.5'); showSettingsToast('Balance reset to $142.50'); }">
+                        <i class="ph-bold ph-arrow-counter-clockwise"></i> Reset Balance
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div><!-- /sp-danger -->
+
+          </div><!-- /panels -->
+        </div><!-- /settings-layout -->
+      </div><!-- /tab-settings -->
 
     </div><!-- /content-area -->
   </main>
@@ -1687,7 +2269,58 @@
     }
     window.renderUsageTab = renderUsageTab;
 
+    // ─── SETTINGS HELPERS ────────────────────────────────────────────
+    function switchSettingsSection(id, btn) {
+      document.querySelectorAll('.settings-panel-section').forEach(function(p) {
+        p.classList.remove('active');
+      });
+      document.querySelectorAll('.sn-item').forEach(function(b) {
+        b.classList.remove('active');
+      });
+      var panel = document.getElementById('sp-' + id);
+      if (panel) panel.classList.add('active');
+      if (btn) btn.classList.add('active');
+    }
+
+    function toggleLimitInputs(checkbox) {
+      var rows = ['limitDailyRow', 'limitMonthlyRow', 'limitActionRow'];
+      rows.forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) {
+          el.style.opacity = checkbox.checked ? '1' : '0.4';
+          el.style.pointerEvents = checkbox.checked ? 'auto' : 'none';
+        }
+      });
+    }
+
+    function showSettingsToast(msg) {
+      var old = document.getElementById('slToast');
+      if (old && old.parentNode) old.parentNode.removeChild(old);
+      var el = document.createElement('div');
+      el.id = 'slToast';
+      el.innerHTML = '<i class="ph-fill ph-check-circle" style="margin-right:7px;color:#34d399"></i>' + msg;
+      Object.assign(el.style, {
+        position: 'fixed', bottom: '28px', left: '50%',
+        transform: 'translateX(-50%)',
+        background: '#131316', border: '1px solid rgba(52,211,153,0.3)',
+        color: '#f8f9fa', padding: '10px 22px', borderRadius: '9999px',
+        fontSize: '13px', fontWeight: '600', fontFamily: "'DM Sans',sans-serif",
+        zIndex: '9999', boxShadow: '0 4px 24px rgba(0,0,0,0.5)',
+        opacity: '0', transition: 'opacity 0.25s', whiteSpace: 'nowrap',
+        display: 'flex', alignItems: 'center',
+      });
+      document.body.appendChild(el);
+      requestAnimationFrame(function() {
+        requestAnimationFrame(function() { el.style.opacity = '1'; });
+      });
+      setTimeout(function() {
+        el.style.opacity = '0';
+        setTimeout(function() { if (el.parentNode) el.parentNode.removeChild(el); }, 300);
+      }, 2800);
+    }
+
     // Sync header balance stat
+
     const origSyncBalance = window._syncBalanceHeaderHooked;
     if (!origSyncBalance) {
       window._syncBalanceHeaderHooked = true;
@@ -1714,6 +2347,8 @@
         } else if (target === 'tab-usage') {
           headerTitle.innerText = 'Usage'; document.getElementById('topbarTitle').innerText = 'Usage';
           setTimeout(renderUsageTab, 20);
+        } else if (target === 'tab-settings') {
+          headerTitle.innerText = 'Settings'; document.getElementById('topbarTitle').innerText = 'Settings';
         } else {
           headerTitle.innerText = 'GPU Instances'; document.getElementById('topbarTitle').innerText = 'GPU Instances';
           _deploySource = 'gpu';
