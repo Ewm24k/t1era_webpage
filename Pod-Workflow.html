@@ -976,6 +976,121 @@
       background: var(--surface-2);
     }
     .s-save-note { font-size: 11px; color: var(--t3); flex: 1; }
+
+    /* ════════════════════════════════════
+       RECHARGE RULE WIDGET
+    ════════════════════════════════════ */
+    .recharge-widget {
+      margin-top: 12px;
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: var(--r2);
+      overflow: hidden;
+      transition: border-color .2s;
+    }
+    .recharge-widget.editing {
+      border-color: rgba(110,168,254,.35);
+      box-shadow: 0 0 0 3px rgba(110,168,254,.06);
+    }
+
+    /* Summary bar — always visible */
+    .rw-summary {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 14px; gap: 10px;
+    }
+    .rw-summary-text {
+      font-size: 13px; color: var(--t2); line-height: 1.5; flex: 1;
+    }
+    .rw-summary-text strong { color: var(--t1); }
+    .rw-edit-btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 6px 13px; border-radius: var(--r1);
+      background: var(--surface-3); border: 1px solid var(--line-mid);
+      color: var(--t2); font-size: 12px; font-weight: 600;
+      cursor: pointer; font-family: 'DM Sans', sans-serif;
+      transition: all .15s; white-space: nowrap; flex-shrink: 0;
+    }
+    .rw-edit-btn:hover { background: var(--surface-4); color: var(--t1); border-color: var(--line-hi); }
+    .rw-edit-btn.active { background: rgba(110,168,254,.1); border-color: rgba(110,168,254,.3); color: var(--b1); }
+
+    /* Sliders panel — hidden until editing */
+    .rw-sliders {
+      max-height: 0; overflow: hidden;
+      transition: max-height .3s cubic-bezier(.4,0,.2,1), opacity .25s;
+      opacity: 0;
+      border-top: 1px solid transparent;
+    }
+    .recharge-widget.editing .rw-sliders {
+      max-height: 260px; opacity: 1;
+      border-top-color: var(--line);
+    }
+    .rw-sliders-inner { padding: 16px 14px; display: flex; flex-direction: column; gap: 18px; }
+
+    /* Individual slider row */
+    .rw-slider-row { display: flex; flex-direction: column; gap: 8px; }
+    .rw-slider-label {
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .rw-slider-name { font-size: 11px; font-weight: 700; color: var(--t3); text-transform: uppercase; letter-spacing: .6px; }
+    .rw-slider-val {
+      font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 700;
+      color: var(--b1);
+      background: rgba(110,168,254,.08); border: 1px solid rgba(110,168,254,.2);
+      padding: 2px 10px; border-radius: var(--r5); min-width: 56px; text-align: center;
+    }
+    /* Custom styled range */
+    .rw-range {
+      -webkit-appearance: none; appearance: none;
+      width: 100%; height: 4px; border-radius: 4px;
+      background: var(--surface-3); outline: none; cursor: pointer;
+      pointer-events: none; /* locked by default */
+      transition: background .2s;
+    }
+    .recharge-widget.editing .rw-range { pointer-events: auto; }
+    .rw-range::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%;
+      background: var(--b1); cursor: pointer;
+      box-shadow: 0 0 0 3px rgba(110,168,254,.2), 0 2px 6px rgba(0,0,0,.4);
+      transition: transform .15s, box-shadow .15s;
+    }
+    .recharge-widget.editing .rw-range::-webkit-slider-thumb:hover {
+      transform: scale(1.18);
+      box-shadow: 0 0 0 5px rgba(110,168,254,.25), 0 2px 8px rgba(0,0,0,.5);
+    }
+    .rw-range::-moz-range-thumb {
+      width: 18px; height: 18px; border-radius: 50%; border: none;
+      background: var(--b1); cursor: pointer;
+    }
+    /* Track fill using a linear-gradient on the element itself */
+    .rw-range-wrap { position: relative; }
+
+    /* Save / Cancel row */
+    .rw-actions {
+      display: flex; align-items: center; justify-content: flex-end;
+      gap: 8px; padding: 0 14px 14px;
+    }
+    .rw-cancel-btn {
+      padding: 6px 13px; border-radius: var(--r1);
+      background: transparent; border: 1px solid var(--line);
+      color: var(--t3); font-size: 12px; font-weight: 600;
+      cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all .15s;
+    }
+    .rw-cancel-btn:hover { background: var(--surface-2); color: var(--t1); }
+    .rw-save-btn {
+      padding: 6px 16px; border-radius: var(--r1);
+      background: var(--grd); border: none;
+      color: #fff; font-size: 12px; font-weight: 700;
+      cursor: pointer; font-family: 'DM Sans', sans-serif; transition: opacity .15s;
+    }
+    .rw-save-btn:hover { opacity: .85; }
+
+    /* Lock icon overlay on sliders when not editing */
+    .rw-lock-hint {
+      display: flex; align-items: center; justify-content: center;
+      gap: 6px; font-size: 11px; color: var(--t3);
+      padding: 10px 14px; border-top: 1px solid var(--line);
+    }
+    .recharge-widget.editing .rw-lock-hint { display: none; }
   </style>
 </head>
 <body>
@@ -1193,12 +1308,66 @@
                 </div>
                 <label class="toggle"><input type="checkbox" checked><span class="toggle-track"></span></label>
               </div>
-              <div class="setting-row">
-                <div>
-                  <div class="setting-title">Recharge Rule</div>
-                  <div class="setting-desc">Add <strong>$50</strong> when balance falls below <strong>$10</strong>.</div>
+              <div class="setting-row" style="flex-direction:column;align-items:stretch;gap:10px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                  <div>
+                    <div class="setting-title">Recharge Rule</div>
+                  </div>
+                  <button class="rw-edit-btn" id="rwEditBtn" onclick="toggleRechargeEdit()">
+                    <i class="ph-bold ph-pencil-simple"></i> Edit
+                  </button>
                 </div>
-                <button class="btn-text">Edit</button>
+
+                <!-- Widget -->
+                <div class="recharge-widget" id="rechargeWidget">
+
+                  <!-- Summary — always visible -->
+                  <div class="rw-summary">
+                    <div class="rw-summary-text">
+                      Add <strong id="rwSummaryAdd">$50</strong> when balance falls below <strong id="rwSummaryBelow">$10</strong>.
+                    </div>
+                  </div>
+
+                  <!-- Lock hint — shown when not editing -->
+                  <div class="rw-lock-hint">
+                    <i class="ph-bold ph-lock-simple"></i> Click Edit to adjust the rule
+                  </div>
+
+                  <!-- Sliders — unlocked on Edit -->
+                  <div class="rw-sliders" id="rwSliders">
+                    <div class="rw-sliders-inner">
+
+                      <!-- Slider 1: Add amount -->
+                      <div class="rw-slider-row">
+                        <div class="rw-slider-label">
+                          <span class="rw-slider-name">Add amount</span>
+                          <span class="rw-slider-val" id="rwAddVal">$50</span>
+                        </div>
+                        <input type="range" class="rw-range" id="rwAddSlider"
+                          min="10" max="500" step="10" value="50"
+                          oninput="updateRechargeWidget()">
+                      </div>
+
+                      <!-- Slider 2: Trigger below -->
+                      <div class="rw-slider-row">
+                        <div class="rw-slider-label">
+                          <span class="rw-slider-name">Trigger below</span>
+                          <span class="rw-slider-val" id="rwBelowVal">$10</span>
+                        </div>
+                        <input type="range" class="rw-range" id="rwBelowSlider"
+                          min="1" max="100" step="1" value="10"
+                          oninput="updateRechargeWidget()">
+                      </div>
+
+                    </div>
+                    <!-- Save / Cancel -->
+                    <div class="rw-actions">
+                      <button class="rw-cancel-btn" onclick="cancelRechargeEdit()">Cancel</button>
+                      <button class="rw-save-btn" onclick="saveRechargeRule()">Save Rule</button>
+                    </div>
+                  </div>
+
+                </div><!-- /recharge-widget -->
               </div>
             </div>
 
@@ -2268,6 +2437,71 @@
       wrap.innerHTML = html;
     }
     window.renderUsageTab = renderUsageTab;
+
+    // ─── RECHARGE RULE WIDGET ────────────────────────────
+    var _rwEditing = false;
+    var _rwSavedAdd = 50;
+    var _rwSavedBelow = 10;
+
+    function toggleRechargeEdit() {
+      _rwEditing ? cancelRechargeEdit() : openRechargeEdit();
+    }
+
+    function openRechargeEdit() {
+      _rwEditing = true;
+      var widget = document.getElementById('rechargeWidget');
+      var btn    = document.getElementById('rwEditBtn');
+      if (widget) widget.classList.add('editing');
+      if (btn) { btn.innerHTML = '<i class="ph-bold ph-x"></i> Cancel'; btn.classList.add('active'); }
+      updateRechargeWidget();
+    }
+
+    function cancelRechargeEdit() {
+      _rwEditing = false;
+      var widget = document.getElementById('rechargeWidget');
+      var btn    = document.getElementById('rwEditBtn');
+      if (widget) widget.classList.remove('editing');
+      if (btn) { btn.innerHTML = '<i class="ph-bold ph-pencil-simple"></i> Edit'; btn.classList.remove('active'); }
+      var addSlider   = document.getElementById('rwAddSlider');
+      var belowSlider = document.getElementById('rwBelowSlider');
+      if (addSlider)   addSlider.value   = _rwSavedAdd;
+      if (belowSlider) belowSlider.value = _rwSavedBelow;
+      updateRechargeWidget();
+    }
+
+    function updateRechargeWidget() {
+      var addVal   = parseInt((document.getElementById('rwAddSlider')   || {value:_rwSavedAdd}).value);
+      var belowVal = parseInt((document.getElementById('rwBelowSlider') || {value:_rwSavedBelow}).value);
+      var addValEl   = document.getElementById('rwAddVal');
+      var belowValEl = document.getElementById('rwBelowVal');
+      if (addValEl)   addValEl.textContent   = '$' + addVal;
+      if (belowValEl) belowValEl.textContent = '$' + belowVal;
+      var addSlider   = document.getElementById('rwAddSlider');
+      var belowSlider = document.getElementById('rwBelowSlider');
+      if (addSlider) {
+        var addPct = ((addVal - 10) / (500 - 10)) * 100;
+        addSlider.style.background = 'linear-gradient(to right,var(--b1) 0%,var(--b1) ' + addPct + '%,var(--surface-3) ' + addPct + '%,var(--surface-3) 100%)';
+      }
+      if (belowSlider) {
+        var belowPct = ((belowVal - 1) / (100 - 1)) * 100;
+        belowSlider.style.background = 'linear-gradient(to right,var(--b1) 0%,var(--b1) ' + belowPct + '%,var(--surface-3) ' + belowPct + '%,var(--surface-3) 100%)';
+      }
+      var summaryAdd   = document.getElementById('rwSummaryAdd');
+      var summaryBelow = document.getElementById('rwSummaryBelow');
+      if (summaryAdd)   summaryAdd.textContent   = '$' + addVal;
+      if (summaryBelow) summaryBelow.textContent = '$' + belowVal;
+    }
+
+    function saveRechargeRule() {
+      var addVal   = parseInt(document.getElementById('rwAddSlider').value);
+      var belowVal = parseInt(document.getElementById('rwBelowSlider').value);
+      _rwSavedAdd   = addVal;
+      _rwSavedBelow = belowVal;
+      cancelRechargeEdit();
+      if (typeof showSettingsToast === 'function') showSettingsToast('Recharge rule saved — Add $' + addVal + ' below $' + belowVal);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() { updateRechargeWidget(); });
 
     // ─── SETTINGS HELPERS ────────────────────────────────────────────
     function switchSettingsSection(id, btn) {
