@@ -1091,6 +1091,68 @@
       padding: 10px 14px; border-top: 1px solid var(--line);
     }
     .recharge-widget.editing .rw-lock-hint { display: none; }
+
+    /* ════════════════════════════════════
+       CUSTOM AMOUNT INPUT
+    ════════════════════════════════════ */
+    .custom-amt-wrap {
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      transition: max-height .28s cubic-bezier(.4,0,.2,1), opacity .22s ease, margin .22s ease;
+      margin-top: 0;
+    }
+    .custom-amt-wrap.open {
+      max-height: 100px;
+      opacity: 1;
+      margin-top: 12px;
+    }
+    .custom-amt-inner {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: var(--r1);
+      overflow: hidden;
+      transition: border-color .18s, box-shadow .18s;
+    }
+    .custom-amt-inner:focus-within {
+      border-color: var(--b1);
+      box-shadow: 0 0 0 3px rgba(110,168,254,.1);
+    }
+    .custom-amt-inner.error {
+      border-color: var(--b5);
+      box-shadow: 0 0 0 3px rgba(248,113,113,.1);
+    }
+    .custom-amt-prefix {
+      padding: 10px 12px;
+      font-size: 15px; font-weight: 700;
+      color: var(--t2);
+      background: var(--surface-2);
+      border-right: 1px solid var(--line);
+      font-family: 'DM Mono', monospace;
+      flex-shrink: 0;
+    }
+    .custom-amt-input {
+      flex: 1;
+      background: transparent;
+      border: none; outline: none;
+      color: var(--t1);
+      font-family: 'DM Mono', monospace;
+      font-size: 16px; font-weight: 700;
+      padding: 10px 12px;
+    }
+    .custom-amt-input::placeholder { color: var(--t3); font-weight: 400; }
+    .custom-amt-hint {
+      font-size: 11px;
+      margin-top: 6px;
+      min-height: 16px;
+      transition: color .15s;
+    }
+    .custom-amt-hint.ok    { color: var(--b3); }
+    .custom-amt-hint.error { color: var(--b5); }
+    .custom-amt-hint.empty { color: var(--t3); }
   </style>
 </head>
 <body>
@@ -1277,6 +1339,23 @@
                 <button class="amt-btn">$100</button>
                 <button class="amt-btn">Custom</button>
               </div>
+            </div>
+
+            <!-- Custom amount input — shown when Custom is selected -->
+            <div class="custom-amt-wrap" id="customAmtWrap">
+              <div class="custom-amt-inner" id="customAmtInner">
+                <span class="custom-amt-prefix">$</span>
+                <input
+                  type="number"
+                  class="custom-amt-input"
+                  id="customAmtInput"
+                  placeholder="Enter amount"
+                  min="5"
+                  step="1"
+                  oninput="onCustomAmtInput()"
+                />
+              </div>
+              <div class="custom-amt-hint empty" id="customAmtHint">Minimum $5.00 USD</div>
             </div>
 
             <div class="form-group">
@@ -2602,15 +2681,82 @@
       btn.addEventListener('click', (e) => {
         document.querySelectorAll('.amt-btn').forEach(b => b.classList.remove('selected'));
         e.currentTarget.classList.add('selected');
-        const val = e.currentTarget.innerText;
+        const val = e.currentTarget.innerText.trim();
         const checkoutBtn = document.querySelector('.btn-checkout');
-        if (val !== 'Custom') {
-          checkoutBtn.innerHTML = `<i class="ph-bold ph-lock-key"></i> Pay ${val}.00`;
+        const customWrap  = document.getElementById('customAmtWrap');
+        const customInput = document.getElementById('customAmtInput');
+
+        if (val === 'Custom') {
+          // Show custom input box
+          if (customWrap) customWrap.classList.add('open');
+          setTimeout(() => { if (customInput) customInput.focus(); }, 280);
+          // Reset checkout button until valid amount entered
+          checkoutBtn.innerHTML = '<i class="ph-bold ph-lock-key"></i> Enter Amount';
+          checkoutBtn.disabled  = true;
+          checkoutBtn.style.opacity = '0.45';
+          checkoutBtn.style.cursor  = 'not-allowed';
         } else {
-          checkoutBtn.innerHTML = `<i class="ph-bold ph-lock-key"></i> Enter Amount`;
+          // Hide custom input box and reset it
+          if (customWrap)  customWrap.classList.remove('open');
+          if (customInput) { customInput.value = ''; }
+          resetCustomAmtHint();
+          // Re-enable checkout with preset amount
+          const num = val.replace('$','');
+          checkoutBtn.innerHTML = '<i class="ph-bold ph-lock-key"></i> Pay $' + num + '.00';
+          checkoutBtn.disabled  = false;
+          checkoutBtn.style.opacity = '';
+          checkoutBtn.style.cursor  = '';
         }
       });
     });
+
+    function onCustomAmtInput() {
+      const input       = document.getElementById('customAmtInput');
+      const hint        = document.getElementById('customAmtHint');
+      const inner       = document.getElementById('customAmtInner');
+      const checkoutBtn = document.querySelector('.btn-checkout');
+      const val         = parseFloat(input.value);
+
+      if (!input.value) {
+        // Empty
+        hint.textContent  = 'Minimum $5.00 USD';
+        hint.className    = 'custom-amt-hint empty';
+        inner.classList.remove('error');
+        checkoutBtn.innerHTML = '<i class="ph-bold ph-lock-key"></i> Enter Amount';
+        checkoutBtn.disabled  = true;
+        checkoutBtn.style.opacity = '0.45';
+        checkoutBtn.style.cursor  = 'not-allowed';
+        return;
+      }
+
+      if (isNaN(val) || val < 5) {
+        // Too low
+        hint.textContent  = val < 5 ? 'Minimum is $5.00 USD — please increase the amount' : 'Enter a valid amount';
+        hint.className    = 'custom-amt-hint error';
+        inner.classList.add('error');
+        checkoutBtn.innerHTML = '<i class="ph-bold ph-lock-key"></i> Enter Amount';
+        checkoutBtn.disabled  = true;
+        checkoutBtn.style.opacity = '0.45';
+        checkoutBtn.style.cursor  = 'not-allowed';
+        return;
+      }
+
+      // Valid
+      inner.classList.remove('error');
+      hint.textContent  = 'Amount accepted — ready to pay';
+      hint.className    = 'custom-amt-hint ok';
+      checkoutBtn.innerHTML = '<i class="ph-bold ph-lock-key"></i> Pay $' + val.toFixed(2);
+      checkoutBtn.disabled  = false;
+      checkoutBtn.style.opacity = '';
+      checkoutBtn.style.cursor  = '';
+    }
+
+    function resetCustomAmtHint() {
+      const hint  = document.getElementById('customAmtHint');
+      const inner = document.getElementById('customAmtInner');
+      if (hint)  { hint.textContent = 'Minimum $5.00 USD'; hint.className = 'custom-amt-hint empty'; }
+      if (inner) inner.classList.remove('error');
+    }
 
   </script>
 
