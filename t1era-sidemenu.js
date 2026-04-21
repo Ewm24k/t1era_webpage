@@ -353,6 +353,49 @@
       color: #e91e8c;
     }
     .t1sm-server-btn svg { width: 12px; height: 12px; flex-shrink: 0; }
+
+    /* ── Sign Out button ── */
+    .t1sm-signout-btn {
+      display: none;
+      align-items: center; justify-content: center; gap: 6px;
+      width: 100%; padding: 6px 10px; min-height: 36px;
+      border-radius: 7px;
+      background: rgba(239,68,68,0.07);
+      border: 1px solid rgba(239,68,68,0.18);
+      color: rgba(239,68,68,0.75);
+      font-size: 10px; font-weight: 700; letter-spacing: 0.05em;
+      font-family: var(--f-body, "DM Sans", sans-serif);
+      cursor: pointer;
+      transition: background 0.18s, border-color 0.18s, color 0.18s;
+      white-space: nowrap;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    .t1sm-signout-btn:hover {
+      background: rgba(239,68,68,0.16);
+      border-color: rgba(239,68,68,0.4);
+      color: #ef4444;
+    }
+    .t1sm-signout-btn.visible { display: flex; }
+    .t1sm-signout-btn svg { width: 13px; height: 13px; flex-shrink: 0; }
+
+    /* ── Sign out toast ── */
+    .t1sm-signout-toast {
+      position: fixed; bottom: 28px; left: 50%;
+      transform: translateX(-50%) translateY(12px);
+      background: #10b981; color: #fff;
+      font-size: 13px; font-weight: 700;
+      padding: 10px 22px; border-radius: 100px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.45);
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.22s, transform 0.22s;
+      z-index: 9999; white-space: nowrap;
+      font-family: var(--f-body, "DM Sans", sans-serif);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .t1sm-signout-toast.show {
+      opacity: 1; transform: translateX(-50%) translateY(0);
+    }
   `;
   document.head.appendChild(style);
 
@@ -490,6 +533,15 @@
               </svg>
               Free Server
             </button>
+            <!-- Sign Out — only shown when authenticated -->
+            <button class="t1sm-signout-btn" id="t1smSignOutBtn" onclick="window.t1smSignOut()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                <polyline points="16 17 21 12 16 7"/>
+                <line x1="21" y1="12" x2="9" y2="12"/>
+              </svg>
+              Sign Out
+            </button>
           </div>
         </div>
       </div>
@@ -607,6 +659,97 @@
         }
       }
     };
+
+    /* 10. Sign Out — calls Firebase signOut() which invalidates the token globally.
+           After signOut(), ALL pages (spark, homepage, etc.) treat user as signed out
+           because onAuthStateChanged fires null on next load. */
+    window.t1smSignOut = function () {
+      var btn = document.getElementById('t1smSignOutBtn');
+      if (btn) { btn.disabled = true; btn.style.opacity = '0.5'; }
+
+      function onSuccess() {
+        _t1smSignOutToast('Signed out successfully ✓');
+        setTimeout(function () {
+          window.location.replace('https://t1era.netlify.app/auth');
+        }, 1400);
+      }
+      function onError(err) {
+        console.error('[t1sm] signOut error:', err);
+        if (btn) { btn.disabled = false; btn.style.opacity = ''; }
+        _t1smSignOutToast('Sign out failed — try again');
+      }
+
+      /* ── 1. Modular Firebase (spark-module.js sets window._t1eraAuth + window._t1eraSignOut) ── */
+      if (window._t1eraAuth && typeof window._t1eraSignOut === 'function') {
+        window._t1eraSignOut(window._t1eraAuth).then(onSuccess).catch(onError);
+        return;
+      }
+
+      /* ── 2. Compat Firebase SDK (pod-workflow / t1era-ai context) ── */
+      if (window.firebase && window.firebase.auth) {
+        window.firebase.auth().signOut().then(onSuccess).catch(onError);
+        return;
+      }
+
+      /* ── 3. Last resort: import modular SDK dynamically ── */
+      import('https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js')
+        .then(function (m) {
+          var app = (window.firebase && window.firebase.apps && window.firebase.apps[0])
+            ? window.firebase.apps[0] : null;
+          if (!app) { onError(new Error('No Firebase app')); return; }
+          var auth = m.getAuth(app);
+          return m.signOut(auth);
+        })
+        .then(onSuccess)
+        .catch(onError);
+    };
+
+    /* Toast helper */
+    function _t1smSignOutToast(msg) {
+      var old = document.getElementById('t1smSOToast');
+      if (old && old.parentNode) old.parentNode.removeChild(old);
+      var el = document.createElement('div');
+      el.id = 't1smSOToast';
+      el.className = 't1sm-signout-toast';
+      var isErr = msg.indexOf('fail') !== -1 || msg.indexOf('error') !== -1;
+      if (isErr) el.style.background = '#ef4444';
+      el.innerHTML = (isErr
+        ? '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
+        : '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>'
+      ) + msg;
+      document.body.appendChild(el);
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () { el.classList.add('show'); });
+      });
+      setTimeout(function () {
+        el.classList.remove('show');
+        setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 300);
+      }, 2600);
+    }
+
+    /* 11. Auth watcher — show sign out button only when user is authenticated.
+           Polls window._sparkUser (set by spark-module.js) and compat auth. */
+    (function watchAuthForSignOut() {
+      var signOutBtn = document.getElementById('t1smSignOutBtn');
+      if (!signOutBtn) return;
+
+      function show() { signOutBtn.classList.add('visible'); }
+      function hide() { signOutBtn.classList.remove('visible'); }
+
+      /* Already authed (spark-module ran first) */
+      if (window._sparkUser) { show(); return; }
+
+      var attempts = 0;
+      var poll = setInterval(function () {
+        attempts++;
+        if (window._sparkUser) { show(); clearInterval(poll); return; }
+        if (window.firebase && window.firebase.auth) {
+          var u = window.firebase.auth().currentUser;
+          if (u) { show(); clearInterval(poll); return; }
+        }
+        if (attempts > 150) clearInterval(poll); /* give up after 15s */
+      }, 100);
+    })();
 
     /* 9. Patch into spark-module.js applyComposeAvatar so the footer avatar
           stays in sync automatically — same timing, same data, zero duplication.
