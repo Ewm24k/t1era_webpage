@@ -706,6 +706,18 @@
 
     onAuthStateChanged(auth, async user => {
       if (user) {
+        // ── Check if user just deliberately signed out via sidemenu ──
+        // t1era-sidemenu.js sets this flag before navigating here.
+        // If set, clear it and show the login form — do NOT auto-redirect.
+        const justSignedOut = sessionStorage.getItem('t1era_signed_out');
+        if (justSignedOut) {
+          sessionStorage.removeItem('t1era_signed_out');
+          // Force a real signOut now — the sidemenu signOut may not have fully
+          // propagated yet when onAuthStateChanged fires from cache.
+          try { await signOut(auth); } catch (e) {}
+          return; // onAuthStateChanged will fire again with user=null
+        }
+
         // ── Early redirect: already authenticated, not a fresh login ──
         if (!window._isNewSignup && !window._isLoggingIn) {
           try {
@@ -769,7 +781,10 @@
       } else {
         document.getElementById('authF').style.display = '';
         document.getElementById('lgdin').classList.remove('on');
-        if (isLoggingOut) {
+        // Show "signed out" message — triggered by sidemenu signout OR outBtn
+        const wasSignedOut = sessionStorage.getItem('t1era_signed_out');
+        if (isLoggingOut || wasSignedOut) {
+          sessionStorage.removeItem('t1era_signed_out');
           setTimeout(() => {
             const ok = document.getElementById('lOk');
             ok.innerHTML = '<span class="aico">✅</span><span>Securely signed out.</span>';
