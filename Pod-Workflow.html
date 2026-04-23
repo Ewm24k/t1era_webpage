@@ -218,6 +218,17 @@
 
     /* User footer */
     .sb-footer { padding:12px 10px; border-top:1px solid var(--line); }
+    .sb-signout-btn {
+      display:flex; align-items:center; gap:9px;
+      width:100%; padding:8px 10px; margin-top:4px;
+      border-radius:var(--r1); border:none; background:transparent;
+      color:var(--t3); font-size:13px; font-weight:500;
+      font-family:'DM Sans',sans-serif; cursor:pointer;
+      transition:all .15s var(--ease); text-align:left;
+    }
+    .sb-signout-btn i { font-size:16px; flex-shrink:0; }
+    .sb-signout-btn:hover { background:rgba(248,113,113,.08); color:var(--b5); border-color:transparent; }
+    .sb-signout-btn:disabled { opacity:.5; cursor:not-allowed; pointer-events:none; }
     .sb-user {
       display:flex; align-items:center; gap:9px;
       padding:8px 10px; border-radius:var(--r2);
@@ -1213,6 +1224,9 @@
         </div>
         <i class="ph ph-caret-up-down" style="color:var(--t3);font-size:13px;flex-shrink:0;"></i>
       </div>
+      <button class="sb-signout-btn" id="podSignOutBtn" onclick="podSignOut()">
+        <i class="ph-bold ph-sign-out"></i> Sign Out
+      </button>
     </div>
   </nav>
 
@@ -2856,6 +2870,37 @@
       // to re-fetch the account state and verify the session is still valid.
       // Then getIdToken(true) forces a server-signed token refresh.
       // Only after BOTH succeed do we dismiss the gate — this is a real check.
+      // ── SIGN OUT ─────────────────────────────────────────────────
+      // Exposed globally so the sidebar button can call it.
+      // Uses firebase.auth().signOut() (compat SDK) — waits for the
+      // Firebase server to confirm sign-out before redirecting.
+      window.podSignOut = function() {
+        var btn = document.getElementById('podSignOutBtn');
+        if (btn) {
+          btn.disabled = true;
+          btn.innerHTML = '<i class="ph-bold ph-circle-notch" style="animation:spin .7s linear infinite"></i> Signing out…';
+        }
+
+        firebase.auth().signOut()
+          .then(function() {
+            // Firebase confirmed — show brief success state, then redirect
+            if (btn) {
+              btn.innerHTML = '<i class="ph-fill ph-check-circle" style="color:#34d399"></i> Signed out';
+            }
+            setTimeout(function() {
+              window.location.replace('https://t1era.netlify.app/auth.html');
+            }, 900);
+          })
+          .catch(function(err) {
+            // Sign-out failed — restore button so user can retry
+            console.error('[podSignOut] error:', err.code, err.message);
+            if (btn) {
+              btn.disabled = false;
+              btn.innerHTML = '<i class="ph-bold ph-sign-out"></i> Sign Out';
+            }
+          });
+      };
+
       firebase.auth().onAuthStateChanged(function(user) {
         if (!user) {
           // No cached session at all — redirect immediately
