@@ -661,6 +661,13 @@
       if (el) el.textContent = fmt;
     });
 
+    /* Notify pod-balance.js (T1Balance) so it can throttle-write to Firestore.
+       This fires on every tick while a GPU is running. T1Balance handles
+       the throttle — it won't write Firestore every second. */
+    try {
+      document.dispatchEvent(new CustomEvent('slBalanceUpdate', { detail: fmt }));
+    } catch (ignore) {}
+
     var sub = document.querySelector(".balance-subtext");
     if (sub) {
       if (_balance < 5) {
