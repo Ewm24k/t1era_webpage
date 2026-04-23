@@ -1164,6 +1164,43 @@
     .custom-amt-hint.ok    { color: var(--b3); }
     .custom-amt-hint.error { color: var(--b5); }
     .custom-amt-hint.empty { color: var(--t3); }
+
+    /* ════════════════════════════════════
+       TRANSACTION HISTORY CARD
+    ════════════════════════════════════ */
+    .txn-card {
+      background: var(--surface-1);
+      border: 1px solid var(--line);
+      border-radius: var(--r3);
+      overflow: hidden;
+      margin-top: 18px;
+    }
+    .txn-card-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--line);
+      background: var(--surface-2);
+    }
+    .txn-card-head-left { display: flex; align-items: center; gap: 10px; }
+    .txn-card-icon {
+      width: 28px; height: 28px; border-radius: var(--r1);
+      background: rgba(110,168,254,.1); color: var(--b1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; flex-shrink: 0;
+    }
+    .txn-card-title { font-size: 13px; font-weight: 700; color: var(--t1); }
+    .txn-card-sub   { font-size: 11px; color: var(--t3); margin-top: 1px; }
+    .txn-refresh-btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 11px; font-weight: 600; color: var(--t2);
+      background: var(--surface-3); border: 1px solid var(--line);
+      border-radius: var(--r1); padding: 5px 10px; cursor: pointer;
+      transition: all .15s; font-family: 'DM Sans', sans-serif;
+    }
+    .txn-refresh-btn:hover { background: var(--surface-4); color: var(--t1); }
+    #billingTxnList { max-height: 340px; overflow-y: auto;
+      scrollbar-width: thin; scrollbar-color: var(--surface-3) transparent; }
+    #billingTxnList > div:last-child { border-bottom: none !important; }
   </style>
 </head>
 <body>
@@ -1484,6 +1521,29 @@
             </div>
           </div>
         </div>
+
+        <!-- ── Transaction History ── -->
+        <div class="txn-card" style="max-width:960px;">
+          <div class="txn-card-head">
+            <div class="txn-card-head-left">
+              <div class="txn-card-icon"><i class="ph-fill ph-receipt"></i></div>
+              <div>
+                <div class="txn-card-title">Transaction History</div>
+                <div class="txn-card-sub">Balance top-ups, deductions and payment records</div>
+              </div>
+            </div>
+            <button class="txn-refresh-btn" onclick="if(window.T1Balance){window.T1Balance.renderHistory();}">
+              <i class="ph-bold ph-arrows-clockwise"></i> Refresh
+            </button>
+          </div>
+          <div id="billingTxnList">
+            <div style="text-align:center;padding:32px 20px;color:var(--t3);font-size:13px;">
+              <i class="ph-bold ph-circle-notch" style="font-size:22px;display:block;margin-bottom:8px;opacity:.35;animation:spin .9s linear infinite;"></i>
+              Loading transactions…
+            </div>
+          </div>
+        </div><!-- /txn-card -->
+
       </div><!-- /tab-payg -->
 
       <!-- ── TAB: USAGE ── -->
@@ -2936,6 +2996,7 @@
 
   <!-- Serverless instance manager -->
   <script src="pod-serverless.js"></script>
+  <script src="pod-balance.js"></script>
   <script src="pod-notify.js"></script>
 </body>
 </html>
