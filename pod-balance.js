@@ -60,12 +60,14 @@
   /* ══════════════════════════════════════════════════════════════════
      MODULE STATE  (mirror pod-notify.js _db / _uid / _prefs pattern)
   ══════════════════════════════════════════════════════════════════ */
-  var _db       = null;
-  var _uid      = null;
-  var _balance  = null;   // current balance (number)
-  var _currency = DEFAULT_CURRENCY;
-  var _txns     = [];     // in-memory transaction array
-  var _ready    = false;
+  var _db            = null;
+  var _uid           = null;
+  var _balance       = null;   // current balance (number)
+  var _currency      = DEFAULT_CURRENCY;
+  var _txns          = [];     // in-memory transaction array
+  var _ready         = false;
+  var _lastFsWrite   = 0;      // timestamp of last Firestore balance write
+  var FS_WRITE_THROTTLE = 30000; // ms — max 1 Firestore write per 30s during tick
 
   /* ══════════════════════════════════════════════════════════════════
      1. FIREBASE INIT  —  piggyback on existing compat app
@@ -467,12 +469,20 @@
         _ready = true;
       });
 
-      /* Hook into slBalanceUpdate event (fired by SL module each tick) */
+      /* Hook into slBalanceUpdate event (fired by SL module each tick).
+         Throttled: Firestore write at most once per 30s during active drain.
+         localStorage is always kept current for instant cross-tab reads. */
       document.addEventListener('slBalanceUpdate', function (e) {
         if (!e.detail) return;
         var val = parseFloat(String(e.detail).replace('$', ''));
-        if (!isNaN(val) && val !== _balance) {
-          _balance = val;
+        if (isNaN(val) || val === _balance) return;
+        _balance = val;
+        /* Always keep localStorage current */
+        try { localStorage.setItem(LS_BALANCE_CACHE, String(val)); } catch (ex) {}
+        /* Throttle Firestore writes — max 1 per 30s */
+        var now = Date.now();
+        if (now - _lastFsWrite >= FS_WRITE_THROTTLE) {
+          _lastFsWrite = now;
           saveBalanceToFirestore(val, _currency);
         }
       });
