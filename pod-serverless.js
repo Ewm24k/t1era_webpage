@@ -254,7 +254,10 @@
     }
 
     /* 2. UPTIME PERSIST: for any instance that was "running" when the
-       page closed, calculate elapsed real-world seconds and add them */
+       page closed, calculate elapsed real-world seconds and add them.
+       Instances remain "running" — the ticker restarts automatically.
+       lastStartedAt is reset to now so the NEXT refresh only charges
+       the time since this page load, not double-counting. */
     var now = Date.now();
     _instances.forEach(function (inst) {
       if (inst.state === "running" && inst.lastStartedAt) {
@@ -267,9 +270,14 @@
           inst.totalCost = (inst.totalCost || 0) + drain;
           _balance = Math.max(0, _balance - drain);
         }
+        /* Reset anchor point to now — prevents double-charging on next refresh */
+        inst.lastStartedAt = new Date(now).toISOString();
+        /* Stop if balance hit zero during offline period */
+        if (_balance <= 0) {
+          inst.state = "stopped";
+          inst.lastStartedAt = null;
+        }
       }
-      // Come back as paused — user resumes manually
-      if (inst.state === "running") inst.state = "paused";
     });
 
     saveState();
