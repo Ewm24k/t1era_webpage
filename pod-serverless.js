@@ -32,23 +32,29 @@
 
   /* ── Storage keys ──────────────────────────────────────────────── */
   var KEY_INSTANCES = "t1era_sl_instances";
-  var KEY_BALANCE = "t1era_sl_balance";
-  var STARTING_BAL = 142.5;
+  var KEY_BALANCE   = "t1era_sl_balance";
+  var STARTING_BAL  = 142.5;
 
   /* ── Storage keys (projects) ────────────────────────────────────── */
   var KEY_PROJECTS = "t1era_sl_projects";
 
+  /* ── Heartbeat: write running pod state to Firestore every N seconds
+     so cross-device sync and close-tab recovery are accurate.
+     30s = max 2 Firestore writes/min per pod — well within free quota. ── */
+  var HEARTBEAT_INTERVAL = 30;  // seconds between Firestore checkpoints
+
   /* ── Runtime state ─────────────────────────────────────────────── */
-  var _instances = [];
-  var _balance = STARTING_BAL;
-  var _ticker = null;
-  var _fbApp = null;
-  var _fbDb = null;
-  var _fbAuth = null;
-  var _currentUid = null;
+  var _instances   = [];
+  var _balance     = STARTING_BAL;
+  var _ticker      = null;
+  var _tickCount   = 0;         // counts seconds since ticker started
+  var _fbApp       = null;
+  var _fbDb        = null;
+  var _fbAuth      = null;
+  var _currentUid  = null;
   /* project state */
-  var _projects = [];          // [{id, name, location, createdAt}]
-  var _activeProjectId = null; // which project is selected in serverless tab
+  var _projects        = [];    // [{id, name, location, createdAt}]
+  var _activeProjectId = null;  // which project is selected in serverless tab
 
   /* ══════════════════════════════════════════════════════════════════
      1. FIREBASE INIT + AUTH GATE
@@ -328,6 +334,7 @@
   ══════════════════════════════════════════════════════════════════ */
   function startTicker() {
     if (_ticker) return;
+    _tickCount = 0;   // reset heartbeat counter each time ticker starts
     _ticker = setInterval(tick, 1000);
   }
 
@@ -342,21 +349,28 @@
   }
 
   function tick() {
-    var changed = false;
+    var changed    = false;
+    var depleted   = false;  // flag: stop iterating once balance hits zero
+
+    _tickCount += 1;
+
     _instances.forEach(function (inst) {
       if (inst.state !== "running") return;
+      if (depleted) return;  // balance already zero — don't drain further
+
       var drain = inst.pricePerHr / 3600;
       inst.uptimeSec += 1;
-      inst.totalCost = (inst.totalCost || 0) + drain;
-      _balance = Math.max(0, _balance - drain);
-      changed = true;
+      inst.totalCost  = (inst.totalCost || 0) + drain;
+      _balance        = Math.max(0, _balance - drain);
+      changed         = true;
 
       if (_balance <= 0) {
+        depleted = true;
         inst.state = "stopped";
         inst.lastStartedAt = null;
+        fbSavePod(inst);   // immediate Firestore write on stop
         stopTickerIfIdle();
         toast("⚠️ Balance depleted – " + inst.name + " stopped.");
-        renderAll();
       }
     });
 
@@ -364,6 +378,25 @@
       saveState();
       syncBalanceDOMs();
       refreshLiveNumbers();
+      if (depleted) renderAll();  // single renderAll only when needed
+    }
+
+    /* ── Heartbeat: checkpoint running pods to Firestore every 30s ──
+       Ensures cross-device sync and close-tab recovery are accurate.
+       Without this, Firestore only has state from last play/pause/stop. */
+    if (_tickCount % HEARTBEAT_INTERVAL === 0) {
+      var now = new Date().toISOString();
+      _instances.forEach(function (inst) {
+        if (inst.state !== "running") return;
+        inst.lastStartedAt = now;  // reset anchor so next load charges correctly
+        fbSavePod(inst);
+      });
+      /* Also checkpoint balance so T1Balance stays in sync cross-device */
+      try {
+        if (global.T1Balance && global.T1Balance.isReady()) {
+          global.T1Balance.deduct(0, { description: 'heartbeat sync' });
+        }
+      } catch (e) {}
     }
   }
 
@@ -1209,6 +1242,31 @@
     if (_instances.some(function (i) { return i.state === "running"; })) {
       startTicker();
     }
+
+    /* ── Final Firestore checkpoint on tab hide / close ──────────────
+       visibilitychange fires reliably on tab switch and most close events.
+       beforeunload is a best-effort fallback (browsers may ignore writes).
+       Both reset lastStartedAt=now so the next load only charges elapsed
+       from this checkpoint, not from the original deploy time. ────── */
+    function flushRunningPods() {
+      var now = new Date().toISOString();
+      _instances.forEach(function (inst) {
+        if (inst.state !== "running") return;
+        inst.lastStartedAt = now;
+        fbSavePod(inst);
+      });
+      saveState();
+    }
+
+    document.addEventListener('visibilitychange', function () {
+      if (document.visibilityState === 'hidden') {
+        flushRunningPods();
+      }
+    });
+
+    global.addEventListener('beforeunload', function () {
+      flushRunningPods();
+    });
 
     /* Step 2 — after auth, load Firestore and merge (cross-device sync) */
     if (_fbAuth) {
