@@ -172,6 +172,38 @@
     ]);
   }
 
+  /* ── Load all pods from Firestore (cross-device sync) ──────────── */
+  function fbLoadPods(callback) {
+    if (!_fbDb || !_currentUid) { callback(null); return; }
+    _fbDb.collection('users').doc(_currentUid).collection('pods').get()
+      .then(function (snap) {
+        if (snap.empty) { callback([]); return; }
+        var pods = [];
+        snap.forEach(function (doc) { pods.push(doc.data()); });
+        callback(pods);
+      })
+      .catch(function (e) {
+        console.warn('[SL] fbLoadPods failed:', e);
+        callback(null);
+      });
+  }
+
+  /* ── Load all projects from Firestore (cross-device sync) ──────── */
+  function fbLoadProjects(callback) {
+    if (!_fbDb || !_currentUid) { callback(null); return; }
+    _fbDb.collection('users').doc(_currentUid).collection('projects').get()
+      .then(function (snap) {
+        if (snap.empty) { callback([]); return; }
+        var projs = [];
+        snap.forEach(function (doc) { projs.push(doc.data()); });
+        callback(projs);
+      })
+      .catch(function (e) {
+        console.warn('[SL] fbLoadProjects failed:', e);
+        callback(null);
+      });
+  }
+
   function showToast(msg, type) {
     /* type: 'success' | 'error' */
     var existing = document.getElementById('slToast');
@@ -1142,26 +1174,24 @@
 
   /* ══════════════════════════════════════════════════════════════════
      BOOT
+     Pattern mirrors pod-balance.js boot():
+       1. Show localStorage data immediately (fast, offline-resilient)
+       2. After auth, load Firestore (authoritative, cross-device)
+       3. Merge: Firestore wins — recalculate elapsed for running pods
   ══════════════════════════════════════════════════════════════════ */
   function boot() {
     injectCSS();
     initFirebase();
 
+    /* Step 1 — show localStorage data immediately while Firestore loads */
     loadState();
     renderAll();
 
-    /* On page load, if projects exist in localStorage, immediately render
-       the project panel in tab-compute so it never shows "No Server Configured"
-       when the user has already created projects. */
     if (_projects.length > 0) {
-      /* Use a small defer so the DOM is fully ready */
       setTimeout(function () {
-        /* Trigger renderComputeTab via the public API so Pod-workflow.html
-           helper function keeps its own state consistent too */
         if (typeof renderComputeTab === 'function') {
           renderComputeTab();
         } else {
-          /* Fallback: directly render into the panel */
           var slObj = global.SL;
           if (slObj && slObj.renderComputeTab) slObj.renderComputeTab();
         }
@@ -1176,12 +1206,94 @@
         });
       });
 
-    if (
-      _instances.some(function (i) {
-        return i.state === "running";
-      })
-    ) {
+    if (_instances.some(function (i) { return i.state === "running"; })) {
       startTicker();
+    }
+
+    /* Step 2 — after auth, load Firestore and merge (cross-device sync) */
+    if (_fbAuth) {
+      _fbAuth.onAuthStateChanged(function (user) {
+        if (!user) return;
+        _currentUid = user.uid;
+
+        /* Load projects from Firestore — authoritative */
+        fbLoadProjects(function (fsProjects) {
+          if (!fsProjects || fsProjects.length === 0) return;
+
+          /* Merge: Firestore wins over localStorage for projects */
+          _projects = fsProjects;
+          if (!_activeProjectId && _projects.length > 0) {
+            _activeProjectId = _projects[0].id;
+          }
+
+          /* Save merged projects to localStorage */
+          try { localStorage.setItem(KEY_PROJECTS, JSON.stringify(_projects)); } catch (e) {}
+
+          /* Load pods from Firestore — authoritative */
+          fbLoadPods(function (fsPods) {
+            if (!fsPods) return; /* network error — keep localStorage data */
+
+            var now = Date.now();
+
+            /* Recalculate elapsed for any running pods (same logic as loadState) */
+            fsPods.forEach(function (inst) {
+              if (inst.state === 'running' && inst.lastStartedAt) {
+                var elapsed = Math.floor(
+                  (now - new Date(inst.lastStartedAt).getTime()) / 1000
+                );
+                if (elapsed > 0) {
+                  var drain = inst.pricePerHr * (elapsed / 3600);
+                  inst.uptimeSec = (inst.uptimeSec || 0) + elapsed;
+                  inst.totalCost = (inst.totalCost || 0) + drain;
+                  _balance = Math.max(0, _balance - drain);
+                }
+                /* Reset anchor to now — prevents double-charging next refresh */
+                inst.lastStartedAt = new Date(now).toISOString();
+                if (_balance <= 0) {
+                  inst.state = 'stopped';
+                  inst.lastStartedAt = null;
+                }
+                /* Persist updated anchor back to Firestore */
+                fbSavePod(inst);
+              }
+              /* Link orphaned pods to earliest project */
+              if (!inst.projectId && _projects.length > 0) {
+                var earliest = _projects.slice().sort(function (a, b) {
+                  return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
+                })[0];
+                inst.projectId = earliest.id;
+              }
+            });
+
+            /* Firestore is authoritative — replace _instances entirely */
+            _instances = fsPods;
+            try { localStorage.setItem(KEY_INSTANCES, JSON.stringify(_instances)); } catch (e) {}
+            try { localStorage.setItem(KEY_BALANCE, _balance.toFixed(6)); } catch (e) {}
+
+            renderAll();
+            syncBalanceDOMs();
+
+            /* Restart ticker if any pod is running */
+            if (_instances.some(function (i) { return i.state === 'running'; })) {
+              startTicker();
+            }
+
+            /* Re-render compute tab with Firestore projects */
+            setTimeout(function () {
+              if (typeof renderComputeTab === 'function') {
+                renderComputeTab();
+              } else if (global.SL && global.SL.renderComputeTab) {
+                global.SL.renderComputeTab();
+              }
+            }, 50);
+
+            /* Notify T1Balance of updated balance */
+            try {
+              document.dispatchEvent(new CustomEvent('slBalanceUpdate', { detail: '$' + _balance.toFixed(2) }));
+            } catch (e) {}
+          });
+        });
+      });
     }
   }
 
