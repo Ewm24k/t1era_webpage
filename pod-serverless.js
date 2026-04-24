@@ -720,7 +720,7 @@
     }
   }
 
-  /* 4. syncBalanceDOMs — syncs all 4 balance targets including runwayBalance */
+  /* 4. syncBalanceDOMs — syncs all balance displays + sidebar instance count */
   function syncBalanceDOMs() {
     var fmt = "$" + _balance.toFixed(2);
     [
@@ -734,6 +734,51 @@
       if (el) el.textContent = fmt;
     });
 
+    /* ── Sidebar cluster count — shows live running instance count ── */
+    var countEl = document.getElementById('sbInstanceCount');
+    if (countEl) {
+      var runningCount = _instances.filter(function (i) { return i.state === 'running'; }).length;
+      countEl.textContent = runningCount + ' running';
+      countEl.style.color = runningCount > 0 ? 'var(--b3)' : 'var(--t3)';
+    }
+
+    /* ── Billing card status text (class: bal-sub) ──
+       syncBalanceDOMs previously looked for .balance-subtext which doesn't
+       exist in the HTML. Correct class is .bal-sub. ── */
+    var balSub = document.querySelector('.bal-sub');
+    if (balSub) {
+      if (_balance <= 0) {
+        balSub.innerHTML = '<i class="ph-fill ph-x-circle"></i> Balance depleted — top up to resume';
+        balSub.style.color = 'var(--b5)';
+      } else if (_balance < 5) {
+        balSub.innerHTML = '<i class="ph-fill ph-warning-circle"></i> Critical — top up now';
+        balSub.style.color = 'var(--b5)';
+      } else if (_balance < 20) {
+        balSub.innerHTML = '<i class="ph-fill ph-warning"></i> Balance running low';
+        balSub.style.color = 'var(--b4)';
+      } else {
+        balSub.innerHTML = '<i class="ph-fill ph-check-circle"></i> Sufficient for active deployments';
+        balSub.style.color = 'var(--b3)';
+      }
+    }
+
+    /* ── Runway Estimator — recalculate from live balance ── */
+    var runwayList = document.querySelector('.runway-list');
+    if (runwayList && _balance > 0) {
+      var gpuRates = [
+        { name: 'RTX 3090',  rate: 0.34 },
+        { name: 'RTX 4090',  rate: 0.74 },
+        { name: 'A100 80GB', rate: 1.89 },
+      ];
+      runwayList.innerHTML = gpuRates.map(function (g) {
+        var hrs = (_balance / g.rate).toFixed(0);
+        return '<div class="runway-row">'
+          + '<div class="rw-gpu"><i class="ph-fill ph-graphics-card"></i> ' + g.name + '</div>'
+          + '<div class="rw-time"><b>~' + hrs + '</b> hrs</div>'
+          + '</div>';
+      }).join('');
+    }
+
     /* Notify pod-balance.js (T1Balance) so it can throttle-write to Firestore.
        This fires on every tick while a GPU is running. T1Balance handles
        the throttle — it won't write Firestore every second. */
@@ -741,22 +786,7 @@
       document.dispatchEvent(new CustomEvent('slBalanceUpdate', { detail: fmt }));
     } catch (ignore) {}
 
-    var sub = document.querySelector(".balance-subtext");
-    if (sub) {
-      if (_balance < 5) {
-        sub.innerHTML =
-          '<i class="ph-fill ph-warning-circle"></i> Critical – top up now';
-        sub.style.color = "var(--b5)";
-      } else if (_balance < 20) {
-        sub.innerHTML =
-          '<i class="ph-fill ph-warning"></i> Balance running low';
-        sub.style.color = "var(--b4)";
-      } else {
-        sub.innerHTML =
-          '<i class="ph-fill ph-check-circle"></i> Sufficient for active deployments';
-        sub.style.color = "var(--b3)";
-      }
-    }
+    /* .balance-subtext removed — bal-sub is now updated inside syncBalanceDOMs above */
   }
 
   /* ══════════════════════════════════════════════════════════════════
