@@ -1304,82 +1304,103 @@
         if (!user) return;
         _currentUid = user.uid;
 
-        /* Load projects from Firestore — authoritative */
-        fbLoadProjects(function (fsProjects) {
-          if (!fsProjects || fsProjects.length === 0) return;
+        /* ── Load projects and pods independently — not nested ─────────
+           Bug fix: previously pods were nested inside project callback,
+           so if fsProjects was empty (Device B, fresh login), the early
+           return killed pod loading entirely. Now both run in parallel
+           via a simple counter — finalize() runs once both complete. ── */
+        var _fsProjects = null;
+        var _fsPods     = null;
+        var _loadsDone  = 0;
 
-          /* Merge: Firestore wins over localStorage for projects */
-          _projects = fsProjects;
-          if (!_activeProjectId && _projects.length > 0) {
-            _activeProjectId = _projects[0].id;
+        function finalizeSync() {
+          _loadsDone += 1;
+          if (_loadsDone < 2) return; /* wait for both to finish */
+
+          /* Projects — Firestore wins; empty array is valid (user deleted all) */
+          if (_fsProjects !== null) {
+            _projects = _fsProjects;
+            if (!_activeProjectId && _projects.length > 0) {
+              _activeProjectId = _projects[0].id;
+            }
+            try { localStorage.setItem(KEY_PROJECTS, JSON.stringify(_projects)); } catch (e) {}
           }
 
-          /* Save merged projects to localStorage */
-          try { localStorage.setItem(KEY_PROJECTS, JSON.stringify(_projects)); } catch (e) {}
-
-          /* Load pods from Firestore — authoritative */
-          fbLoadPods(function (fsPods) {
-            if (!fsPods) return; /* network error — keep localStorage data */
-
-            var now = Date.now();
-
-            /* Recalculate elapsed for any running pods (same logic as loadState) */
-            fsPods.forEach(function (inst) {
-              if (inst.state === 'running' && inst.lastStartedAt) {
-                var elapsed = Math.floor(
-                  (now - new Date(inst.lastStartedAt).getTime()) / 1000
-                );
-                if (elapsed > 0) {
-                  var drain = inst.pricePerHr * (elapsed / 3600);
-                  inst.uptimeSec = (inst.uptimeSec || 0) + elapsed;
-                  inst.totalCost = (inst.totalCost || 0) + drain;
-                  _balance = Math.max(0, _balance - drain);
-                }
-                /* Reset anchor to now — prevents double-charging next refresh */
-                inst.lastStartedAt = new Date(now).toISOString();
-                if (_balance <= 0) {
-                  inst.state = 'stopped';
-                  inst.lastStartedAt = null;
-                }
-                /* Persist updated anchor back to Firestore */
-                fbSavePod(inst);
-              }
-              /* Link orphaned pods to earliest project */
-              if (!inst.projectId && _projects.length > 0) {
-                var earliest = _projects.slice().sort(function (a, b) {
-                  return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
-                })[0];
-                inst.projectId = earliest.id;
-              }
-            });
-
-            /* Firestore is authoritative — replace _instances entirely */
-            _instances = fsPods;
-            try { localStorage.setItem(KEY_INSTANCES, JSON.stringify(_instances)); } catch (e) {}
-            try { localStorage.setItem(KEY_BALANCE, _balance.toFixed(6)); } catch (e) {}
-
+          /* Pods — network error keeps localStorage data; empty array is valid */
+          if (_fsPods === null) {
+            /* Firestore read failed — silently keep whatever localStorage had */
             renderAll();
             syncBalanceDOMs();
+            return;
+          }
 
-            /* Restart ticker if any pod is running */
-            if (_instances.some(function (i) { return i.state === 'running'; })) {
-              startTicker();
-            }
+          var now = Date.now();
 
-            /* Re-render compute tab with Firestore projects */
-            setTimeout(function () {
-              if (typeof renderComputeTab === 'function') {
-                renderComputeTab();
-              } else if (global.SL && global.SL.renderComputeTab) {
-                global.SL.renderComputeTab();
+          _fsPods.forEach(function (inst) {
+            /* Recalculate elapsed for running pods */
+            if (inst.state === 'running' && inst.lastStartedAt) {
+              var elapsed = Math.floor(
+                (now - new Date(inst.lastStartedAt).getTime()) / 1000
+              );
+              if (elapsed > 0) {
+                var drain = inst.pricePerHr * (elapsed / 3600);
+                inst.uptimeSec = (inst.uptimeSec || 0) + elapsed;
+                inst.totalCost = (inst.totalCost || 0) + drain;
+                _balance = Math.max(0, _balance - drain);
               }
-            }, 50);
-
-            /* Notify T1Balance of updated balance */
-            try {
-              document.dispatchEvent(new CustomEvent('slBalanceUpdate', { detail: '$' + _balance.toFixed(2) }));
-            } catch (e) {}
+              /* Reset anchor to now — prevents double-charging next load */
+              inst.lastStartedAt = new Date(now).toISOString();
+              if (_balance <= 0) {
+                inst.state = 'stopped';
+                inst.lastStartedAt = null;
+              }
+              fbSavePod(inst);
+            }
+            /* Link orphaned pods to earliest project if needed */
+            if (!inst.projectId && _projects.length > 0) {
+              var earliest = _projects.slice().sort(function (a, b) {
+                return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
+              })[0];
+              inst.projectId = earliest.id;
+            }
           });
+
+          /* Firestore is authoritative — replace _instances */
+          _instances = _fsPods;
+          try { localStorage.setItem(KEY_INSTANCES, JSON.stringify(_instances)); } catch (e) {}
+          try { localStorage.setItem(KEY_BALANCE, _balance.toFixed(6)); } catch (e) {}
+
+          renderAll();
+          syncBalanceDOMs();
+
+          if (_instances.some(function (i) { return i.state === 'running'; })) {
+            startTicker();
+          }
+
+          setTimeout(function () {
+            if (typeof renderComputeTab === 'function') {
+              renderComputeTab();
+            } else if (global.SL && global.SL.renderComputeTab) {
+              global.SL.renderComputeTab();
+            }
+          }, 50);
+
+          try {
+            document.dispatchEvent(new CustomEvent('slBalanceUpdate', {
+              detail: '$' + _balance.toFixed(2)
+            }));
+          } catch (e) {}
+        }
+
+        /* Fire both reads simultaneously — not sequential */
+        fbLoadProjects(function (result) {
+          _fsProjects = result; /* null = network error, [] = genuinely empty */
+          finalizeSync();
+        });
+
+        fbLoadPods(function (result) {
+          _fsPods = result; /* null = network error, [] = genuinely empty */
+          finalizeSync();
         });
       });
     }
