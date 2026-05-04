@@ -1273,27 +1273,117 @@
       startTicker();
     }
 
-    /* ── Final Firestore checkpoint on tab hide / close ──────────────
-       visibilitychange fires reliably on tab switch and most close events.
-       beforeunload is a best-effort fallback (browsers may ignore writes).
-       Both reset lastStartedAt=now so the next load only charges elapsed
-       from this checkpoint, not from the original deploy time. ────── */
+    /* ══════════════════════════════════════════════════════════════════
+       UNIVERSAL PAGE LIFECYCLE — all devices, all browsers
+       ══════════════════════════════════════════════════════════════════
+       The 30s heartbeat in tick() is the PRIMARY reliability mechanism.
+       These flush events are SUPPLEMENTARY best-effort checkpoints.
+
+       Reality per platform (from MDN + Chrome dev docs):
+       ┌─────────────────────────┬──────────────────┬──────────┬────────────┐
+       │ Platform                │ visibilitychange  │ pagehide │ beforeunload│
+       ├─────────────────────────┼──────────────────┼──────────┼────────────┤
+       │ Desktop Chrome/Edge/FF  │ ✅ reliable       │ ✅       │ ✅         │
+       │ Desktop Safari (Mac)    │ ⚠️ not on X-close │ ✅       │ ✅ needed  │
+       │ iPhone / iPad Safari    │ ⚠️ not on kill    │ ✅ no net│ ❌ ignored │
+       │ Android Chrome          │ ✅ reliable       │ ✅       │ ❌ ignored │
+       │ Android Samsung Browser │ ✅                │ ✅       │ ❌         │
+       │ Android Firefox         │ ✅ most reliable  │ ✅       │ ❌         │
+       │ iPad Chrome             │ ✅                │ ✅       │ ❌         │
+       │ Tablet (any Android)    │ ✅                │ ✅       │ ❌         │
+       └─────────────────────────┴──────────────────┴──────────┴────────────┘
+
+       iOS Safari note: pagehide fires but Webkit blocks async network
+       requests inside it. localStorage write still works — Firestore
+       write may be dropped. Heartbeat covers this gap.
+
+       Desktop Safari note: closing tab via X fires neither
+       visibilitychange nor pagehide — beforeunload covers this case.
+
+       Strategy:
+         1. visibilitychange hidden  → flush (all mobile + desktop tab switch)
+         2. pagehide                 → flush (iOS Safari nav away + bfcache)
+         3. beforeunload             → flush (desktop Safari tab X close)
+         4. visibilitychange visible → re-sync from Firestore (return from
+            lock screen / app switch on any device)
+       ══════════════════════════════════════════════════════════════════ */
+
+    /* Core flush — updates lastStartedAt anchor and writes to Firestore.
+       Called from multiple events — idempotent, safe to call redundantly. */
     function flushRunningPods() {
       var now = new Date().toISOString();
+      var hasRunning = false;
       _instances.forEach(function (inst) {
-        if (inst.state !== "running") return;
+        if (inst.state !== 'running') return;
+        hasRunning = true;
         inst.lastStartedAt = now;
         fbSavePod(inst);
       });
-      saveState();
+      if (hasRunning) saveState();
     }
 
+    /* Re-sync from Firestore when user returns to the page.
+       Handles: phone unlock, app switch back, tab refocus, iPad multitask.
+       Recalculates elapsed since last checkpoint and resumes ticker. */
+    function resyncOnVisible() {
+      if (!_currentUid) return;
+      fbLoadPods(function (fsPods) {
+        if (!fsPods || fsPods.length === 0) return;
+        var now = Date.now();
+        fsPods.forEach(function (inst) {
+          if (inst.state !== 'running' || !inst.lastStartedAt) return;
+          var elapsed = Math.floor(
+            (now - new Date(inst.lastStartedAt).getTime()) / 1000
+          );
+          if (elapsed > 0) {
+            var drain = inst.pricePerHr * (elapsed / 3600);
+            inst.uptimeSec  = (inst.uptimeSec  || 0) + elapsed;
+            inst.totalCost  = (inst.totalCost  || 0) + drain;
+            _balance = Math.max(0, _balance - drain);
+          }
+          inst.lastStartedAt = new Date(now).toISOString();
+          if (_balance <= 0) {
+            inst.state = 'stopped';
+            inst.lastStartedAt = null;
+          }
+          fbSavePod(inst);
+        });
+        _instances = fsPods;
+        try { localStorage.setItem(KEY_INSTANCES, JSON.stringify(_instances)); } catch (e) {}
+        try { localStorage.setItem(KEY_BALANCE, _balance.toFixed(6)); } catch (e) {}
+        renderAll();
+        syncBalanceDOMs();
+        if (_instances.some(function (i) { return i.state === 'running'; })) {
+          startTicker();
+        }
+      });
+    }
+
+    /* 1. visibilitychange — primary signal on ALL mobile devices and
+          desktop tab switching. Most reliable cross-platform event.
+          hidden  → flush checkpoint to Firestore
+          visible → re-sync and recalculate elapsed (covers lock screen,
+                    app switch, tab refocus, iPad split-view, etc.) */
     document.addEventListener('visibilitychange', function () {
       if (document.visibilityState === 'hidden') {
         flushRunningPods();
+      } else if (document.visibilityState === 'visible') {
+        resyncOnVisible();
       }
     });
 
+    /* 2. pagehide — fires on iOS Safari when navigating away, on all
+          browsers when page enters bfcache. Supplements visibilitychange
+          for cases where hidden doesn't fire (navigation, reload).
+          Note: on iOS Safari, Firestore async write may be blocked by
+          WebKit — localStorage write in saveState() still succeeds. */
+    global.addEventListener('pagehide', function () {
+      flushRunningPods();
+    });
+
+    /* 3. beforeunload — desktop only. Specifically covers desktop Safari
+          closing a tab via the X button, which fires neither
+          visibilitychange nor pagehide. Harmless no-op on mobile. */
     global.addEventListener('beforeunload', function () {
       flushRunningPods();
     });
