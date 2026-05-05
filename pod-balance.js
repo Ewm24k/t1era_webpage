@@ -66,8 +66,9 @@
   var _currency      = DEFAULT_CURRENCY;
   var _txns          = [];     // in-memory transaction array
   var _ready         = false;
-  var _lastFsWrite   = 0;      // timestamp of last Firestore balance write
-  var FS_WRITE_THROTTLE = 30000; // ms — max 1 Firestore write per 30s during tick
+  var _lastFsWrite      = 0;       // timestamp of last Firestore balance write
+  var FS_WRITE_THROTTLE = 30000;  // ms — max 1 Firestore write per 30s during tick
+  var _unsubBalance     = null;   // Firestore onSnapshot unsubscribe fn
 
   /* ══════════════════════════════════════════════════════════════════
      1. FIREBASE INIT  —  piggyback on existing compat app
@@ -444,17 +445,32 @@
       _txns = loadTxnsFromCache();
       renderTxnHistory();
 
-      /* Load authoritative balance from Firestore */
-      loadBalanceFromFirestore(function (balData) {
-        if (balData) {
-          _balance  = balData.amount;
-          _currency = balData.currency || DEFAULT_CURRENCY;
+      /* Attach REALTIME balance listener — replaces one-time .get().
+         Any device that updates balance in Firestore (top-up, admin set,
+         billing drain heartbeat) is instantly reflected on ALL devices. */
+      if (_unsubBalance) { _unsubBalance(); _unsubBalance = null; }
+      var _balRef = balanceDocRef();
+      if (_balRef) {
+        _unsubBalance = _balRef.onSnapshot(function (snap) {
+          if (!snap.exists) return;
+          var balData   = snap.data();
+          _balance      = balData.amount;
+          _currency     = balData.currency || DEFAULT_CURRENCY;
           try { localStorage.setItem(LS_BALANCE_CACHE, String(_balance)); } catch (e) {}
           syncAllBalanceDOMs(_balance);
-          /* Let T1Notify evaluate immediately with server balance */
           try { if (global.T1Notify) global.T1Notify.evaluate(_balance); } catch (e) {}
-        }
-      });
+        }, function (err) {
+          console.warn('[Balance] realtime listener error:', err);
+          /* Fallback to one-time read on listener failure */
+          loadBalanceFromFirestore(function (balData) {
+            if (!balData) return;
+            _balance  = balData.amount;
+            _currency = balData.currency || DEFAULT_CURRENCY;
+            try { localStorage.setItem(LS_BALANCE_CACHE, String(_balance)); } catch (e) {}
+            syncAllBalanceDOMs(_balance);
+          });
+        });
+      }
 
       /* Load transaction ledger from Firestore */
       loadTxnsFromFirestore(function (txnData) {
