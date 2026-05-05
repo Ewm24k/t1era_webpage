@@ -190,6 +190,7 @@
       })
       .catch(function (e) {
         console.warn('[SL] fbLoadPods failed:', e);
+        setSyncBadge('error', 'Sync failed');
         callback(null);
       });
   }
@@ -206,8 +207,55 @@
       })
       .catch(function (e) {
         console.warn('[SL] fbLoadProjects failed:', e);
+        setSyncBadge('error', 'Sync failed');
         callback(null);
       });
+  }
+
+  /* ══════════════════════════════════════════════════════════════════
+     SYNC BADGE — visual loading + sync status for serverless + billing
+     States: 'syncing' | 'synced' | 'error'
+  ══════════════════════════════════════════════════════════════════ */
+  function setSyncBadge(state, text) {
+    var ids = [
+      { badge: 'slSyncBadge',      txt: 'slSyncText'      },
+      { badge: 'billingSyncBadge', txt: 'billingSyncText'  },
+    ];
+    ids.forEach(function (pair) {
+      var badge = document.getElementById(pair.badge);
+      var label = document.getElementById(pair.txt);
+      if (!badge) return;
+
+      badge.style.display = 'inline-flex';
+      badge.className     = 'sync-badge ' + state;
+
+      /* Replace dot with correct indicator */
+      var dot = badge.querySelector('.sync-dot');
+      if (dot) {
+        dot.className = state === 'syncing' ? 'sync-dot spin' : 'sync-dot';
+      }
+      if (label && text) label.textContent = text;
+
+      /* Auto-hide after 3s when synced or errored */
+      if (state === 'synced' || state === 'error') {
+        clearTimeout(badge._hideTimer);
+        badge._hideTimer = setTimeout(function () {
+          badge.style.opacity = '0';
+          setTimeout(function () { badge.style.display = 'none'; badge.style.opacity = ''; }, 350);
+        }, 3000);
+      }
+    });
+  }
+
+  /* Show billing grid — fade in, hide skeleton overlay */
+  function showBillingContent() {
+    var grid    = document.getElementById('billingGrid');
+    var overlay = document.getElementById('billingLoadingOverlay');
+    if (grid)    { grid.style.opacity = '1'; }
+    if (overlay) {
+      overlay.style.opacity = '0';
+      setTimeout(function () { overlay.style.display = 'none'; }, 350);
+    }
   }
 
   function showToast(msg, type) {
@@ -1247,6 +1295,7 @@
     initFirebase();
 
     /* Step 1 — show localStorage data immediately while Firestore loads */
+    setSyncBadge('syncing', 'Syncing');
     loadState();
     renderAll();
 
@@ -1327,8 +1376,12 @@
        Recalculates elapsed since last checkpoint and resumes ticker. */
     function resyncOnVisible() {
       if (!_currentUid) return;
+      setSyncBadge('syncing', 'Refreshing');
       fbLoadPods(function (fsPods) {
-        if (!fsPods || fsPods.length === 0) return;
+        if (!fsPods || fsPods.length === 0) {
+          setSyncBadge('synced', 'Up to date');
+          return;
+        }
         var now = Date.now();
         fsPods.forEach(function (inst) {
           if (inst.state !== 'running' || !inst.lastStartedAt) return;
@@ -1353,6 +1406,7 @@
         try { localStorage.setItem(KEY_BALANCE, _balance.toFixed(6)); } catch (e) {}
         renderAll();
         syncBalanceDOMs();
+        setSyncBadge('synced', 'Up to date');
         if (_instances.some(function (i) { return i.state === 'running'; })) {
           startTicker();
         }
@@ -1462,6 +1516,8 @@
 
           renderAll();
           syncBalanceDOMs();
+          showBillingContent();
+          setSyncBadge('synced', 'Synced');
 
           if (_instances.some(function (i) { return i.state === 'running'; })) {
             startTicker();
