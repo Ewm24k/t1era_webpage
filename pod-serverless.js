@@ -178,12 +178,164 @@
     ]);
   }
 
-  /* ── Load all pods from Firestore (cross-device sync) ──────────── */
+  /* ══════════════════════════════════════════════════════════════════
+     REALTIME FIRESTORE LISTENERS
+     onSnapshot replaces one-time .get() calls.
+     Every device — phone, tablet, laptop, desktop — sees changes
+     instantly the moment any other device writes to Firestore.
+     No refresh needed. No polling. No stale data.
+
+     _unsubPods and _unsubProjects hold the unsubscribe functions
+     so we can detach listeners cleanly on sign-out.
+  ══════════════════════════════════════════════════════════════════ */
+  var _unsubPods     = null;
+  var _unsubProjects = null;
+  var _realtimeReady = false; /* true once first snapshot has arrived */
+
+  function attachRealtimeListeners(uid) {
+    /* Detach any existing listeners first — prevents duplicates on
+       re-auth or account switch */
+    detachRealtimeListeners();
+
+    if (!_fbDb || !uid) return;
+
+    setSyncBadge('syncing', 'Connecting');
+
+    var podsReceived     = false;
+    var projectsReceived = false;
+
+    /* ── PROJECTS listener ─────────────────────────────────────── */
+    _unsubProjects = _fbDb
+      .collection('users').doc(uid).collection('projects')
+      .onSnapshot(function (snap) {
+        var projs = [];
+        snap.forEach(function (doc) { projs.push(doc.data()); });
+
+        _projects = projs;
+
+        /* Preserve active project if it still exists, else pick first */
+        var stillExists = _projects.some(function (p) {
+          return p.id === _activeProjectId;
+        });
+        if (!stillExists) {
+          _activeProjectId = _projects.length > 0 ? _projects[0].id : null;
+        }
+
+        try { localStorage.setItem(KEY_PROJECTS, JSON.stringify(_projects)); } catch (e) {}
+
+        projectsReceived = true;
+
+        /* Re-render if both snapshots have arrived at least once */
+        if (podsReceived) {
+          afterBothReady();
+        }
+      }, function (err) {
+        console.warn('[SL] projects listener error:', err);
+        setSyncBadge('error', 'Sync failed');
+      });
+
+    /* ── PODS listener ─────────────────────────────────────────── */
+    _unsubPods = _fbDb
+      .collection('users').doc(uid).collection('pods')
+      .onSnapshot(function (snap) {
+        var now = Date.now();
+        var incoming = [];
+
+        snap.forEach(function (doc) {
+          incoming.push(doc.data());
+        });
+
+        /* For running pods: recalculate elapsed since lastStartedAt.
+           This handles the case where another device was running a pod
+           and this device just opened — charge the offline period. */
+        incoming.forEach(function (inst) {
+          if (inst.state === 'running' && inst.lastStartedAt) {
+            var elapsed = Math.floor(
+              (now - new Date(inst.lastStartedAt).getTime()) / 1000
+            );
+            if (elapsed > 0 && !_realtimeReady) {
+              /* Only apply elapsed on first load — subsequent snapshots
+                 are triggered by THIS device's own writes, not time passing */
+              var drain = inst.pricePerHr * (elapsed / 3600);
+              inst.uptimeSec = (inst.uptimeSec || 0) + elapsed;
+              inst.totalCost = (inst.totalCost || 0) + drain;
+              _balance = Math.max(0, _balance - drain);
+            }
+            /* Reset anchor to now on first load */
+            if (!_realtimeReady) {
+              inst.lastStartedAt = new Date(now).toISOString();
+              if (_balance <= 0) {
+                inst.state = 'stopped';
+                inst.lastStartedAt = null;
+              }
+              /* Write the updated anchor back — one write per pod on load */
+              fbSavePod(inst);
+            }
+          }
+          /* Link orphaned pods to earliest project */
+          if (!inst.projectId && _projects.length > 0) {
+            var earliest = _projects.slice().sort(function (a, b) {
+              return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
+            })[0];
+            inst.projectId = earliest.id;
+          }
+        });
+
+        _instances = incoming;
+        try { localStorage.setItem(KEY_INSTANCES, JSON.stringify(_instances)); } catch (e) {}
+        try { localStorage.setItem(KEY_BALANCE, _balance.toFixed(6)); } catch (e) {}
+
+        podsReceived = true;
+
+        if (projectsReceived) {
+          afterBothReady();
+        }
+      }, function (err) {
+        console.warn('[SL] pods listener error:', err);
+        setSyncBadge('error', 'Sync failed');
+      });
+
+    /* Called once both collections have delivered their first snapshot,
+       and again on every subsequent change to either collection. */
+    function afterBothReady() {
+      _realtimeReady = true;
+
+      renderAll();
+      syncBalanceDOMs();
+      showBillingContent();
+      setSyncBadge('synced', 'Live');
+
+      if (_instances.some(function (i) { return i.state === 'running'; })) {
+        startTicker();
+      } else {
+        stopTickerIfIdle();
+      }
+
+      setTimeout(function () {
+        if (global.SL && global.SL.renderComputeTab) {
+          global.SL.renderComputeTab();
+        }
+      }, 50);
+
+      try {
+        document.dispatchEvent(new CustomEvent('slBalanceUpdate', {
+          detail: '$' + _balance.toFixed(2)
+        }));
+      } catch (e) {}
+    }
+  }
+
+  function detachRealtimeListeners() {
+    if (_unsubPods)     { _unsubPods();     _unsubPods     = null; }
+    if (_unsubProjects) { _unsubProjects(); _unsubProjects = null; }
+    _realtimeReady = false;
+  }
+
+  /* Legacy one-time fetch — kept as fallback if onSnapshot unavailable */
   function fbLoadPods(callback) {
     if (!_fbDb || !_currentUid) { callback(null); return; }
     _fbDb.collection('users').doc(_currentUid).collection('pods').get()
       .then(function (snap) {
-        if (snap.empty) { callback([]); return; }
         var pods = [];
         snap.forEach(function (doc) { pods.push(doc.data()); });
         callback(pods);
@@ -195,12 +347,10 @@
       });
   }
 
-  /* ── Load all projects from Firestore (cross-device sync) ──────── */
   function fbLoadProjects(callback) {
     if (!_fbDb || !_currentUid) { callback(null); return; }
     _fbDb.collection('users').doc(_currentUid).collection('projects').get()
       .then(function (snap) {
-        if (snap.empty) { callback([]); return; }
         var projs = [];
         snap.forEach(function (doc) { projs.push(doc.data()); });
         callback(projs);
@@ -1374,62 +1524,20 @@
       if (hasRunning) saveState();
     }
 
-    /* Re-sync from Firestore when user returns to the page.
-       Handles: phone unlock, app switch back, tab refocus, iPad multitask.
-       Recalculates elapsed since last checkpoint and resumes ticker. */
-    function resyncOnVisible() {
-      if (!_currentUid) return;
-      setSyncBadge('syncing', 'Refreshing');
-      fbLoadPods(function (fsPods) {
-        if (!fsPods || fsPods.length === 0) {
-          setSyncBadge('synced', 'Up to date');
-          return;
-        }
-        var now = Date.now();
-        fsPods.forEach(function (inst) {
-          if (inst.state !== 'running' || !inst.lastStartedAt) return;
-          var elapsed = Math.floor(
-            (now - new Date(inst.lastStartedAt).getTime()) / 1000
-          );
-          if (elapsed > 0) {
-            var drain = inst.pricePerHr * (elapsed / 3600);
-            inst.uptimeSec  = (inst.uptimeSec  || 0) + elapsed;
-            inst.totalCost  = (inst.totalCost  || 0) + drain;
-            _balance = Math.max(0, _balance - drain);
-          }
-          inst.lastStartedAt = new Date(now).toISOString();
-          if (_balance <= 0) {
-            inst.state = 'stopped';
-            inst.lastStartedAt = null;
-          }
-          fbSavePod(inst);
-        });
-        _instances = fsPods;
-        try { localStorage.setItem(KEY_INSTANCES, JSON.stringify(_instances)); } catch (e) {}
-        try { localStorage.setItem(KEY_BALANCE, _balance.toFixed(6)); } catch (e) {}
-        renderAll();
-        syncBalanceDOMs();
-        setSyncBadge('synced', 'Up to date');
-        if (_instances.some(function (i) { return i.state === 'running'; })) {
-          startTicker();
-        }
-        /* Re-render compute tab panel directly — not via HTML wrapper */
-        if (global.SL && global.SL.renderComputeTab) {
-          global.SL.renderComputeTab();
-        }
-      });
-    }
+    /* resyncOnVisible() removed — onSnapshot listeners handle this
+       automatically. When any device writes to Firestore, every other
+       device with an active listener receives the update instantly.
+       No manual re-fetch needed on tab focus or device return. */
 
     /* 1. visibilitychange — primary signal on ALL mobile devices and
           desktop tab switching. Most reliable cross-platform event.
-          hidden  → flush checkpoint to Firestore
-          visible → re-sync and recalculate elapsed (covers lock screen,
-                    app switch, tab refocus, iPad split-view, etc.) */
+          hidden  → flush checkpoint to Firestore immediately.
+          visible → onSnapshot listener already keeps data live — no
+                    manual resync needed. Firestore pushes any changes
+                    that happened while the tab was hidden automatically. */
     document.addEventListener('visibilitychange', function () {
       if (document.visibilityState === 'hidden') {
         flushRunningPods();
-      } else if (document.visibilityState === 'visible') {
-        resyncOnVisible();
       }
     });
 
@@ -1449,115 +1557,38 @@
       flushRunningPods();
     });
 
-    /* Step 2 — after auth, load Firestore and merge (cross-device sync) */
+    /* Step 2 — attach Firestore REALTIME listeners after auth resolves.
+       Uses onSnapshot so every device (phone, tablet, laptop, desktop)
+       sees changes the instant any other device writes to Firestore.
+       No refresh. No polling. No stale data. Ever.
+
+       Auth timing note: Pod-workflow.html registers onAuthStateChanged
+       first. Firebase fires it from local cache immediately. By the time
+       pod-serverless.js boot() runs, currentUser is already populated.
+       We read currentUser directly and only fall back to onAuthStateChanged
+       on slow connections where SDK hasn't resolved yet. */
+    function startRealtimeSync(user) {
+      if (!user) return;
+      _currentUid = user.uid;
+      if (!_fbDb && global.firebase) {
+        _fbDb = global.firebase.firestore();
+      }
+      attachRealtimeListeners(user.uid);
+    }
+
     if (_fbAuth) {
-      _fbAuth.onAuthStateChanged(function (user) {
-        if (!user) return;
-        _currentUid = user.uid;
+      var _bootUser = global.firebase && global.firebase.auth
+        ? global.firebase.auth().currentUser
+        : null;
 
-        /* ── Load projects and pods independently — not nested ─────────
-           Bug fix: previously pods were nested inside project callback,
-           so if fsProjects was empty (Device B, fresh login), the early
-           return killed pod loading entirely. Now both run in parallel
-           via a simple counter — finalize() runs once both complete. ── */
-        var _fsProjects = null;
-        var _fsPods     = null;
-        var _loadsDone  = 0;
-
-        function finalizeSync() {
-          _loadsDone += 1;
-          if (_loadsDone < 2) return; /* wait for both to finish */
-
-          /* Projects — Firestore wins; empty array is valid (user deleted all) */
-          if (_fsProjects !== null) {
-            _projects = _fsProjects;
-            if (!_activeProjectId && _projects.length > 0) {
-              _activeProjectId = _projects[0].id;
-            }
-            try { localStorage.setItem(KEY_PROJECTS, JSON.stringify(_projects)); } catch (e) {}
-          }
-
-          /* Pods — network error keeps localStorage data; empty array is valid */
-          if (_fsPods === null) {
-            /* Firestore read failed — silently keep whatever localStorage had */
-            renderAll();
-            syncBalanceDOMs();
-            return;
-          }
-
-          var now = Date.now();
-
-          _fsPods.forEach(function (inst) {
-            /* Recalculate elapsed for running pods */
-            if (inst.state === 'running' && inst.lastStartedAt) {
-              var elapsed = Math.floor(
-                (now - new Date(inst.lastStartedAt).getTime()) / 1000
-              );
-              if (elapsed > 0) {
-                var drain = inst.pricePerHr * (elapsed / 3600);
-                inst.uptimeSec = (inst.uptimeSec || 0) + elapsed;
-                inst.totalCost = (inst.totalCost || 0) + drain;
-                _balance = Math.max(0, _balance - drain);
-              }
-              /* Reset anchor to now — prevents double-charging next load */
-              inst.lastStartedAt = new Date(now).toISOString();
-              if (_balance <= 0) {
-                inst.state = 'stopped';
-                inst.lastStartedAt = null;
-              }
-              fbSavePod(inst);
-            }
-            /* Link orphaned pods to earliest project if needed */
-            if (!inst.projectId && _projects.length > 0) {
-              var earliest = _projects.slice().sort(function (a, b) {
-                return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
-              })[0];
-              inst.projectId = earliest.id;
-            }
-          });
-
-          /* Firestore is authoritative — replace _instances */
-          _instances = _fsPods;
-          try { localStorage.setItem(KEY_INSTANCES, JSON.stringify(_instances)); } catch (e) {}
-          try { localStorage.setItem(KEY_BALANCE, _balance.toFixed(6)); } catch (e) {}
-
-          renderAll();
-          syncBalanceDOMs();
-          showBillingContent();
-          setSyncBadge('synced', 'Synced');
-
-          if (_instances.some(function (i) { return i.state === 'running'; })) {
-            startTicker();
-          }
-
-          /* Call SL.renderComputeTab directly — bypasses the HTML wrapper
-             which resets gpuComputeProjectPanel visibility before rendering.
-             The HTML wrapper (renderComputeTab in Pod-workflow.html) is only
-             for tab-switch events; here we just need the panel re-rendered. */
-          setTimeout(function () {
-            if (global.SL && global.SL.renderComputeTab) {
-              global.SL.renderComputeTab();
-            }
-          }, 50);
-
-          try {
-            document.dispatchEvent(new CustomEvent('slBalanceUpdate', {
-              detail: '$' + _balance.toFixed(2)
-            }));
-          } catch (e) {}
-        }
-
-        /* Fire both reads simultaneously — not sequential */
-        fbLoadProjects(function (result) {
-          _fsProjects = result; /* null = network error, [] = genuinely empty */
-          finalizeSync();
+      if (_bootUser) {
+        startRealtimeSync(_bootUser);
+      } else {
+        var _unsubAuth = _fbAuth.onAuthStateChanged(function (user) {
+          _unsubAuth();
+          startRealtimeSync(user);
         });
-
-        fbLoadPods(function (result) {
-          _fsPods = result; /* null = network error, [] = genuinely empty */
-          finalizeSync();
-        });
-      });
+      }
     }
   }
 
