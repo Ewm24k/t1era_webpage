@@ -436,11 +436,19 @@
       if (!user) return;
       _uid = user.uid;
 
-      /* Show cached data immediately while Firestore loads */
+      /* Show cached balance only as a placeholder — marked as pending.
+         onSnapshot will replace it within 1-2s with authoritative value.
+         We set _balance in memory so the rest of the module has a value,
+         but we do NOT write it to Firestore or treat it as source of truth. */
       var cachedBal = loadBalanceFromCache();
       if (cachedBal !== null) {
         _balance = cachedBal;
+        /* Show in DOM with a subtle opacity to signal it is loading */
         syncAllBalanceDOMs(_balance);
+        var allBalEls = document.querySelectorAll(
+          '#balanceAmount,#sidebarBalance,#slHeaderBalance,#runwayBalance,#headerBalanceStat'
+        );
+        allBalEls.forEach(function (el) { el.style.opacity = '0.45'; });
       }
       _txns = loadTxnsFromCache();
       renderTxnHistory();
@@ -458,6 +466,11 @@
           _currency     = balData.currency || DEFAULT_CURRENCY;
           try { localStorage.setItem(LS_BALANCE_CACHE, String(_balance)); } catch (e) {}
           syncAllBalanceDOMs(_balance);
+          /* Restore full opacity — authoritative value confirmed from Firestore */
+          var allBalEls = document.querySelectorAll(
+            '#balanceAmount,#sidebarBalance,#slHeaderBalance,#runwayBalance,#headerBalanceStat'
+          );
+          allBalEls.forEach(function (el) { el.style.opacity = ''; });
           try { if (global.T1Notify) global.T1Notify.evaluate(_balance); } catch (e) {}
         }, function (err) {
           console.warn('[Balance] realtime listener error:', err);
@@ -486,16 +499,46 @@
       });
 
       /* Hook into slBalanceUpdate event (fired by SL module each tick).
-         Throttled: Firestore write at most once per 30s during active drain.
-         localStorage is always kept current for instant cross-tab reads. */
+         
+         IMPORTANT — write rules to prevent the balance flip-flop race:
+         
+         onSnapshot is the SINGLE source of truth for balance from Firestore.
+         slBalanceUpdate is fired by the local ticker every second as pods drain.
+         
+         On Device A (running the pod):
+           - ticker drains balance → fires slBalanceUpdate
+           - slBalanceUpdate updates DOM + writes to Firestore (throttled 30s)
+           - onSnapshot receives that write → confirms DOM is already correct
+         
+         On Device B (passive observer):
+           - onSnapshot receives Firestore writes from Device A → updates DOM
+           - slBalanceUpdate may fire if Device B also has a running pod
+           - slBalanceUpdate must NOT write to Firestore if onSnapshot already
+             has a fresher value — prevents Device B overwriting Device A's balance
+         
+         Rule: slBalanceUpdate only writes to Firestore if the value it has
+         is LOWER than current _balance (drain is always downward).
+         If slBalanceUpdate tries to write a value HIGHER than _balance,
+         that means onSnapshot already received a newer authoritative value
+         and slBalanceUpdate is stale — ignore the write entirely. */
       document.addEventListener('slBalanceUpdate', function (e) {
         if (!e.detail) return;
         var val = parseFloat(String(e.detail).replace('$', ''));
-        if (isNaN(val) || val === _balance) return;
+        if (isNaN(val)) return;
+        
+        /* If incoming value is higher than what we know — onSnapshot
+           already updated us with authoritative data. Discard this event. */
+        if (_balance !== null && val > _balance) return;
+        
+        /* Update in-memory balance and DOM */
         _balance = val;
-        /* Always keep localStorage current */
         try { localStorage.setItem(LS_BALANCE_CACHE, String(val)); } catch (ex) {}
-        /* Throttle Firestore writes — max 1 per 30s */
+        syncAllBalanceDOMs(val);
+        
+        /* Write to Firestore only if this device is the one draining
+           (i.e. it has running pods). Throttled to max 1 write per 30s.
+           If onSnapshot already received a newer value, the write will
+           trigger onSnapshot again but val <= _balance so it's idempotent. */
         var now = Date.now();
         if (now - _lastFsWrite >= FS_WRITE_THROTTLE) {
           _lastFsWrite = now;
