@@ -33,7 +33,7 @@
   /* ── Storage keys ──────────────────────────────────────────────── */
   var KEY_INSTANCES = "t1era_sl_instances";
   var KEY_BALANCE   = "t1era_sl_balance";
-  var STARTING_BAL  = 142.5;
+  var STARTING_BAL  = 500.0;  // test balance
 
   /* ── Storage keys (projects) ────────────────────────────────────── */
   var KEY_PROJECTS = "t1era_sl_projects";
