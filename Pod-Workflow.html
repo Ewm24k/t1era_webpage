@@ -136,6 +136,92 @@
     .skel-card   { height:150px; border-radius:var(--r3); margin-bottom:12px; }
 
     /* ════════════════════════════════════
+       LOADING / SYNC STATES
+    ════════════════════════════════════ */
+
+    /* Sync status badge — top right of serverless + billing tabs */
+    .sync-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 11px; font-weight: 500; letter-spacing: .3px;
+      padding: 4px 10px; border-radius: 20px;
+      position: absolute; top: 18px; right: 18px; z-index: 10;
+      transition: opacity .3s;
+    }
+    .sync-badge.syncing {
+      background: var(--surface-2); color: var(--t2);
+      border: 1px solid var(--border);
+    }
+    .sync-badge.synced {
+      background: rgba(52,199,89,.12); color: #34c759;
+      border: 1px solid rgba(52,199,89,.25);
+    }
+    .sync-badge.synced .sync-dot { background: #34c759; }
+    .sync-badge.error {
+      background: rgba(255,69,58,.10); color: #ff453a;
+      border: 1px solid rgba(255,69,58,.2);
+    }
+    .sync-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--t3); flex-shrink: 0;
+    }
+    .sync-dot.spin {
+      background: none;
+      border: 2px solid var(--t3); border-top-color: var(--b3);
+      animation: spin .7s linear infinite;
+      width: 8px; height: 8px; border-radius: 50%;
+    }
+
+    /* Serverless skeleton — realistic GPU card shape */
+    .skel-gpu-card {
+      border-radius: var(--r3); padding: 18px 20px;
+      margin-bottom: 12px; border: 1px solid var(--border);
+      background: var(--surface-1);
+    }
+    .skel-gpu-card .skel-row {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
+    }
+    .skel-gpu-card .skel-badge {
+      width: 64px; height: 20px; border-radius: 10px;
+    }
+    .skel-gpu-card .skel-stats {
+      display: grid; grid-template-columns: repeat(3,1fr); gap: 10px;
+      margin-bottom: 14px;
+    }
+    .skel-gpu-card .skel-stat-block {
+      height: 44px; border-radius: var(--r2);
+    }
+    .skel-gpu-card .skel-actions {
+      display: flex; gap: 8px;
+    }
+    .skel-gpu-card .skel-btn {
+      height: 32px; border-radius: var(--r2); flex: 1;
+    }
+
+    /* Billing skeleton — overlays the billing grid while loading */
+    .billing-skel-wrap {
+      position: relative;
+    }
+    .billing-loading-overlay {
+      position: absolute; inset: 0; z-index: 5;
+      background: var(--surface-0);
+      display: flex; flex-direction: column; gap: 16px;
+      padding: 0;
+      transition: opacity .3s;
+      pointer-events: none;
+    }
+    .billing-loading-overlay.hidden {
+      opacity: 0; pointer-events: none;
+    }
+    .billing-skel-card {
+      background: var(--surface-1); border: 1px solid var(--border);
+      border-radius: var(--r3); padding: 24px; flex: 1;
+      display: flex; flex-direction: column; gap: 12px;
+    }
+    .billing-skel-row {
+      display: flex; gap: 16px;
+    }
+
+    /* ════════════════════════════════════
        SIDEBAR
     ════════════════════════════════════ */
     .sidebar-overlay {
@@ -1352,17 +1438,65 @@
       </div>
 
       <!-- ── TAB: SERVERLESS ── -->
-      <div id="tab-serverless" class="tab-content active">
-        <div id="serverlessSkeleton">
-          <div class="skel skel-card"></div>
-          <div class="skel skel-card"></div>
-          <div class="skel skel-card"></div>
+      <div id="tab-serverless" class="tab-content active" style="position:relative;">
+
+        <!-- Sync status badge — updated by pod-serverless.js -->
+        <div class="sync-badge syncing" id="slSyncBadge" style="display:none;">
+          <span class="sync-dot spin"></span>
+          <span id="slSyncText">Syncing</span>
         </div>
-        <div id="serverlessContent"></div>
+
+        <!-- Skeleton — shown while Firestore loads, hidden by renderAll() -->
+        <div id="serverlessSkeleton">
+
+          <!-- Realistic GPU card skeleton x2 -->
+          <div class="skel-gpu-card">
+            <div class="skel-row">
+              <div class="skel skel-line med" style="flex:1; height:16px;"></div>
+              <div class="skel skel-badge"></div>
+            </div>
+            <div class="skel-stats">
+              <div class="skel skel-stat-block"></div>
+              <div class="skel skel-stat-block"></div>
+              <div class="skel skel-stat-block"></div>
+            </div>
+            <div class="skel-actions">
+              <div class="skel skel-btn"></div>
+              <div class="skel skel-btn"></div>
+              <div class="skel skel-btn"></div>
+            </div>
+          </div>
+
+          <div class="skel-gpu-card">
+            <div class="skel-row">
+              <div class="skel skel-line short" style="flex:1; height:16px;"></div>
+              <div class="skel skel-badge"></div>
+            </div>
+            <div class="skel-stats">
+              <div class="skel skel-stat-block"></div>
+              <div class="skel skel-stat-block"></div>
+              <div class="skel skel-stat-block"></div>
+            </div>
+            <div class="skel-actions">
+              <div class="skel skel-btn"></div>
+              <div class="skel skel-btn"></div>
+              <div class="skel skel-btn"></div>
+            </div>
+          </div>
+
+        </div>
+        <div id="serverlessContent" style="display:none;"></div>
       </div>
 
       <!-- ── TAB: BILLING ── -->
-      <div id="tab-payg" class="tab-content">
+      <div id="tab-payg" class="tab-content" style="position:relative;">
+
+        <!-- Sync badge for billing tab -->
+        <div class="sync-badge syncing" id="billingSyncBadge" style="display:none;">
+          <span class="sync-dot spin"></span>
+          <span id="billingSyncText">Loading balance</span>
+        </div>
+
         <div class="page-head">
           <div class="page-head-left">
             <div class="page-head-icon"><i class="ph-fill ph-wallet"></i></div>
@@ -1373,7 +1507,29 @@
           </div>
         </div>
 
-        <div class="billing-grid">
+        <!-- Billing skeleton overlay — hidden once balance loads from Firestore -->
+        <div id="billingSkeleton" class="billing-skel-wrap">
+          <div class="billing-loading-overlay" id="billingLoadingOverlay">
+            <div class="billing-skel-row">
+              <div class="billing-skel-card">
+                <div class="skel skel-line short" style="height:14px; width:80px;"></div>
+                <div class="skel skel-line full" style="height:42px; border-radius:8px;"></div>
+                <div class="skel skel-line med" style="height:12px;"></div>
+                <div class="skel skel-line full" style="height:44px; border-radius:8px; margin-top:8px;"></div>
+                <div class="skel skel-line full" style="height:44px; border-radius:8px;"></div>
+                <div class="skel skel-line full" style="height:38px; border-radius:8px; margin-top:12px;"></div>
+              </div>
+              <div class="billing-skel-card">
+                <div class="skel skel-line short" style="height:14px; width:100px;"></div>
+                <div class="skel skel-line full" style="height:80px; border-radius:8px;"></div>
+                <div class="skel skel-line full" style="height:80px; border-radius:8px;"></div>
+                <div class="skel skel-line full" style="height:80px; border-radius:8px;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="billing-grid" id="billingGrid" style="opacity:0; transition: opacity .35s;">
           <!-- Left: top-up -->
           <div class="b-card featured">
             <div class="b-label">Add Credits</div>
