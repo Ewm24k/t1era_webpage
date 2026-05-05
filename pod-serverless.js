@@ -452,6 +452,9 @@
       _instances = [];
     }
 
+    /* Balance is owned by pod-balance.js / T1Balance.
+       Read localStorage only as a temporary local drain counter.
+       The authoritative value always comes from Firestore via onSnapshot. */
     try {
       var b = localStorage.getItem(KEY_BALANCE);
       _balance = b !== null ? parseFloat(b) : STARTING_BAL;
@@ -459,6 +462,13 @@
     } catch (e) {
       _balance = STARTING_BAL;
     }
+    /* Sync with T1Balance if already ready */
+    try {
+      if (global.T1Balance && global.T1Balance.isReady()) {
+        var fsbal = global.T1Balance.getBalance();
+        if (fsbal !== null && !isNaN(fsbal)) _balance = fsbal;
+      }
+    } catch (e) {}
 
     try {
       var rp = localStorage.getItem(KEY_PROJECTS);
@@ -546,55 +556,80 @@
     }
   }
 
+  /* _drainAccumulator tracks total drain since last heartbeat write.
+     This is committed to Firestore every 30s via T1Balance.deduct().
+     Between heartbeats, _balance is a local counter for smooth UI only. */
+  var _drainAccumulator = 0;
+
   function tick() {
-    var changed    = false;
-    var depleted   = false;  // flag: stop iterating once balance hits zero
+    var changed  = false;
+    var depleted = false;
 
     _tickCount += 1;
 
+    /* Sync _balance from T1Balance on every tick — Firestore is truth */
+    try {
+      if (global.T1Balance && global.T1Balance.isReady()) {
+        var fsbal = global.T1Balance.getBalance();
+        if (fsbal !== null && !isNaN(fsbal)) _balance = fsbal;
+      }
+    } catch (e) {}
+
     _instances.forEach(function (inst) {
-      if (inst.state !== "running") return;
-      if (depleted) return;  // balance already zero — don't drain further
+      if (inst.state !== 'running') return;
+      if (depleted) return;
 
       var drain = inst.pricePerHr / 3600;
-      inst.uptimeSec += 1;
-      inst.totalCost  = (inst.totalCost || 0) + drain;
-      _balance        = Math.max(0, _balance - drain);
-      changed         = true;
+      inst.uptimeSec      += 1;
+      inst.totalCost       = (inst.totalCost || 0) + drain;
+      _balance             = Math.max(0, _balance - drain);
+      _drainAccumulator   += drain;
+      changed              = true;
 
       if (_balance <= 0) {
         depleted = true;
-        inst.state = "stopped";
+        inst.state = 'stopped';
         inst.lastStartedAt = null;
-        fbSavePod(inst);   // immediate Firestore write on stop
+        fbSavePod(inst);
         stopTickerIfIdle();
-        toast("⚠️ Balance depleted – " + inst.name + " stopped.");
+        toast('⚠️ Balance depleted – ' + inst.name + ' stopped.');
       }
     });
 
     if (changed) {
       saveState();
-      syncBalanceDOMs();
       refreshLiveNumbers();
-      if (depleted) renderAll();  // single renderAll only when needed
+      if (depleted) renderAll();
     }
 
-    /* ── Heartbeat: checkpoint running pods to Firestore every 30s ──
-       Ensures cross-device sync and close-tab recovery are accurate.
-       Without this, Firestore only has state from last play/pause/stop. */
+    /* ── Heartbeat every 30s ─────────────────────────────────────────
+       1. Write accumulated drain to Firestore via T1Balance.deduct()
+          → T1Balance writes to users/{uid}/billing/balance
+          → onSnapshot fires on ALL devices simultaneously
+          → All devices show the same balance with no conflict
+       2. Update pod lastStartedAt anchor in Firestore
+       This is the ONLY place balance is written to Firestore during drain. */
     if (_tickCount % HEARTBEAT_INTERVAL === 0) {
-      var now = new Date().toISOString();
+      /* Commit accumulated drain to Firestore */
+      if (_drainAccumulator > 0) {
+        try {
+          if (global.T1Balance && global.T1Balance.isReady()) {
+            global.T1Balance.deduct(_drainAccumulator, {
+              description: 'Compute drain (' + HEARTBEAT_INTERVAL + 's)',
+              type: 'deduction',
+            });
+          }
+        } catch (e) {}
+        _drainAccumulator = 0;
+      }
+
+      /* Update pod lastStartedAt anchors */
+      var hbNow = new Date().toISOString();
       _instances.forEach(function (inst) {
-        if (inst.state !== "running") return;
-        inst.lastStartedAt = now;  // reset anchor so next load charges correctly
+        if (inst.state !== 'running') return;
+        inst.lastStartedAt = hbNow;
         fbSavePod(inst);
       });
-      /* Also checkpoint balance so T1Balance stays in sync cross-device */
-      try {
-        if (global.T1Balance && global.T1Balance.isReady()) {
-          global.T1Balance.deduct(0, { description: 'heartbeat sync' });
-        }
-      } catch (e) {}
     }
   }
 
@@ -920,21 +955,25 @@
     }
   }
 
-  /* 4. syncBalanceDOMs — syncs all balance displays + sidebar instance count */
+  /* 4. syncBalanceDOMs — sidebar count + status + runway ONLY.
+     ══════════════════════════════════════════════════════════════
+     BALANCE DOM IS OWNED EXCLUSIVELY BY pod-balance.js onSnapshot.
+     This function must NEVER write to: balanceAmount, sidebarBalance,
+     slHeaderBalance, runwayBalance, headerBalanceStat.
+     Writing here causes Device A vs Device B to show different values.
+     Firestore onSnapshot in pod-balance.js is the single source of truth.
+     ══════════════════════════════════════════════════════════════ */
   function syncBalanceDOMs() {
-    var fmt = "$" + _balance.toFixed(2);
-    [
-      "balanceAmount",
-      "sidebarBalance",
-      "slHeaderBalance",
-      "runwayBalance",
-      "headerBalanceStat",
-    ].forEach(function (id) {
-      var el = document.getElementById(id);
-      if (el) el.textContent = fmt;
-    });
+    /* Read authoritative balance from T1Balance (Firestore source) */
+    var bal = _balance;
+    try {
+      if (global.T1Balance && global.T1Balance.isReady()) {
+        var fsbal = global.T1Balance.getBalance();
+        if (fsbal !== null && !isNaN(fsbal)) bal = fsbal;
+      }
+    } catch (e) {}
 
-    /* ── Sidebar cluster count — shows live running instance count ── */
+    /* ── Sidebar cluster count ── */
     var countEl = document.getElementById('sbInstanceCount');
     if (countEl) {
       var runningCount = _instances.filter(function (i) { return i.state === 'running'; }).length;
@@ -942,18 +981,16 @@
       countEl.style.color = runningCount > 0 ? 'var(--b3)' : 'var(--t3)';
     }
 
-    /* ── Billing card status text (class: bal-sub) ──
-       syncBalanceDOMs previously looked for .balance-subtext which doesn't
-       exist in the HTML. Correct class is .bal-sub. ── */
+    /* ── Billing card status text ── */
     var balSub = document.querySelector('.bal-sub');
     if (balSub) {
-      if (_balance <= 0) {
+      if (bal <= 0) {
         balSub.innerHTML = '<i class="ph-fill ph-x-circle"></i> Balance depleted — top up to resume';
         balSub.style.color = 'var(--b5)';
-      } else if (_balance < 5) {
+      } else if (bal < 5) {
         balSub.innerHTML = '<i class="ph-fill ph-warning-circle"></i> Critical — top up now';
         balSub.style.color = 'var(--b5)';
-      } else if (_balance < 20) {
+      } else if (bal < 20) {
         balSub.innerHTML = '<i class="ph-fill ph-warning"></i> Balance running low';
         balSub.style.color = 'var(--b4)';
       } else {
@@ -962,31 +999,22 @@
       }
     }
 
-    /* ── Runway Estimator — recalculate from live balance ── */
+    /* ── Runway Estimator ── */
     var runwayList = document.querySelector('.runway-list');
-    if (runwayList && _balance > 0) {
+    if (runwayList && bal > 0) {
       var gpuRates = [
         { name: 'RTX 3090',  rate: 0.34 },
         { name: 'RTX 4090',  rate: 0.74 },
         { name: 'A100 80GB', rate: 1.89 },
       ];
       runwayList.innerHTML = gpuRates.map(function (g) {
-        var hrs = (_balance / g.rate).toFixed(0);
+        var hrs = (bal / g.rate).toFixed(0);
         return '<div class="runway-row">'
           + '<div class="rw-gpu"><i class="ph-fill ph-graphics-card"></i> ' + g.name + '</div>'
           + '<div class="rw-time"><b>~' + hrs + '</b> hrs</div>'
           + '</div>';
       }).join('');
     }
-
-    /* Notify pod-balance.js (T1Balance) so it can throttle-write to Firestore.
-       This fires on every tick while a GPU is running. T1Balance handles
-       the throttle — it won't write Firestore every second. */
-    try {
-      document.dispatchEvent(new CustomEvent('slBalanceUpdate', { detail: fmt }));
-    } catch (ignore) {}
-
-    /* .balance-subtext removed — bal-sub is now updated inside syncBalanceDOMs above */
   }
 
   /* ══════════════════════════════════════════════════════════════════
