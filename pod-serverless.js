@@ -596,26 +596,28 @@
        If no projects, shows empty state. If projects exist, shows each
        project with its deployed GPU instance count and an "Add GPU" button. */
     renderComputeTab: function () {
-      var panel = document.getElementById('gpuComputeProjectPanel');
+      var panel      = document.getElementById('gpuComputeProjectPanel');
       var emptyState = document.getElementById('gpuEmptyState');
       var searchBox  = document.getElementById('gpuSearchBox');
       var gpuGrid    = document.getElementById('gpuGrid');
 
       if (!panel) return;
 
+      /* Always hide GPU grid and search — we're in project view */
+      if (searchBox) searchBox.style.display = 'none';
+      if (gpuGrid)   gpuGrid.style.display   = 'none';
+
       if (_projects.length === 0) {
-        // No projects yet — show original empty state
+        /* No projects — show empty state, hide panel */
         panel.style.display = 'none';
         if (emptyState) emptyState.style.display = '';
-        if (searchBox)  searchBox.style.display  = 'none';
-        if (gpuGrid)    gpuGrid.style.display     = 'none';
         return;
       }
 
-      // Has projects — hide empty state, hide GPU grid, show project panel
+      /* Has projects — hide empty state, SHOW panel, then write HTML.
+         Critical: panel.style.display must be set BEFORE innerHTML so
+         the element is visible when the browser paints the new content. */
       if (emptyState) emptyState.style.display = 'none';
-      if (searchBox)  searchBox.style.display  = 'none';
-      if (gpuGrid)    gpuGrid.style.display     = 'none';
       panel.style.display = '';
 
       var html = '<div class="cp-header">'
@@ -1299,13 +1301,14 @@
     loadState();
     renderAll();
 
+    /* On boot, render compute panel directly via SL.renderComputeTab.
+       Never call the HTML-side renderComputeTab() wrapper here — it hides
+       gpuComputeProjectPanel before rendering, causing "No Project Yet"
+       flash even when localStorage already has projects. */
     if (_projects.length > 0) {
       setTimeout(function () {
-        if (typeof renderComputeTab === 'function') {
-          renderComputeTab();
-        } else {
-          var slObj = global.SL;
-          if (slObj && slObj.renderComputeTab) slObj.renderComputeTab();
+        if (global.SL && global.SL.renderComputeTab) {
+          global.SL.renderComputeTab();
         }
       }, 50);
     }
@@ -1409,6 +1412,10 @@
         setSyncBadge('synced', 'Up to date');
         if (_instances.some(function (i) { return i.state === 'running'; })) {
           startTicker();
+        }
+        /* Re-render compute tab panel directly — not via HTML wrapper */
+        if (global.SL && global.SL.renderComputeTab) {
+          global.SL.renderComputeTab();
         }
       });
     }
@@ -1523,10 +1530,12 @@
             startTicker();
           }
 
+          /* Call SL.renderComputeTab directly — bypasses the HTML wrapper
+             which resets gpuComputeProjectPanel visibility before rendering.
+             The HTML wrapper (renderComputeTab in Pod-workflow.html) is only
+             for tab-switch events; here we just need the panel re-rendered. */
           setTimeout(function () {
-            if (typeof renderComputeTab === 'function') {
-              renderComputeTab();
-            } else if (global.SL && global.SL.renderComputeTab) {
+            if (global.SL && global.SL.renderComputeTab) {
               global.SL.renderComputeTab();
             }
           }, 50);
