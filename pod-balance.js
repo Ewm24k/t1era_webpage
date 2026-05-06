@@ -297,6 +297,13 @@
     var userBal = document.querySelector('.user-balance');
     if (userBal) userBal.textContent = fmt;
 
+    /* Update balance inside every pod card — id="sl-bal-{instId}"
+       These are stamped with — at render time and updated here only.
+       No renderAll() needed — direct DOM update per card. */
+    document.querySelectorAll('[id^="sl-bal-"]').forEach(function (el) {
+      el.textContent = fmt;
+    });
+
     /* slHeaderBalance lives inside serverless tab HTML that gets rebuilt
        by renderAll() every tick. After renderAll() recreates the DOM,
        the new element has no value. Watch for it being recreated and
@@ -304,10 +311,14 @@
     if (!_balanceObserver) {
       _balanceObserver = new MutationObserver(function () {
         if (_balance === null) return;
-        var el = document.getElementById('slHeaderBalance');
-        if (el && el.textContent !== '$' + _balance.toFixed(2)) {
-          el.textContent = '$' + _balance.toFixed(2);
-        }
+        var fmt = '$' + _balance.toFixed(2);
+        /* Repopulate header balance chip */
+        var hdr = document.getElementById('slHeaderBalance');
+        if (hdr && hdr.textContent !== fmt) hdr.textContent = fmt;
+        /* Repopulate every pod card balance that still shows placeholder */
+        document.querySelectorAll('[id^="sl-bal-"]').forEach(function (el) {
+          if (el.textContent !== fmt) el.textContent = fmt;
+        });
       });
       var slContent = document.getElementById('serverlessContent');
       if (slContent) {
