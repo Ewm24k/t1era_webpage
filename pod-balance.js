@@ -51,11 +51,9 @@
   /* ══════════════════════════════════════════════════════════════════
      CONSTANTS  (mirror pod-notify.js naming pattern)
   ══════════════════════════════════════════════════════════════════ */
-  var LS_BALANCE_CACHE = 't1era_sl_balance';          // reuse existing key so SL module stays in sync
-  var LS_TXN_CACHE     = 't1era_billing_transactions';// local ledger cache
+  /* localStorage constants removed — Firestore is the only storage */
   var DEFAULT_BALANCE  = 142.50;
   var DEFAULT_CURRENCY = 'MYR';
-  var MAX_LOCAL_TXN    = 50;                          // keep last N entries in localStorage
 
   /* ══════════════════════════════════════════════════════════════════
      MODULE STATE  (mirror pod-notify.js _db / _uid / _prefs pattern)
@@ -120,10 +118,9 @@
         if (snap.exists) {
           callback(snap.data());
         } else {
-          /* First visit — seed from localStorage or default */
-          var cached = loadBalanceFromCache();
+          /* First visit — seed with default balance */
           var seed = {
-            amount:    cached !== null ? cached : DEFAULT_BALANCE,
+            amount:    DEFAULT_BALANCE,
             currency:  DEFAULT_CURRENCY,
             updatedAt: new Date().toISOString(),
           };
@@ -147,21 +144,9 @@
     };
     ref.set(data, { merge: true })
       .catch(function (e) { console.warn('[Balance] save balance failed:', e); });
-
-    /* Mirror to localStorage — keeps SL module and notify module in sync */
-    try { localStorage.setItem(LS_BALANCE_CACHE, String(amount)); } catch (e) {}
   }
 
-  function loadBalanceFromCache() {
-    try {
-      var raw = localStorage.getItem(LS_BALANCE_CACHE);
-      if (raw !== null) {
-        var v = parseFloat(raw);
-        return isNaN(v) ? null : v;
-      }
-    } catch (e) {}
-    return null;
-  }
+  /* loadBalanceFromCache removed — Firestore onSnapshot is the only source */
 
   /* ══════════════════════════════════════════════════════════════════
      4. TRANSACTIONS  —  load / append  (same pattern as balance above)
@@ -196,18 +181,8 @@
       { merge: true }
     ).catch(function (e) { console.warn('[Balance] append txn failed:', e); });
 
-    /* Also persist to local cache */
+    /* Keep in-memory txn list updated for renderTxnHistory() */
     _txns.unshift(entry);
-    if (_txns.length > MAX_LOCAL_TXN) _txns = _txns.slice(0, MAX_LOCAL_TXN);
-    try { localStorage.setItem(LS_TXN_CACHE, JSON.stringify(_txns)); } catch (e) {}
-  }
-
-  function loadTxnsFromCache() {
-    try {
-      var raw = localStorage.getItem(LS_TXN_CACHE);
-      if (raw) return JSON.parse(raw);
-    } catch (e) {}
-    return [];
   }
 
   /* ══════════════════════════════════════════════════════════════════
@@ -221,7 +196,8 @@
    */
   function applyTopUp(amount, opts) {
     opts = opts || {};
-    var prev    = _balance !== null ? _balance : (loadBalanceFromCache() || DEFAULT_BALANCE);
+    if (_balance === null) { console.warn('[Balance] applyTopUp before Firestore loaded'); return null; }
+    var prev    = _balance;
     var newBal  = Math.round((prev + amount) * 1e6) / 1e6;
 
     _balance = newBal;
@@ -260,29 +236,38 @@
    */
   function applyDeduction(amount, opts) {
     opts = opts || {};
-    var prev    = _balance !== null ? _balance : (loadBalanceFromCache() || DEFAULT_BALANCE);
-    var newBal  = Math.max(0, Math.round((prev - amount) * 1e6) / 1e6);
 
-    _balance = newBal;
+    /* ALWAYS use the in-memory _balance that was set by onSnapshot.
+       Never fall back to localStorage — it may be from a different device
+       or a stale session. If _balance is null, Firestore has not responded
+       yet — defer the write until onSnapshot sets it. */
+    if (_balance === null) {
+      console.warn('[Balance] applyDeduction called before Firestore balance loaded — skipped.');
+      return null;
+    }
+
+    var prev   = _balance;
+    var newBal = Math.max(0, Math.round((prev - amount) * 1e6) / 1e6);
+
+    /* Write to Firestore — onSnapshot will update DOM on ALL devices */
     saveBalanceToFirestore(newBal, _currency);
-    syncAllBalanceDOMs(newBal);
 
-    var entry = {
-      id:          'txn_' + Date.now(),
-      type:        'deduction',
-      amount:      -amount,
-      balanceAfter: newBal,
-      description: opts.description || 'GPU compute charge',
-      ref:         opts.ref         || '',
-      gateway:     '',
-      status:      'completed',
-      createdAt:   new Date().toISOString(),
-    };
-    appendTxnToFirestore(entry);
+    /* Record transaction */
+    if (amount > 0) {
+      var entry = {
+        id:          'txn_' + Date.now(),
+        type:        'deduction',
+        amount:      -amount,
+        balanceAfter: newBal,
+        description: opts.description || 'GPU compute charge',
+        ref:         opts.ref         || '',
+        gateway:     '',
+        status:      'completed',
+        createdAt:   new Date().toISOString(),
+      };
+      appendTxnToFirestore(entry);
+    }
 
-    try {
-      document.dispatchEvent(new CustomEvent('slBalanceUpdate', { detail: '$' + newBal.toFixed(2) }));
-    } catch (e) {}
     try { if (global.T1Notify) global.T1Notify.evaluate(newBal); } catch (e) {}
 
     return newBal;
@@ -294,14 +279,22 @@
   ══════════════════════════════════════════════════════════════════ */
   function syncAllBalanceDOMs(amount) {
     var fmt = '$' + amount.toFixed(2);
-    var ids = ['headerBalanceStat', 'balanceAmount', 'runwayBalance', 'sidebarBalance'];
+    /* ALL balance display IDs across every tab and component */
+    var ids = [
+      'headerBalanceStat',
+      'balanceAmount',
+      'runwayBalance',
+      'sidebarBalance',
+      'slHeaderBalance',    /* balance chip inside serverless tab header */
+      'headerBalanceStat',
+    ];
     ids.forEach(function (id) {
       var el = document.getElementById(id);
-      if (el) {
-        /* balanceAmount has no $ prefix in its own text — keep consistent */
-        el.textContent = id === 'balanceAmount' ? fmt : fmt;
-      }
+      if (el) el.textContent = fmt;
     });
+    /* Also update user-balance in sidebar (different selector) */
+    var userBal = document.querySelector('.user-balance');
+    if (userBal) userBal.textContent = fmt;
   }
 
   /* ══════════════════════════════════════════════════════════════════
@@ -405,7 +398,7 @@
         id:          'txn_' + Date.now(),
         type:        'topup',
         amount:      parseFloat(txnData.amount) || 0,
-        balanceAfter: _balance !== null ? _balance : (loadBalanceFromCache() || DEFAULT_BALANCE),
+        balanceAfter: _balance !== null ? _balance : DEFAULT_BALANCE,
         description: 'Top-up via toyyibPay (failed)',
         ref:         billCode,
         gateway:     'toyyibpay',
@@ -422,89 +415,79 @@
   ══════════════════════════════════════════════════════════════════ */
   function boot() {
     if (!initFirebase()) {
-      /* Fallback: localStorage only */
-      var cachedBal = loadBalanceFromCache();
-      _balance = cachedBal !== null ? cachedBal : DEFAULT_BALANCE;
-      _txns    = loadTxnsFromCache();
-      syncAllBalanceDOMs(_balance);
-      renderTxnHistory();
+      console.warn('[Balance] Firebase not available — balance cannot be loaded.');
       _ready = true;
       return;
     }
 
-    global.firebase.auth().onAuthStateChanged(function (user) {
+    /* CRITICAL: Pod-workflow.html registers onAuthStateChanged first.
+       Firebase fires it immediately from local cache.
+       By the time pod-balance.js runs, auth is already resolved.
+       onAuthStateChanged will NOT fire again — currentUser is already set.
+       Read currentUser directly. Fall back to onAuthStateChanged only
+       if not yet resolved (slow connection edge case). */
+    function startBalanceSync(user) {
       if (!user) return;
       _uid = user.uid;
 
-      /* Show cached balance only as a placeholder — marked as pending.
-         onSnapshot will replace it within 1-2s with authoritative value.
-         We set _balance in memory so the rest of the module has a value,
-         but we do NOT write it to Firestore or treat it as source of truth. */
-      var cachedBal = loadBalanceFromCache();
-      if (cachedBal !== null) {
-        _balance = cachedBal;
-        /* Show in DOM with a subtle opacity to signal it is loading */
-        syncAllBalanceDOMs(_balance);
-        var allBalEls = document.querySelectorAll(
-          '#balanceAmount,#sidebarBalance,#slHeaderBalance,#runwayBalance,#headerBalanceStat'
-        );
-        allBalEls.forEach(function (el) { el.style.opacity = '0.45'; });
+      /* Re-init _db if needed */
+      if (!_db && global.firebase) {
+        _db = global.firebase.firestore();
       }
-      _txns = loadTxnsFromCache();
-      renderTxnHistory();
 
-      /* Attach REALTIME balance listener — replaces one-time .get().
-         Any device that updates balance in Firestore (top-up, admin set,
-         billing drain heartbeat) is instantly reflected on ALL devices. */
+      /* Detach any existing listener */
       if (_unsubBalance) { _unsubBalance(); _unsubBalance = null; }
+
       var _balRef = balanceDocRef();
-      if (_balRef) {
-        _unsubBalance = _balRef.onSnapshot(function (snap) {
-          if (!snap.exists) return;
-          var balData   = snap.data();
-          _balance      = balData.amount;
-          _currency     = balData.currency || DEFAULT_CURRENCY;
-          try { localStorage.setItem(LS_BALANCE_CACHE, String(_balance)); } catch (e) {}
-          syncAllBalanceDOMs(_balance);
-          /* Restore full opacity — authoritative value confirmed from Firestore */
-          var allBalEls = document.querySelectorAll(
-            '#balanceAmount,#sidebarBalance,#slHeaderBalance,#runwayBalance,#headerBalanceStat'
-          );
-          allBalEls.forEach(function (el) { el.style.opacity = ''; });
-          try { if (global.T1Notify) global.T1Notify.evaluate(_balance); } catch (e) {}
-        }, function (err) {
-          console.warn('[Balance] realtime listener error:', err);
-          /* Fallback to one-time read on listener failure */
-          loadBalanceFromFirestore(function (balData) {
-            if (!balData) return;
-            _balance  = balData.amount;
-            _currency = balData.currency || DEFAULT_CURRENCY;
-            try { localStorage.setItem(LS_BALANCE_CACHE, String(_balance)); } catch (e) {}
-            syncAllBalanceDOMs(_balance);
-          });
-        });
+      if (!_balRef) {
+        console.warn('[Balance] balanceDocRef null — Firestore not ready');
+        return;
       }
 
-      /* Load transaction ledger from Firestore */
+      /* Attach REALTIME listener — fires immediately with current value
+         and again every time ANY device writes to this document.
+         This is the ONLY place balance DOM is updated. */
+      _unsubBalance = _balRef.onSnapshot(function (snap) {
+        if (!snap.exists) {
+          /* Document does not exist yet — create it with default */
+          var seed = { amount: DEFAULT_BALANCE, currency: DEFAULT_CURRENCY, updatedAt: new Date().toISOString() };
+          _balRef.set(seed).catch(function(e){ console.warn('[Balance] seed failed:', e); });
+          return;
+        }
+        var data  = snap.data();
+        _balance  = data.amount;
+        _currency = data.currency || DEFAULT_CURRENCY;
+        syncAllBalanceDOMs(_balance);
+        try { if (global.T1Notify) global.T1Notify.evaluate(_balance); } catch (e) {}
+      }, function (err) {
+        console.warn('[Balance] onSnapshot error:', err);
+      });
+
+      /* Load transaction ledger */
       loadTxnsFromFirestore(function (txnData) {
         if (txnData && Array.isArray(txnData.entries)) {
-          /* Merge: server is authoritative; sort newest-first */
           _txns = txnData.entries.slice().sort(function (a, b) {
             return new Date(b.createdAt) - new Date(a.createdAt);
           });
-          try { localStorage.setItem(LS_TXN_CACHE, JSON.stringify(_txns.slice(0, MAX_LOCAL_TXN))); } catch (e) {}
           renderTxnHistory();
         }
         _ready = true;
       });
+    }
 
-      /* slBalanceUpdate listener REMOVED.
-         Balance is now owned exclusively by onSnapshot above.
-         Drain is committed to Firestore every 30s by pod-serverless.js
-         via T1Balance.deduct() in the heartbeat. onSnapshot receives
-         that write and updates all devices simultaneously. No event
-         needed — no race condition possible. */
-    });
+    /* Check currentUser directly first */
+    var _authUser = global.firebase.auth
+      ? global.firebase.auth().currentUser
+      : null;
+
+    if (_authUser) {
+      startBalanceSync(_authUser);
+    } else {
+      var _unsub = global.firebase.auth().onAuthStateChanged(function (user) {
+        _unsub();
+        startBalanceSync(user);
+      });
+    }
   }
 
   /* ── Expose public API (mirrors T1Notify pattern) ── */
