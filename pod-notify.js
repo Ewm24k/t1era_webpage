@@ -290,6 +290,15 @@
   function evaluateBalance(balance) {
     if (!_prefs) return;
 
+    /* Never evaluate until Firestore has confirmed a real balance.
+       null means Firestore has not responded yet — not that balance is 0. */
+    if (balance === null || balance === undefined || isNaN(balance)) return;
+
+    /* Only evaluate once T1Balance is ready (Firestore onSnapshot fired) */
+    try {
+      if (global.T1Balance && !global.T1Balance.isReady()) return;
+    } catch (e) { return; }
+
     /* ── Depleted ($0) ── */
     if (_prefs.depletedEnabled && balance <= 0) {
       showBanner('depleted',
@@ -340,9 +349,11 @@
       var el = document.getElementById('headerBalanceStat');
       if (el && !el._t1NotifyObserver) {
         var observer = new MutationObserver(function () {
-          var text = el.textContent.replace('$', '').trim();
+          /* Only react after T1Balance confirmed a real Firestore value */
+          try { if (global.T1Balance && !global.T1Balance.isReady()) return; } catch(e){ return; }
+          var text = el.textContent.replace('$', '').replace('—','').trim();
           var val  = parseFloat(text);
-          if (!isNaN(val)) evaluateBalance(val);
+          if (!isNaN(val) && val > 0) evaluateBalance(val);
         });
         observer.observe(el, { childList: true, characterData: true, subtree: true });
         el._t1NotifyObserver = observer;
