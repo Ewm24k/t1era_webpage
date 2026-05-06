@@ -348,10 +348,10 @@
         el._t1NotifyObserver = observer;
       }
 
-      /* Also check on localStorage balance directly (page load / refresh) */
+      /* Balance comes from T1Balance (Firestore onSnapshot) only */
       if (attempts === 1) {
         try {
-          var b = parseFloat(localStorage.getItem('t1era_sl_balance'));
+          var b = (global.T1Balance ? global.T1Balance.getBalance() : null);
           if (!isNaN(b)) evaluateBalance(b);
         } catch (e) {}
       }
@@ -416,7 +416,7 @@
         onToggleChange();
         /* Re-evaluate banners immediately */
         try {
-          var b = parseFloat(localStorage.getItem('t1era_sl_balance'));
+          var b = (global.T1Balance ? global.T1Balance.getBalance() : null);
           if (!isNaN(b)) {
             /* If turning OFF, hide low/critical banners */
             if (!this.checked) {
@@ -437,7 +437,7 @@
         onToggleChange();
         /* Re-evaluate immediately on toggle */
         try {
-          var b = parseFloat(localStorage.getItem('t1era_sl_balance'));
+          var b = (global.T1Balance ? global.T1Balance.getBalance() : null);
           if (!isNaN(b)) evaluateBalance(b);
         } catch (e) {}
       });
@@ -456,7 +456,7 @@
         delete state['low'];
         setDismissedState(state);
         try {
-          var b = parseFloat(localStorage.getItem('t1era_sl_balance'));
+          var b = (global.T1Balance ? global.T1Balance.getBalance() : null);
           if (!isNaN(b)) evaluateBalance(b);
         } catch (e) {}
       }
@@ -534,7 +534,7 @@
         applyPrefsToUI(_prefs);
         /* Evaluate balance immediately with cached prefs */
         try {
-          var b = parseFloat(localStorage.getItem('t1era_sl_balance'));
+          var b = (global.T1Balance ? global.T1Balance.getBalance() : null);
           if (!isNaN(b)) evaluateBalance(b);
         } catch (e) {}
       }
@@ -548,7 +548,7 @@
           applyPrefsToUI(_prefs);
           /* Re-evaluate with server prefs */
           try {
-            var b = parseFloat(localStorage.getItem('t1era_sl_balance'));
+            var b = (global.T1Balance ? global.T1Balance.getBalance() : null);
             if (!isNaN(b)) evaluateBalance(b);
           } catch (e) {}
         }
