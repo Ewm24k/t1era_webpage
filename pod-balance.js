@@ -249,7 +249,11 @@
     var prev   = _balance;
     var newBal = Math.max(0, Math.round((prev - amount) * 1e6) / 1e6);
 
-    /* Write to Firestore — onSnapshot will update DOM on ALL devices */
+    /* Update in-memory immediately so getBalance() is correct between
+       heartbeats. onSnapshot will confirm and sync all devices. */
+    _balance = newBal;
+
+    /* Write to Firestore — onSnapshot fires on ALL devices */
     saveBalanceToFirestore(newBal, _currency);
 
     /* Record transaction */
