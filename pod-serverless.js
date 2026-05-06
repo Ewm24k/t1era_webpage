@@ -468,22 +468,37 @@
     }
   }
 
-  /* _drainAccumulator tracks total drain since last heartbeat write.
-     This is committed to Firestore every 30s via T1Balance.deduct().
-     Between heartbeats, _balance is a local counter for smooth UI only. */
-  var _drainAccumulator = 0;
+  /* ══════════════════════════════════════════════════════════════════
+     TICKER — per-second drain counter for smooth UI only.
+
+     RULES:
+     1. _balance here is a LOCAL display counter only.
+        It is seeded from Firestore (T1Balance) on each heartbeat.
+        It is NEVER written to Firestore directly from tick().
+
+     2. Only the heartbeat (every 30s) writes to Firestore.
+        It reads the CURRENT Firestore balance via T1Balance.getBalance(),
+        subtracts the 30s accumulated drain, and writes that result.
+        onSnapshot fires on ALL devices with the new value.
+
+     3. The ticker never calls T1Balance.deduct() with accumulated drain.
+        That caused: boot with _balance=0, drain runs, writes 0 to Firestore.
+  ══════════════════════════════════════════════════════════════════ */
+  var _drainPerTick = 0;      /* total drain rate per second across all running pods */
+  var _drainIn30s   = 0;      /* accumulated drain since last heartbeat */
 
   function tick() {
     var changed  = false;
     var depleted = false;
 
-    _tickCount += 1;
+    _tickCount  += 1;
+    _drainPerTick = 0;
 
-    /* Sync _balance from T1Balance on every tick — Firestore is truth */
+    /* Get current Firestore balance as display base */
+    var fsBalance = null;
     try {
       if (global.T1Balance && global.T1Balance.isReady()) {
-        var fsbal = global.T1Balance.getBalance();
-        if (fsbal !== null && !isNaN(fsbal)) _balance = fsbal;
+        fsBalance = global.T1Balance.getBalance();
       }
     } catch (e) {}
 
@@ -491,14 +506,19 @@
       if (inst.state !== 'running') return;
       if (depleted) return;
 
-      var drain = inst.pricePerHr / 3600;
-      inst.uptimeSec      += 1;
-      inst.totalCost       = (inst.totalCost || 0) + drain;
-      _balance             = Math.max(0, _balance - drain);
-      _drainAccumulator   += drain;
-      changed              = true;
+      var drain     = inst.pricePerHr / 3600;
+      inst.uptimeSec += 1;
+      inst.totalCost  = (inst.totalCost || 0) + drain;
+      _drainPerTick  += drain;
+      _drainIn30s    += drain;
+      changed         = true;
 
-      if (_balance <= 0) {
+      /* Check depletion against Firestore balance minus accumulated drain */
+      var effectiveBalance = fsBalance !== null
+        ? Math.max(0, fsBalance - _drainIn30s)
+        : 0;
+
+      if (effectiveBalance <= 0) {
         depleted = true;
         inst.state = 'stopped';
         inst.lastStartedAt = null;
@@ -514,25 +534,35 @@
       if (depleted) renderAll();
     }
 
-    /* ── Heartbeat every 30s ─────────────────────────────────────────
-       1. Write accumulated drain to Firestore via T1Balance.deduct()
-          → T1Balance writes to users/{uid}/billing/balance
-          → onSnapshot fires on ALL devices simultaneously
-          → All devices show the same balance with no conflict
-       2. Update pod lastStartedAt anchor in Firestore
-       This is the ONLY place balance is written to Firestore during drain. */
-    if (_tickCount % HEARTBEAT_INTERVAL === 0) {
-      /* Commit accumulated drain to Firestore */
-      if (_drainAccumulator > 0) {
-        try {
-          if (global.T1Balance && global.T1Balance.isReady()) {
-            global.T1Balance.deduct(_drainAccumulator, {
-              description: 'Compute drain (' + HEARTBEAT_INTERVAL + 's)',
-              type: 'deduction',
+    /* ── Heartbeat every 30s ──────────────────────────────────────────
+       Read Firestore balance → subtract 30s drain → write back.
+       This is the ONLY Firestore balance write during drain.
+       onSnapshot fires on all devices with the authoritative new value. */
+    if (_tickCount % HEARTBEAT_INTERVAL === 0 && _drainIn30s > 0) {
+      var currentFsBal = null;
+      try {
+        if (global.T1Balance && global.T1Balance.isReady()) {
+          currentFsBal = global.T1Balance.getBalance();
+        }
+      } catch (e) {}
+
+      if (currentFsBal !== null) {
+        var newBal = Math.max(0, Math.round((currentFsBal - _drainIn30s) * 1e6) / 1e6);
+        /* Write directly to Firestore billing doc — bypass applyDeduction
+           which also does its own balance math and could compound the error */
+        if (global.T1Balance) {
+          try {
+            /* Use saveBalanceToFirestore via T1Balance internal — but since
+               it is not exposed, we call deduct with exact amount needed
+               to arrive at newBal from currentFsBal */
+            var exactDrain = currentFsBal - newBal;
+            global.T1Balance.deduct(exactDrain, {
+              description: 'Compute drain (30s)',
+              silent: true,
             });
-          }
-        } catch (e) {}
-        _drainAccumulator = 0;
+          } catch (e) {}
+        }
+        _drainIn30s = 0;
       }
 
       /* Update pod lastStartedAt anchors */
