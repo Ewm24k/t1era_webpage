@@ -283,23 +283,40 @@
   ══════════════════════════════════════════════════════════════════ */
   function syncAllBalanceDOMs(amount) {
     var fmt = '$' + amount.toFixed(2);
-    /* ALL balance display IDs across every tab and component */
     var ids = [
       'headerBalanceStat',
       'balanceAmount',
       'runwayBalance',
       'sidebarBalance',
-      'slHeaderBalance',    /* balance chip inside serverless tab header */
-      'headerBalanceStat',
+      'slHeaderBalance',
     ];
     ids.forEach(function (id) {
       var el = document.getElementById(id);
       if (el) el.textContent = fmt;
     });
-    /* Also update user-balance in sidebar (different selector) */
     var userBal = document.querySelector('.user-balance');
     if (userBal) userBal.textContent = fmt;
+
+    /* slHeaderBalance lives inside serverless tab HTML that gets rebuilt
+       by renderAll() every tick. After renderAll() recreates the DOM,
+       the new element has no value. Watch for it being recreated and
+       immediately repopulate it with the current authoritative balance. */
+    if (!_balanceObserver) {
+      _balanceObserver = new MutationObserver(function () {
+        if (_balance === null) return;
+        var el = document.getElementById('slHeaderBalance');
+        if (el && el.textContent !== '$' + _balance.toFixed(2)) {
+          el.textContent = '$' + _balance.toFixed(2);
+        }
+      });
+      var slContent = document.getElementById('serverlessContent');
+      if (slContent) {
+        _balanceObserver.observe(slContent, { childList: true, subtree: true });
+      }
+    }
   }
+
+  var _balanceObserver = null;
 
   /* ══════════════════════════════════════════════════════════════════
      7. TRANSACTION HISTORY RENDERER
