@@ -280,7 +280,15 @@
           }
         });
 
-        _instances = incoming;
+        /* Deduplicate — keep only one pod per ID.
+           Prevents ghost pods if onSnapshot fires multiple times before
+           _realtimeReady is set or if a pod was saved with duplicate IDs. */
+        var seen = {};
+        _instances = incoming.filter(function (inst) {
+          if (!inst.id || seen[inst.id]) return false;
+          seen[inst.id] = true;
+          return true;
+        });
 
         podsReceived = true;
 
@@ -1152,9 +1160,9 @@
       (inst.totalCost || 0).toFixed(5),
       "</div></div>",
       '<div class="sl-stat"><div class="sl-stat-lbl">Balance</div>',
-      '<div class="sl-stat-val sl-val-bal">$',
-      _balance.toFixed(2),
-      "</div></div>",
+      '<div class="sl-stat-val sl-val-bal" id="sl-bal-' + inst.id + '">—</div></div>',
+      /* sl-bal-{id} is populated by pod-balance.js syncAllBalanceDOMs
+         so it always shows the authoritative Firestore value, never stale local _balance */
       "</div>",
       '<div class="sl-config-row">',
       '<span><i class="ph ph-hard-drive"></i> Container ',
