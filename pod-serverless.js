@@ -32,7 +32,7 @@
 
   /* ── Storage keys ──────────────────────────────────────────────── */
   var KEY_INSTANCES = "t1era_sl_instances";
-  var KEY_BALANCE   = "t1era_sl_balance";
+  /* KEY_BALANCE removed — balance is Firestore only */
   var STARTING_BAL  = 500.0;  // test balance
 
   /* ── Storage keys (projects) ────────────────────────────────────── */
@@ -221,7 +221,6 @@
           _activeProjectId = _projects.length > 0 ? _projects[0].id : null;
         }
 
-        try { localStorage.setItem(KEY_PROJECTS, JSON.stringify(_projects)); } catch (e) {}
 
         projectsReceived = true;
 
@@ -282,8 +281,6 @@
         });
 
         _instances = incoming;
-        try { localStorage.setItem(KEY_INSTANCES, JSON.stringify(_instances)); } catch (e) {}
-        try { localStorage.setItem(KEY_BALANCE, _balance.toFixed(6)); } catch (e) {}
 
         podsReceived = true;
 
@@ -442,99 +439,14 @@
   }
 
   /* ══════════════════════════════════════════════════════════════════
-     PERSISTENCE  –  localStorage + uptime recovery on refresh
+     STATE — all data from Firestore onSnapshot. No localStorage.
   ══════════════════════════════════════════════════════════════════ */
   function loadState() {
-    try {
-      var raw = localStorage.getItem(KEY_INSTANCES);
-      _instances = raw ? JSON.parse(raw) : [];
-    } catch (e) {
-      _instances = [];
-    }
-
-    /* Balance is owned by pod-balance.js / T1Balance.
-       Read localStorage only as a temporary local drain counter.
-       The authoritative value always comes from Firestore via onSnapshot. */
-    try {
-      var b = localStorage.getItem(KEY_BALANCE);
-      _balance = b !== null ? parseFloat(b) : STARTING_BAL;
-      if (isNaN(_balance)) _balance = STARTING_BAL;
-    } catch (e) {
-      _balance = STARTING_BAL;
-    }
-    /* Sync with T1Balance if already ready */
-    try {
-      if (global.T1Balance && global.T1Balance.isReady()) {
-        var fsbal = global.T1Balance.getBalance();
-        if (fsbal !== null && !isNaN(fsbal)) _balance = fsbal;
-      }
-    } catch (e) {}
-
-    try {
-      var rp = localStorage.getItem(KEY_PROJECTS);
-      _projects = rp ? JSON.parse(rp) : [];
-    } catch (e) {
-      _projects = [];
-    }
-
-    /* set active project to first project if not already set */
-    if (!_activeProjectId && _projects.length > 0) {
-      _activeProjectId = _projects[0].id;
-    }
-
-    /* If instances have no projectId, assign them to the first real project.
-       We do NOT create fake placeholder projects here — that was corrupting
-       t1era_sl_projects with generic names and overwriting the user's real names.
-       Display-time fallback handles the label if still unresolved. */
-    var unlinked = _instances.filter(function (i) { return !i.projectId; });
-    if (unlinked.length > 0 && _projects.length > 0) {
-      var earliest = _projects.slice().sort(function (a, b) {
-        return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
-      })[0];
-      unlinked.forEach(function (i) { i.projectId = earliest.id; });
-    }
-
-    /* Set active project */
-    if (!_activeProjectId && _projects.length > 0) {
-      _activeProjectId = _projects[0].id;
-    }
-
-    /* 2. UPTIME PERSIST: for any instance that was "running" when the
-       page closed, calculate elapsed real-world seconds and add them.
-       Instances remain "running" — the ticker restarts automatically.
-       lastStartedAt is reset to now so the NEXT refresh only charges
-       the time since this page load, not double-counting. */
-    var now = Date.now();
-    _instances.forEach(function (inst) {
-      if (inst.state === "running" && inst.lastStartedAt) {
-        var elapsed = Math.floor(
-          (now - new Date(inst.lastStartedAt).getTime()) / 1000,
-        );
-        if (elapsed > 0) {
-          var drain = inst.pricePerHr * (elapsed / 3600);
-          inst.uptimeSec += elapsed;
-          inst.totalCost = (inst.totalCost || 0) + drain;
-          _balance = Math.max(0, _balance - drain);
-        }
-        /* Reset anchor point to now — prevents double-charging on next refresh */
-        inst.lastStartedAt = new Date(now).toISOString();
-        /* Stop if balance hit zero during offline period */
-        if (_balance <= 0) {
-          inst.state = "stopped";
-          inst.lastStartedAt = null;
-        }
-      }
-    });
-
-    saveState();
+    /* No-op. Real loading happens in attachRealtimeListeners() via Firestore onSnapshot. */
   }
 
-  function saveState() {
-    try {
-      localStorage.setItem(KEY_INSTANCES, JSON.stringify(_instances));
-      localStorage.setItem(KEY_BALANCE, _balance.toFixed(6));
-      localStorage.setItem(KEY_PROJECTS, JSON.stringify(_projects));
-    } catch (e) {}
+    function saveState() {
+    /* localStorage removed — all state comes from Firestore onSnapshot */
   }
 
   /* ══════════════════════════════════════════════════════════════════
@@ -1089,9 +1001,10 @@
       '<div class="sl-topbar-right">',
       '<div class="sl-balance-chip">',
       '<i class="ph ph-coins"></i>',
-      '<span id="slHeaderBalance">$',
-      _balance.toFixed(2),
-      "</span>",
+      '<span id="slHeaderBalance">—</span>',
+      /* slHeaderBalance is populated by pod-balance.js onSnapshot only */
+      '',
+      '',
       "</div>",
       "</div>",
       "</div>",
@@ -1474,9 +1387,8 @@
     injectCSS();
     initFirebase();
 
-    /* Step 1 — show localStorage data immediately while Firestore loads */
+    /* Step 1 — show empty shell immediately. Firestore onSnapshot loads real data. */
     setSyncBadge('syncing', 'Syncing');
-    loadState();
     renderAll();
 
     /* On boot, render compute panel directly via SL.renderComputeTab.
