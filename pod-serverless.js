@@ -33,7 +33,7 @@
   /* ── Storage keys ──────────────────────────────────────────────── */
   var KEY_INSTANCES = "t1era_sl_instances";
   /* KEY_BALANCE removed — balance is Firestore only */
-  var STARTING_BAL  = 500.0;  // test balance
+  var STARTING_BAL = 500.0; // test balance
 
   /* ── Storage keys (projects) ────────────────────────────────────── */
   var KEY_PROJECTS = "t1era_sl_projects";
@@ -41,20 +41,20 @@
   /* ── Heartbeat: write running pod state to Firestore every N seconds
      so cross-device sync and close-tab recovery are accurate.
      30s = max 2 Firestore writes/min per pod — well within free quota. ── */
-  var HEARTBEAT_INTERVAL = 30;  // seconds between Firestore checkpoints
+  var HEARTBEAT_INTERVAL = 30; // seconds between Firestore checkpoints
 
   /* ── Runtime state ─────────────────────────────────────────────── */
-  var _instances   = [];
-  var _balance     = STARTING_BAL;
-  var _ticker      = null;
-  var _tickCount   = 0;         // counts seconds since ticker started
-  var _fbApp       = null;
-  var _fbDb        = null;
-  var _fbAuth      = null;
-  var _currentUid  = null;
+  var _instances = [];
+  var _balance = STARTING_BAL;
+  var _ticker = null;
+  var _tickCount = 0; // counts seconds since ticker started
+  var _fbApp = null;
+  var _fbDb = null;
+  var _fbAuth = null;
+  var _currentUid = null;
   /* project state */
-  var _projects        = [];    // [{id, name, location, createdAt}]
-  var _activeProjectId = null;  // which project is selected in serverless tab
+  var _projects = []; // [{id, name, location, createdAt}]
+  var _activeProjectId = null; // which project is selected in serverless tab
 
   /* ══════════════════════════════════════════════════════════════════
      1. FIREBASE INIT + AUTH GATE
@@ -153,7 +153,6 @@
       });
   }
 
-
   function fbDeleteProject(projectId) {
     /* Returns a Promise that resolves when BOTH the project doc AND all its
        pod docs have been confirmed deleted by Firestore. */
@@ -161,20 +160,28 @@
       /* No DB connection — resolve immediately (offline mode) */
       return Promise.resolve();
     }
-    var projectRef = _fbDb.collection('users').doc(_currentUid)
-                          .collection('projects').doc(projectId);
-    var podsRef    = _fbDb.collection('users').doc(_currentUid)
-                          .collection('pods').where('projectId','==',projectId);
+    var projectRef = _fbDb
+      .collection("users")
+      .doc(_currentUid)
+      .collection("projects")
+      .doc(projectId);
+    var podsRef = _fbDb
+      .collection("users")
+      .doc(_currentUid)
+      .collection("pods")
+      .where("projectId", "==", projectId);
 
     /* Delete project doc + all pods in parallel, wait for both */
     return Promise.all([
       projectRef.delete(),
-      podsRef.get().then(function(snap) {
+      podsRef.get().then(function (snap) {
         if (snap.empty) return Promise.resolve();
         var batch = _fbDb.batch();
-        snap.forEach(function(doc) { batch.delete(doc.ref); });
+        snap.forEach(function (doc) {
+          batch.delete(doc.ref);
+        });
         return batch.commit();
-      })
+      }),
     ]);
   }
 
@@ -188,7 +195,7 @@
      _unsubPods and _unsubProjects hold the unsubscribe functions
      so we can detach listeners cleanly on sign-out.
   ══════════════════════════════════════════════════════════════════ */
-  var _unsubPods     = null;
+  var _unsubPods = null;
   var _unsubProjects = null;
   var _realtimeReady = false; /* true once first snapshot has arrived */
 
@@ -199,106 +206,117 @@
 
     if (!_fbDb || !uid) return;
 
-    setSyncBadge('syncing', 'Connecting');
+    setSyncBadge("syncing", "Connecting");
 
-    var podsReceived     = false;
+    var podsReceived = false;
     var projectsReceived = false;
 
     /* ── PROJECTS listener ─────────────────────────────────────── */
     _unsubProjects = _fbDb
-      .collection('users').doc(uid).collection('projects')
-      .onSnapshot(function (snap) {
-        var projs = [];
-        snap.forEach(function (doc) { projs.push(doc.data()); });
+      .collection("users")
+      .doc(uid)
+      .collection("projects")
+      .onSnapshot(
+        function (snap) {
+          var projs = [];
+          snap.forEach(function (doc) {
+            projs.push(doc.data());
+          });
 
-        _projects = projs;
+          _projects = projs;
 
-        /* Preserve active project if it still exists, else pick first */
-        var stillExists = _projects.some(function (p) {
-          return p.id === _activeProjectId;
-        });
-        if (!stillExists) {
-          _activeProjectId = _projects.length > 0 ? _projects[0].id : null;
-        }
+          /* Preserve active project if it still exists, else pick first */
+          var stillExists = _projects.some(function (p) {
+            return p.id === _activeProjectId;
+          });
+          if (!stillExists) {
+            _activeProjectId = _projects.length > 0 ? _projects[0].id : null;
+          }
 
+          projectsReceived = true;
 
-        projectsReceived = true;
-
-        /* Re-render if both snapshots have arrived at least once */
-        if (podsReceived) {
-          afterBothReady();
-        }
-      }, function (err) {
-        console.warn('[SL] projects listener error:', err);
-        setSyncBadge('error', 'Sync failed');
-      });
+          /* Re-render if both snapshots have arrived at least once */
+          if (podsReceived) {
+            afterBothReady();
+          }
+        },
+        function (err) {
+          console.warn("[SL] projects listener error:", err);
+          setSyncBadge("error", "Sync failed");
+        },
+      );
 
     /* ── PODS listener ─────────────────────────────────────────── */
     _unsubPods = _fbDb
-      .collection('users').doc(uid).collection('pods')
-      .onSnapshot(function (snap) {
-        var now = Date.now();
-        var incoming = [];
+      .collection("users")
+      .doc(uid)
+      .collection("pods")
+      .onSnapshot(
+        function (snap) {
+          var now = Date.now();
+          var incoming = [];
 
-        snap.forEach(function (doc) {
-          incoming.push(doc.data());
-        });
+          snap.forEach(function (doc) {
+            incoming.push(doc.data());
+          });
 
-        /* For running pods: recalculate elapsed since lastStartedAt.
+          /* For running pods: recalculate elapsed since lastStartedAt.
            This handles the case where another device was running a pod
            and this device just opened — charge the offline period. */
-        incoming.forEach(function (inst) {
-          if (inst.state === 'running' && inst.lastStartedAt) {
-            var elapsed = Math.floor(
-              (now - new Date(inst.lastStartedAt).getTime()) / 1000
-            );
-            if (elapsed > 0 && !_realtimeReady) {
-              /* Only apply elapsed on first load — subsequent snapshots
+          incoming.forEach(function (inst) {
+            if (inst.state === "running" && inst.lastStartedAt) {
+              var elapsed = Math.floor(
+                (now - new Date(inst.lastStartedAt).getTime()) / 1000,
+              );
+              if (elapsed > 0 && !_realtimeReady) {
+                /* Only apply elapsed on first load — subsequent snapshots
                  are triggered by THIS device's own writes, not time passing */
-              var drain = inst.pricePerHr * (elapsed / 3600);
-              inst.uptimeSec = (inst.uptimeSec || 0) + elapsed;
-              inst.totalCost = (inst.totalCost || 0) + drain;
-              _balance = Math.max(0, _balance - drain);
-            }
-            /* Reset anchor to now on first load */
-            if (!_realtimeReady) {
-              inst.lastStartedAt = new Date(now).toISOString();
-              if (_balance <= 0) {
-                inst.state = 'stopped';
-                inst.lastStartedAt = null;
+                var drain = inst.pricePerHr * (elapsed / 3600);
+                inst.uptimeSec = (inst.uptimeSec || 0) + elapsed;
+                inst.totalCost = (inst.totalCost || 0) + drain;
+                _balance = Math.max(0, _balance - drain);
               }
-              /* Write the updated anchor back — one write per pod on load */
-              fbSavePod(inst);
+              /* Reset anchor to now on first load */
+              if (!_realtimeReady) {
+                inst.lastStartedAt = new Date(now).toISOString();
+                if (_balance <= 0) {
+                  inst.state = "stopped";
+                  inst.lastStartedAt = null;
+                }
+                /* Write the updated anchor back — one write per pod on load */
+                fbSavePod(inst);
+              }
             }
-          }
-          /* Link orphaned pods to earliest project */
-          if (!inst.projectId && _projects.length > 0) {
-            var earliest = _projects.slice().sort(function (a, b) {
-              return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
-            })[0];
-            inst.projectId = earliest.id;
-          }
-        });
+            /* Link orphaned pods to earliest project */
+            if (!inst.projectId && _projects.length > 0) {
+              var earliest = _projects.slice().sort(function (a, b) {
+                return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
+              })[0];
+              inst.projectId = earliest.id;
+            }
+          });
 
-        /* Deduplicate — keep only one pod per ID.
+          /* Deduplicate — keep only one pod per ID.
            Prevents ghost pods if onSnapshot fires multiple times before
            _realtimeReady is set or if a pod was saved with duplicate IDs. */
-        var seen = {};
-        _instances = incoming.filter(function (inst) {
-          if (!inst.id || seen[inst.id]) return false;
-          seen[inst.id] = true;
-          return true;
-        });
+          var seen = {};
+          _instances = incoming.filter(function (inst) {
+            if (!inst.id || seen[inst.id]) return false;
+            seen[inst.id] = true;
+            return true;
+          });
 
-        podsReceived = true;
+          podsReceived = true;
 
-        if (projectsReceived) {
-          afterBothReady();
-        }
-      }, function (err) {
-        console.warn('[SL] pods listener error:', err);
-        setSyncBadge('error', 'Sync failed');
-      });
+          if (projectsReceived) {
+            afterBothReady();
+          }
+        },
+        function (err) {
+          console.warn("[SL] pods listener error:", err);
+          setSyncBadge("error", "Sync failed");
+        },
+      );
 
     /* Called once both collections have delivered their first snapshot,
        and again on every subsequent change to either collection. */
@@ -308,9 +326,13 @@
       renderAll();
       syncBalanceDOMs();
       showBillingContent();
-      setSyncBadge('synced', 'Live');
+      setSyncBadge("synced", "Live");
 
-      if (_instances.some(function (i) { return i.state === 'running'; })) {
+      if (
+        _instances.some(function (i) {
+          return i.state === "running";
+        })
+      ) {
         startTicker();
       } else {
         stopTickerIfIdle();
@@ -323,46 +345,72 @@
       }, 50);
 
       try {
-        document.dispatchEvent(new CustomEvent('slBalanceUpdate', {
-          detail: '$' + _balance.toFixed(2)
-        }));
+        document.dispatchEvent(
+          new CustomEvent("slBalanceUpdate", {
+            detail: "$" + _balance.toFixed(2),
+          }),
+        );
       } catch (e) {}
     }
   }
 
   function detachRealtimeListeners() {
-    if (_unsubPods)     { _unsubPods();     _unsubPods     = null; }
-    if (_unsubProjects) { _unsubProjects(); _unsubProjects = null; }
+    if (_unsubPods) {
+      _unsubPods();
+      _unsubPods = null;
+    }
+    if (_unsubProjects) {
+      _unsubProjects();
+      _unsubProjects = null;
+    }
     _realtimeReady = false;
   }
 
   /* Legacy one-time fetch — kept as fallback if onSnapshot unavailable */
   function fbLoadPods(callback) {
-    if (!_fbDb || !_currentUid) { callback(null); return; }
-    _fbDb.collection('users').doc(_currentUid).collection('pods').get()
+    if (!_fbDb || !_currentUid) {
+      callback(null);
+      return;
+    }
+    _fbDb
+      .collection("users")
+      .doc(_currentUid)
+      .collection("pods")
+      .get()
       .then(function (snap) {
         var pods = [];
-        snap.forEach(function (doc) { pods.push(doc.data()); });
+        snap.forEach(function (doc) {
+          pods.push(doc.data());
+        });
         callback(pods);
       })
       .catch(function (e) {
-        console.warn('[SL] fbLoadPods failed:', e);
-        setSyncBadge('error', 'Sync failed');
+        console.warn("[SL] fbLoadPods failed:", e);
+        setSyncBadge("error", "Sync failed");
         callback(null);
       });
   }
 
   function fbLoadProjects(callback) {
-    if (!_fbDb || !_currentUid) { callback(null); return; }
-    _fbDb.collection('users').doc(_currentUid).collection('projects').get()
+    if (!_fbDb || !_currentUid) {
+      callback(null);
+      return;
+    }
+    _fbDb
+      .collection("users")
+      .doc(_currentUid)
+      .collection("projects")
+      .get()
       .then(function (snap) {
         var projs = [];
-        snap.forEach(function (doc) { projs.push(doc.data()); });
+        snap.forEach(function (doc) {
+          projs.push(doc.data());
+        });
         callback(projs);
       })
       .catch(function (e) {
-        console.warn('[SL] fbLoadProjects failed:', e);
-        setSyncBadge('error', 'Sync failed');
+        console.warn("[SL] fbLoadProjects failed:", e);
+        setSyncBadge("error", "Sync failed");
         callback(null);
       });
   }
@@ -373,30 +421,33 @@
   ══════════════════════════════════════════════════════════════════ */
   function setSyncBadge(state, text) {
     var ids = [
-      { badge: 'slSyncBadge',      txt: 'slSyncText'      },
-      { badge: 'billingSyncBadge', txt: 'billingSyncText'  },
+      { badge: "slSyncBadge", txt: "slSyncText" },
+      { badge: "billingSyncBadge", txt: "billingSyncText" },
     ];
     ids.forEach(function (pair) {
       var badge = document.getElementById(pair.badge);
       var label = document.getElementById(pair.txt);
       if (!badge) return;
 
-      badge.style.display = 'inline-flex';
-      badge.className     = 'sync-badge ' + state;
+      badge.style.display = "inline-flex";
+      badge.className = "sync-badge " + state;
 
       /* Replace dot with correct indicator */
-      var dot = badge.querySelector('.sync-dot');
+      var dot = badge.querySelector(".sync-dot");
       if (dot) {
-        dot.className = state === 'syncing' ? 'sync-dot spin' : 'sync-dot';
+        dot.className = state === "syncing" ? "sync-dot spin" : "sync-dot";
       }
       if (label && text) label.textContent = text;
 
       /* Auto-hide after 3s when synced or errored */
-      if (state === 'synced' || state === 'error') {
+      if (state === "synced" || state === "error") {
         clearTimeout(badge._hideTimer);
         badge._hideTimer = setTimeout(function () {
-          badge.style.opacity = '0';
-          setTimeout(function () { badge.style.display = 'none'; badge.style.opacity = ''; }, 350);
+          badge.style.opacity = "0";
+          setTimeout(function () {
+            badge.style.display = "none";
+            badge.style.opacity = "";
+          }, 350);
         }, 3000);
       }
     });
@@ -404,45 +455,62 @@
 
   /* Show billing grid — fade in, hide skeleton overlay */
   function showBillingContent() {
-    var grid    = document.getElementById('billingGrid');
-    var overlay = document.getElementById('billingLoadingOverlay');
-    if (grid)    { grid.style.opacity = '1'; }
+    var grid = document.getElementById("billingGrid");
+    var overlay = document.getElementById("billingLoadingOverlay");
+    if (grid) {
+      grid.style.opacity = "1";
+    }
     if (overlay) {
-      overlay.style.opacity = '0';
-      setTimeout(function () { overlay.style.display = 'none'; }, 350);
+      overlay.style.opacity = "0";
+      setTimeout(function () {
+        overlay.style.display = "none";
+      }, 350);
     }
   }
 
   function showToast(msg, type) {
     /* type: 'success' | 'error' */
-    var existing = document.getElementById('slToast');
+    var existing = document.getElementById("slToast");
     if (existing) existing.remove();
-    var t = document.createElement('div');
-    t.id = 'slToast';
-    var bg   = type === 'error' ? 'rgba(235,87,87,0.15)' : 'rgba(52,211,153,0.12)';
-    var bdr  = type === 'error' ? 'rgba(235,87,87,0.4)'  : 'rgba(52,211,153,0.35)';
-    var col  = type === 'error' ? '#f28b82'               : '#34d399';
-    var icon = type === 'error' ? 'ph-warning-circle'     : 'ph-check-circle';
-    t.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:9998;'
-      + 'display:flex;align-items:center;gap:10px;'
-      + 'background:' + bg + ';border:1px solid ' + bdr + ';color:' + col + ';'
-      + 'padding:12px 18px;border-radius:10px;font-size:13px;font-weight:600;'
-      + "font-family:'DM Sans',sans-serif;"
-      + 'box-shadow:0 8px 24px rgba(0,0,0,0.4);'
-      + 'animation:toastIn .25s cubic-bezier(.16,1,.3,1) both;';
-    t.innerHTML = '<i class="ph-fill ' + icon + '" style="font-size:16px;"></i>' + msg;
+    var t = document.createElement("div");
+    t.id = "slToast";
+    var bg =
+      type === "error" ? "rgba(235,87,87,0.15)" : "rgba(52,211,153,0.12)";
+    var bdr =
+      type === "error" ? "rgba(235,87,87,0.4)" : "rgba(52,211,153,0.35)";
+    var col = type === "error" ? "#f28b82" : "#34d399";
+    var icon = type === "error" ? "ph-warning-circle" : "ph-check-circle";
+    t.style.cssText =
+      "position:fixed;bottom:24px;right:24px;z-index:9998;" +
+      "display:flex;align-items:center;gap:10px;" +
+      "background:" +
+      bg +
+      ";border:1px solid " +
+      bdr +
+      ";color:" +
+      col +
+      ";" +
+      "padding:12px 18px;border-radius:10px;font-size:13px;font-weight:600;" +
+      "font-family:'DM Sans',sans-serif;" +
+      "box-shadow:0 8px 24px rgba(0,0,0,0.4);" +
+      "animation:toastIn .25s cubic-bezier(.16,1,.3,1) both;";
+    t.innerHTML =
+      '<i class="ph-fill ' + icon + '" style="font-size:16px;"></i>' + msg;
     /* inject keyframe once */
-    if (!document.getElementById('slToastStyle')) {
-      var s = document.createElement('style');
-      s.id = 'slToastStyle';
-      s.textContent = '@keyframes toastIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}';
+    if (!document.getElementById("slToastStyle")) {
+      var s = document.createElement("style");
+      s.id = "slToastStyle";
+      s.textContent =
+        "@keyframes toastIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}";
       document.head.appendChild(s);
     }
     document.body.appendChild(t);
-    setTimeout(function() {
-      t.style.transition = 'opacity .3s';
-      t.style.opacity = '0';
-      setTimeout(function(){ t.remove(); }, 320);
+    setTimeout(function () {
+      t.style.transition = "opacity .3s";
+      t.style.opacity = "0";
+      setTimeout(function () {
+        t.remove();
+      }, 320);
     }, 3500);
   }
 
@@ -453,7 +521,7 @@
     /* No-op. Real loading happens in attachRealtimeListeners() via Firestore onSnapshot. */
   }
 
-    function saveState() {
+  function saveState() {
     /* localStorage removed — all state comes from Firestore onSnapshot */
   }
 
@@ -462,7 +530,7 @@
   ══════════════════════════════════════════════════════════════════ */
   function startTicker() {
     if (_ticker) return;
-    _tickCount = 0;   // reset heartbeat counter each time ticker starts
+    _tickCount = 0; // reset heartbeat counter each time ticker starts
     _ticker = setInterval(tick, 1000);
   }
 
@@ -492,14 +560,14 @@
      3. The ticker never calls T1Balance.deduct() with accumulated drain.
         That caused: boot with _balance=0, drain runs, writes 0 to Firestore.
   ══════════════════════════════════════════════════════════════════ */
-  var _drainPerTick = 0;      /* total drain rate per second across all running pods */
-  var _drainIn30s   = 0;      /* accumulated drain since last heartbeat */
+  var _drainPerTick = 0; /* total drain rate per second across all running pods */
+  var _drainIn30s = 0; /* accumulated drain since last heartbeat */
 
   function tick() {
-    var changed  = false;
+    var changed = false;
     var depleted = false;
 
-    _tickCount  += 1;
+    _tickCount += 1;
     _drainPerTick = 0;
 
     /* Get current Firestore balance as display base */
@@ -511,28 +579,27 @@
     } catch (e) {}
 
     _instances.forEach(function (inst) {
-      if (inst.state !== 'running') return;
+      if (inst.state !== "running") return;
       if (depleted) return;
 
-      var drain     = inst.pricePerHr / 3600;
+      var drain = inst.pricePerHr / 3600;
       inst.uptimeSec += 1;
-      inst.totalCost  = (inst.totalCost || 0) + drain;
-      _drainPerTick  += drain;
-      _drainIn30s    += drain;
-      changed         = true;
+      inst.totalCost = (inst.totalCost || 0) + drain;
+      _drainPerTick += drain;
+      _drainIn30s += drain;
+      changed = true;
 
       /* Check depletion against Firestore balance minus accumulated drain */
-      var effectiveBalance = fsBalance !== null
-        ? Math.max(0, fsBalance - _drainIn30s)
-        : 0;
+      var effectiveBalance =
+        fsBalance !== null ? Math.max(0, fsBalance - _drainIn30s) : 0;
 
       if (effectiveBalance <= 0) {
         depleted = true;
-        inst.state = 'stopped';
+        inst.state = "stopped";
         inst.lastStartedAt = null;
         fbSavePod(inst);
         stopTickerIfIdle();
-        toast('⚠️ Balance depleted – ' + inst.name + ' stopped.');
+        toast("⚠️ Balance depleted – " + inst.name + " stopped.");
       }
     });
 
@@ -555,7 +622,10 @@
       } catch (e) {}
 
       if (currentFsBal !== null) {
-        var newBal = Math.max(0, Math.round((currentFsBal - _drainIn30s) * 1e6) / 1e6);
+        var newBal = Math.max(
+          0,
+          Math.round((currentFsBal - _drainIn30s) * 1e6) / 1e6,
+        );
         /* Write directly to Firestore billing doc — bypass applyDeduction
            which also does its own balance math and could compound the error */
         if (global.T1Balance) {
@@ -565,7 +635,7 @@
                to arrive at newBal from currentFsBal */
             var exactDrain = currentFsBal - newBal;
             global.T1Balance.deduct(exactDrain, {
-              description: 'Compute drain (30s)',
+              description: "Compute drain (30s)",
               silent: true,
             });
           } catch (e) {}
@@ -576,7 +646,7 @@
       /* Update pod lastStartedAt anchors */
       var hbNow = new Date().toISOString();
       _instances.forEach(function (inst) {
-        if (inst.state !== 'running') return;
+        if (inst.state !== "running") return;
         inst.lastStartedAt = hbNow;
         fbSavePod(inst);
       });
@@ -677,14 +747,23 @@
       /* btnEl — the trash button DOM element, used to show loading state */
       if (btnEl) {
         btnEl.disabled = true;
-        btnEl.innerHTML = '<i class="ph ph-spinner" style="animation:spin 1s linear infinite;display:inline-block;"></i>';
+        btnEl.innerHTML =
+          '<i class="ph ph-spinner" style="animation:spin 1s linear infinite;display:inline-block;"></i>';
       }
 
       /* 1. Remove from memory + localStorage immediately so UI feels instant */
-      var toDelete = _instances.filter(function(i){ return i.projectId === projectId; });
-      toDelete.forEach(function(i){ fbDeletePod(i.id); });
-      _instances = _instances.filter(function(i){ return i.projectId !== projectId; });
-      _projects  = _projects.filter(function(p){ return p.id !== projectId; });
+      var toDelete = _instances.filter(function (i) {
+        return i.projectId === projectId;
+      });
+      toDelete.forEach(function (i) {
+        fbDeletePod(i.id);
+      });
+      _instances = _instances.filter(function (i) {
+        return i.projectId !== projectId;
+      });
+      _projects = _projects.filter(function (p) {
+        return p.id !== projectId;
+      });
       if (_activeProjectId === projectId) {
         _activeProjectId = _projects.length > 0 ? _projects[0].id : null;
       }
@@ -693,23 +772,24 @@
       renderAll();
 
       /* Re-render compute tab */
-      var panel = document.getElementById('gpuComputeProjectPanel');
-      var emptyState = document.getElementById('gpuEmptyState');
+      var panel = document.getElementById("gpuComputeProjectPanel");
+      var emptyState = document.getElementById("gpuEmptyState");
       if (_projects.length === 0) {
-        if (panel) panel.style.display = 'none';
-        if (emptyState) emptyState.style.display = '';
+        if (panel) panel.style.display = "none";
+        if (emptyState) emptyState.style.display = "";
       } else {
-        if (global.SL && global.SL.renderComputeTab) global.SL.renderComputeTab();
+        if (global.SL && global.SL.renderComputeTab)
+          global.SL.renderComputeTab();
       }
 
       /* 2. Delete from Firestore — wait for confirmation then show toast */
       fbDeleteProject(projectId)
-        .then(function() {
-          showToast('Project deleted from database', 'success');
+        .then(function () {
+          showToast("Project deleted from database", "success");
         })
-        .catch(function(err) {
-          console.error('[SL] DB delete failed:', err);
-          showToast('Deleted locally — database sync failed', 'error');
+        .catch(function (err) {
+          console.error("[SL] DB delete failed:", err);
+          showToast("Deleted locally — database sync failed", "error");
         });
     },
 
@@ -731,105 +811,158 @@
        If no projects, shows empty state. If projects exist, shows each
        project with its deployed GPU instance count and an "Add GPU" button. */
     renderComputeTab: function () {
-      var panel      = document.getElementById('gpuComputeProjectPanel');
-      var emptyState = document.getElementById('gpuEmptyState');
-      var searchBox  = document.getElementById('gpuSearchBox');
-      var gpuGrid    = document.getElementById('gpuGrid');
+      var panel = document.getElementById("gpuComputeProjectPanel");
+      var emptyState = document.getElementById("gpuEmptyState");
+      var searchBox = document.getElementById("gpuSearchBox");
+      var gpuGrid = document.getElementById("gpuGrid");
 
       if (!panel) return;
 
       /* Always hide GPU grid and search — we're in project view */
-      if (searchBox) searchBox.style.display = 'none';
-      if (gpuGrid)   gpuGrid.style.display   = 'none';
+      if (searchBox) searchBox.style.display = "none";
+      if (gpuGrid) gpuGrid.style.display = "none";
 
       if (_projects.length === 0) {
         /* No projects — show empty state, hide panel */
-        panel.style.display = 'none';
-        if (emptyState) emptyState.style.display = '';
+        panel.style.display = "none";
+        if (emptyState) emptyState.style.display = "";
         return;
       }
 
       /* Has projects — hide empty state, SHOW panel, then write HTML.
          Critical: panel.style.display must be set BEFORE innerHTML so
          the element is visible when the browser paints the new content. */
-      if (emptyState) emptyState.style.display = 'none';
-      panel.style.display = '';
+      if (emptyState) emptyState.style.display = "none";
+      panel.style.display = "";
 
-      var html = '<div class="cp-header">'
-        + '<span class="cp-title"><i class="ph-fill ph-stack"></i> Your Projects</span>'
-        + '<span class="cp-subtitle">' + _projects.length + ' project' + (_projects.length !== 1 ? 's' : '') + '</span>'
-        + '</div>';
+      var html =
+        '<div class="cp-header">' +
+        '<span class="cp-title"><i class="ph-fill ph-stack"></i> Your Projects</span>' +
+        '<span class="cp-subtitle">' +
+        _projects.length +
+        " project" +
+        (_projects.length !== 1 ? "s" : "") +
+        "</span>" +
+        "</div>";
 
       _projects.forEach(function (proj) {
-        var podCount = _instances.filter(function (i) { return i.projectId === proj.id; }).length;
-        var running  = _instances.filter(function (i) { return i.projectId === proj.id && i.state === 'running'; }).length;
+        var podCount = _instances.filter(function (i) {
+          return i.projectId === proj.id;
+        }).length;
+        var running = _instances.filter(function (i) {
+          return i.projectId === proj.id && i.state === "running";
+        }).length;
         var isActive = proj.id === _activeProjectId;
 
         var locationLabels = {
-          'us-east':     'US East (Virginia)',
-          'us-west':     'US West (Oregon)',
-          'eu-central':  'EU Central (Frankfurt)',
-          'ap-southeast':'Asia Pacific (Singapore)'
+          "us-east": "US East (Virginia)",
+          "us-west": "US West (Oregon)",
+          "eu-central": "EU Central (Frankfurt)",
+          "ap-southeast": "Asia Pacific (Singapore)",
         };
-        var locLabel = locationLabels[proj.location] || proj.location || 'Global';
+        var locLabel =
+          locationLabels[proj.location] || proj.location || "Global";
 
-        var createdStr = new Date(proj.createdAt).toLocaleDateString('en-US', {
-          month: 'short', day: 'numeric', year: 'numeric'
+        var createdStr = new Date(proj.createdAt).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
         });
 
-        html += '<div class="cp-card' + (isActive ? ' cp-card-active' : '') + '">'
+        html +=
+          '<div class="cp-card' +
+          (isActive ? " cp-card-active" : "") +
+          '">' +
           // Accent bar
-          + '<div class="cp-accent"></div>'
+          '<div class="cp-accent"></div>' +
           // Card header row
-          + '<div class="cp-card-head">'
-          + '<div class="cp-card-left">'
-          + '<div class="cp-icon"><i class="ph-fill ph-folder' + (podCount > 0 ? '-open' : '') + '"></i></div>'
-          + '<div>'
-          + '<div class="cp-name">' + esc(proj.name) + '</div>'
-          + '<div class="cp-meta">'
-          + '<span><i class="ph ph-map-pin"></i>' + esc(locLabel) + '</span>'
-          + '<span><i class="ph ph-calendar-blank"></i>' + createdStr + '</span>'
-          + '</div>'
-          + '</div>'
-          + '</div>'
-          + '<div class="cp-card-right">'
-          + (running > 0
-            ? '<span class="cp-running-badge"><span class="sl-blink"></span>' + running + ' running</span>'
-            : '')
-          + '<span class="cp-count-badge">' + podCount + ' GPU' + (podCount !== 1 ? 's' : '') + '</span>'
-          + '</div>'
-          + '</div>'
+          '<div class="cp-card-head">' +
+          '<div class="cp-card-left">' +
+          '<div class="cp-icon"><i class="ph-fill ph-folder' +
+          (podCount > 0 ? "-open" : "") +
+          '"></i></div>' +
+          "<div>" +
+          '<div class="cp-name">' +
+          esc(proj.name) +
+          "</div>" +
+          '<div class="cp-meta">' +
+          '<span><i class="ph ph-map-pin"></i>' +
+          esc(locLabel) +
+          "</span>" +
+          '<span><i class="ph ph-calendar-blank"></i>' +
+          createdStr +
+          "</span>" +
+          "</div>" +
+          "</div>" +
+          "</div>" +
+          '<div class="cp-card-right">' +
+          (running > 0
+            ? '<span class="cp-running-badge"><span class="sl-blink"></span>' +
+              running +
+              " running</span>"
+            : "") +
+          '<span class="cp-count-badge">' +
+          podCount +
+          " GPU" +
+          (podCount !== 1 ? "s" : "") +
+          "</span>" +
+          "</div>" +
+          "</div>" +
           // GPU list (names only, compact)
-          + (podCount > 0
-            ? '<div class="cp-gpu-list">'
-              + _instances
-                .filter(function (i) { return i.projectId === proj.id; })
+          (podCount > 0
+            ? '<div class="cp-gpu-list">' +
+              _instances
+                .filter(function (i) {
+                  return i.projectId === proj.id;
+                })
                 .map(function (i) {
-                  var stateClass = i.state === 'running' ? 'cp-gpu-running'
-                                 : i.state === 'paused'  ? 'cp-gpu-paused'
-                                 : 'cp-gpu-stopped';
-                  return '<div class="cp-gpu-row ' + stateClass + '">'
-                    + '<i class="ph-fill ph-graphics-card"></i>'
-                    + '<span class="cp-gpu-name">' + esc(i.name) + '</span>'
-                    + '<span class="cp-gpu-vram">' + esc(i.vram) + '</span>'
-                    + '<span class="cp-gpu-state">' + i.state + '</span>'
-                    + '</div>';
-                }).join('')
-              + '</div>'
-            : '<div class="cp-no-gpu">No GPUs deployed yet</div>')
+                  var stateClass =
+                    i.state === "running"
+                      ? "cp-gpu-running"
+                      : i.state === "paused"
+                        ? "cp-gpu-paused"
+                        : "cp-gpu-stopped";
+                  return (
+                    '<div class="cp-gpu-row ' +
+                    stateClass +
+                    '">' +
+                    '<i class="ph-fill ph-graphics-card"></i>' +
+                    '<span class="cp-gpu-name">' +
+                    esc(i.name) +
+                    "</span>" +
+                    '<span class="cp-gpu-vram">' +
+                    esc(i.vram) +
+                    "</span>" +
+                    '<span class="cp-gpu-state">' +
+                    i.state +
+                    "</span>" +
+                    "</div>"
+                  );
+                })
+                .join("") +
+              "</div>"
+            : '<div class="cp-no-gpu">No GPUs deployed yet</div>') +
           // Footer actions
-          + '<div class="cp-card-footer">'
-          + '<button class="cp-btn-add" onclick="computeTabAddGPU(\'' + proj.id + '\', \'' + esc(proj.name).replace(/\\/g,'\\\\').replace(/'/g,"\\'") + '\')">'
-          + '<i class="ph-bold ph-plus"></i> Add GPU'
-          + '</button>'
-          + (isActive
+          '<div class="cp-card-footer">' +
+          '<button class="cp-btn-add" onclick="computeTabAddGPU(\'' +
+          proj.id +
+          "', '" +
+          esc(proj.name).replace(/\\/g, "\\\\").replace(/'/g, "\\'") +
+          "')\">" +
+          '<i class="ph-bold ph-plus"></i> Add GPU' +
+          "</button>" +
+          (isActive
             ? '<span class="cp-active-badge"><i class="ph-fill ph-check-circle"></i> Active Project</span>'
-            : '<button class="cp-btn-switch" onclick="computeTabSwitchProject(\'' + proj.id + '\')">'
-              + '<i class="ph-fill ph-arrow-square-right"></i> Switch to This'
-              + '</button>')
-          + '<button class="cp-btn-delete" onclick="slDeleteProject(\'' + proj.id + '\',this)" title="Delete project"><i class="ph-bold ph-trash"></i></button>'
-          + '</div>'
-          + '</div>';
+            : '<button class="cp-btn-switch" onclick="computeTabSwitchProject(\'' +
+              proj.id +
+              "')\">" +
+              '<i class="ph-fill ph-arrow-square-right"></i> Switch to This' +
+              "</button>") +
+          '<button class="cp-btn-delete" onclick="slDeleteProject(\'' +
+          proj.id +
+          '\',this)" title="Delete project"><i class="ph-bold ph-trash"></i></button>' +
+          "</div>" +
+          "</div>";
       });
 
       panel.innerHTML = html;
@@ -850,7 +983,9 @@
 
     /* Filter instances to active project if one is selected */
     var visibleInstances = _activeProjectId
-      ? _instances.filter(function (i) { return i.projectId === _activeProjectId; })
+      ? _instances.filter(function (i) {
+          return i.projectId === _activeProjectId;
+        })
       : _instances;
 
     if (_instances.length === 0) {
@@ -863,19 +998,27 @@
     var html = projectSelectorHTML();
 
     /* Active project info banner */
-    var activeProj = _projects.filter(function (p) { return p.id === _activeProjectId; })[0] || null;
+    var activeProj =
+      _projects.filter(function (p) {
+        return p.id === _activeProjectId;
+      })[0] || null;
     if (activeProj) {
       html += projectBannerHTML(activeProj, visibleInstances.length);
     }
 
     if (visibleInstances.length === 0) {
-      html += '<div class="sl-empty" style="padding: 40px 20px 24px;">'
-        + '<div class="sl-empty-icon"><i class="ph-fill ph-cpu"></i></div>'
-        + '<h3>No Instances in This Project</h3>'
-        + '<p>Go to <strong>GPU Instances</strong> and deploy a GPU under this project.</p>'
-        + '</div>';
+      html +=
+        '<div class="sl-empty" style="padding: 40px 20px 24px;">' +
+        '<div class="sl-empty-icon"><i class="ph-fill ph-cpu"></i></div>' +
+        "<h3>No Instances in This Project</h3>" +
+        "<p>Go to <strong>GPU Instances</strong> and deploy a GPU under this project.</p>" +
+        "</div>";
     } else {
-      html += headerBarHTML() + '<div id="slCards">' + visibleInstances.map(cardHTML).join("") + "</div>";
+      html +=
+        headerBarHTML() +
+        '<div id="slCards">' +
+        visibleInstances.map(cardHTML).join("") +
+        "</div>";
     }
 
     wrap.innerHTML = html;
@@ -924,46 +1067,60 @@
     } catch (e) {}
 
     /* ── Sidebar cluster count ── */
-    var countEl = document.getElementById('sbInstanceCount');
+    var countEl = document.getElementById("sbInstanceCount");
     if (countEl) {
-      var runningCount = _instances.filter(function (i) { return i.state === 'running'; }).length;
-      countEl.textContent = runningCount + ' running';
-      countEl.style.color = runningCount > 0 ? 'var(--b3)' : 'var(--t3)';
+      var runningCount = _instances.filter(function (i) {
+        return i.state === "running";
+      }).length;
+      countEl.textContent = runningCount + " running";
+      countEl.style.color = runningCount > 0 ? "var(--b3)" : "var(--t3)";
     }
 
     /* ── Billing card status text ── */
-    var balSub = document.querySelector('.bal-sub');
+    var balSub = document.querySelector(".bal-sub");
     if (balSub) {
       if (bal <= 0) {
-        balSub.innerHTML = '<i class="ph-fill ph-x-circle"></i> Balance depleted — top up to resume';
-        balSub.style.color = 'var(--b5)';
+        balSub.innerHTML =
+          '<i class="ph-fill ph-x-circle"></i> Balance depleted — top up to resume';
+        balSub.style.color = "var(--b5)";
       } else if (bal < 5) {
-        balSub.innerHTML = '<i class="ph-fill ph-warning-circle"></i> Critical — top up now';
-        balSub.style.color = 'var(--b5)';
+        balSub.innerHTML =
+          '<i class="ph-fill ph-warning-circle"></i> Critical — top up now';
+        balSub.style.color = "var(--b5)";
       } else if (bal < 20) {
-        balSub.innerHTML = '<i class="ph-fill ph-warning"></i> Balance running low';
-        balSub.style.color = 'var(--b4)';
+        balSub.innerHTML =
+          '<i class="ph-fill ph-warning"></i> Balance running low';
+        balSub.style.color = "var(--b4)";
       } else {
-        balSub.innerHTML = '<i class="ph-fill ph-check-circle"></i> Sufficient for active deployments';
-        balSub.style.color = 'var(--b3)';
+        balSub.innerHTML =
+          '<i class="ph-fill ph-check-circle"></i> Sufficient for active deployments';
+        balSub.style.color = "var(--b3)";
       }
     }
 
     /* ── Runway Estimator ── */
-    var runwayList = document.querySelector('.runway-list');
+    var runwayList = document.querySelector(".runway-list");
     if (runwayList && bal > 0) {
       var gpuRates = [
-        { name: 'RTX 3090',  rate: 0.34 },
-        { name: 'RTX 4090',  rate: 0.74 },
-        { name: 'A100 80GB', rate: 1.89 },
+        { name: "RTX 3090", rate: 0.34 },
+        { name: "RTX 4090", rate: 0.74 },
+        { name: "A100 80GB", rate: 1.89 },
       ];
-      runwayList.innerHTML = gpuRates.map(function (g) {
-        var hrs = (bal / g.rate).toFixed(0);
-        return '<div class="runway-row">'
-          + '<div class="rw-gpu"><i class="ph-fill ph-graphics-card"></i> ' + g.name + '</div>'
-          + '<div class="rw-time"><b>~' + hrs + '</b> hrs</div>'
-          + '</div>';
-      }).join('');
+      runwayList.innerHTML = gpuRates
+        .map(function (g) {
+          var hrs = (bal / g.rate).toFixed(0);
+          return (
+            '<div class="runway-row">' +
+            '<div class="rw-gpu"><i class="ph-fill ph-graphics-card"></i> ' +
+            g.name +
+            "</div>" +
+            '<div class="rw-time"><b>~' +
+            hrs +
+            "</b> hrs</div>" +
+            "</div>"
+          );
+        })
+        .join("");
     }
   }
 
@@ -975,34 +1132,63 @@
     var html = '<div class="sl-proj-selector">';
     _projects.forEach(function (p) {
       var isActive = p.id === _activeProjectId;
-      var count = _instances.filter(function (i) { return i.projectId === p.id; }).length;
-      html += '<button class="sl-proj-tab' + (isActive ? " sl-proj-tab-active" : "") + '"'
-        + ' onclick="SL.setActiveProject(\'' + p.id + '\')">'
-        + '<i class="ph-fill ph-folder' + (isActive ? "-open" : "") + '"></i> '
-        + esc(p.name)
-        + '<span class="sl-proj-count">' + count + '</span>'
-        + '</button>';
+      var count = _instances.filter(function (i) {
+        return i.projectId === p.id;
+      }).length;
+      html +=
+        '<button class="sl-proj-tab' +
+        (isActive ? " sl-proj-tab-active" : "") +
+        '"' +
+        " onclick=\"SL.setActiveProject('" +
+        p.id +
+        "')\">" +
+        '<i class="ph-fill ph-folder' +
+        (isActive ? "-open" : "") +
+        '"></i> ' +
+        esc(p.name) +
+        '<span class="sl-proj-count">' +
+        count +
+        "</span>" +
+        "</button>";
     });
-    html += '</div>';
+    html += "</div>";
     return html;
   }
 
   function projectBannerHTML(proj, count) {
-    return '<div class="sl-proj-banner">'
-      + '<div class="sl-proj-banner-left">'
-      + '<div class="sl-proj-banner-icon"><i class="ph-fill ph-folder-open"></i></div>'
-      + '<div>'
-      + '<div class="sl-proj-banner-name">' + esc(proj.name) + '</div>'
-      + '<div class="sl-proj-banner-meta">'
-      + (proj.location ? '<span><i class="ph ph-map-pin"></i> ' + esc(proj.location) + '</span>' : '')
-      + '<span><i class="ph ph-calendar-blank"></i> Created ' + new Date(proj.createdAt).toLocaleDateString("en-US", {month:"short",day:"numeric",year:"numeric"}) + '</span>'
-      + '</div>'
-      + '</div>'
-      + '</div>'
-      + '<div class="sl-proj-banner-right">'
-      + '<span class="sl-instance-pill">' + count + ' instance' + (count !== 1 ? 's' : '') + '</span>'
-      + '</div>'
-      + '</div>';
+    return (
+      '<div class="sl-proj-banner">' +
+      '<div class="sl-proj-banner-left">' +
+      '<div class="sl-proj-banner-icon"><i class="ph-fill ph-folder-open"></i></div>' +
+      "<div>" +
+      '<div class="sl-proj-banner-name">' +
+      esc(proj.name) +
+      "</div>" +
+      '<div class="sl-proj-banner-meta">' +
+      (proj.location
+        ? '<span><i class="ph ph-map-pin"></i> ' +
+          esc(proj.location) +
+          "</span>"
+        : "") +
+      '<span><i class="ph ph-calendar-blank"></i> Created ' +
+      new Date(proj.createdAt).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      }) +
+      "</span>" +
+      "</div>" +
+      "</div>" +
+      "</div>" +
+      '<div class="sl-proj-banner-right">' +
+      '<span class="sl-instance-pill">' +
+      count +
+      " instance" +
+      (count !== 1 ? "s" : "") +
+      "</span>" +
+      "</div>" +
+      "</div>"
+    );
   }
 
   function emptyStateHTML() {
@@ -1035,15 +1221,6 @@
           running +
           " running</span>"
         : '<span class="sl-running-pill" style="display:none"></span>',
-      "</div>",
-      '<div class="sl-topbar-right">',
-      '<div class="sl-balance-chip">',
-      '<i class="ph ph-coins"></i>',
-      '<span id="slHeaderBalance">—</span>',
-      /* slHeaderBalance is populated by pod-balance.js onSnapshot only */
-      '',
-      '',
-      "</div>",
       "</div>",
       "</div>",
     ].join("");
@@ -1107,7 +1284,9 @@
     /* resolve project name from _projects array */
     var projName = "";
     if (inst.projectId) {
-      var projMatch = _projects.filter(function (p) { return p.id === inst.projectId; })[0];
+      var projMatch = _projects.filter(function (p) {
+        return p.id === inst.projectId;
+      })[0];
       if (projMatch) projName = projMatch.name;
     }
 
@@ -1120,8 +1299,10 @@
       '<div class="sl-card-accent"></div>',
       /* project tag strip — sits above card head */
       projName
-        ? '<div class="sl-card-proj-tag"><i class="ph-fill ph-folder-open"></i> ' + esc(projName) + '</div>'
-        : '',
+        ? '<div class="sl-card-proj-tag"><i class="ph-fill ph-folder-open"></i> ' +
+          esc(projName) +
+          "</div>"
+        : "",
       '<div class="sl-card-head">',
       '<div class="sl-title-row">',
       '<div class="sl-card-icon"><i class="ph-fill ph-graphics-card"></i></div>',
@@ -1160,7 +1341,9 @@
       (inst.totalCost || 0).toFixed(5),
       "</div></div>",
       '<div class="sl-stat"><div class="sl-stat-lbl">Balance</div>',
-      '<div class="sl-stat-val sl-val-bal" id="sl-bal-' + inst.id + '">—</div></div>',
+      '<div class="sl-stat-val sl-val-bal" id="sl-bal-' +
+        inst.id +
+        '">—</div></div>',
       /* sl-bal-{id} is populated by pod-balance.js syncAllBalanceDOMs
          so it always shows the authoritative Firestore value, never stale local _balance */
       "</div>",
@@ -1313,8 +1496,7 @@
       ".sl-running-pill{background:rgba(129,201,149,0.1);border:1px solid rgba(129,201,149,0.25);color:#81c995;font-size:11px;font-weight:700;padding:3px 9px;border-radius:9999px;display:inline-flex;align-items:center;gap:5px;}",
       ".sl-blink{width:7px;height:7px;border-radius:50%;background:#81c995;display:inline-block;animation:slBlink 1.4s ease-in-out infinite;}",
       "@keyframes slBlink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.25;transform:scale(0.6)}}",
-      '.sl-balance-chip{display:inline-flex;align-items:center;gap:6px;background:#0a0a0c;border:1px solid rgba(138,180,248,0.2);border-radius:9999px;padding:6px 14px;font-size:13px;font-weight:700;font-family:"JetBrains Mono",monospace;color:#81c995;}',
-      ".sl-balance-chip i{font-size:14px;color:#8ab4f8;}",
+
       ".sl-card{background:#131316;border:1px solid rgba(255,255,255,0.07);border-radius:20px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;transition:border-color 0.2s,box-shadow 0.2s;}",
       ".sl-card:hover{border-color:rgba(138,180,248,0.2);box-shadow:0 0 28px rgba(138,180,248,0.06);}",
       ".sl-card-running{border-color:rgba(129,201,149,0.15);}",
@@ -1426,7 +1608,7 @@
     initFirebase();
 
     /* Step 1 — show empty shell immediately. Firestore onSnapshot loads real data. */
-    setSyncBadge('syncing', 'Syncing');
+    setSyncBadge("syncing", "Syncing");
     renderAll();
 
     /* On boot, render compute panel directly via SL.renderComputeTab.
@@ -1449,7 +1631,11 @@
         });
       });
 
-    if (_instances.some(function (i) { return i.state === "running"; })) {
+    if (
+      _instances.some(function (i) {
+        return i.state === "running";
+      })
+    ) {
       startTicker();
     }
 
@@ -1494,7 +1680,7 @@
       var now = new Date().toISOString();
       var hasRunning = false;
       _instances.forEach(function (inst) {
-        if (inst.state !== 'running') return;
+        if (inst.state !== "running") return;
         hasRunning = true;
         inst.lastStartedAt = now;
         fbSavePod(inst);
@@ -1513,8 +1699,8 @@
           visible → onSnapshot listener already keeps data live — no
                     manual resync needed. Firestore pushes any changes
                     that happened while the tab was hidden automatically. */
-    document.addEventListener('visibilitychange', function () {
-      if (document.visibilityState === 'hidden') {
+    document.addEventListener("visibilitychange", function () {
+      if (document.visibilityState === "hidden") {
         flushRunningPods();
       }
     });
@@ -1524,14 +1710,14 @@
           for cases where hidden doesn't fire (navigation, reload).
           Note: on iOS Safari, Firestore async write may be blocked by
           WebKit — localStorage write in saveState() still succeeds. */
-    global.addEventListener('pagehide', function () {
+    global.addEventListener("pagehide", function () {
       flushRunningPods();
     });
 
     /* 3. beforeunload — desktop only. Specifically covers desktop Safari
           closing a tab via the X button, which fires neither
           visibilitychange nor pagehide. Harmless no-op on mobile. */
-    global.addEventListener('beforeunload', function () {
+    global.addEventListener("beforeunload", function () {
       flushRunningPods();
     });
 
@@ -1555,9 +1741,10 @@
     }
 
     if (_fbAuth) {
-      var _bootUser = global.firebase && global.firebase.auth
-        ? global.firebase.auth().currentUser
-        : null;
+      var _bootUser =
+        global.firebase && global.firebase.auth
+          ? global.firebase.auth().currentUser
+          : null;
 
       if (_bootUser) {
         startRealtimeSync(_bootUser);
