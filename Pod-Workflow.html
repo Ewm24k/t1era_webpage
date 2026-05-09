@@ -2629,19 +2629,16 @@
       var wrap = document.getElementById('usageContent');
       if (!wrap) return;
 
-      // Pull live data from SL module
-      var instances = (window.SL && typeof window.SL.getProjects === 'function')
-        ? (function() {
-            // read from localStorage directly — SL doesn't expose getInstances publicly
-            try { return JSON.parse(localStorage.getItem('t1era_sl_instances') || '[]'); } catch(e) { return []; }
-          })()
+      // Pull live data from Firestore via SL and T1Balance APIs — no localStorage
+      var instances = (window.SL && typeof window.SL.getInstances === 'function')
+        ? window.SL.getInstances()
         : [];
       var projects = (window.SL && typeof window.SL.getProjects === 'function')
         ? window.SL.getProjects()
         : [];
-      var balance = (function() {
-        try { var b = parseFloat(localStorage.getItem('t1era_sl_balance')); return isNaN(b) ? 142.50 : b; } catch(e) { return 142.50; }
-      })();
+      var balance = (window.T1Balance && typeof window.T1Balance.getBalance === 'function')
+        ? (window.T1Balance.getBalance() || 0)
+        : 0;
 
       // Aggregate stats
       var totalInstances = instances.length;
