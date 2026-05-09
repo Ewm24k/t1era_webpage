@@ -1222,6 +1222,15 @@
           " running</span>"
         : '<span class="sl-running-pill" style="display:none"></span>',
       "</div>",
+      '<div class="sl-topbar-right">',
+      '<div class="sl-balance-chip">',
+      '<i class="ph ph-coins"></i>',
+      '<span id="slHeaderBalance">—</span>',
+      /* slHeaderBalance is populated by pod-balance.js onSnapshot only */
+      "",
+      "",
+      "</div>",
+      "</div>",
       "</div>",
     ].join("");
   }
@@ -1496,7 +1505,8 @@
       ".sl-running-pill{background:rgba(129,201,149,0.1);border:1px solid rgba(129,201,149,0.25);color:#81c995;font-size:11px;font-weight:700;padding:3px 9px;border-radius:9999px;display:inline-flex;align-items:center;gap:5px;}",
       ".sl-blink{width:7px;height:7px;border-radius:50%;background:#81c995;display:inline-block;animation:slBlink 1.4s ease-in-out infinite;}",
       "@keyframes slBlink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.25;transform:scale(0.6)}}",
-
+      '.sl-balance-chip{display:inline-flex;align-items:center;gap:6px;background:#0a0a0c;border:1px solid rgba(138,180,248,0.2);border-radius:9999px;padding:6px 14px;font-size:13px;font-weight:700;font-family:"JetBrains Mono",monospace;color:#81c995;}',
+      ".sl-balance-chip i{font-size:14px;color:#8ab4f8;}",
       ".sl-card{background:#131316;border:1px solid rgba(255,255,255,0.07);border-radius:20px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;transition:border-color 0.2s,box-shadow 0.2s;}",
       ".sl-card:hover{border-color:rgba(138,180,248,0.2);box-shadow:0 0 28px rgba(138,180,248,0.06);}",
       ".sl-card-running{border-color:rgba(129,201,149,0.15);}",
