@@ -802,6 +802,10 @@
       return _projects.slice();
     },
 
+    getInstances: function () {
+      return _instances.slice();
+    },
+
     getActiveProjectId: function () {
       return _activeProjectId;
     },
