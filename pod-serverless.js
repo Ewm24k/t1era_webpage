@@ -304,24 +304,61 @@
           });
 
           /* Write offline drain to Firestore via T1Balance.
-             This is the critical step that was missing — without this,
-             the drain calculated above is correct in memory but never
-             persisted. T1Balance.deduct() writes to Firestore and
-             onSnapshot fires on all devices with the new balance. */
+             T1Balance._ready is set after loadTxnsFromFirestore completes,
+             which can take several seconds. We must not give up early.
+             Strategy: retry every 1s for up to 60s. Once T1Balance is
+             ready and has a real balance loaded, write the drain once
+             and stop retrying. */
           if (!_realtimeReady && totalOfflineDrain > 0) {
-            var waitForBalance = function (attempts) {
-              if (attempts <= 0) return;
-              if (global.T1Balance && global.T1Balance.isReady()) {
+            var _drainWritten  = false;
+            var _drainRetries  = 0;
+            var _maxRetries    = 60;   /* 60 × 1000ms = 60 seconds max wait */
+
+            var writeOfflineDrain = function () {
+              if (_drainWritten) return;
+              _drainRetries += 1;
+
+              var balReady  = global.T1Balance && global.T1Balance.isReady();
+              var balVal    = balReady ? global.T1Balance.getBalance() : null;
+
+              /* Only write once T1Balance has a real non-null balance
+                 loaded from Firestore — not before */
+              if (balReady && balVal !== null && !isNaN(balVal)) {
+                _drainWritten = true;
                 global.T1Balance.deduct(totalOfflineDrain, {
                   description: 'Offline compute drain',
-                  type: 'deduction',
+                  type:        'deduction',
                 });
+                return;
+              }
+
+              /* Not ready yet — retry after 1s */
+              if (_drainRetries < _maxRetries) {
+                setTimeout(writeOfflineDrain, 1000);
               } else {
-                /* T1Balance not ready yet — retry after 500ms */
-                setTimeout(function () { waitForBalance(attempts - 1); }, 500);
+                /* Last resort: write directly to Firestore billing doc
+                   bypassing T1Balance if it never became ready */
+                if (_fbDb && _currentUid) {
+                  var balRef = _fbDb
+                    .collection('users').doc(_currentUid)
+                    .collection('billing').doc('balance');
+                  balRef.get().then(function (snap) {
+                    if (!snap.exists) return;
+                    var cur    = snap.data().amount || 0;
+                    var newBal = Math.max(0, Math.round((cur - totalOfflineDrain) * 1e6) / 1e6);
+                    balRef.set({
+                      amount:    newBal,
+                      updatedAt: new Date().toISOString(),
+                    }, { merge: true });
+                  }).catch(function (e) {
+                    console.warn('[SL] offline drain fallback write failed:', e);
+                  });
+                }
               }
             };
-            waitForBalance(10);  /* retry up to 5 seconds */
+
+            /* Start after 500ms — give T1Balance a head start */
+            setTimeout(writeOfflineDrain, 500);
           }
 
           /* Deduplicate — keep only one pod per ID.
