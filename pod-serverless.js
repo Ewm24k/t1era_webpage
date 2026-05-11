@@ -284,11 +284,16 @@
               /* Reset anchor to now — next offline period calculates from here */
               if (!_realtimeReady) {
                 inst.lastStartedAt = new Date(now).toISOString();
-                /* Check depletion after drain */
-                var currentBal = (global.T1Balance && global.T1Balance.isReady())
-                  ? (global.T1Balance.getBalance() || 0) : 0;
-                if (currentBal - totalOfflineDrain <= 0) {
-                  inst.state = "stopped";
+                /* Only stop pod if T1Balance is ready AND confirms zero balance.
+                   If T1Balance is not ready yet (_ready=false), we MUST NOT check
+                   balance here — getBalance() returns null/0 before Firestore loads,
+                   which would incorrectly stop every running pod on every refresh.
+                   The offline drain write (below) handles stopping if balance is depleted
+                   once T1Balance is actually ready. */
+                var balReady  = global.T1Balance && global.T1Balance.isReady();
+                var balVal    = balReady ? global.T1Balance.getBalance() : null;
+                if (balReady && balVal !== null && (balVal - totalOfflineDrain) <= 0) {
+                  inst.state         = "stopped";
                   inst.lastStartedAt = null;
                 }
                 fbSavePod(inst);
