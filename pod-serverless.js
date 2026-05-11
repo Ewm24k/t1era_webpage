@@ -261,29 +261,36 @@
           });
 
           /* For running pods: recalculate elapsed since lastStartedAt.
-           This handles the case where another device was running a pod
-           and this device just opened — charge the offline period. */
+           Covers ALL offline scenarios:
+           - PC off for 2 days with pod running
+           - WiFi disconnected for hours
+           - Browser closed and reopened
+           - Any device opening the site after being away
+           lastStartedAt in Firestore is the anchor — elapsed is the
+           real-world time since last checkpoint. */
+          var totalOfflineDrain = 0;  /* accumulate all pods drain to write once */
+
           incoming.forEach(function (inst) {
             if (inst.state === "running" && inst.lastStartedAt) {
               var elapsed = Math.floor(
                 (now - new Date(inst.lastStartedAt).getTime()) / 1000,
               );
               if (elapsed > 0 && !_realtimeReady) {
-                /* Only apply elapsed on first load — subsequent snapshots
-                 are triggered by THIS device's own writes, not time passing */
                 var drain = inst.pricePerHr * (elapsed / 3600);
-                inst.uptimeSec = (inst.uptimeSec || 0) + elapsed;
-                inst.totalCost = (inst.totalCost || 0) + drain;
-                _balance = Math.max(0, _balance - drain);
+                inst.uptimeSec  = (inst.uptimeSec  || 0) + elapsed;
+                inst.totalCost  = (inst.totalCost  || 0) + drain;
+                totalOfflineDrain += drain;
               }
-              /* Reset anchor to now on first load */
+              /* Reset anchor to now — next offline period calculates from here */
               if (!_realtimeReady) {
                 inst.lastStartedAt = new Date(now).toISOString();
-                if (_balance <= 0) {
+                /* Check depletion after drain */
+                var currentBal = (global.T1Balance && global.T1Balance.isReady())
+                  ? (global.T1Balance.getBalance() || 0) : 0;
+                if (currentBal - totalOfflineDrain <= 0) {
                   inst.state = "stopped";
                   inst.lastStartedAt = null;
                 }
-                /* Write the updated anchor back — one write per pod on load */
                 fbSavePod(inst);
               }
             }
@@ -295,6 +302,27 @@
               inst.projectId = earliest.id;
             }
           });
+
+          /* Write offline drain to Firestore via T1Balance.
+             This is the critical step that was missing — without this,
+             the drain calculated above is correct in memory but never
+             persisted. T1Balance.deduct() writes to Firestore and
+             onSnapshot fires on all devices with the new balance. */
+          if (!_realtimeReady && totalOfflineDrain > 0) {
+            var waitForBalance = function (attempts) {
+              if (attempts <= 0) return;
+              if (global.T1Balance && global.T1Balance.isReady()) {
+                global.T1Balance.deduct(totalOfflineDrain, {
+                  description: 'Offline compute drain',
+                  type: 'deduction',
+                });
+              } else {
+                /* T1Balance not ready yet — retry after 500ms */
+                setTimeout(function () { waitForBalance(attempts - 1); }, 500);
+              }
+            };
+            waitForBalance(10);  /* retry up to 5 seconds */
+          }
 
           /* Deduplicate — keep only one pod per ID.
            Prevents ghost pods if onSnapshot fires multiple times before
